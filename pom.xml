@@ -30,6 +30,13 @@
 	<dependencyManagement>
 		<dependencies>
 
+			<!-- 良心云 sms -->
+			<dependency>
+				<groupId>com.github.qcloudsms</groupId>
+				<artifactId>qcloudsms</artifactId>
+				<version>1.0.5</version>
+			</dependency>
+
 			<!-- mybatis plus 依赖 -->
 			<dependency>
 				<groupId>com.baomidou</groupId>

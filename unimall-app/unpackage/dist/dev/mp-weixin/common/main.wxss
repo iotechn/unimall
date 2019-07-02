@@ -1,0 +1,339 @@
+@charset "UTF-8";
+/* 页面左右间距 */
+/* 文字尺寸 */
+/*文字颜色*/
+/* 边框颜色 */
+/* 图片加载中颜色 */
+/* 行为相关颜色 */
+/*
+	全局公共样式和字体图标
+*/
+@font-face {
+  font-family: yticon;
+  font-weight: normal;
+  font-style: normal;
+  src: url("https://at.alicdn.com/t/font_1078604_w4kpxh0rafi.ttf") format("truetype");
+}
+.yticon {
+  font-family: "yticon" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.icon-yiguoqi1:before {
+  content: "\E700";
+}
+.icon-iconfontshanchu1:before {
+  content: "\E619";
+}
+.icon-iconfontweixin:before {
+  content: "\E611";
+}
+.icon-alipay:before {
+  content: "\E636";
+}
+.icon-shang:before {
+  content: "\E624";
+}
+.icon-shouye:before {
+  content: "\E626";
+}
+.icon-shanchu4:before {
+  content: "\E622";
+}
+.icon-xiaoxi:before {
+  content: "\E618";
+}
+.icon-jiantour-copy:before {
+  content: "\E600";
+}
+.icon-fenxiang2:before {
+  content: "\E61E";
+}
+.icon-pingjia:before {
+  content: "\E67B";
+}
+.icon-daifukuan:before {
+  content: "\E68F";
+}
+.icon-pinglun-copy:before {
+  content: "\E612";
+}
+.icon-dianhua-copy:before {
+  content: "\E621";
+}
+.icon-shoucang:before {
+  content: "\E645";
+}
+.icon-xuanzhong2:before {
+  content: "\E62F";
+}
+.icon-gouwuche_:before {
+  content: "\E630";
+}
+.icon-icon-test:before {
+  content: "\E60C";
+}
+.icon-icon-test1:before {
+  content: "\E632";
+}
+.icon-bianji:before {
+  content: "\E646";
+}
+.icon-jiazailoading-A:before {
+  content: "\E8FC";
+}
+.icon-zuoshang:before {
+  content: "\E613";
+}
+.icon-jia2:before {
+  content: "\E60A";
+}
+.icon-huifu:before {
+  content: "\E68B";
+}
+.icon-sousuo:before {
+  content: "\E7CE";
+}
+.icon-arrow-fine-up:before {
+  content: "\E601";
+}
+.icon-hot:before {
+  content: "\E60E";
+}
+.icon-lishijilu:before {
+  content: "\E6B9";
+}
+.icon-zhengxinchaxun-zhifubaoceping-:before {
+  content: "\E616";
+}
+.icon-naozhong:before {
+  content: "\E64A";
+}
+.icon-xiatubiao--copy:before {
+  content: "\E608";
+}
+.icon-shoucang_xuanzhongzhuangtai:before {
+  content: "\E6A9";
+}
+.icon-jia1:before {
+  content: "\E61C";
+}
+.icon-bangzhu1:before {
+  content: "\E63D";
+}
+.icon-arrow-left-bottom:before {
+  content: "\E602";
+}
+.icon-arrow-right-bottom:before {
+  content: "\E603";
+}
+.icon-arrow-left-top:before {
+  content: "\E604";
+}
+.icon-icon--:before {
+  content: "\E744";
+}
+.icon-zuojiantou-up:before {
+  content: "\E605";
+}
+.icon-xia:before {
+  content: "\E62D";
+}
+.icon--jianhao:before {
+  content: "\E60B";
+}
+.icon-weixinzhifu:before {
+  content: "\E61A";
+}
+.icon-comment:before {
+  content: "\E64F";
+}
+.icon-weixin:before {
+  content: "\E61F";
+}
+.icon-fenlei1:before {
+  content: "\E620";
+}
+.icon-erjiye-yucunkuan:before {
+  content: "\E623";
+}
+.icon-Group-:before {
+  content: "\E688";
+}
+.icon-you:before {
+  content: "\E606";
+}
+.icon-forward:before {
+  content: "\E607";
+}
+.icon-tuijian:before {
+  content: "\E610";
+}
+.icon-bangzhu:before {
+  content: "\E679";
+}
+.icon-share:before {
+  content: "\E656";
+}
+.icon-yiguoqi:before {
+  content: "\E997";
+}
+.icon-shezhi1:before {
+  content: "\E61D";
+}
+.icon-fork:before {
+  content: "\E61B";
+}
+.icon-kafei:before {
+  content: "\E66A";
+}
+.icon-iLinkapp-:before {
+  content: "\E654";
+}
+.icon-saomiao:before {
+  content: "\E60D";
+}
+.icon-shezhi:before {
+  content: "\E60F";
+}
+.icon-shouhoutuikuan:before {
+  content: "\E631";
+}
+.icon-gouwuche:before {
+  content: "\E609";
+}
+.icon-dizhi:before {
+  content: "\E614";
+}
+.icon-fenlei:before {
+  content: "\E706";
+}
+.icon-xingxing:before {
+  content: "\E70B";
+}
+.icon-tuandui:before {
+  content: "\E633";
+}
+.icon-zuanshi:before {
+  content: "\E615";
+}
+.icon-zuo:before {
+  content: "\E63C";
+}
+.icon-shoucang2:before {
+  content: "\E62E";
+}
+.icon-shouhuodizhi:before {
+  content: "\E712";
+}
+.icon-yishouhuo:before {
+  content: "\E71A";
+}
+.icon-dianzan-ash:before {
+  content: "\E617";
+}
+view,
+scroll-view,
+swiper,
+swiper-item,
+cover-view,
+cover-image,
+icon,
+text,
+rich-text,
+progress,
+button,
+checkbox,
+form,
+input,
+label,
+radio,
+slider,
+switch,
+textarea,
+navigator,
+audio,
+camera,
+image,
+video {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+/* 骨架屏替代方案 */
+.Skeleton {
+  background: #f3f3f3;
+  padding: 20rpx 0;
+  border-radius: 8rpx;
+}
+/* 图片载入替代方案 */
+.image-wrapper {
+  font-size: 0;
+  background: #f3f3f3;
+  border-radius: 4px;
+}
+.image-wrapper image {
+    width: 100%;
+    height: 100%;
+    -webkit-transition: .6s;
+    -o-transition: .6s;
+    transition: .6s;
+    opacity: 0;
+}
+.image-wrapper image.loaded {
+      opacity: 1;
+}
+.clamp {
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+     text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+.common-hover {
+  background: #f5f5f5;
+}
+/*边框*/
+.b-b:after,
+.b-t:after {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  height: 0;
+  content: '';
+  -webkit-transform: scaleY(0.5);
+      -ms-transform: scaleY(0.5);
+          transform: scaleY(0.5);
+  border-bottom: 1px solid #E4E7ED;
+}
+.b-b:after {
+  bottom: 0;
+}
+.b-t:after {
+  top: 0;
+}
+/* button样式改写 */
+uni-button,
+button {
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 34rpx;
+  font-weight: normal;
+}
+uni-button.no-border:before, uni-button.no-border:after, button.no-border:before, button.no-border:after {
+    border: 0;
+}
+uni-button[type=default],
+button[type=default] {
+  color: #303133;
+}
+/* input 样式 */
+.input-placeholder {
+  color: #999999;
+}
+.placeholder {
+  color: #999999;
+}
+

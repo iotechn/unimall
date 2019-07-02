@@ -9,12 +9,11 @@ package com.iotechn.unimall.core.annotation;
  */
 
 public enum HttpParamType {
-    COMMON,
-    HEADER,
-    USER_ID,
     COOKIE,
+    COMMON,
+    USER_ID,
+    ADMIN_ID,
     IP,
-    ACCESS_TOKEN,
     ;
 
 }

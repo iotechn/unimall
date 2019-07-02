@@ -17,6 +17,7 @@ public class UserDO extends SuperDO {
 
     private String password;
 
+    @TableField("open_id")
     private String openId;
 
     private String nickname;
@@ -24,7 +25,7 @@ public class UserDO extends SuperDO {
     @TableField("avatar_url")
     private String avatarUrl;
 
-    private String level;
+    private Integer level;
 
     private Date birthday;
 

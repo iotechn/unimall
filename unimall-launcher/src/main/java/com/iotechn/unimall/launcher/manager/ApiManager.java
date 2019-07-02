@@ -5,7 +5,7 @@ import com.iotechn.unimall.core.annotation.HttpOpenApi;
 import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.launcher.exception.ExceptionDefinition;
+import com.iotechn.unimall.launcher.exception.LauncherExceptionDefinition;
 import com.iotechn.unimall.launcher.exception.LauncherServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +77,7 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
                     String key = method.getName();
                     Method methodQuery = tempMap.get(key);
                     if (methodQuery != null) {
-                        throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_API_REGISTER_FAILED);
+                        throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_API_REGISTER_FAILED);
                     }
                     tempMap.put(key, method);
                     logger.info("[注册OpenApi] " + group + "." + method.getName());
@@ -87,7 +87,7 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
 
             }
         } else {
-            throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_API_REGISTER_FAILED);
+            throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_API_REGISTER_FAILED);
         }
     }
 

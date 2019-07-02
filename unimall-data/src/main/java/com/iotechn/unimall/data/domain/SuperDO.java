@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.domain;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import lombok.Data;
 
 import java.util.Date;
@@ -12,8 +13,10 @@ public class SuperDO {
 
     private Long id;
 
+    @TableField("gmt_update")
     private Date gmtUpdate;
 
+    @TableField("gmt_create")
     private Date gmtCreate;
 
 }

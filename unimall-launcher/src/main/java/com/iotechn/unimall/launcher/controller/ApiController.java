@@ -10,7 +10,7 @@ import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.annotation.param.TextFormat;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.launcher.exception.ExceptionDefinition;
+import com.iotechn.unimall.launcher.exception.LauncherExceptionDefinition;
 import com.iotechn.unimall.launcher.exception.LauncherServiceException;
 import com.iotechn.unimall.launcher.manager.ApiManager;
 import com.iotechn.unimall.launcher.model.GatewayResponse;
@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,7 +49,7 @@ public class ApiController {
     @Autowired
     private ApplicationContext applicationContext;
     @Autowired
-    private RedisTemplate<String, String> stringRedisTemplate;
+    private StringRedisTemplate userRedisTemplate;
 
     @RequestMapping(method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
@@ -88,7 +88,7 @@ public class ApiController {
             String[] gps = parameterMap.get("_gp");
             String[] mts = parameterMap.get("_mt");
             if(gps == null  || mts == null || gps.length == 0 || mts.length == 0){
-                throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_API_NOT_EXISTS);
+                throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_API_NOT_EXISTS);
             }
             String _gp = gps[0];
             String _mt = mts[0];
@@ -99,27 +99,25 @@ public class ApiController {
             }
             Method method = apiManager.getMethod(_gp, _mt);
             if (method == null) {
-                throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_API_NOT_EXISTS);
+                throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_API_NOT_EXISTS);
             }
             HttpMethod httpMethod = method.getAnnotation(HttpMethod.class);
             if (httpMethod == null) {
                 //只起标记作用防止调到封闭方法了
-                throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_API_NOT_EXISTS);
+                throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_API_NOT_EXISTS);
             }
             String permission = httpMethod.permission();
             if (!StringUtils.isEmpty(permission)) {
                 //若需要权限，则校验当前用户是否具有权限
-//                String accessToken = request.getHeader(AdminServiceImpl.ACCESS_TOKEN);
-//                String tenementCode = request.getHeader("tenement");
-//                String admin = stringRedisTemplate.opsForValue().get(AdminServiceImpl.ADMIN_REDIS_PREFIX + tenementCode + accessToken);
-//                if (StringUtils.isEmpty(admin)) {
-//                    throw new ManagerServiceException(ExceptionDefinition.CLOUD_USER_NOT_LOGIN);
-//                }
-//
-//                AdminDTO adminDTO = JSONObject.parseObject(admin, AdminDTO.class);
+                String accessToken = request.getHeader(Const.ADMIN_ACCESS_TOKEN);
+                String admin = userRedisTemplate.opsForValue().get(Const.ADMIN_REDIS_PREFIX + accessToken);
+                if (StringUtils.isEmpty(admin)) {
+                    throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_ADMIN_NOT_LOGIN);
+                }
+//TODO                AdminDTO adminDTO = JSONObject.parseObject(admin, AdminDTO.class);
 //                SessionUtil.setAdmin(adminDTO);
 //                if (!SessionUtil.hasPerm(permission)) {
-//                    throw new ManagerServiceException(ExceptionDefinition.CLOUD_PERMISSION_DENY);
+//                    throw new ManagerServiceException(LauncherExceptionDefinition.CLOUD_PERMISSION_DENY);
 //                }
 
             }
@@ -130,7 +128,7 @@ public class ApiController {
                 Parameter methodParam = methodParameters[i];
                 HttpParam httpParam = methodParam.getAnnotation(HttpParam.class);
                 if (httpParam == null) {
-                    throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_API_NOT_EXISTS);
+                    throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_API_NOT_EXISTS);
                 }
                 if (httpParam.type() == HttpParamType.COMMON) {
                     String[] paramArray = parameterMap.get(httpParam.name());
@@ -171,36 +169,44 @@ public class ApiController {
                         } else {
                             if (methodParam.getAnnotation(NotNull.class) != null) {
                                 logger.error("missing :" + httpParam.name());
-                                throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                                throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                             }
                             args[i] = null;
                         }
                     }
                 } else if (httpParam.type() == HttpParamType.USER_ID) {
-//                    String accessToken = request.getHeader(AdminServiceImpl.ACCESS_TOKEN);
-//                    String tenementCode = request.getHeader("tenement");
-//                    if (!StringUtils.isEmpty(accessToken)) {
-//                        String admin = stringRedisTemplate.opsForValue().get(AdminServiceImpl.ADMIN_REDIS_PREFIX + tenementCode + accessToken);
-//                        if (!StringUtils.isEmpty(admin)) {
-//                            AdminDTO adminDTO = JSONObject.parseObject(admin, AdminDTO.class);
+                    String accessToken = request.getHeader(Const.USER_ACCESS_TOKEN);
+                    if (!StringUtils.isEmpty(accessToken)) {
+                        String userJson = userRedisTemplate.opsForValue().get(Const.USER_REDIS_PREFIX + accessToken);
+                        if (!StringUtils.isEmpty(userJson)) {
+//TODO                            AdminDTO adminDTO = JSONObject.parseObject(userJson, AdminDTO.class);
 //                            SessionUtil.setAdmin(adminDTO);
 //                            args[i] = adminDTO.getId();
-//                            stringRedisTemplate.expire(AdminServiceImpl.ADMIN_REDIS_PREFIX + tenementCode + accessToken, 30, TimeUnit.MINUTES);
-//                            break;
-//                        }
-//                    }
-//                    if (args[i] == null) {
-//                        throw new ManagerServiceException(ExceptionDefinition.CLOUD_USER_NOT_LOGIN);
-//                    }
-                } else if (httpParam.type() == HttpParamType.ACCESS_TOKEN) {
-//                    String accessToken = request.getHeader(AdminServiceImpl.ACCESS_TOKEN);
-//                    if (!StringUtils.isEmpty(accessToken)) {
-//                        args[i] = accessToken;
-//                    } else {
-//                        throw new ManagerServiceException(ExceptionDefinition.CLOUD_USER_NOT_LOGIN);
-//                    }
-                }  else if (httpParam.type() == HttpParamType.IP) {
-//                    args[i] = IpAdrressUtil.getIpAdrress(request);
+                            userRedisTemplate.expire(Const.USER_REDIS_PREFIX + accessToken, 30, TimeUnit.MINUTES);
+                            break;
+                        }
+                    }
+                    if (args[i] == null) {
+                        throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_USER_NOT_LOGIN);
+                    }
+                } else if (httpParam.type() == HttpParamType.ADMIN_ID) {
+                    String accessToken = request.getHeader(Const.ADMIN_ACCESS_TOKEN);
+                    if (!StringUtils.isEmpty(accessToken)) {
+                        String userJson = userRedisTemplate.opsForValue().get(Const.ADMIN_REDIS_PREFIX + accessToken);
+                        if (!StringUtils.isEmpty(userJson)) {
+//TODO                            AdminDTO adminDTO = JSONObject.parseObject(userJson, AdminDTO.class);
+//                            SessionUtil.setAdmin(adminDTO);
+//                            args[i] = adminDTO.getId();
+                            userRedisTemplate.expire(Const.ADMIN_REDIS_PREFIX + accessToken, 30, TimeUnit.MINUTES);
+                            break;
+                        }
+                    }
+                    if (args[i] == null) {
+                        throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_ADMIN_NOT_LOGIN);
+                    }
+                } else if (httpParam.type() == HttpParamType.IP) {
+                    //这里根据实际情况来定。 若使用了负载均衡，Ip将会被代理服务器设置到某个Header里面
+                    args[i] = request.getHeader("X-Forwarded-For");
                 } else if (httpParam.type() == HttpParamType.COOKIE) {
                     Cookie[] cookies = request.getCookies();
                     for(Cookie cookie : cookies){
@@ -208,9 +214,7 @@ public class ApiController {
                             args[i] = cookie.getValue();
                             break;
                         }
-
                     }
-
                     if(args[i] == null){
                         String[] paramArray = parameterMap.get(httpParam.name());
                         if(paramArray.length > 0){
@@ -230,7 +234,7 @@ public class ApiController {
             if (resultType == ResultType.COOKIE) {
                 //加入Cookie时处理
                 if (StringUtils.isEmpty(httpMethod.retName())) {
-                    throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_API_NOT_EXISTS);
+                    throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_API_NOT_EXISTS);
                 } else {
                     //setCookie
                     Cookie cookie = new Cookie(httpMethod.retName(), (String) invokeObj);
@@ -242,7 +246,7 @@ public class ApiController {
                 }
             }
             GatewayResponse gatewayResponse = new GatewayResponse();
-            gatewayResponse.setErrno(200);
+            gatewayResponse.setErrno(0);
             gatewayResponse.setErrmsg("成功");
             gatewayResponse.setTimestamp(invokeTime);
             gatewayResponse.setData(invokeObj);
@@ -258,7 +262,7 @@ public class ApiController {
                 }
             }
             logger.error("[网关] 系统未知异常", e);
-            throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_UNKNOWN_EXCEPTION);
+            throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_UNKNOWN_EXCEPTION);
         }
     }
 
@@ -271,57 +275,57 @@ public class ApiController {
                 if (!StringUtils.isEmpty(regex)) {
                     //如果正则生效，则直接使用正则校验
                     if (!target.matches(regex)) {
-                        throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                        throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                     }
                 } else {
                     boolean notChinese = textFormat.notChinese();
                     if (notChinese) {
                         if (target.matches("[\\u4e00-\\u9fa5]+")) {
-                            throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                            throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                         }
                     }
 
                     String[] contains = textFormat.contains();
                     for (int j = 0; j < contains.length; j++) {
                         if (!target.contains(contains[j])) {
-                            throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                            throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                         }
                     }
 
                     String[] notContains = textFormat.notContains();
                     for (int j = 0; j < notContains.length; j++) {
                         if (target.contains(notContains[j])) {
-                            throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                            throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                         }
                     }
 
                     String startWith = textFormat.startWith();
                     if (!StringUtils.isEmpty(startWith)) {
                         if (!target.startsWith(startWith)) {
-                            throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                            throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                         }
                     }
 
                     String endsWith = textFormat.endsWith();
                     if (!StringUtils.isEmpty(target)) {
                         if (!target.endsWith(endsWith)) {
-                            throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                            throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                         }
                     }
                     int targetLength = target.length();
                     int length = textFormat.length();
                     if (length != -1) {
                         if (targetLength != length) {
-                            throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                            throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                         }
                     }
 
                     if (targetLength < textFormat.lengthMin()) {
-                        throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                        throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                     }
 
                     if (targetLength > textFormat.lengthMax()) {
-                        throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                        throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                     }
                 }
             }
@@ -330,28 +334,15 @@ public class ApiController {
             Integer integer = new Integer(target);
             if (range != null) {
                 if (integer > range.max() || integer < range.min()) {
-                    throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                    throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                 }
             }
-//            Enum annotation = methodParam.getAnnotation(Enum.class);
-//            if (annotation != null) {
-//                int[] value = annotation.value();
-//                boolean contains = false;
-//                for (int i = 0; i < value.length; i++) {
-//                    if (value[i] == integer) {
-//                        contains = true;
-//                    }
-//                }
-//                if (!contains) {
-//                    throw new ManagerServiceException(ExceptionDefinition.CLOUD_PARAM_CHECK_FAILED);
-//                }
-//            }
         } else if (type == Long.class) {
             Range range = methodParam.getAnnotation(Range.class);
             if (range != null) {
                 Long integer = new Long(target);
                 if (integer > range.max() || integer < range.min()) {
-                    throw new LauncherServiceException(ExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
+                    throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                 }
             }
         }

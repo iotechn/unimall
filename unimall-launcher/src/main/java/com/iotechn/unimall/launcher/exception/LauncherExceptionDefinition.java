@@ -5,7 +5,7 @@ import com.iotechn.unimall.core.exception.ServiceExceptionDefinition;
 /**
  * Created by rize on 2019/6/30.
  */
-public class ExceptionDefinition {
+public class LauncherExceptionDefinition {
 
     public static final ServiceExceptionDefinition LAUNCHER_API_REGISTER_FAILED =
             new ServiceExceptionDefinition(9999, "api注册失败");
@@ -27,5 +27,8 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition LAUNCHER_API_NOT_SUPPORT =
             new ServiceExceptionDefinition(10005, "Api 不再支持调用");
+
+    public static final ServiceExceptionDefinition LAUNCHER_ADMIN_NOT_LOGIN =
+            new ServiceExceptionDefinition(10006, " 管理员尚未登录");
 
 }
