@@ -5,16 +5,11 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
-import com.iotechn.unimall.data.domain.CategoryDO;
-import com.iotechn.unimall.data.domain.ImgDO;
-import com.iotechn.unimall.data.domain.SkuDO;
-import com.iotechn.unimall.data.domain.SpuDO;
+import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.SpuDTO;
 import com.iotechn.unimall.data.enums.BizType;
-import com.iotechn.unimall.data.mapper.CategoryMapper;
-import com.iotechn.unimall.data.mapper.ImgMapper;
-import com.iotechn.unimall.data.mapper.SkuMapper;
-import com.iotechn.unimall.data.mapper.SpuMapper;
+import com.iotechn.unimall.data.enums.SpuStatusType;
+import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
@@ -39,6 +34,9 @@ public class GoodsServiceImpl implements GoodsService {
     private SpuMapper spuMapper;
 
     @Autowired
+    private SpuAttributeMapper spuAttributeMapper;
+
+    @Autowired
     private SkuMapper skuMapper;
 
     @Autowired
@@ -61,9 +59,12 @@ public class GoodsServiceImpl implements GoodsService {
             wrapper.like("title", title);
         } else {
             //若关键字为空，尝试从缓存取列表
-            return cacheComponent.getObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize, Page.class);
+            Page objFromCache = cacheComponent.getObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize, Page.class);
+            if (objFromCache != null) {
+                return objFromCache;
+            }
         }
-        if (categoryId != null) {
+        if (categoryId != null && categoryId != 0) {
             List<CategoryDO> childrenList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", categoryId));
             if (CollectionUtils.isEmpty(childrenList)) {
                 //目标节点为叶子节点
@@ -91,8 +92,7 @@ public class GoodsServiceImpl implements GoodsService {
                 wrapper.in("category_id", childrenIds);
             }
         }
-        //TODO 设置枚举
-        wrapper.eq("status", 1);
+        wrapper.eq("status", SpuStatusType.SELLING.getCode());
         List<SpuDO> spuDOS = spuMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
         //组装SPU
         List<SpuDTO> spuDTOList = new ArrayList<>();
@@ -131,6 +131,9 @@ public class GoodsServiceImpl implements GoodsService {
                 new EntityWrapper<SkuDO>()
                         .eq("spu_id", spuId));
         spuDTO.setSkuList(skuDOList);
+
+        List<SpuAttributeDO> spuAttributeList = spuAttributeMapper.selectList(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));
+        spuDTO.setAttributeList(spuAttributeList);
         //放入缓存
         cacheComponent.putObj(CA_SPU_PREFIX + spuId, spuDTO, Const.CACHE_ONE_DAY);
         return spuDTO;

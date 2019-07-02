@@ -1,6 +1,7 @@
 package com.iotechn.unimall.data.dto;
 
 import com.iotechn.unimall.data.domain.SkuDO;
+import com.iotechn.unimall.data.domain.SpuAttributeDO;
 import lombok.Data;
 
 import java.util.List;
@@ -36,6 +37,8 @@ public class SpuDTO {
     private Long categoryId;
 
     private List<CategoryDTO> categoryList;
+
+    private List<SpuAttributeDO> attributeList;
 
     private String unit;
 

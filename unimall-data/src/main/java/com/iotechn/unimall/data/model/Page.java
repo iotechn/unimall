@@ -1,5 +1,8 @@
 package com.iotechn.unimall.data.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -10,6 +13,8 @@ import java.util.List;
  * Date: 2018-08-15
  * Time: 下午8:12
  */
+@Data
+@NoArgsConstructor
 public class Page<T> implements Serializable {
     private List<T> items;
 
@@ -26,23 +31,11 @@ public class Page<T> implements Serializable {
         this.count = count;
     }
 
-    public int getPageNo() {
-        return pageNo;
-    }
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    public long getCount() {
-        return count;
-    }
-
     public long getTotalPageNo() {
         return count/pageSize + (count%pageSize==0?0:1);
     }
 
-    public List<T> getData() {
+    public List<T> getItems() {
         return items;
     }
 

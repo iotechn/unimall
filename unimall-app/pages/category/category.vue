@@ -89,9 +89,8 @@
 				this.sizeCalcState = true;
 			},
 			navToList(fid, tid){
-				debugger
 				uni.navigateTo({
-					url: `/pages/product/list?fid=${sid}&tid=${tid}`
+					url: `/pages/product/list?fid=${fid}&tid=${tid}`
 				})
 			}
 		}
