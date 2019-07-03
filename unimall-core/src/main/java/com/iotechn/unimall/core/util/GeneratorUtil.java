@@ -13,6 +13,6 @@ public class GeneratorUtil {
     }
 
     public static String genSessionId() {
-        return UUID.randomUUID().toString().replace("-","") + UUID.randomUUID().toString().replace("-","");
+        return UUID.randomUUID().toString().replace("-","").toUpperCase();
     }
 }

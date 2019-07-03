@@ -14,10 +14,10 @@
 					<text class="tit">手机号码</text>
 					<input 
 						type="number" 
-						:value="mobile" 
+						:value="phone" 
 						placeholder="请输入手机号码"
 						maxlength="11"
-						data-key="mobile"
+						data-key="phone"
 						@input="inputChange"
 					/>
 				</view>
@@ -56,7 +56,7 @@
 	export default{
 		data(){
 			return {
-				mobile: '',
+				phone: '',
 				password: '',
 				logining: false
 			}
@@ -74,32 +74,28 @@
 				uni.navigateBack();
 			},
 			toRegist(){
-				this.$api.msg('去注册');
+				uni.redirectTo({
+					url: './register'
+				})
 			},
 			async toLogin(){
-				this.logining = true;
-				const {mobile, password} = this;
-				/* 数据验证模块
-				if(!this.$api.match({
-					mobile,
-					password
-				})){
-					this.logining = false;
-					return;
-				}
-				*/
-				const sendData = {
-					mobile,
-					password
-				};
-				const result = await this.$api.json('userInfo');
-				if(result.status === 1){
-					this.login(result.data);
-                    uni.navigateBack();  
-				}else{
-					this.$api.msg(result.msg);
-					this.logining = false;
-				}
+				const that = this
+				that.logining = true;
+
+				that.$api.request('user','login', {
+					phone: that.phone,
+					password : that.password
+				}, failres => {
+					that.logining = false
+					uni.showToast({
+						title: failres.errmsg,
+						icon:"none"
+					});
+				}).then (res => {
+					that.logining = false
+					//将返回的用户信息设置到Store里面
+					that.$store.commit('login',res.data)
+				})
 			}
 		},
 

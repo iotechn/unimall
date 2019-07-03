@@ -3,6 +3,7 @@ package com.iotechn.unimall.core.notify;
 import com.github.qcloudsms.SmsSingleSender;
 import com.github.qcloudsms.SmsSingleSenderResult;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -36,12 +37,21 @@ public class QCloudSMSClient implements SMSClient,InitializingBean {
     public SMSResult sendMsg(String phone, int templateId, String ...params) throws ServiceException {
         try {
             SmsSingleSenderResult smsSingleSenderResult = sender.sendWithParam("86", phone, templateId, params, "", "", "");
-            logger.info("[]");
+            if (smsSingleSenderResult.result == 0) {
+                SMSResult smsResult = new SMSResult();
+                smsResult.setSucc(true);
+                smsResult.setMsg("成功");
+                return smsResult;
+            } else {
+                logger.info("[腾讯短信发送] 回复与预期不一致 result=" + smsSingleSenderResult.result + ";errMsg=" + smsSingleSenderResult.errMsg);
+                throw new ThirdPartServiceException(smsSingleSenderResult.errMsg, smsSingleSenderResult.result);
+            }
+        } catch (ServiceException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("[腾讯短信发送] 异常", e);
-            //TODO
+            throw new ThirdPartServiceException("腾讯云短信发送未知异常", 0);
         }
-        return null;
     }
 
 

@@ -10,6 +10,8 @@ import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.annotation.param.TextFormat;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.dto.UserDTO;
+import com.iotechn.unimall.data.util.SessionUtil;
 import com.iotechn.unimall.launcher.exception.LauncherExceptionDefinition;
 import com.iotechn.unimall.launcher.exception.LauncherServiceException;
 import com.iotechn.unimall.launcher.manager.ApiManager;
@@ -179,9 +181,9 @@ public class ApiController {
                     if (!StringUtils.isEmpty(accessToken)) {
                         String userJson = userRedisTemplate.opsForValue().get(Const.USER_REDIS_PREFIX + accessToken);
                         if (!StringUtils.isEmpty(userJson)) {
-//TODO                            AdminDTO adminDTO = JSONObject.parseObject(userJson, AdminDTO.class);
-//                            SessionUtil.setAdmin(adminDTO);
-//                            args[i] = adminDTO.getId();
+                            UserDTO userDTO = JSONObject.parseObject(userJson, UserDTO.class);
+                            SessionUtil.setUser(userDTO);
+                            args[i] = userDTO.getId();
                             userRedisTemplate.expire(Const.USER_REDIS_PREFIX + accessToken, 30, TimeUnit.MINUTES);
                             break;
                         }

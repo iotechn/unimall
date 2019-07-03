@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.CartMapper">
+
+    <select id="countCart" resultType="java.lang.Integer">
+        SELECT
+            sum( c.num )
+        FROM
+            unimall_cart AS c
+        WHERE
+            c.user_id = #{userId}
+    </select>
+
+    <select id="getCartList" resultType="com.iotechn.unimall.data.dto.CartDTO">
+        SELECT
+            c.id,
+            c.sku_id AS skuId,
+            c.num,
+            p.title,
+            k.price,
+            k.title AS skuTitle,
+            p.img AS spuImg,
+            k.img AS skuImg,
+            k.stock,
+            k.spu_id AS spuId,
+            c.gmt_update AS gmtUpdate,
+            c.gmt_create AS gmtCreate
+        FROM
+            unimall_cart AS c,
+            unimall_sku AS k,
+            unimall_spu AS p
+        WHERE
+            c.user_id = #{userId}
+            AND c.sku_id = k.id
+            AND k.spu_id = p.id
+    </select>
+
+</mapper>

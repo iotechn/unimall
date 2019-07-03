@@ -22,6 +22,8 @@ public class SkuDO extends SuperDO {
      */
     private String title;
 
+    private String img;
+
     private Integer price;
 
     private Integer stock;

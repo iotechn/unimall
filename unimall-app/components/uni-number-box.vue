@@ -114,7 +114,7 @@
 				if(newValue === value){
 					return;
 				}
-				this.inputValue = newValue / scale;
+				this.inputValue = newValue / scale; 
 			},
 			_getDecimalScale() {
 				let scale = 1;

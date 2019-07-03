@@ -3,6 +3,8 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
+
+
 const store = new Vuex.Store({
 	state: {
 		hasLogin: false,
@@ -15,8 +17,7 @@ const store = new Vuex.Store({
 			uni.setStorage({//缓存用户登陆状态
 			    key: 'userInfo',  
 			    data: provider  
-			}) 
-			console.log(state.userInfo);
+			})
 		},
 		logout(state) {
 			state.hasLogin = false;
@@ -28,6 +29,11 @@ const store = new Vuex.Store({
 	},
 	actions: {
 	
+	},
+	getters: {
+		getUserInfo(state) {
+			return state.userInfo
+		}
 	}
 })
 

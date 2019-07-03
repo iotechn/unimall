@@ -21,7 +21,7 @@
 						:class="{'b-b': index!==cartList.length-1}"
 					>
 						<view class="image-wrapper">
-							<image :src="item.image" 
+							<image :src="item.skuImg?item.skuImg:item.spuImg" 
 								:class="[item.loaded]"
 								mode="aspectFill" 
 								lazy-load 
@@ -36,15 +36,13 @@
 						</view>
 						<view class="item-right">
 							<text class="clamp title">{{item.title}}</text>
-							<text class="attr">{{item.attr_val}}</text>
-							<text class="price">¥{{item.price}}</text>
+							<text class="attr">{{item.skuTitle}}{{item.num > item.stock?(' (库存不足 剩余:' + item.stock + ')') : ''}}</text>
+							<text class="price">¥{{item.price | priceFormat}}</text>
 							<uni-number-box 
 								class="step"
 								:min="1" 
-								:max="item.stock"
-								:value="item.number>item.stock?item.stock:item.number"
-								:isMax="item.number>=item.stock?true:false"
-								:isMin="item.number===1"
+								:value="item.num"
+								:isMin="item.num===1"
 								:index="index"
 								@eventChange="numberChange"
 							></uni-number-box>
@@ -66,11 +64,11 @@
 					</view>
 				</view>
 				<view class="total-box">
-					<text class="price">¥{{total}}</text>
+					<text class="price">¥{{total | priceFormat}}</text>
 					<text class="coupon">
-						已优惠
-						<text>74.35</text>
-						元
+						总共
+						<text>{{totalItems}}</text>
+						件
 					</text>
 				</view>
 				<button type="primary" class="no-border confirm-btn" @click="createOrder">去结算</button>
@@ -85,11 +83,17 @@
 	} from 'vuex';
 	import uniNumberBox from '@/components/uni-number-box.vue'
 	export default {
+		filters: {
+			priceFormat(price) {
+				return price / 100.0
+			}
+		},
 		components: {
 			uniNumberBox
 		},
 		data() {
 			return {
+				totalItems: 0, //总数量
 				total: 0, //总价格
 				allChecked: false, //全选状态  true|false
 				empty: false, //空白页现实  true|false
@@ -97,6 +101,9 @@
 			};
 		},
 		onLoad(){
+			
+		},
+		onShow() {
 			this.loadData();
 		},
 		watch:{
@@ -114,13 +121,14 @@
 		methods: {
 			//请求数据
 			async loadData(){
-				let list = await this.$api.json('cartList'); 
-				let cartList = list.map(item=>{
-					item.checked = true;
-					return item;
-				});
-				this.cartList = cartList;
-				this.calcTotal();  //计算总价
+				const that = this
+				that.$api.request('cart', 'getCartList').then(res => {
+					res.data.forEach(item => {
+						item.checked = true
+					})
+					that.cartList = res.data
+					this.calcTotal();  //计算总价
+				})
 			},
 			//监听image加载完成
 			onImageLoad(key, index) {
@@ -151,18 +159,33 @@
 			},
 			//数量
 			numberChange(data){
-				this.cartList[data.index].number = data.number;
-				this.calcTotal();
+				const that = this
+				that.$api.request('cart','updateCartItemNum', {
+					cartId: that.cartList[data.index].id,
+					num: data.number
+				}, failres => {
+					uni.showToast({
+						title: failres.errmsg,
+						icon: 'none'
+					});
+					that.cartList[data.index].num = that.cartList[data.index].num
+				}).then(res => {
+					that.cartList[data.index].num = data.number;
+					that.calcTotal();
+				})
 			},
 			//删除
 			deleteCartItem(index){
-				let list = this.cartList;
-				let row = list[index];
-				let id = row.id;
+				const that = this
+				that.$api.request('cart', 'removeCartItem', {
+					cartId: that.cartList[index].id
+				}).then(res => {
+					that.cartList.splice(index, 1);
+					that.calcTotal();
+					//uni.hideLoading();
+				})
 
-				this.cartList.splice(index, 1);
-				this.calcTotal();
-				uni.hideLoading();
+				
 			},
 			//清空
 			clearCart(){
@@ -183,16 +206,19 @@
 					return;
 				}
 				let total = 0;
+				let totalItems = 0;
 				let checked = true;
 				list.forEach(item=>{
 					if(item.checked === true){
-						total += item.price * item.number;
+						totalItems += item.num
+						total += item.price * item.num;
 					}else if(checked === true){
 						checked = false;
 					}
 				})
 				this.allChecked = checked;
 				this.total = Number(total.toFixed(2));
+				this.totalItems = totalItems
 			},
 			//创建订单
 			createOrder(){
@@ -202,7 +228,7 @@
 					if(item.checked){
 						goodsData.push({
 							attr_val: item.attr_val,
-							number: item.number
+							number: item.num
 						})
 					}
 				})

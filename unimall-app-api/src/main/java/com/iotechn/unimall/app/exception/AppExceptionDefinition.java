@@ -8,6 +8,9 @@ import com.iotechn.unimall.core.exception.ServiceExceptionDefinition;
  */
 public class AppExceptionDefinition {
 
+    public static final ServiceExceptionDefinition APP_PARAM_CHECK_FAILED =
+            new ServiceExceptionDefinition(10002, "参数校验失败");
+
     public static final ServiceExceptionDefinition USER_UNKNOWN_EXCEPTION =
             new ServiceExceptionDefinition(11000, "用户系统未知异常");
 
@@ -28,6 +31,10 @@ public class AppExceptionDefinition {
 
     public static final ServiceExceptionDefinition USER_PHONE_OR_PASSWORD_NOT_CORRECT =
             new ServiceExceptionDefinition(11006, "手机号或密码错误!");
+
+
+    public static final ServiceExceptionDefinition CART_UPDATE_FAILED =
+            new ServiceExceptionDefinition(12001, "购物车更新失败");
 
 
 }

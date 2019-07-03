@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
         Date now = new Date();
         UserDO userDO = new UserDO();
         userDO.setPhone(phone);
-        userDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), phone));
+        userDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0,7)));
         userDO.setLastLoginIp(ip);
         userDO.setGmtLastLogin(now);
         userDO.setGmtUpdate(now);
@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
         //3.校验成功，重置密码
         UserDO updateUserDO = new UserDO();
         updateUserDO.setId(id);
-        updateUserDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(),phone));
+        updateUserDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(),"$1$" + phone.substring(0,7)));
         updateUserDO.setGmtUpdate(new Date());
         if (userMapper.updateById(updateUserDO) > 0) {
             cacheComponent.del(VERIFY_CODE_PREFIX + phone);
@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO login(String phone, String password) throws ServiceException {
-        String cryptPassword = Md5Crypt.md5Crypt(password.getBytes(), phone);
+        String cryptPassword = Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0,7));
         UserDTO userDTO = userMapper.login(phone, cryptPassword);
         if (userDTO == null) {
             throw new AppServiceException(AppExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);

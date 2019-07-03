@@ -10,13 +10,17 @@ import java.util.List;
  * Created by rize on 2019/7/2.
  */
 @Data
-public class SpuDTO {
+public class SpuDTO extends SuperDTO {
 
     private List<SkuDO> skuList;
 
     private Integer originalPrice;
 
     private Integer price;
+
+    private Integer stock;
+
+    private Integer sales;
 
     private String title;
 

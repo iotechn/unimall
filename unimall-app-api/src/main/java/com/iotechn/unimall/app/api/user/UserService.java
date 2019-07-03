@@ -6,6 +6,7 @@ import com.iotechn.unimall.core.annotation.HttpOpenApi;
 import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
+import com.iotechn.unimall.core.annotation.param.TextFormat;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.dto.UserDTO;
 
@@ -17,32 +18,32 @@ public interface UserService {
 
     @HttpMethod(description = "发送验证码到用户手机")
     public String sendVerifyCode(
-            @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone) throws ServiceException;
+            @NotNull @TextFormat(length = 11) @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone) throws ServiceException;
 
     @HttpMethod(description = "用户注册")
     public String register(
-            @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
-            @NotNull @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
+            @NotNull @TextFormat(length = 11) @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
+            @NotNull @TextFormat(lengthMin = 8,lengthMax = 18,notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
             @NotNull @HttpParam(name = "verifyCode", type = HttpParamType.COMMON, description = "注册验证码") String verifyCode,
             @HttpParam(name = "ip", type = HttpParamType.IP, description = "用户Ip") String ip) throws ServiceException;
 
     @HttpMethod(description = "用户绑定手机号")
     public String bindPhone(
-            @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
-            @NotNull @HttpParam(name = "password", type = HttpParamType.COMMON, description = "设置用户密码") String password,
+            @NotNull @TextFormat(length = 11) @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
+            @NotNull @TextFormat(lengthMin = 8,lengthMax = 18,notChinese = true)@HttpParam(name = "password", type = HttpParamType.COMMON, description = "设置用户密码") String password,
             @NotNull @HttpParam(name = "verifyCode", type = HttpParamType.COMMON, description = "注册验证码") String verifyCode,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
     @HttpMethod(description = "用户重置密码")
     public String resetPassword(
-            @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
-            @NotNull @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
+            @NotNull @TextFormat(length = 11)@HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
+            @NotNull @TextFormat(lengthMin = 8,lengthMax = 18,notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
             @NotNull @HttpParam(name = "verifyCode", type = HttpParamType.COMMON, description = "注册验证码") String verifyCode) throws ServiceException;
 
     @HttpMethod(description = "用户登录")
     public UserDTO login(
             @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
-            @NotNull @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password) throws ServiceException;
+            @NotNull @TextFormat(lengthMin = 8,lengthMax = 18,notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password) throws ServiceException;
 
     @HttpMethod(description = "用户注销")
     public String logout(

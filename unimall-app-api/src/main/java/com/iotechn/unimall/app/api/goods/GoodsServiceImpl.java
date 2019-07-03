@@ -121,16 +121,15 @@ public class GoodsServiceImpl implements GoodsService {
         SpuDO spuDO = spuMapper.selectById(spuId);
         SpuDTO spuDTO = new SpuDTO();
         BeanUtils.copyProperties(spuDO, spuDTO);
-        List<ImgDO> imgDOS = imgMapper.selectList(
-                new EntityWrapper<ImgDO>()
-                        .eq("biz_type", BizType.GOODS.getCode())
-                        .eq("biz_id", spuId));
-        //TODO 直接SQL查出来URL
-        spuDTO.setImgList(imgDOS.stream().map(imgDO -> imgDO.getUrl()).collect(Collectors.toList()));
+        spuDTO.setImgList(imgMapper.getImgs(BizType.GOODS.getCode(), spuId));
         List<SkuDO> skuDOList = skuMapper.selectList(
                 new EntityWrapper<SkuDO>()
                         .eq("spu_id", spuId));
         spuDTO.setSkuList(skuDOList);
+
+        //TODO
+        spuDTO.setSales(0);
+        spuDTO.setStock(10);
 
         List<SpuAttributeDO> spuAttributeList = spuAttributeMapper.selectList(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));
         spuDTO.setAttributeList(spuAttributeList);
