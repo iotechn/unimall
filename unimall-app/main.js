@@ -54,7 +54,7 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 			method: 'POST',
 			header: {
 				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-				'ACCESSTOEKN': accessToken
+				'ACCESSTOKEN': accessToken
 			},
 			success: (res) => {
 				if (res.statusCode === 200) {
