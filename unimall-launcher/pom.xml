@@ -44,6 +44,12 @@
         </dependency>
 
 
+        <!-- 模板引擎 freemarker -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+        </dependency>
+
         <!-- lombok 工具 -->
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>easycampus Api文档</title>
+    <link href="https://iotechn.oss-cn-hangzhou.aliyuncs.com/open/style/commons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="https://iotechn.oss-cn-hangzhou.aliyuncs.com/open/stylesheets/commons.css">
+    <link rel="stylesheet" type="text/css" href="https://iotechn.oss-cn-hangzhou.aliyuncs.com/open/stylesheets/index-news.css">
+    <script src="https://iotechn.oss-cn-hangzhou.aliyuncs.com/open/js/jquery-lastest.js"></script>
+</head><body>
+<div class="open-header clearfix">
+    <div class="pm">
+        <div class="open-header-c1 fl">
+            <!-- logo -->
+            <a href="/"><span class='open-header-icon'></span></a>
+        </div>
+    </div>
+</div>
+<div class="open-nav">
+    <div class="pm">
+        <!-- 横向导航栏 -->
+        <ul class="openapi-nav">
+            <!--<li class="openapi-nav-index"><a href="/index">首页</a></li>-->
+            <li class="openapi-nav-apis" type=""><a href="#">API</a></li>
+            <!--<li class="openapi-nav-docs"><a href="/docs">文档</a></li>-->
+        </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    function setLang(lang){
+        $.post("/lang",{lang:lang},function(result){
+            window.location.reload(true);
+        });
+    }
+    var selected="index";
+    var locationPath=window.location.pathname.toLowerCase();
+    if(locationPath.indexOf("apis")>0||locationPath.indexOf("testapi")>0){
+        selected="apis";
+    }else if(locationPath.indexOf("docs")>0){
+        selected="docs";
+    }else if(locationPath.indexOf("enter")>0){
+        selected="enter";
+    }
+    $(".openapi-nav li").removeClass("active");
+    $(".openapi-nav-"+selected).addClass("active");
+</script>
+<div class="pm">
+    <nav class="open-breadcrumbs">
+        <a href="/info/group/${model.name}">API</a>/${model.name}
+    </nav>
+    <div class="clearfix">
+        <div class="open-grid-c1">
+            <aside class="open-sideber">
+                <ul class="open-sideber-list1">
+                    <li>
+                        <a href="">api分组</a>
+                        <ul class="open-sideber-list2">
+                            <!-- for 方法分组和url -->
+                            <#list groupNames as gp>
+                                <li data-name="${gp.name}"><a href="/info/group/${gp.name}">${gp.name}</a></li>
+                            </#list>
+                        </ul>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+        <div class="open-grid-c2">
+            <section class="open-list">
+                <table>
+                    <caption>${model.name}</caption>
+                    <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>描述</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- for 方法简介 -->
+                    <#list model.methods as item>
+                        <tr>
+                            <td><a href="/info/api/${model.name}/${item.name}">${item.name}</a></td>
+                            <td><a href="/info/api/${model.name}/${item.name}">${item.description}</a></td>
+                        </tr>
+                    </#list>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+</div>
+
+<div class="open-footer">
+    <ul>
+
+        <li><a href="#">API</a></li>
+    </ul>
+    <p>备案</p>
+</div>
+<script src="http://open.fengqu.com/js/md5.min.js"></script>
+<script type="text/javascript">
+    var path = location.pathname.split("/");
+    var len = path.length;
+    if(len > 2){
+        var groupElement = $("." + path[len-2]);
+        groupElement.addClass("active");
+        groupElement.parent().parent().find("ul").css("display", "block");
+        $("[data-name='" + decodeURI(path[len-1]) + "']").addClass("active");
+    }
+    $(".groupName").click(function(){
+        if($(this).parent().parent().find("ul").css("display") == "block"){
+            $(this).removeClass('active');
+            $($(this).parent().parent().find("ul")).css("display", "none");
+        }
+        else{
+            $(this).addClass('active');
+            $($(this).parent().parent().find("ul")).css("display", "block");
+        }
+    });
+    function setLang(lang){
+        $.post("/lang",{lang:lang},function(result){
+            window.location.reload(true);
+        });
+    }
+</script></body>
+</html>
