@@ -137,7 +137,6 @@ public class CouponServiceImpl implements CouponService {
             }
             return couponDTO;
         }).collect(Collectors.toList());
-
         return couponDTOList;
     }
 

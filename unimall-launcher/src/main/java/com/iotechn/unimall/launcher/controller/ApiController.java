@@ -185,7 +185,7 @@ public class ApiController {
                             SessionUtil.setUser(userDTO);
                             args[i] = userDTO.getId();
                             userRedisTemplate.expire(Const.USER_REDIS_PREFIX + accessToken, 30, TimeUnit.MINUTES);
-                            break;
+                            continue;
                         }
                     }
                     if (args[i] == null) {
@@ -200,7 +200,7 @@ public class ApiController {
 //                            SessionUtil.setAdmin(adminDTO);
 //                            args[i] = adminDTO.getId();
                             userRedisTemplate.expire(Const.ADMIN_REDIS_PREFIX + accessToken, 30, TimeUnit.MINUTES);
-                            break;
+                            continue;
                         }
                     }
                     if (args[i] == null) {
@@ -211,10 +211,10 @@ public class ApiController {
                     args[i] = request.getHeader("X-Forwarded-For");
                 } else if (httpParam.type() == HttpParamType.COOKIE) {
                     Cookie[] cookies = request.getCookies();
-                    for(Cookie cookie : cookies){
+                    inner: for(Cookie cookie : cookies){
                         if(httpParam.name().equals(cookie.getName())) {
                             args[i] = cookie.getValue();
-                            break;
+                            break inner;
                         }
                     }
                     if(args[i] == null){
