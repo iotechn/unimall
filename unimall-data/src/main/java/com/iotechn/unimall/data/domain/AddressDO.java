@@ -27,12 +27,16 @@ public class AddressDO extends SuperDO{
 
     private String address;
 
+    @TableField("default_address")
+    private Integer defaultAddress;
+
     @TableField("user_id")
     private Long userId;
 
     private String phone;
 
     private String consignee;
+
 
 
 }

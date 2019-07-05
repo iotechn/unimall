@@ -17,4 +17,6 @@ public interface CollectMapper extends BaseMapper<CollectDO> {
     public Integer countCollect(Long userId);//统计用户收藏数量
 
     public List<CollectDTO> getCollectAll(@Param("userId") Long userId, @Param("offset")Integer offset, @Param("size")Integer size);//获得用户所有收藏
+
+    public CollectDTO getCollectById(@Param("userId") Long userId, @Param("collectId")Long collectId, @Param("spuId")Long spuId);//获得某一收藏
 }

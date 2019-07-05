@@ -25,6 +25,7 @@ public interface AddressService {
                               @NotNull @HttpParam(name = "county", type = HttpParamType.COMMON, description = "区县")String county,
                               @NotNull @HttpParam(name = "street", type = HttpParamType.COMMON, description = "街道")String street,
                               @NotNull @HttpParam(name = "address", type = HttpParamType.COMMON, description = "详细地址")String address,
+                              @NotNull @HttpParam(name = "defaultAddress", type = HttpParamType.COMMON, description = "默认地址")Integer defaultAddress,
                               @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID")Long userId,
                               @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "电话")String phone,
                               @NotNull @HttpParam(name = "consignee", type = HttpParamType.COMMON, description = "收件人")String consignee
@@ -33,7 +34,8 @@ public interface AddressService {
 
     @HttpMethod(description = "删除收货地址")
     public Boolean deleteAddress(@NotNull @HttpParam(name="addressId",type = HttpParamType.COMMON,description = "收货地址ID")Long addressId,
-                                 @NotNull @HttpParam(name="userId",type = HttpParamType.USER_ID,description = "用户ID")Long userId) throws ServiceException;
+                                 @NotNull @HttpParam(name="userId",type = HttpParamType.USER_ID,description = "用户ID")Long userId
+                                ) throws ServiceException;
 
 
 
@@ -44,9 +46,11 @@ public interface AddressService {
                                  @NotNull @HttpParam(name = "county", type = HttpParamType.COMMON, description = "区县")String county,
                                  @NotNull @HttpParam(name = "street", type = HttpParamType.COMMON, description = "街道")String street,
                                  @NotNull @HttpParam(name = "address", type = HttpParamType.COMMON, description = "详细地址")String address,
+                                 @NotNull @HttpParam(name = "defaultAddress", type = HttpParamType.COMMON, description = "默认地址")Integer defaultAddress,
                                  @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID")Long userId,
                                  @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "电话")String phone,
-                                 @NotNull @HttpParam(name = "consignee", type = HttpParamType.COMMON, description = "收件人")String consignee)throws ServiceException;
+                                 @NotNull @HttpParam(name = "consignee", type = HttpParamType.COMMON, description = "收件人")String consignee
+                                )throws ServiceException;
 
 
     @HttpMethod(description = "查询用户所有收货地址")
