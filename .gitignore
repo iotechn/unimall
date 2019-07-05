@@ -42,3 +42,6 @@ mvnw.cmd
 /unimall-data/target/
 /unimall-core/target/
 /unimall-launcher/target/
+
+###password###
+/unimall-launcher/src/main/resources/application.properties
