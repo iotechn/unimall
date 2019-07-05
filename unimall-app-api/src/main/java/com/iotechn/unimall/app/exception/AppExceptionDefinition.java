@@ -55,6 +55,10 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition COUPON_HAS_LOCKED =
             new ServiceExceptionDefinition(14005, "优惠券活动已经冻结！");
 
+    public static final ServiceExceptionDefinition COLLECT_ALREADY_EXISTED =
+            new ServiceExceptionDefinition(15001, "该商品已经收藏");
 
+    public static final ServiceExceptionDefinition COLLECT_PARAM_CHECK_FAILED  =
+            new ServiceExceptionDefinition(15002, "收藏记录传入参数校验失败");
 
 }

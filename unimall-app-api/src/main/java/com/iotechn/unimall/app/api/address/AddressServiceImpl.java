@@ -32,6 +32,7 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public Boolean addAddress(String province, String city, String county, String street, String address, Long userId, String phone, String consignee) throws ServiceException {
         AddressDO addressDO = new AddressDO(province,city,county,street,address,userId,phone,consignee);
+        System.out.println(phone + " " + consignee);
         Date now =  new Date();
         addressDO.setGmtCreate(now);
         addressDO.setGmtUpdate(addressDO.getGmtCreate());

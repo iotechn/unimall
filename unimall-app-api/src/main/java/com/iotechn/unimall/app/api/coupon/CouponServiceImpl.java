@@ -93,7 +93,6 @@ public class CouponServiceImpl implements CouponService {
                         .or().gt("gmt_end", new Date()));
         List<Long> couponIds = couponDOS.stream().map(couponDO -> couponDO.getId()).collect(Collectors.toList());
 
-        userCouponMapper.selectList()
 
         return null;
     }

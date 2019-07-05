@@ -1,0 +1,45 @@
+package com.iotechn.unimall.app.api.collect;
+
+/*
+@author kbq
+@date  2019/7/5 - 10:13
+*/
+
+import com.iotechn.unimall.core.annotation.HttpMethod;
+import com.iotechn.unimall.core.annotation.HttpOpenApi;
+import com.iotechn.unimall.core.annotation.HttpParam;
+import com.iotechn.unimall.core.annotation.HttpParamType;
+import com.iotechn.unimall.core.annotation.param.NotNull;
+import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.domain.CollectDO;
+import com.iotechn.unimall.data.dto.CollectDTO;
+import com.iotechn.unimall.data.model.Page;
+
+import java.util.List;
+
+@HttpOpenApi(group = "collect",description = "收藏表单")
+public interface CollectService{
+
+    @HttpMethod(description = "增加收藏记录")
+    public Boolean addCollect(@NotNull @HttpParam(name = "userId",type = HttpParamType.USER_ID,description = "用户Id")Long userId,
+                              @NotNull @HttpParam(name="spuId",type = HttpParamType.COMMON,description = "商品ID")Long spuId) throws ServiceException;
+
+    @HttpMethod(description = "删除收藏记录")
+    public Boolean deleteCollect(@NotNull @HttpParam(name = "userId",type = HttpParamType.USER_ID,description = "用户Id")Long userId
+            ,@NotNull @HttpParam(name="spuId",type = HttpParamType.COMMON,description = "商品ID")Long spuId
+            ,@NotNull @HttpParam(name="collectId",type = HttpParamType.COMMON,description = "收藏记录ID")Long collectId) throws ServiceException;
+
+    @HttpMethod(description = "查询某一用户收藏记录")
+    public Page<CollectDTO> getCollectAll(@NotNull @HttpParam(name = "userId",type = HttpParamType.USER_ID,description = "用户Id")Long userId
+            , @HttpParam(name="page",valueDef = "1",type = HttpParamType.COMMON,description = "分页查询偏移量")Integer page
+            , @HttpParam(name="size",valueDef = "10",type = HttpParamType.COMMON,description = "分页查询长度")Integer size)throws ServiceException;
+
+
+    @HttpMethod(description = "查询某一条收藏记录")
+    public CollectDTO getCollectById(@NotNull @HttpParam(name = "userId",type = HttpParamType.USER_ID,description = "用户Id")Long userId
+            ,@NotNull @HttpParam(name="collectId",type = HttpParamType.COMMON,description = "收藏记录id")Long collectId
+            ,@HttpParam(name="spuId",type = HttpParamType.COMMON,description = "商品ID")Long spuId) throws  ServiceException;
+
+
+
+}
