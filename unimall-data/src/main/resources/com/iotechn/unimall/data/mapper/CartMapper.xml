@@ -18,11 +18,14 @@
             c.num,
             p.title,
             k.price,
+            k.original_price AS originalPrice,
+            k.vip_price AS vipPrice,
             k.title AS skuTitle,
             p.img AS spuImg,
             k.img AS skuImg,
             k.stock,
             k.spu_id AS spuId,
+            p.category_id AS categoryId,
             c.gmt_update AS gmtUpdate,
             c.gmt_create AS gmtCreate
         FROM

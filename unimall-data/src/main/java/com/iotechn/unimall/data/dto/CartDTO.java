@@ -2,6 +2,8 @@ package com.iotechn.unimall.data.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Created by rize on 2019/7/3.
  */
@@ -14,7 +16,11 @@ public class CartDTO extends SuperDTO {
 
     private String title;
 
+    private Integer originalPrice;
+
     private Integer price;
+
+    private Integer vipPrice;
 
     private String skuTitle;
 
@@ -25,5 +31,9 @@ public class CartDTO extends SuperDTO {
     private Integer stock;
 
     private Long spuId;
+
+    private Long categoryId;
+
+    private List<Long> categoryIdList;
 
 }
