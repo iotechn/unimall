@@ -95,6 +95,7 @@
 					that.logining = false
 					//将返回的用户信息设置到Store里面
 					that.$store.commit('login',res.data)
+					uni.navigateBack()
 				})
 			}
 		},

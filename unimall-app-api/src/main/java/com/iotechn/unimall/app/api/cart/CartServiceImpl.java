@@ -7,7 +7,9 @@ import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.exception.ServiceExceptionDefinition;
 import com.iotechn.unimall.data.domain.CartDO;
 import com.iotechn.unimall.data.dto.CartDTO;
+import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.mapper.CartMapper;
+import com.iotechn.unimall.data.util.SessionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +62,7 @@ public class CartServiceImpl implements CartService {
                 new EntityWrapper<CartDO>()
                         .eq("sku_id", skuId)
                         .eq("user_id", userId));
+
         CartDO cartDO = new CartDO();
         if (!CollectionUtils.isEmpty(cartDOS)) {
             cartDO.setId(cartDOS.get(0).getId());

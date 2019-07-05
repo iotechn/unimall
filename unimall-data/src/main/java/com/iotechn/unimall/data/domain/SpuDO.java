@@ -28,6 +28,11 @@ public class SpuDO extends SuperDO {
     private String title;
 
     /**
+     * 商品销量
+     */
+    private Integer sales;
+
+    /**
      * 商品主图（冗余信息）
      */
     private String img;

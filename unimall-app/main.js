@@ -93,8 +93,7 @@ Vue.prototype.$api = {
 	msg,
 	json,
 	prePage,
-	request,
-	toLastPage
+	request
 };
 
 App.mpType = 'app'

@@ -222,21 +222,9 @@
 			},
 			//创建订单
 			createOrder(){
-				let list = this.cartList;
-				let goodsData = [];
-				list.forEach(item=>{
-					if(item.checked){
-						goodsData.push({
-							attr_val: item.attr_val,
-							number: item.num
-						})
-					}
-				})
-
+				console.log(this.cartList)
 				uni.navigateTo({
-					url: `/pages/order/createOrder?data=${JSON.stringify({
-						goodsData: goodsData
-					})}`
+					url: `/pages/order/createOrder?data=${JSON.stringify(this.cartList)}`
 				})
 				this.$api.msg('跳转下一页 sendData');
 			}

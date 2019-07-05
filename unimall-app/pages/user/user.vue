@@ -7,7 +7,7 @@
 					<image class="portrait" :src="userInfo.portrait || '/static/missing-face.png'"></image>
 				</view>
 				<view class="info-box">
-					<text class="username">{{userInfo.nickname || '未设置昵称'}}</text>
+					<text class="username">{{ hasLogin? (userInfo.nickname || '未设置昵称') : '立即登录' }}</text>
 				</view>
 			</view>
 			<view class="vip-card-box">

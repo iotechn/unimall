@@ -18,30 +18,19 @@
 		</navigator>
 
 		<view class="goods-section">
-			<view class="g-header b-b">
+			<!-- <view class="g-header b-b">
 				<image class="logo" src="http://duoduo.qibukj.cn/./Upload/Images/20190321/201903211727515.png"></image>
 				<text class="name">西城小店铺</text>
-			</view>
+			</view> -->
 			<!-- 商品列表 -->
-			<view class="g-item">
-				<image src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=756705744,3505936868&fm=11&gp=0.jpg"></image>
+			<view v-for="(item, index) in skuList" :key="index" class="g-item">
+				<image :src="item.skuImg?item.skuImg:item.spuImg"></image>
 				<view class="right">
-					<text class="title clamp">古黛妃 短袖t恤女夏装2019新款</text>
-					<text class="spec">春装款 L</text>
+					<text class="title clamp">{{item.title}}</text>
+					<text class="spec">{{item.skuTitle}}</text>
 					<view class="price-box">
-						<text class="price">￥17.8</text>
-						<text class="number">x 1</text>
-					</view>
-				</view>
-			</view>
-			<view class="g-item">
-				<image src="https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1620020012,789258862&fm=26&gp=0.jpg"></image>
-				<view class="right">
-					<text class="title clamp">韩版于是洞洞拖鞋 夏季浴室防滑简约居家【新人专享，限选意见】</text>
-					<text class="spec">春装款 L</text>
-					<view class="price-box">
-						<text class="price">￥17.8</text>
-						<text class="number">x 1</text>
+						<text class="price">￥{{item.price | priceFormat}}</text>
+						<text class="number">x {{item.num}}</text>
 					</view>
 				</view>
 			</view>
@@ -86,7 +75,7 @@
 				<input class="desc" type="text" v-model="desc" placeholder="请填写备注信息" placeholder-class="placeholder" />
 			</view>
 		</view>
-		
+
 		<!-- 底部 -->
 		<view class="footer">
 			<view class="price-content">
@@ -96,7 +85,7 @@
 			</view>
 			<text class="submit" @click="submit">提交订单</text>
 		</view>
-		
+
 		<!-- 优惠券面板 -->
 		<view class="mask" :class="maskState===0 ? 'none' : maskState===1 ? 'show' : ''" @click="toggleMask">
 			<view class="mask-content" @click.stop.prevent="stopPrevent">
@@ -111,7 +100,7 @@
 							<text class="price">{{item.price}}</text>
 							<text>满30可用</text>
 						</view>
-						
+
 						<view class="circle l"></view>
 						<view class="circle r"></view>
 					</view>
@@ -125,13 +114,18 @@
 
 <script>
 	export default {
+		filters: {
+			priceFormat(price) {
+				return price / 100.0
+			}
+		},
 		data() {
 			return {
+				skuList: [],
 				maskState: 0, //优惠券面板显示状态
 				desc: '', //备注
 				payType: 1, //1微信 2支付宝
-				couponList: [
-					{
+				couponList: [{
 						title: '新用户专享优惠券',
 						price: 5,
 					},
@@ -154,33 +148,32 @@
 				}
 			}
 		},
-		onLoad(option){
+		onLoad(option) {
 			//商品数据
-			//let data = JSON.parse(option.data);
-			//console.log(data);
+			this.skuList = JSON.parse(option.data);
 		},
 		methods: {
 			//显示优惠券面板
-			toggleMask(type){
+			toggleMask(type) {
 				let timer = type === 'show' ? 10 : 300;
-				let	state = type === 'show' ? 1 : 0;
+				let state = type === 'show' ? 1 : 0;
 				this.maskState = 2;
-				setTimeout(()=>{
+				setTimeout(() => {
 					this.maskState = state;
 				}, timer)
 			},
 			numberChange(data) {
 				this.number = data.number;
 			},
-			changePayType(type){
+			changePayType(type) {
 				this.payType = type;
 			},
-			submit(){
+			submit() {
 				uni.redirectTo({
 					url: '/pages/money/pay'
 				})
 			},
-			stopPrevent(){}
+			stopPrevent() {}
 		}
 	}
 </script>
@@ -310,7 +303,8 @@
 				.price {
 					margin-bottom: 4upx;
 				}
-				.number{
+
+				.number {
 					font-size: 26upx;
 					color: $font-color-base;
 					margin-left: 20upx;
@@ -322,6 +316,7 @@
 			}
 		}
 	}
+
 	.yt-list {
 		margin-top: 16upx;
 		background: #fff;
@@ -389,7 +384,8 @@
 			&.active {
 				color: $base-color;
 			}
-			&.red{
+
+			&.red {
 				color: $base-color;
 			}
 		}
@@ -406,31 +402,35 @@
 			color: $font-color-dark;
 		}
 	}
-	
+
 	/* 支付列表 */
-	.pay-list{
+	.pay-list {
 		padding-left: 40upx;
 		margin-top: 16upx;
 		background: #fff;
-		.pay-item{
+
+		.pay-item {
 			display: flex;
 			align-items: center;
 			padding-right: 20upx;
 			line-height: 1;
-			height: 110upx;	
+			height: 110upx;
 			position: relative;
 		}
-		.icon-weixinzhifu{
+
+		.icon-weixinzhifu {
 			width: 80upx;
 			font-size: 40upx;
 			color: #6BCC03;
 		}
-		.icon-alipay{
+
+		.icon-alipay {
 			width: 80upx;
 			font-size: 40upx;
 			color: #06B4FD;
 		}
-		.icon-xuanzhong2{
+
+		.icon-xuanzhong2 {
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -439,14 +439,15 @@
 			font-size: 40upx;
 			color: $base-color;
 		}
-		.tit{
+
+		.tit {
 			font-size: 32upx;
 			color: $font-color-dark;
 			flex: 1;
 		}
 	}
-	
-	.footer{
+
+	.footer {
 		position: fixed;
 		left: 0;
 		bottom: 0;
@@ -460,21 +461,25 @@
 		background-color: #fff;
 		z-index: 998;
 		color: $font-color-base;
-		box-shadow: 0 -1px 5px rgba(0,0,0,.1);
-		.price-content{
+		box-shadow: 0 -1px 5px rgba(0, 0, 0, .1);
+
+		.price-content {
 			padding-left: 30upx;
 		}
-		.price-tip{
+
+		.price-tip {
 			color: $base-color;
 			margin-left: 8upx;
 		}
-		.price{
+
+		.price {
 			font-size: 36upx;
 			color: $base-color;
 		}
-		.submit{
-			display:flex;
-			align-items:center;
+
+		.submit {
+			display: flex;
+			align-items: center;
 			justify-content: center;
 			width: 280upx;
 			height: 100%;
@@ -483,9 +488,9 @@
 			background-color: $base-color;
 		}
 	}
-	
+
 	/* 优惠券面板 */
-	.mask{
+	.mask {
 		display: flex;
 		align-items: flex-end;
 		position: fixed;
@@ -493,44 +498,48 @@
 		top: var(--window-top);
 		bottom: 0;
 		width: 100%;
-		background: rgba(0,0,0,0);
+		background: rgba(0, 0, 0, 0);
 		z-index: 9995;
 		transition: .3s;
-		
-		.mask-content{
+
+		.mask-content {
 			width: 100%;
 			min-height: 30vh;
 			max-height: 70vh;
 			background: #f3f3f3;
 			transform: translateY(100%);
 			transition: .3s;
-			overflow-y:scroll;
+			overflow-y: scroll;
 		}
-		&.none{
+
+		&.none {
 			display: none;
 		}
-		&.show{
-			background: rgba(0,0,0,.4);
-			
-			.mask-content{
+
+		&.show {
+			background: rgba(0, 0, 0, .4);
+
+			.mask-content {
 				transform: translateY(0);
 			}
 		}
 	}
 
 	/* 优惠券列表 */
-	.coupon-item{
+	.coupon-item {
 		display: flex;
 		flex-direction: column;
 		margin: 20upx 24upx;
 		background: #fff;
-		.con{
+
+		.con {
 			display: flex;
 			align-items: center;
 			position: relative;
 			height: 120upx;
 			padding: 0 30upx;
-			&:after{
+
+			&:after {
 				position: absolute;
 				left: 0;
 				bottom: 0;
@@ -541,7 +550,8 @@
 				transform: scaleY(50%);
 			}
 		}
-		.left{
+
+		.left {
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
@@ -549,16 +559,19 @@
 			overflow: hidden;
 			height: 100upx;
 		}
-		.title{
+
+		.title {
 			font-size: 32upx;
 			color: $font-color-dark;
 			margin-bottom: 10upx;
 		}
-		.time{
+
+		.time {
 			font-size: 24upx;
 			color: $font-color-light;
 		}
-		.right{
+
+		.right {
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
@@ -567,21 +580,25 @@
 			color: $font-color-base;
 			height: 100upx;
 		}
-		.price{
+
+		.price {
 			font-size: 44upx;
 			color: $base-color;
-			&:before{
+
+			&:before {
 				content: '￥';
 				font-size: 34upx;
 			}
 		}
-		.tips{
+
+		.tips {
 			font-size: 24upx;
 			color: $font-color-light;
 			line-height: 60upx;
 			padding-left: 30upx;
 		}
-		.circle{
+
+		.circle {
 			position: absolute;
 			left: -6upx;
 			bottom: -10upx;
@@ -590,11 +607,11 @@
 			height: 20upx;
 			background: #f3f3f3;
 			border-radius: 100px;
-			&.r{
+
+			&.r {
 				left: auto;
 				right: -6upx;
 			}
 		}
 	}
-
 </style>

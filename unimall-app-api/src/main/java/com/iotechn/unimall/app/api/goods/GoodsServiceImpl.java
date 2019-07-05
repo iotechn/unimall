@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -52,19 +53,22 @@ public class GoodsServiceImpl implements GoodsService {
 
     private static final String CA_SPU_PREFIX = "CA_SPU_";
 
+    private static final String CA_SPU_SALES_HASH = "CA_SPU_SALES_HASH";
+
     @Override
-    public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String title) throws ServiceException {
+    public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, String title) throws ServiceException {
         Wrapper<SpuDO> wrapper = new EntityWrapper<SpuDO>();
         if (!StringUtils.isEmpty(title)) {
             wrapper.like("title", title);
         } else {
             //若关键字为空，尝试从缓存取列表
-            Page objFromCache = cacheComponent.getObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize, Page.class);
+            Page objFromCache = cacheComponent.getObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize + "_" + orderBy, Page.class);
             if (objFromCache != null) {
                 return objFromCache;
             }
         }
         if (categoryId != null && categoryId != 0) {
+            wrapper.orderBy(orderBy, false);
             List<CategoryDO> childrenList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", categoryId));
             if (CollectionUtils.isEmpty(childrenList)) {
                 //目标节点为叶子节点
@@ -99,7 +103,11 @@ public class GoodsServiceImpl implements GoodsService {
         spuDOS.forEach(item -> {
             SpuDTO spuDTO = new SpuDTO();
             BeanUtils.copyProperties(item, spuDTO);
-            //TODO 销量\缓存用hash表把
+            Map<String, String> hashAll = cacheComponent.getHashAll(CA_SPU_SALES_HASH);
+            String salesStr = hashAll.get("S" + item.getId());
+            if (!StringUtils.isEmpty(salesStr)) {
+                spuDTO.setSales(new Integer(salesStr));
+            }
             spuDTOList.add(spuDTO);
         });
 
@@ -107,7 +115,7 @@ public class GoodsServiceImpl implements GoodsService {
         Page<SpuDTO> page = new Page<>(spuDTOList, pageNo, pageSize, count);
         if (StringUtils.isEmpty(title)) {
             //若关键字为空，制作缓存
-            cacheComponent.putObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize, page, Const.CACHE_ONE_DAY);
+            cacheComponent.putObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize + "_" + orderBy, page, Const.CACHE_ONE_DAY);
         }
         return page;
     }
@@ -127,9 +135,12 @@ public class GoodsServiceImpl implements GoodsService {
                         .eq("spu_id", spuId));
         spuDTO.setSkuList(skuDOList);
 
-        //TODO
-        spuDTO.setSales(0);
-        spuDTO.setStock(10);
+        String salesStr = cacheComponent.getHashRaw(CA_SPU_SALES_HASH, "S" + spuId);
+        if (!StringUtils.isEmpty(salesStr)) {
+            spuDTO.setSales(new Integer(salesStr));
+        }
+        int sum = skuDOList.stream().mapToInt(item -> item.getStock()).sum();
+        spuDTO.setStock(sum);
 
         List<SpuAttributeDO> spuAttributeList = spuAttributeMapper.selectList(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));
         spuDTO.setAttributeList(spuAttributeList);

@@ -37,4 +37,24 @@ public class AppExceptionDefinition {
             new ServiceExceptionDefinition(12001, "购物车更新失败");
 
 
+    public static final ServiceExceptionDefinition ORDER_SKU_CANNOT_EMPTY =
+            new ServiceExceptionDefinition(13001, "订单商品不能为空");
+
+    public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
+            new ServiceExceptionDefinition(14001, "优惠券已经领完～");
+
+    public static final ServiceExceptionDefinition COUPON_YOU_HAVE_OBTAINED =
+            new ServiceExceptionDefinition(14002, "您已经领取过了～");
+
+    public static final ServiceExceptionDefinition COUPON_ACTIVITY_NOT_START =
+            new ServiceExceptionDefinition(14003, "优惠券活动还没开始");
+
+    public static final ServiceExceptionDefinition COUPON_ACTIVITY_HAS_END =
+            new ServiceExceptionDefinition(14004, "优惠券活动已经结束");
+
+    public static final ServiceExceptionDefinition COUPON_HAS_LOCKED =
+            new ServiceExceptionDefinition(14005, "优惠券活动已经冻结！");
+
+
+
 }
