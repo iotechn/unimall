@@ -24,7 +24,13 @@ public class SkuDO extends SuperDO {
 
     private String img;
 
+    @TableField("original_price")
+    private Integer originalPrice;
+
     private Integer price;
+
+    @TableField("vip_price")
+    private Integer vipPrice;
 
     private Integer stock;
 

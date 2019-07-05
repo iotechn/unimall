@@ -23,6 +23,11 @@ public class SpuDO extends SuperDO {
     private Integer price;
 
     /**
+     * 会员价格
+     */
+    private Integer vipPrice;
+
+    /**
      * 商品标题
      */
     private String title;

@@ -18,6 +18,8 @@ public class SpuDTO extends SuperDTO {
 
     private Integer price;
 
+    private Integer vipPrice;
+
     private Integer stock;
 
     private Integer sales;
