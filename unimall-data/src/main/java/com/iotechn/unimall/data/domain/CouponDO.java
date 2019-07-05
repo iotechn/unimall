@@ -25,6 +25,10 @@ public class CouponDO extends SuperDO {
 
     private Integer limit;
 
+    private Integer discount;
+
+    private Integer min;
+
     private Integer status;
 
     @TableField("category_id")

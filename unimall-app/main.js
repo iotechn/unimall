@@ -60,7 +60,13 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 				if (res.statusCode === 200) {
 					if (res.data.errno === 0) {
 						resolve(res.data);
+					}  else if (res.data.errno === 10001) {
+						store.commit('logout')
+						if (failCallback) {
+							failCallback(res.data)
+						}
 					} else {
+						
 						if (failCallback) {
 							failCallback(res.data)
 						} else {

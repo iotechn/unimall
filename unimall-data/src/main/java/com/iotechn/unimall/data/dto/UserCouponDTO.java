@@ -1,0 +1,35 @@
+package com.iotechn.unimall.data.dto;
+
+import lombok.Data;
+
+import java.util.Date;
+
+/**
+ * Created by rize on 2019/7/5.
+ */
+@Data
+public class UserCouponDTO extends SuperDTO {
+
+    private String title;
+
+    private String categoryTitle;
+
+    private Long categoryId;
+
+    private Integer min;
+
+    private Integer discount;
+
+    private Long userId;
+
+    private Long couponId;
+
+    private Long orderId;
+
+    private Date gmtUsed;
+
+    private Date gmtStart;
+
+    private Date gmtEnd;
+
+}

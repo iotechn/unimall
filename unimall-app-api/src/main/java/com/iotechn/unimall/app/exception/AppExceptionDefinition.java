@@ -11,6 +11,9 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition APP_PARAM_CHECK_FAILED =
             new ServiceExceptionDefinition(10002, "参数校验失败");
 
+    public static final ServiceExceptionDefinition APP_SYSTEM_BUSY =
+            new ServiceExceptionDefinition(10007, "系统繁忙～");
+
     public static final ServiceExceptionDefinition USER_UNKNOWN_EXCEPTION =
             new ServiceExceptionDefinition(11000, "用户系统未知异常");
 
@@ -54,6 +57,9 @@ public class AppExceptionDefinition {
 
     public static final ServiceExceptionDefinition COUPON_HAS_LOCKED =
             new ServiceExceptionDefinition(14005, "优惠券活动已经冻结！");
+
+    public static final ServiceExceptionDefinition COUPON_STRATEGY_INCORRECT =
+            new ServiceExceptionDefinition(14006, "优惠券策略不正确");
 
 
 

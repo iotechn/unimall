@@ -22,6 +22,10 @@ public class CouponDTO extends SuperDTO {
 
     private Integer limit;
 
+    private Integer discount;
+
+    private Integer min;
+
     private Integer status;
 
     private Long categoryId;

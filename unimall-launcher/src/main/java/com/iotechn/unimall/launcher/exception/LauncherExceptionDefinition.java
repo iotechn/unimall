@@ -31,4 +31,7 @@ public class LauncherExceptionDefinition {
     public static final ServiceExceptionDefinition LAUNCHER_ADMIN_NOT_LOGIN =
             new ServiceExceptionDefinition(10006, " 管理员尚未登录");
 
+    public static final ServiceExceptionDefinition LAUNCHER_SYSTEM_BUSY =
+            new ServiceExceptionDefinition(10007, "系统繁忙～");
+
 }

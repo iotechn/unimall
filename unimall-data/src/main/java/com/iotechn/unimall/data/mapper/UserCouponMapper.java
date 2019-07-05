@@ -2,6 +2,7 @@ package com.iotechn.unimall.data.mapper;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.iotechn.unimall.data.domain.UserCouponDO;
+import com.iotechn.unimall.data.dto.UserCouponDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,6 @@ import java.util.Map;
  */
 public interface UserCouponMapper extends BaseMapper<UserCouponDO> {
 
-//    public Map<Long, Integer> getCou
+    public List<UserCouponDTO> getUserCoupons(Long userId);
 
 }

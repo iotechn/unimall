@@ -104,9 +104,11 @@ public class GoodsServiceImpl implements GoodsService {
             SpuDTO spuDTO = new SpuDTO();
             BeanUtils.copyProperties(item, spuDTO);
             Map<String, String> hashAll = cacheComponent.getHashAll(CA_SPU_SALES_HASH);
-            String salesStr = hashAll.get("S" + item.getId());
-            if (!StringUtils.isEmpty(salesStr)) {
-                spuDTO.setSales(new Integer(salesStr));
+            if (hashAll != null) {
+                String salesStr = hashAll.get("S" + item.getId());
+                if (!StringUtils.isEmpty(salesStr)) {
+                    spuDTO.setSales(new Integer(salesStr));
+                }
             }
             spuDTOList.add(spuDTO);
         });

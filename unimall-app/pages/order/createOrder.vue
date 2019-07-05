@@ -97,14 +97,14 @@
 							<text class="time">有效期至2019-06-30</text>
 						</view>
 						<view class="right">
-							<text class="price">{{item.price}}</text>
-							<text>满30可用</text>
+							<text class="price">{{item.discount | priceFormat}}</text>
+							<text>满{{item.min | priceFormat}}可用</text>
 						</view>
 
 						<view class="circle l"></view>
 						<view class="circle r"></view>
 					</view>
-					<text class="tips">限新用户使用</text>
+					<text class="tips">{{item.categoryTitle?'限' + item.categoryTitle + '可用': '全品类可用'}}</text>
 				</view>
 			</view>
 		</view>
@@ -150,7 +150,12 @@
 		},
 		onLoad(option) {
 			//商品数据
-			this.skuList = JSON.parse(option.data);
+			const that = this
+			that.skuList = JSON.parse(option.data);
+			
+			that.$api.request('coupon', 'getUserCoupons').then(res => {
+				that.couponList = res.data
+			})
 		},
 		methods: {
 			//显示优惠券面板
