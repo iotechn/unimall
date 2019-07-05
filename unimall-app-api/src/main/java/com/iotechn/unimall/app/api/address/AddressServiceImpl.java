@@ -5,14 +5,12 @@ import com.iotechn.unimall.app.exception.AppExceptionDefinition;
 import com.iotechn.unimall.app.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AddressDO;
-import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.mapper.AddressMapper;
 import com.iotechn.unimall.data.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.rmi.ServerException;
 import java.util.Date;
 import java.util.List;
 
@@ -30,45 +28,97 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public Boolean addAddress(String province, String city, String county, String street, String address, Long userId, String phone, String consignee) throws ServiceException {
-        AddressDO addressDO = new AddressDO(province,city,county,street,address,userId,phone,consignee);
-        System.out.println(phone + " " + consignee);
-        Date now =  new Date();
+    public Boolean addAddress(String province, String city, String county, String street, String address, Integer defaultAddress, Long userId, String phone, String consignee) throws ServiceException {
+        Integer addressNum = addressMapper.selectCount(new EntityWrapper<AddressDO>().eq("user_id", userId));
+        AddressDO addressDO = null;
+        if (addressNum == 0) {
+            addressDO = new AddressDO(province, city, county, street, address, 1, userId, phone, consignee);
+        } else {
+            if (defaultAddress != 0) {
+                AddressDO preDefault = new AddressDO();
+                preDefault.setDefaultAddress(0);
+                if (!(addressMapper.update(preDefault //该用户有地址却没有默认地址，抛出该异常
+                        , new EntityWrapper<AddressDO>()
+                                .eq("user_id", userId)
+                                .eq("default_address", 1)) > 0)) {
+                    throw new AppServiceException(AppExceptionDefinition.ADDRESS_QUERY_FAILED);
+                }
+                addressDO = new AddressDO(province, city, county, street, address, 1, userId, phone, consignee);
+            } else {
+                addressDO = new AddressDO(province, city, county, street, address, 0, userId, phone, consignee);
+            }
+        }
+        Date now = new Date();
         addressDO.setGmtCreate(now);
         addressDO.setGmtUpdate(addressDO.getGmtCreate());
-        return addressMapper.insert(addressDO) > 0;
+        if (addressMapper.insert(addressDO) > 0) {
+            return true;
+        } else {
+            throw new AppServiceException(AppExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
+        }
     }
 
     @Override
     @Transactional
     public Boolean deleteAddress(Long addressId, Long userId) throws ServiceException {
-      return addressMapper.delete(new EntityWrapper<AddressDO>()
-              .eq("id",addressId)
-              .eq("user_id",userId)) > 0;
+        Integer defaultNum = addressMapper.selectCount(new EntityWrapper<AddressDO>()
+                .eq("user_id", userId)
+                .eq("id", addressId)
+                .eq("default_address", 1));
+        if (defaultNum == 0) {
+            return addressMapper.delete(new EntityWrapper<AddressDO>()
+                    .eq("id", addressId)
+                    .eq("user_id", userId)) > 0;
+        } else {
+            if (!(addressMapper.delete(new EntityWrapper<AddressDO>()
+                    .eq("id", addressId)
+                    .eq("user_id", userId)) > 0)) {
+                throw new AppServiceException(AppExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
+            } else {
+                List<AddressDO> addressDOS = addressMapper.selectList(new EntityWrapper<AddressDO>().eq("user_id", userId));
+                if (addressDOS.size() != 0) {
+                    AddressDO addressDO = addressDOS.get(0);
+                    addressDO.setDefaultAddress(1);
+                    return addressMapper.updateById(addressDO) > 0;
+                }
+                return true;
+            }
+        }
     }
 
     @Override
     @Transactional
-    public Boolean updateAddress(Long addressId, String province, String city, String county, String street, String address, Long userId, String phone, String consignee) throws ServiceException {
-        AddressDO addressDO = new AddressDO(province,city,county,street,address,userId,phone,consignee);
-        Date now =  new Date();
+    public Boolean updateAddress(Long addressId, String province, String city, String county, String street, String address, Integer defaultAddress, Long userId, String phone, String consignee) throws ServiceException {
+        AddressDO addressDO = new AddressDO(province, city, county, street, address, defaultAddress, userId, phone, consignee);
+        Date now = new Date();
+        if (defaultAddress != 0) {
+            defaultAddress = 1;
+            List<AddressDO> addressDOS = addressMapper.selectList(new EntityWrapper<AddressDO>().eq("user_id", userId).eq("default_address", 1));
+            if (addressDOS.size() != 0) {
+                AddressDO preDefault = addressDOS.get(0);
+                preDefault.setDefaultAddress(0);
+                addressMapper.updateById(preDefault);
+            }
+        }
+        addressDO.setDefaultAddress(defaultAddress);
         addressDO.setGmtUpdate(now);
-        return addressMapper.update(addressDO,new EntityWrapper<AddressDO>()
-                .eq("id",addressId)
-                .eq("user_id",userId)) > 0;
+        return addressMapper.update(addressDO, new EntityWrapper<AddressDO>()
+                .eq("id", addressId)
+                .eq("user_id", userId)) > 0;
+
     }
 
     @Override
     public List<AddressDO> getAllAddress(Long userId) throws ServiceException {
         return addressMapper.selectList(new EntityWrapper<AddressDO>()
-                .eq("user_id",userId));
+                .eq("user_id", userId));
     }
 
     @Override
     public AddressDO getAddressById(Long userId, Long addressId) throws ServiceException {
         AddressDO addressDO = new AddressDO();
         addressDO.setUserId(userId);
-        addressDO.setUserId(userId);
+        addressDO.setId(addressId);
         return addressMapper.selectOne(addressDO);
     }
 }

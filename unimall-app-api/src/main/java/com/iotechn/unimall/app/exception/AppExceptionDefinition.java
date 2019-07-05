@@ -68,4 +68,10 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition COLLECT_PARAM_CHECK_FAILED  =
             new ServiceExceptionDefinition(15002, "收藏记录传入参数校验失败");
 
+    public static final ServiceExceptionDefinition ADDRESS_QUERY_FAILED  =
+            new ServiceExceptionDefinition(16001, "这是个有地址却没有默认地址的用户");
+
+    public static final ServiceExceptionDefinition ADDRESS_DATABASE_QUERY_FAILED  =
+            new ServiceExceptionDefinition(16001, "执行语句失败");
+
 }

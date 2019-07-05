@@ -95,6 +95,6 @@ public class CollectServiceImpl implements CollectService{
 
     @Override
     public CollectDTO getCollectById(Long userId, Long collectId, Long spuId) throws ServiceException {
-        return null;
+        return collectMapper.getCollectById(userId,collectId,spuId);
     }
 }

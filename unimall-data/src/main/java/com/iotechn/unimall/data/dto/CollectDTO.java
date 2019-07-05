@@ -14,7 +14,6 @@ import java.util.List;
 @Data
 public class CollectDTO extends SuperDTO {
     private Long userId;
-
     private SpuDO spuDO;
 
 }
