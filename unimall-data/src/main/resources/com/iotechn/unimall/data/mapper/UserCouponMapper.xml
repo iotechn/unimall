@@ -21,6 +21,33 @@
         WHERE
             u.coupon_id = c.id
             AND u.user_id = #{userId}
+            AND IS NULL gmt_used
+            AND u.gmt_start &lt; now()
+            AND u.gmt_end &gt; now()
+    </select>
+
+    <select id="getUserCouponById" resultType="com.iotechn.unimall.data.dto.UserCouponDTO">
+        SELECT
+            u.id,
+            u.user_id AS userId,
+            u.coupon_id AS couponId,
+            u.gmt_update AS gmtUpdate,
+            u.gmt_create AS gmtCreate,
+            c.title,
+            c.category_id AS categoryId,
+            y.title AS categoryTitle,
+            c.`min`,
+            c.discount
+        FROM
+            unimall_user_coupon AS u,
+            unimall_coupon AS c
+            LEFT JOIN unimall_category AS y ON c.category_id = y.id
+        WHERE
+            u.id = #{userCouponId}
+            AND u.user_id = #{userId}
+            AND IS NULL gmt_used
+            AND u.gmt_start &lt; now()
+            AND u.gmt_end &gt; now()
     </select>
 
 </mapper>

@@ -222,7 +222,7 @@
 			},
 			//创建订单
 			createOrder(){
-				console.log(this.cartList)
+				//console.log(this.cartList)
 				uni.navigateTo({
 					url: `/pages/order/createOrder?data=${JSON.stringify(this.cartList)}`
 				})

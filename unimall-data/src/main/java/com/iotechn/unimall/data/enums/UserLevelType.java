@@ -3,12 +3,12 @@ package com.iotechn.unimall.data.enums;
 /**
  * Created by rize on 2019/2/13.
  */
-public enum BizType {
-    GOODS(1, "商品"),
-    COMMENT(2, "评价")
+public enum UserLevelType {
+    COMMON(0, "普通会员"),
+    VIP(1, "VIP会员"),
     ;
 
-    BizType(int code, String msg) {
+    UserLevelType(int code, String msg) {
         this.code = code;
         this.msg = msg;
     }

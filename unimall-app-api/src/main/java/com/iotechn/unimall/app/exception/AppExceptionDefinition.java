@@ -39,9 +39,37 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition CART_UPDATE_FAILED =
             new ServiceExceptionDefinition(12001, "购物车更新失败");
 
+    public static final ServiceExceptionDefinition ORDER_UNKNOWN_EXCEPTION =
+            new ServiceExceptionDefinition(13000, "订单系统未知异常");
 
     public static final ServiceExceptionDefinition ORDER_SKU_CANNOT_EMPTY =
             new ServiceExceptionDefinition(13001, "订单商品不能为空");
+
+    public static final ServiceExceptionDefinition ORDER_SYSTEM_BUSY =
+            new ServiceExceptionDefinition(13002, "订单系统繁忙~");
+
+    public static final ServiceExceptionDefinition ORDER_SKU_STOCK_NOT_ENOUGH =
+            new ServiceExceptionDefinition(13003, "商品库存不足～");
+
+    public static final ServiceExceptionDefinition ORDER_SKU_NOT_EXIST =
+            new ServiceExceptionDefinition(13004, "商品并不存在~");
+
+    public static final ServiceExceptionDefinition ORDER_PRICE_MUST_GT_ZERO =
+            new ServiceExceptionDefinition(13005, "订单金额必须大于0");
+
+    public static final ServiceExceptionDefinition ORDER_PRICE_CHECK_FAILED =
+            new ServiceExceptionDefinition(13006, "订单金额校验失败！");
+
+    public static final ServiceExceptionDefinition ORDER_COUPON_NOT_EXIST =
+            new ServiceExceptionDefinition(13007, "优惠券不存在或已使用！");
+
+    public static final ServiceExceptionDefinition ORDER_COUPON_PRICE_NOT_ENOUGH =
+            new ServiceExceptionDefinition(13008, "优惠券金额未达到指定值");
+
+    public static final ServiceExceptionDefinition ORDER_COUPON_DISCOUNT_CHECK_FAILED =
+            new ServiceExceptionDefinition(13009, "订单优惠券金额校验失败");
+
+
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
             new ServiceExceptionDefinition(14001, "优惠券已经领完～");

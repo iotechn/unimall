@@ -6,7 +6,7 @@
         update unimall_coupon set surplus = surplus - 1 where id = #{couponId}
     </update>
 
-    <select id="getUserCouponsCount" resultType="list">
+    <select id="getUserCouponsCount" resultType="com.iotechn.unimall.data.model.KVModel">
         SELECT
             coupon_id,
             count( coupon_id )
