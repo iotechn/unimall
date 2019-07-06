@@ -23,7 +23,7 @@
 				<text class="name">西城小店铺</text>
 			</view> -->
 			<!-- 商品列表 -->
-			<view v-for="(item, index) in orderReqeust.skuList" :key="index" class="g-item">
+			<view v-for="(item, index) in skuList" :key="index" class="g-item">
 				<image :src="item.skuImg?item.skuImg:item.spuImg"></image>
 				<view class="right">
 					<text class="title clamp">{{item.title}}</text>
@@ -44,31 +44,27 @@
 				</view>
 				<text class="cell-tit clamp">优惠券</text>
 				<text class="cell-tip active">
-					{{orderReqeust.coupon?orderReqeust.coupon.title : '选择优惠券'}}
+					选择优惠券
 				</text>
 				<text class="cell-more wanjia wanjia-gengduo-d"></text>
 			</view>
-			<!-- <view class="yt-list-cell b-b">
+			<view class="yt-list-cell b-b">
 				<view class="cell-icon hb">
 					减
 				</view>
 				<text class="cell-tit clamp">商家促销</text>
 				<text class="cell-tip disabled">暂无可用优惠</text>
-			</view> -->
+			</view>
 		</view>
 		<!-- 金额明细 -->
 		<view class="yt-list">
 			<view class="yt-list-cell b-b">
 				<text class="cell-tit clamp">商品金额</text>
-				<text class="cell-tip">￥{{orderReqeust.totalPrice | priceFormat}}</text>
+				<text class="cell-tip">￥179.88</text>
 			</view>
-			<view v-if="orderReqeust.totalOriginalPrice - orderReqeust.totalPrice > 0" class="yt-list-cell b-b">
-				<text class="cell-tit clamp">折扣金额</text>
-				<text class="cell-tip red">-￥{{(orderReqeust.totalOriginalPrice - orderReqeust.totalPrice) | priceFormat}}</text>
-			</view>
-			<view v-if="orderReqeust.coupon" class="yt-list-cell b-b">
-				<text class="cell-tit clamp">优惠券立减</text>
-				<text class="cell-tip red">-￥{{orderReqeust.coupon.discount | priceFormat}}</text>
+			<view class="yt-list-cell b-b">
+				<text class="cell-tit clamp">优惠金额</text>
+				<text class="cell-tip red">-￥35</text>
 			</view>
 			<view class="yt-list-cell b-b">
 				<text class="cell-tit clamp">运费</text>
@@ -85,7 +81,7 @@
 			<view class="price-content">
 				<text>实付款</text>
 				<text class="price-tip">￥</text>
-				<text class="price">{{orderReqeust.totalPrice - (orderReqeust.coupon?orderReqeust.coupon.discount:0) | priceFormat}}</text>
+				<text class="price">475</text>
 			</view>
 			<text class="submit" @click="submit">提交订单</text>
 		</view>
@@ -94,11 +90,11 @@
 		<view class="mask" :class="maskState===0 ? 'none' : maskState===1 ? 'show' : ''" @click="toggleMask">
 			<view class="mask-content" @click.stop.prevent="stopPrevent">
 				<!-- 优惠券页面，仿mt -->
-				<view @click="selectCoupon(item)" v-if="(!item.categoryId && orderReqeust.totalPrice > item.min) || (item.categoryId && skuCategoryPriceMap[item.categoryId] && skuCategoryPriceMap[item.categoryId] > item.min)" class="coupon-item" v-for="(item,index) in couponList" :key="index">
+				<view class="coupon-item" v-for="(item,index) in couponList" :key="index">
 					<view class="con">
 						<view class="left">
 							<text class="title">{{item.title}}</text>
-							<text class="time">有效期至{{item.gmtEnd | dateFormat}}</text>
+							<text class="time">有效期至2019-06-30</text>
 						</view>
 						<view class="right">
 							<text class="price">{{item.discount | priceFormat}}</text>
@@ -117,31 +113,31 @@
 </template>
 
 <script>
-	//import {formatDate} from '@/common/format.js'
 	export default {
 		filters: {
 			priceFormat(price) {
 				return price / 100.0
-			},
-			dateFormat(time) {
-				return 'temp'
-				//return formatDate(new Date(time),'yyyy-MM-dd HH:mm')
 			}
 		},
 		data() {
 			return {
-				orderReqeust: {
-					skuList: [],
-					totalOriginalPrice: 0,
-					totalPrice: 0, //商品折扣（仅算VIP和限时打折）后总价
-					coupon: undefined
-				},
-				skuCategoryPriceMap: {},
+				skuList: [],
 				maskState: 0, //优惠券面板显示状态
 				desc: '', //备注
 				payType: 1, //1微信 2支付宝
-				couponList: [],
-
+				couponList: [{
+						title: '新用户专享优惠券',
+						price: 5,
+					},
+					{
+						title: '庆五一发一波优惠券',
+						price: 10,
+					},
+					{
+						title: '优惠券优惠券优惠券优惠券',
+						price: 15,
+					}
+				],
 				addressData: {
 					name: '许小星',
 					mobile: '13853989563',
@@ -155,26 +151,8 @@
 		onLoad(option) {
 			//商品数据
 			const that = this
-			that.orderReqeust.skuList = JSON.parse(option.data);
-			let totalOriginalPrice = 0
-			let totalPrice = 0
-			let skuCategoryPriceMap = {}
-			that.orderReqeust.skuList.forEach(item => {
-				totalOriginalPrice += item.originalPrice*item.num
-				//TODO 判断用户VIP状态   .. 若是VIP使用VIP价格
-				totalPrice += item.price*item.num
-				//构建category价格Map
-				item.categoryIdList.forEach(catItem => {
-					if (skuCategoryPriceMap[catItem]) {
-						skuCategoryPriceMap[catItem] += item.price*item.num
-					} else {
-						skuCategoryPriceMap[catItem] = item.price
-					}
-				})
-			})
-			that.skuCategoryPriceMap = skuCategoryPriceMap
-			that.orderReqeust.totalOriginalPrice = totalOriginalPrice
-			that.orderReqeust.totalPrice = totalPrice
+			that.skuList = JSON.parse(option.data);
+			
 			that.$api.request('coupon', 'getUserCoupons').then(res => {
 				that.couponList = res.data
 			})
@@ -200,11 +178,7 @@
 					url: '/pages/money/pay'
 				})
 			},
-			selectCoupon(couponItem) {
-				this.orderReqeust.coupon = couponItem
-				this.maskState = 0
-			},
-			stopPrevent() {},
+			stopPrevent() {}
 		}
 	}
 </script>

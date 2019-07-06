@@ -16,7 +16,4 @@ public interface CategoryService {
     @HttpMethod(description = "获取类目列表")
     public List<CategoryDTO> categoryList() throws ServiceException;
 
-    @HttpMethod(description = "获取分类父节点")
-    public List<Long> getCategoryFamily(Long categoryId) throws ServiceException;
-
 }

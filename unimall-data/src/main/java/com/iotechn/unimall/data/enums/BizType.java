@@ -5,7 +5,7 @@ package com.iotechn.unimall.data.enums;
  */
 public enum BizType {
     GOODS(1, "商品"),
-    COMMENT(2, "评价")
+    APPRAISE(2, "评价")
     ;
 
     BizType(int code, String msg) {
