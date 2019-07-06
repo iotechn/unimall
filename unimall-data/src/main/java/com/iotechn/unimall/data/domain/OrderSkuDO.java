@@ -30,9 +30,14 @@ public class OrderSkuDO extends SuperDO {
     private String orderNo;
 
     /**
-     * SKU 标题
+     * SPU 标题
      */
     private String title;
+
+    /**
+     * SKU 标题， 即小规格名称
+     */
+    private String sku_title;
 
     @TableField("bar_code")
     private String barCode;

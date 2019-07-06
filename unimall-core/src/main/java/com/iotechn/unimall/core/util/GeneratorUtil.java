@@ -24,10 +24,10 @@ public class GeneratorUtil {
     }
 
 
-    private static String generateOrderId() {
+    public static String genOrderId(String machineNo, String env) {
         int i = orderIdCount.incrementAndGet() % 1000;
         if (i < 1000)
             i += 1000;
-        return ORDER_ID_FORMAT.format(new Date()) + i;
+        return env + machineNo + ORDER_ID_FORMAT.format(new Date()) + i;
     }
 }

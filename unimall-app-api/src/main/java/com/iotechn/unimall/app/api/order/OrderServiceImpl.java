@@ -4,23 +4,30 @@ import com.iotechn.unimall.app.api.category.CategoryService;
 import com.iotechn.unimall.app.exception.AppExceptionDefinition;
 import com.iotechn.unimall.app.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.OrderDO;
+import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.dto.CouponDTO;
 import com.iotechn.unimall.data.dto.SkuDTO;
 import com.iotechn.unimall.data.dto.UserCouponDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
+import com.iotechn.unimall.data.enums.OrderStatusType;
+import com.iotechn.unimall.data.mapper.OrderMapper;
+import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.mapper.UserCouponMapper;
 import com.iotechn.unimall.data.util.SessionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +49,22 @@ public class OrderServiceImpl implements OrderService {
     private UserCouponMapper userCouponMapper;
 
     @Autowired
+    private OrderMapper orderMapper;
+
+    @Autowired
+    private OrderSkuMapper orderSkuMapper;
+
+    @Autowired
     private CategoryService categoryService;
 
     @Autowired
     private LockComponent lockComponent;
+
+    @Value("${com.iotechn.unimall.machine-no}")
+    private String MACHINE_NO;
+
+    @Value("${com.iotechn.unimall.env}")
+    private String ENV;
 
     @Override
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
@@ -64,8 +83,11 @@ public class OrderServiceImpl implements OrderService {
                 int skuPrice = 0;
                 //稍后用于优惠券作用范围校验
                 Map<Long, Integer> categoryPriceMap = new HashMap<>();
+                //稍后用于插入OrderSku
+                Map<Long, SkuDTO> skuIdDTOMap = new HashMap<>();
                 for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
                     SkuDTO skuDTO = skuMapper.getSkuDTOById(orderRequestSkuDTO.getSkuId());
+                    skuIdDTOMap.put(skuDTO.getId(), skuDTO);
                     if (skuDTO == null) {
                         throw new AppServiceException(AppExceptionDefinition.ORDER_SKU_NOT_EXIST);
                     }
@@ -132,12 +154,35 @@ public class OrderServiceImpl implements OrderService {
                 }
 
                 //TODO 运费
-
                 //参数强校验 END
-
+                //???是否校验actualPrice??强迫校验？
                 int actualPrice = skuPrice - couponPrice;
+                Date now = new Date();
                 OrderDO orderDO = new OrderDO();
+                orderDO.setSkuTotalPrice(skuPrice);
                 orderDO.setChannel(channel);
+                orderDO.setActualPrice(actualPrice);
+                if (couponPrice != 0) {
+                    orderDO.setCouponId(orderRequest.getCoupon().getCouponId());
+                    orderDO.setCouponPrice(couponPrice);
+                }
+                //TODO
+                orderDO.setFreightPrice(0);
+                orderDO.setOrderNo(GeneratorUtil.genOrderId(MACHINE_NO, ENV));
+                orderDO.setUserId(userId);
+                orderDO.setStatus(OrderStatusType.UNPAY.getCode());
+                orderDO.setGmtUpdate(now);
+                orderDO.setGmtCreate(now);
+
+                //TODO 订单收货人信息
+                orderMapper.insert(orderDO);
+
+                //插入OrderSku
+                skuList.forEach(item -> {
+                    SkuDTO skuDTO = skuIdDTOMap.get(item.getSkuId());
+                    OrderSkuDO orderSkuDO = new OrderSkuDO();
+                    orderSkuDO.setBarCode(skuDTO.getBarCode());
+                });
 
 
             } catch (Exception e) {

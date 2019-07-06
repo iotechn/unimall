@@ -74,6 +74,16 @@ public class OrderDO extends SuperDO {
     @TableField("ship_code")
     private String shipCode;
 
+    private String province;
+
+    private String city;
+
+    private String county;
+
+    private String street;
+
+    private String address;
+
     @TableField("gmt_ship")
     private Date gmtShip;
 
