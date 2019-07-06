@@ -10,6 +10,7 @@ import com.iotechn.unimall.data.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -23,16 +24,14 @@ public class AddressServiceImpl implements AddressService {
 
     @Autowired
     private AddressMapper addressMapper;
-    @Autowired
-    private UserMapper userMapper;
 
     @Override
     @Transactional
-    public Boolean addAddress(String province, String city, String county, String street, String address, Integer defaultAddress, Long userId, String phone, String consignee) throws ServiceException {
+    public Boolean addAddress(String province, String city, String county, String address, Integer defaultAddress, Long userId, String phone, String consignee) throws ServiceException {
         Integer addressNum = addressMapper.selectCount(new EntityWrapper<AddressDO>().eq("user_id", userId));
         AddressDO addressDO = null;
         if (addressNum == 0) {
-            addressDO = new AddressDO(province, city, county, street, address, 1, userId, phone, consignee);
+            addressDO = new AddressDO(province, city, county, address, 1, userId, phone, consignee);
         } else {
             if (defaultAddress != 0) {
                 AddressDO preDefault = new AddressDO();
@@ -43,14 +42,14 @@ public class AddressServiceImpl implements AddressService {
                                 .eq("default_address", 1)) > 0)) {
                     throw new AppServiceException(AppExceptionDefinition.ADDRESS_QUERY_FAILED);
                 }
-                addressDO = new AddressDO(province, city, county, street, address, 1, userId, phone, consignee);
+                addressDO = new AddressDO(province, city, county, address, 1, userId, phone, consignee);
             } else {
-                addressDO = new AddressDO(province, city, county, street, address, 0, userId, phone, consignee);
+                addressDO = new AddressDO(province, city, county, address, 0, userId, phone, consignee);
             }
         }
         Date now = new Date();
         addressDO.setGmtCreate(now);
-        addressDO.setGmtUpdate(addressDO.getGmtCreate());
+        addressDO.setGmtUpdate(now);
         if (addressMapper.insert(addressDO) > 0) {
             return true;
         } else {
@@ -88,8 +87,8 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public Boolean updateAddress(Long addressId, String province, String city, String county, String street, String address, Integer defaultAddress, Long userId, String phone, String consignee) throws ServiceException {
-        AddressDO addressDO = new AddressDO(province, city, county, street, address, defaultAddress, userId, phone, consignee);
+    public Boolean updateAddress(Long addressId, String province, String city, String county, String address, Integer defaultAddress, Long userId, String phone, String consignee) throws ServiceException {
+        AddressDO addressDO = new AddressDO(province, city, county, address, defaultAddress, userId, phone, consignee);
         Date now = new Date();
         if (defaultAddress != 0) {
             defaultAddress = 1;
@@ -120,5 +119,25 @@ public class AddressServiceImpl implements AddressService {
         addressDO.setUserId(userId);
         addressDO.setId(addressId);
         return addressMapper.selectOne(addressDO);
+    }
+
+    @Override
+    public AddressDO getDefAddress(Long userId) throws ServiceException {
+        List<AddressDO> addressDOS = addressMapper.selectList(
+                new EntityWrapper<AddressDO>()
+                        .eq("user_id", userId)
+                        .eq("default_address", 1));
+        if (CollectionUtils.isEmpty(addressDOS)) {
+            AddressDO addressDO = new AddressDO();
+            addressDO.setCity("XXX");
+            addressDO.setProvince("XXX");
+            addressDO.setCounty("XXX");
+            addressDO.setAddress("不需要收货地址");
+            addressDO.setConsignee("匿名");
+            addressDO.setPhone("XXXXXXXXXXX");
+            return addressDO;
+        } else {
+            return addressDOS.get(0);
+        }
     }
 }

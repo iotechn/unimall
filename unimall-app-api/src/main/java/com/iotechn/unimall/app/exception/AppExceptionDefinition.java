@@ -69,6 +69,9 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_COUPON_DISCOUNT_CHECK_FAILED =
             new ServiceExceptionDefinition(13009, "订单优惠券金额校验失败");
 
+    public static final ServiceExceptionDefinition ORDER_ADDRESS_NOT_BELONGS_TO_YOU =
+            new ServiceExceptionDefinition(13010, "收货地址不属于您！");
+
 
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =

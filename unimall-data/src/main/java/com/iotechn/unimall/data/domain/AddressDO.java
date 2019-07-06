@@ -23,8 +23,6 @@ public class AddressDO extends SuperDO{
     private String city;
     //行政区/镇
     private String county;
-    //街道
-    private String street;
     //详细地址
     private String address;
     //是否是默认地址

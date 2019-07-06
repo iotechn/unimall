@@ -2,13 +2,13 @@
 	<view class="content b-t">
 		<view class="list b-b" v-for="(item, index) in addressList" :key="index" @click="checkAddress(item)">
 			<view class="wrapper">
+				<view class="u-box">
+					<text class="name">{{item.consignee}}</text>
+					<text class="mobile">{{item.phone}}</text>
+				</view>
 				<view class="address-box">
 					<text v-if="item.default" class="tag">默认</text>
-					<text class="address">{{item.addressName}} {{item.area}}</text>
-				</view>
-				<view class="u-box">
-					<text class="name">{{item.name}}</text>
-					<text class="mobile">{{item.mobile}}</text>
+					<text class="address">{{item.province}} {{item.city}} {{item.county}} {{item.street}} {{item.address}}</text>
 				</view>
 			</view>
 			<text class="yticon icon-bianji" @click.stop="addAddress('edit', item)"></text>
@@ -27,26 +27,12 @@
 			return {
 				source: 0,
 				addressList: [
-					{
-						name: '刘晓晓',
-						mobile: '18666666666',
-						addressName: '贵族皇仕牛排(东城店)',
-						address: '北京市东城区',
-						area: 'B区',
-						default: true
-					},{
-						name: '刘大大',
-						mobile: '18667766666',
-						addressName: '龙回1区12号楼',
-						address: '山东省济南市历城区',
-						area: '西单元302',
-						default: false,
-					}
+					
 				]
 			}
 		},
 		onLoad(option){
-			console.log(option.source);
+			this.refreshList()
 			this.source = option.source;
 		},
 		methods: {
@@ -65,10 +51,10 @@
 			},
 			//添加或修改成功之后回调
 			refreshList(data, type){
-				//添加或修改后事件，这里直接在最前面添加了一条数据，实际应用中直接刷新地址列表即可
-				this.addressList.unshift(data);
-				
-				console.log(data, type);
+				const that = this
+				that.$api.request('address', 'getAllAddress').then(res => {
+					that.addressList = res.data
+				})
 			}
 		}
 	}
@@ -107,13 +93,13 @@
 			line-height: 1;
 		}
 		.address{
-			font-size: 30upx;
-			color: $font-color-dark;
+			font-size: 28upx;
+			color: $font-color-light;
 		}
 	}
 	.u-box{
-		font-size: 28upx;
-		color: $font-color-light;
+		font-size: 30upx;
+		color: $font-color-dark;
 		margin-top: 16upx;
 		.name{
 			margin-right: 30upx;

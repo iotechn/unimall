@@ -80,8 +80,6 @@ public class OrderDO extends SuperDO {
 
     private String county;
 
-    private String street;
-
     private String address;
 
     @TableField("gmt_ship")
