@@ -100,6 +100,9 @@ public class AppExceptionDefinition {
             new ServiceExceptionDefinition(16001, "这是个有地址却没有默认地址的用户");
 
     public static final ServiceExceptionDefinition ADDRESS_DATABASE_QUERY_FAILED  =
-            new ServiceExceptionDefinition(16001, "执行语句失败");
+            new ServiceExceptionDefinition(16002, "执行语句失败");
+
+    public static final ServiceExceptionDefinition APPRAISE_PARAM_CHECK_FAILED  =
+            new ServiceExceptionDefinition(17001, "参数校验失败");
 
 }

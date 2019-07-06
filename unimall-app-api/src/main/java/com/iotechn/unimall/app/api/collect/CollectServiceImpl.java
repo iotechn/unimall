@@ -79,7 +79,7 @@ public class CollectServiceImpl implements CollectService{
         if(size <= 0 || page <= 0){
             throw new AppServiceException(AppExceptionDefinition.COLLECT_PARAM_CHECK_FAILED);
         }
-        if(count % size == 0){
+        if(count % size == 0 && count != 0){
             totalPage = count / size;
         }else {
             totalPage = count / size + 1;
