@@ -20,4 +20,6 @@ public class OrderRequestDTO {
 
     private UserCouponDTO coupon;
 
+    private Long addressId;
+
 }

@@ -23,6 +23,8 @@ public class SkuDTO extends SuperDTO {
 
     private String img;
 
+    private String spuImg;
+
     private Integer originalPrice;
 
     private Integer price;

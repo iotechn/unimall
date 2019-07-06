@@ -23,8 +23,6 @@ public class AddressDO extends SuperDO{
 
     private String county;
 
-    private String street;
-
     private String address;
 
     @TableField("default_address")

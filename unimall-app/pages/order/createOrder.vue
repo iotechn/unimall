@@ -6,10 +6,10 @@
 				<text class="yticon icon-shouhuodizhi"></text>
 				<view class="cen">
 					<view class="top">
-						<text class="name">{{addressData.name}}</text>
-						<text class="mobile">{{addressData.mobile}}</text>
+						<text class="name">{{addressData.consignee}}</text>
+						<text class="mobile">{{addressData.phone}}</text>
 					</view>
-					<text class="address">{{addressData.address}} {{addressData.area}}</text>
+					<text class="address">{{addressData.province}} {{addressData.city}} {{addressData.county}} {{addressData.address}} </text>
 				</view>
 				<text class="yticon icon-you"></text>
 			</view>
@@ -117,7 +117,6 @@
 </template>
 
 <script>
-	//import {formatDate} from '@/common/format.js'
 	export default {
 		filters: {
 			priceFormat(price) {
@@ -143,12 +142,13 @@
 				couponList: [],
 
 				addressData: {
-					name: '许小星',
-					mobile: '13853989563',
-					addressName: '金九大道',
-					address: '山东省济南市历城区',
-					area: '149号',
-					default: false,
+					consignee: '',
+					phone: '',
+					province: '',
+					city: '',
+					county: '',
+					address: '',
+					defaultAddress: false,
 				}
 			}
 		},
@@ -178,6 +178,10 @@
 			that.$api.request('coupon', 'getUserCoupons').then(res => {
 				that.couponList = res.data
 			})
+			
+			that.$api.request('address', 'getDefAddress').then(res => {
+				that.addressData = res.data
+			})
 		},
 		methods: {
 			//显示优惠券面板
@@ -196,9 +200,17 @@
 				this.payType = type;
 			},
 			submit() {
-				uni.redirectTo({
-					url: '/pages/money/pay'
+				const that = this
+				that.$api.request('order', 'takeOrder', {
+					orderRequest : JSON.stringify(that.orderReqeust),
+					channel: 'MINI'
+				}).then(res => {
+					//提交订单成功
+					uni.redirectTo({
+						url: '/pages/money/pay'
+					})
 				})
+				
 			},
 			selectCoupon(couponItem) {
 				this.orderReqeust.coupon = couponItem

@@ -21,7 +21,7 @@
         WHERE
             u.coupon_id = c.id
             AND u.user_id = #{userId}
-            AND IS NULL gmt_used
+            AND u.gmt_used IS NULL
             AND u.gmt_start &lt; now()
             AND u.gmt_end &gt; now()
     </select>
@@ -45,7 +45,7 @@
         WHERE
             u.id = #{userCouponId}
             AND u.user_id = #{userId}
-            AND IS NULL gmt_used
+            AND u.gmt_used IS NULL
             AND u.gmt_start &lt; now()
             AND u.gmt_end &gt; now()
     </select>

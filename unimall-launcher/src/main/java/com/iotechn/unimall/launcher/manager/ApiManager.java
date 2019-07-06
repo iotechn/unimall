@@ -134,6 +134,9 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
                         if (docParameter == null) {
                             logger.info("[Api] 参数未注解:" + method.getName());
                         }
+                        if (httpParam == null) {
+                            logger.info("[Api] 参数未注解");
+                        }
                         docParameter.setName(httpParam.name());
                         docParameter.setDescription(httpParam.description());
                         String typeName = parameter.getType().getTypeName();

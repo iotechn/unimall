@@ -6,6 +6,7 @@ import com.iotechn.unimall.app.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.LockComponent;
+import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.domain.SkuDO;
@@ -15,13 +16,12 @@ import com.iotechn.unimall.data.dto.UserCouponDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.mapper.OrderMapper;
-import com.iotechn.unimall.data.mapper.OrderSkuMapper;
-import com.iotechn.unimall.data.mapper.SkuMapper;
-import com.iotechn.unimall.data.mapper.UserCouponMapper;
+import com.iotechn.unimall.data.enums.UserLevelType;
+import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.util.SessionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -55,6 +55,9 @@ public class OrderServiceImpl implements OrderService {
     private OrderSkuMapper orderSkuMapper;
 
     @Autowired
+    private AddressMapper addressMapper;
+
+    @Autowired
     private CategoryService categoryService;
 
     @Autowired
@@ -70,7 +73,10 @@ public class OrderServiceImpl implements OrderService {
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
         if (lockComponent.tryLock(TAKE_ORDER_LOCK + userId, 20)) {
             //加上乐观锁，防止用户重复提交订单
+
             try {
+                //用户会员等级
+                Integer userLevel = SessionUtil.getUser().getLevel();
                 //参数强校验 START
                 List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
                 if (CollectionUtils.isEmpty(skuList) || orderRequest.getTotalPrice() == null) {
@@ -95,9 +101,8 @@ public class OrderServiceImpl implements OrderService {
                         //TODO 这里存在并发问题
                         throw new AppServiceException(AppExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH);
                     }
-                    Integer level = SessionUtil.getUser().getLevel();
                     int p;
-                    if (level == 1) {
+                    if (userLevel == UserLevelType.VIP.getCode()) {
                         p = skuDTO.getVipPrice() * orderRequestSkuDTO.getNum();
                     } else {
                         p = skuDTO.getPrice() * orderRequestSkuDTO.getNum();
@@ -166,7 +171,7 @@ public class OrderServiceImpl implements OrderService {
                     orderDO.setCouponId(orderRequest.getCoupon().getCouponId());
                     orderDO.setCouponPrice(couponPrice);
                 }
-                //TODO
+                //TODO 运费
                 orderDO.setFreightPrice(0);
                 orderDO.setOrderNo(GeneratorUtil.genOrderId(MACHINE_NO, ENV));
                 orderDO.setUserId(userId);
@@ -174,7 +179,16 @@ public class OrderServiceImpl implements OrderService {
                 orderDO.setGmtUpdate(now);
                 orderDO.setGmtCreate(now);
 
-                //TODO 订单收货人信息
+                if (orderRequest.getAddressId() != null) {
+                    AddressDO addressDO = addressMapper.selectById(orderRequest.getAddressId());
+                    if (!userId.equals(addressDO.getUserId())) {
+                        throw new AppServiceException(AppExceptionDefinition.ORDER_ADDRESS_NOT_BELONGS_TO_YOU);
+                    }
+                    orderDO.setProvince(addressDO.getProvince());
+                    orderDO.setCity(addressDO.getCity());
+                    orderDO.setCounty(addressDO.getCounty());
+                    orderDO.setAddress(addressDO.getAddress());
+                }
                 orderMapper.insert(orderDO);
 
                 //插入OrderSku
@@ -182,8 +196,26 @@ public class OrderServiceImpl implements OrderService {
                     SkuDTO skuDTO = skuIdDTOMap.get(item.getSkuId());
                     OrderSkuDO orderSkuDO = new OrderSkuDO();
                     orderSkuDO.setBarCode(skuDTO.getBarCode());
+                    orderSkuDO.setSkuTitle(skuDTO.getTitle());
+                    orderSkuDO.setTitle(skuDTO.getSpuTitle());
+                    orderSkuDO.setImg(skuDTO.getImg() == null ? skuDTO.getSpuImg() : skuDTO.getImg());
+                    orderSkuDO.setNum(item.getNum());
+                    orderSkuDO.setPrice(skuDTO.getPrice());
+                    if (userLevel == UserLevelType.VIP.getCode()) {
+                        orderSkuDO.setPrice(skuDTO.getVipPrice());
+                    } else {
+                        orderSkuDO.setPrice(skuDTO.getPrice());
+                    }
+                    orderSkuDO.setSkuId(skuDTO.getId());
+                    orderSkuDO.setSpuId(skuDTO.getSpuId());
+                    orderSkuDO.setOrderNo(orderDO.getOrderNo());
+                    orderSkuDO.setOrderId(orderDO.getId());
+                    orderSkuDO.setGmtCreate(now);
+                    orderSkuDO.setGmtUpdate(now);
+                    orderSkuMapper.insert(orderSkuDO);
                 });
 
+                return "ok";
 
             } catch (Exception e) {
                 logger.error("[提交订单] 异常", e);
