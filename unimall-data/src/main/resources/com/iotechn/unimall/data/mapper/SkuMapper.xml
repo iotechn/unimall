@@ -10,6 +10,7 @@
             k.bar_code AS barCode,
             p.category_id AS categoryId,
             k.title,
+            p.title AS spuTitle,
             k.img,
             k.original_price AS originalPrice,
             k.price,
