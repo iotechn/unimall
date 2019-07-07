@@ -6,9 +6,11 @@ import com.iotechn.unimall.admin.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.domain.FreightTemplateDO;
+import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.mapper.FreightTemplateCarriageMapper;
 import com.iotechn.unimall.data.mapper.FreightTemplateMapper;
+import com.iotechn.unimall.data.mapper.SpuMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,9 @@ public class FreightTemplateServiceImpl implements FreightTemplateService{
     @Autowired
     private FreightTemplateCarriageMapper freightTemplateCarriageMapper;
 
+    @Autowired
+    private SpuMapper spuMapper;
+
 
     @Override
     @Transactional
@@ -44,7 +49,7 @@ public class FreightTemplateServiceImpl implements FreightTemplateService{
         Integer judgeSQL = 1;   //用于判断sql是否执行成功
         judgeSQL = freightTemplateMapper.insert(freightTemplateDO); //插入模板主表
         if(!(judgeSQL > 0)){
-            throw  new AdminServiceException(AdminExceptionDefinition.ADMIN_TEMPLATE_INSERT_FAILED);
+            throw  new AdminServiceException(AdminExceptionDefinition.FREIGHT_TEMPLATE_INSERT_FAILED);
         }
         if(freightTemplateCarriageDOList == null || freightTemplateCarriageDOList.size() == 0){
             return true;
@@ -57,7 +62,7 @@ public class FreightTemplateServiceImpl implements FreightTemplateService{
             freightTemplateCarriageDO.setGmtUpdate(freightTemplateCarriageDO.getGmtCreate());
             judgeSQL = freightTemplateCarriageMapper.insert(freightTemplateCarriageDO);
             if(!(judgeSQL > 0)){
-                throw  new AdminServiceException(AdminExceptionDefinition.ADMIN_CARRIAGE_INSERT_FAILED);
+                throw  new AdminServiceException(AdminExceptionDefinition.FREIGHT_CARRIAGE_INSERT_FAILED);
             }
         }
         return true;
@@ -67,10 +72,13 @@ public class FreightTemplateServiceImpl implements FreightTemplateService{
     @Transactional
     public boolean deleteFreightTemplate(Long templateId, Long adminId) throws ServiceException {
         Integer judgeSQL = 1;
+        if(spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("freight_template_id",templateId))>0){
+            throw new AdminServiceException(AdminExceptionDefinition.FREIGHT_SPU_QUERY_HAS);
+        }
         judgeSQL = freightTemplateMapper.delete(new EntityWrapper<FreightTemplateDO>()
                 .eq("id",templateId));
         if(!(judgeSQL > 0)){
-            throw  new AdminServiceException(AdminExceptionDefinition.ADMIN_TEMPLATE_DELETE_FAILED);
+            throw  new AdminServiceException(AdminExceptionDefinition.FREIGHT_TEMPLATE_DELETE_FAILED);
         }
         judgeSQL = freightTemplateCarriageMapper.selectCount(new EntityWrapper<FreightTemplateCarriageDO>().eq("templateId",templateId));
         if(judgeSQL == 0){
@@ -93,7 +101,7 @@ public class FreightTemplateServiceImpl implements FreightTemplateService{
         freightTemplateDO.setGmtUpdate(now);
         Integer judgeSQL = freightTemplateMapper.updateById(freightTemplateDO);
         if(!(judgeSQL > 0)){    //如果主表修改失败
-            throw new AdminServiceException(AdminExceptionDefinition.ADMIN_TEMPLATE_UPDATE_FAILED);
+            throw new AdminServiceException(AdminExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
         }
 
         freightTemplateCarriageMapper.delete(new EntityWrapper<FreightTemplateCarriageDO>().eq("templateId",templateId));
@@ -108,7 +116,7 @@ public class FreightTemplateServiceImpl implements FreightTemplateService{
             freightTemplateCarriageDO.setGmtUpdate(freightTemplateCarriageDO.getGmtCreate());
             judgeSQL = freightTemplateCarriageMapper.insert(freightTemplateCarriageDO);
             if(!(judgeSQL > 0)){
-                throw  new AdminServiceException(AdminExceptionDefinition.ADMIN_CARRIAGE_INSERT_FAILED);
+                throw  new AdminServiceException(AdminExceptionDefinition.FREIGHT_CARRIAGE_INSERT_FAILED);
             }
         }
         return true;
@@ -136,7 +144,7 @@ public class FreightTemplateServiceImpl implements FreightTemplateService{
     public FreightTemplateDTO getTemplateById(Long adminId, Long templateId) throws ServiceException {
         FreightTemplateDO freightTemplateDO = freightTemplateMapper.selectById(templateId);
         if(freightTemplateDO == null){
-            throw  new AdminServiceException(AdminExceptionDefinition.ADMIN_TEMPLATE_QUERY_FAILED);
+            throw  new AdminServiceException(AdminExceptionDefinition.FREIGHT_TEMPLATE_QUERY_FAILED);
         }
 
         //查出副表中其他地区的东西
