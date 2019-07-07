@@ -1,24 +1,26 @@
 package com.iotechn.unimall.app.api.order;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.iotechn.unimall.app.api.category.CategoryService;
 import com.iotechn.unimall.app.exception.AppExceptionDefinition;
 import com.iotechn.unimall.app.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.LockComponent;
-import com.iotechn.unimall.data.domain.AddressDO;
-import com.iotechn.unimall.data.domain.OrderDO;
-import com.iotechn.unimall.data.domain.OrderSkuDO;
-import com.iotechn.unimall.data.domain.SkuDO;
+import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.CouponDTO;
 import com.iotechn.unimall.data.dto.SkuDTO;
 import com.iotechn.unimall.data.dto.UserCouponDTO;
+import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.UserLevelType;
 import com.iotechn.unimall.data.mapper.*;
+import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
+import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -26,11 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by rize on 2019/7/4.
@@ -58,6 +59,9 @@ public class OrderServiceImpl implements OrderService {
     private AddressMapper addressMapper;
 
     @Autowired
+    private CartMapper cartMapper;
+
+    @Autowired
     private CategoryService categoryService;
 
     @Autowired
@@ -73,7 +77,6 @@ public class OrderServiceImpl implements OrderService {
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
         if (lockComponent.tryLock(TAKE_ORDER_LOCK + userId, 20)) {
             //加上乐观锁，防止用户重复提交订单
-
             try {
                 //用户会员等级
                 Integer userLevel = SessionUtil.getUser().getLevel();
@@ -191,6 +194,15 @@ public class OrderServiceImpl implements OrderService {
                 }
                 orderMapper.insert(orderDO);
 
+                //扣除用户优惠券
+                if (orderDO.getCouponId() != null) {
+                    UserCouponDO updateUserCouponDO = new UserCouponDO();
+                    updateUserCouponDO.setId(orderDO.getCouponId());
+                    updateUserCouponDO.setGmtUsed(now);
+                    updateUserCouponDO.setOrderId(orderDO.getId());
+                    userCouponMapper.updateById(updateUserCouponDO);
+                }
+
                 //插入OrderSku
                 skuList.forEach(item -> {
                     SkuDTO skuDTO = skuIdDTOMap.get(item.getSkuId());
@@ -213,7 +225,19 @@ public class OrderServiceImpl implements OrderService {
                     orderSkuDO.setGmtCreate(now);
                     orderSkuDO.setGmtUpdate(now);
                     orderSkuMapper.insert(orderSkuDO);
+
+                    //扣除库存
+                    skuMapper.decSkuStock(item.getSkuId(), item.getNum());
                 });
+
+                if (!StringUtils.isEmpty(orderRequest.getTakeWay())) {
+                    String takeWay = orderRequest.getTakeWay();
+                    if ("cart".equals(takeWay)) {
+                        //扣除购物车
+                        List<Long> skuIds = skuList.stream().map(item -> item.getSkuId()).collect(Collectors.toList());
+                        cartMapper.delete(new EntityWrapper<CartDO>().in("sku_id", skuIds).eq("user_id", userId));
+                    }
+                }
 
                 return "ok";
 
@@ -226,4 +250,20 @@ public class OrderServiceImpl implements OrderService {
         }
         throw new AppServiceException(AppExceptionDefinition.ORDER_SYSTEM_BUSY);
     }
+
+    @Override
+    public Page<OrderDTO> getOrderPage(Integer pageNo, Integer pageSize, Integer status, Long userId) throws ServiceException {
+        List<OrderDTO> orderDTOList = orderMapper.selectOrderPage(status, (pageNo - 1) * pageSize, pageSize, userId);
+        Long count = orderMapper.countOrder(status, (pageNo - 1) * pageSize, pageSize, userId);
+        //封装SKU
+
+        return null;
+    }
+
+    @Override
+    public OrderDTO getOrderDetail(Long orderId, Long userId) throws ServiceException {
+        return null;
+    }
+
+
 }

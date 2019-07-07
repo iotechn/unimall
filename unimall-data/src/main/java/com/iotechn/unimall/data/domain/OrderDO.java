@@ -82,6 +82,8 @@ public class OrderDO extends SuperDO {
 
     private String address;
 
+    private String mono;
+
     @TableField("gmt_ship")
     private Date gmtShip;
 
