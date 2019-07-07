@@ -2,6 +2,9 @@ package com.iotechn.unimall.app.api.order;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
+import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
+import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
 import com.iotechn.unimall.app.exception.AppExceptionDefinition;
 import com.iotechn.unimall.app.exception.AppServiceException;
@@ -65,6 +68,9 @@ public class OrderServiceImpl implements OrderService {
     private CategoryService categoryService;
 
     @Autowired
+    private WxPayService wxPayService;
+
+    @Autowired
     private LockComponent lockComponent;
 
     @Value("${com.iotechn.unimall.machine-no}")
@@ -90,6 +96,7 @@ public class OrderServiceImpl implements OrderService {
                 }
                 //商品价格
                 int skuPrice = 0;
+                int skuOriginalPrice = 0;
                 //稍后用于优惠券作用范围校验
                 Map<Long, Integer> categoryPriceMap = new HashMap<>();
                 //稍后用于插入OrderSku
@@ -111,6 +118,7 @@ public class OrderServiceImpl implements OrderService {
                         p = skuDTO.getPrice() * orderRequestSkuDTO.getNum();
                     }
                     skuPrice += p;
+                    skuOriginalPrice += skuDTO.getOriginalPrice();
                     List<Long> categoryFamily = categoryService.getCategoryFamily(skuDTO.getCategoryId());
                     for (Long cid : categoryFamily) {
                         Integer price = categoryPriceMap.get(cid);
@@ -168,6 +176,7 @@ public class OrderServiceImpl implements OrderService {
                 Date now = new Date();
                 OrderDO orderDO = new OrderDO();
                 orderDO.setSkuTotalPrice(skuPrice);
+                orderDO.setSkuOriginalTotalPrice(skuOriginalPrice);
                 orderDO.setChannel(channel);
                 orderDO.setActualPrice(actualPrice);
                 if (couponPrice != 0) {
@@ -208,10 +217,11 @@ public class OrderServiceImpl implements OrderService {
                     SkuDTO skuDTO = skuIdDTOMap.get(item.getSkuId());
                     OrderSkuDO orderSkuDO = new OrderSkuDO();
                     orderSkuDO.setBarCode(skuDTO.getBarCode());
-                    orderSkuDO.setSkuTitle(skuDTO.getTitle());
-                    orderSkuDO.setTitle(skuDTO.getSpuTitle());
+                    orderSkuDO.setTitle(skuDTO.getTitle());
+                    orderSkuDO.setSpuTitle(skuDTO.getSpuTitle());
                     orderSkuDO.setImg(skuDTO.getImg() == null ? skuDTO.getSpuImg() : skuDTO.getImg());
                     orderSkuDO.setNum(item.getNum());
+                    orderSkuDO.setOriginalPrice(skuDTO.getOriginalPrice());
                     orderSkuDO.setPrice(skuDTO.getPrice());
                     if (userLevel == UserLevelType.VIP.getCode()) {
                         orderSkuDO.setPrice(skuDTO.getVipPrice());
@@ -239,7 +249,7 @@ public class OrderServiceImpl implements OrderService {
                     }
                 }
 
-                return "ok";
+                return orderDO.getOrderNo();
 
             } catch (Exception e) {
                 logger.error("[提交订单] 异常", e);
@@ -256,13 +266,69 @@ public class OrderServiceImpl implements OrderService {
         List<OrderDTO> orderDTOList = orderMapper.selectOrderPage(status, (pageNo - 1) * pageSize, pageSize, userId);
         Long count = orderMapper.countOrder(status, (pageNo - 1) * pageSize, pageSize, userId);
         //封装SKU
-
-        return null;
+        orderDTOList.forEach(item -> {
+            item.setSkuList(orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", item.getId())));
+        });
+        return new Page<>(orderDTOList, pageNo, pageSize, count);
     }
 
     @Override
     public OrderDTO getOrderDetail(Long orderId, Long userId) throws ServiceException {
-        return null;
+        List<OrderDO> orderDOS = orderMapper.selectList(
+                new EntityWrapper<OrderDO>()
+                        .eq("id", orderId)
+                        .eq("user_id", userId));
+
+        if (CollectionUtils.isEmpty(orderDOS)) {
+            throw new AppServiceException(AppExceptionDefinition.ORDER_NOT_EXIST);
+        }
+        OrderDTO orderDTO = new OrderDTO();
+        BeanUtils.copyProperties(orderDOS.get(0), orderDTO);
+        orderDTO.setSkuList(orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", orderId)));
+        return orderDTO;
+    }
+
+
+    public Object wxPrepay(String orderNo, String ip, Long userId) throws ServiceException {
+        OrderDO orderDO = checkOrderExist(orderNo, userId);
+        // 检测订单状态
+        Integer status = orderDO.getStatus();
+        if (status != OrderStatusType.UNPAY.getCode()) {
+            throw new AppServiceException(AppExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+        }
+
+        String openid = SessionUtil.getUser().getMiniOpenId();
+        WxPayMpOrderResult result = null;
+        try {
+            WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
+            orderRequest.setOutTradeNo(orderNo);
+            orderRequest.setOpenid(openid);
+            orderRequest.setBody("订单：" + orderNo);
+            orderRequest.setTotalFee(orderDO.getActualPrice());
+            orderRequest.setSpbillCreateIp(ip);
+            result = wxPayService.createOrder(orderRequest);
+            //缓存prepayID用于后续模版通知
+            String prepayId = result.getPackageValue();
+            prepayId = prepayId.replace("prepay_id=", "");
+//TODO 缓存支付Id            userBizService.setVaildFormIdFromSession(prepayId);
+        } catch (Exception e) {
+            logger.error("[预付款异常]", e);
+            throw new AppServiceException(AppExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+        }
+        return result;
+    }
+
+
+
+    private OrderDO checkOrderExist(String orderNo, Long userId) throws ServiceException {
+        List<OrderDO> orderDOS = orderMapper.selectList(
+                new EntityWrapper<OrderDO>()
+                        .eq("order_no", orderNo)
+                        .eq("user_id", userId));
+        if (CollectionUtils.isEmpty(orderDOS)) {
+            throw new AppServiceException(AppExceptionDefinition.ORDER_NOT_EXIST);
+        }
+        return orderDOS.get(0);
     }
 
 

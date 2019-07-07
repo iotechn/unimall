@@ -62,7 +62,7 @@
 			}
 		},
 		onLoad(){
-			
+			this.$store.commit('logout')
 		},
 		methods: {
 			...mapMutations(['login']),
@@ -95,6 +95,10 @@
 					that.logining = false
 					//将返回的用户信息设置到Store里面
 					that.$store.commit('login',res.data)
+					if (that.$api.prePage().lodaData) {
+						that.$api.prePage().loadData()
+					}
+					
 					uni.navigateBack()
 				})
 			}

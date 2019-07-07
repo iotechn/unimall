@@ -79,6 +79,19 @@
 				<version>1.2.31</version>
 			</dependency>
 
+			<!-- 微信第三方封装Api -->
+			<dependency>
+				<groupId>com.github.binarywang</groupId>
+				<artifactId>weixin-java-pay</artifactId>
+				<version>3.3.0</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>qrcode-utils</artifactId>
+						<groupId>com.github.binarywang</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

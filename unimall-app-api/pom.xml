@@ -31,6 +31,12 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
+		<!-- 微信第三方封装Api -->
+		<dependency>
+			<groupId>com.github.binarywang</groupId>
+			<artifactId>weixin-java-pay</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>

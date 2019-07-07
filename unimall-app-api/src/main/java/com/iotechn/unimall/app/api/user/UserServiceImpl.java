@@ -171,7 +171,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String wechatLogin(String code) throws ServiceException {
+    public UserDTO thirdPartLogin(String platformCode, String raw) throws ServiceException {
         return null;
     }
 

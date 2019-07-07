@@ -50,8 +50,10 @@ public interface UserService {
             @NotNull @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.COOKIE, description = "用户访问Cookie") String accessToken,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
-    @HttpMethod(description = "微信小程序登录")
-    public String wechatLogin(
-            @NotNull @HttpParam(name = "code", type = HttpParamType.COMMON, description = "wx返回的开放Api") String code) throws ServiceException;
+
+    @HttpMethod(description = "第三方登录")
+    public UserDTO thirdPartLogin(
+            @NotNull @HttpParam(name = "platformCode", type = HttpParamType.COMMON, description = "平台代码") String platformCode,
+            @NotNull @HttpParam(name = "raw", type = HttpParamType.COMMON, description = "第三方平台返回的数据") String raw) throws ServiceException;
 
 }

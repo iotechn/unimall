@@ -14,7 +14,7 @@
             unimall_order
         WHERE
             user_id = #{userId}
-            <if test="status != null">
+            <if test="status != null and status != 0">
                 AND `status` = #{status}
             </if>
             LIMIT #{offset}, #{limit}
@@ -26,7 +26,7 @@
             unimall_order
         WHERE
             user_id = #{userId}
-        <if test="status != null">
+        <if test="status != null and status != 0">
             AND `status` = #{status}
         </if>
     </select>

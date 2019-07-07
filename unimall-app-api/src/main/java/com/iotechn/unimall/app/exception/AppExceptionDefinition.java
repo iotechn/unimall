@@ -72,6 +72,12 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_ADDRESS_NOT_BELONGS_TO_YOU =
             new ServiceExceptionDefinition(13010, "收货地址不属于您！");
 
+    public static final ServiceExceptionDefinition ORDER_NOT_EXIST =
+            new ServiceExceptionDefinition(13011, "订单并不存在");
+
+    public static final ServiceExceptionDefinition ORDER_STATUS_NOT_SUPPORT_PAY =
+            new ServiceExceptionDefinition(13012, "订单状态不支持支付");
+
 
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =

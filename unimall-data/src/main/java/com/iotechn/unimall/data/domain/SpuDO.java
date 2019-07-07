@@ -25,6 +25,7 @@ public class SpuDO extends SuperDO {
     /**
      * 会员价格
      */
+    @TableField("vip_price")
     private Integer vipPrice;
 
     /**

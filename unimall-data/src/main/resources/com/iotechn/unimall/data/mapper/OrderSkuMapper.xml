@@ -3,8 +3,4 @@
 <mapper namespace="com.iotechn.unimall.data.mapper.OrderSkuMapper">
 
 
-    <select id="getOrderSkuByOrderId" resultType="com.iotechn.unimall.data.dto.order.OrderSkuDTO">
-
-
-    </select>
 </mapper>
