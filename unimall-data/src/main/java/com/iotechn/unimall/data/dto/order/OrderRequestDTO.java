@@ -14,6 +14,9 @@ public class OrderRequestDTO {
 
     private List<OrderRequestSkuDTO> skuList;
 
+    /**
+     * 商品支付总价
+     */
     private Integer totalPrice;
 
     private Integer totalOriginalPrice;

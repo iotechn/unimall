@@ -201,6 +201,7 @@
 			toggleSpec(e) {
 				if (this.specClass === 'show') {
 					this.specClass = 'hide';
+					
 					setTimeout(() => {
 						this.specClass = 'none';
 						if (this.toggleCallback) {
@@ -210,6 +211,9 @@
 					}, 250);
 				} else if (this.specClass === 'none') {
 					this.specClass = 'show';
+					if (!this.selectedSku.title) {
+						this.selectedSku = this.goods.skuList[0]
+					}
 				}
 			},
 			//选择规格

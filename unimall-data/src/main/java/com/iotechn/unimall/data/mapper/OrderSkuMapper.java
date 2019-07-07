@@ -2,7 +2,6 @@ package com.iotechn.unimall.data.mapper;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
-import com.iotechn.unimall.data.dto.order.OrderSkuDTO;
 
 import java.util.List;
 
@@ -11,6 +10,5 @@ import java.util.List;
  */
 public interface OrderSkuMapper extends BaseMapper<OrderSkuDO> {
 
-    public List<OrderSkuDTO> getOrderSkuByOrderId(Long orderId);
 
 }

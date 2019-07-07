@@ -44,6 +44,7 @@
             LEFT JOIN unimall_category AS y ON c.category_id = y.id
         WHERE
             u.id = #{userCouponId}
+            AND u.coupon_id = c.id
             AND u.user_id = #{userId}
             AND u.gmt_used IS NULL
             AND u.gmt_start &lt; now()

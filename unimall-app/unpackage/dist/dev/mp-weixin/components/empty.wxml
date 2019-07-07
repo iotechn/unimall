@@ -1,1 +1,0 @@
-<view class="empty-content" bind:__l="__l"><image class="empty-content-image" src="{{setSrc}}" mode="aspectFit"></image></view>

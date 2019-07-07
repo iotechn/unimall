@@ -60,13 +60,23 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 				if (res.statusCode === 200) {
 					if (res.data.errno === 0) {
 						resolve(res.data);
-					}  else if (res.data.errno === 10001) {
-						store.commit('logout')
+					} else if (res.data.errno === 10001) {
 						if (failCallback) {
 							failCallback(res.data)
+						} else {
+							uni.showModal({
+								title: '登录提示',
+								content: '您尚未登录，是否立即登录？',
+								showCancel: true,
+								confirmText: '登录',
+								success: () => {
+									uni.navigateTo({
+										url: '/pages/public/login'
+									})
+								}
+							})
 						}
 					} else {
-						
 						if (failCallback) {
 							failCallback(res.data)
 						} else {

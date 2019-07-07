@@ -26,6 +26,9 @@ public class OrderDO extends SuperDO {
 
     private Integer status;
 
+    @TableField("sku_original_total_price")
+    private Integer skuOriginalTotalPrice;
+
     /**
      * 商品总价
      */

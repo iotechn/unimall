@@ -6,13 +6,12 @@ package com.iotechn.unimall.data.enums;
 public enum OrderStatusType {
     UNPAY(10, "未付款"),
     WAIT_STOCK(20, "待出库"),
-    DELIVERING(30, "配送中"),
-    WAIT_CONFIRM(40, "待收货"),
-    WAIT_APPRAISE(50, "待评价"),
-    COMPLETE(60, "已完成"),
-    CANCELING(70, "取消中"),
-    CANCELED(80, "已取消"),
-    CANCELED_SYS(90, "已取消（系统）");
+    WAIT_CONFIRM(30, "待收货"),
+    WAIT_APPRAISE(40, "待评价"),
+    COMPLETE(50, "已完成"),
+    CANCELING(60, "取消中"),
+    CANCELED(70, "已取消"),
+    CANCELED_SYS(80, "已取消（系统）");
 
     OrderStatusType(int code, String msg) {
         this.code = code;

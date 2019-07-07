@@ -37,7 +37,7 @@
 						<view class="item-right">
 							<text class="clamp title">{{item.title}}</text>
 							<text class="attr">{{item.skuTitle}}{{item.num > item.stock?(' (库存不足 剩余:' + item.stock + ')') : ''}}</text>
-							<text class="price">¥{{item.price | priceFormat}}</text>
+							<text class="price"><text v-if="item.originalPrice > item.price" style="text-decoration:line-through">¥{{item.originalPrice | priceFormat}}</text> ¥{{item.price | priceFormat}}</text>
 							<uni-number-box 
 								class="step"
 								:min="1" 
@@ -224,9 +224,8 @@
 			createOrder(){
 				//console.log(this.cartList)
 				uni.navigateTo({
-					url: `/pages/order/createOrder?data=${JSON.stringify(this.cartList)}`
+					url: `/pages/order/createOrder?takeway=cart&data=${JSON.stringify(this.cartList)}`
 				})
-				this.$api.msg('跳转下一页 sendData');
 			}
 		}
 	}

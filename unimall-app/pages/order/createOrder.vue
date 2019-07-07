@@ -29,7 +29,7 @@
 					<text class="title clamp">{{item.title}}</text>
 					<text class="spec">{{item.skuTitle}}</text>
 					<view class="price-box">
-						<text class="price">￥{{item.price | priceFormat}}</text>
+						<text class="price"><text v-if="item.price < item.originalPrice" style="text-decoration:line-through">￥{{item.originalPrice | priceFormat}}</text>￥{{item.price | priceFormat}}</text>
 						<text class="number">x {{item.num}}</text>
 					</view>
 				</view>
@@ -60,7 +60,7 @@
 		<view class="yt-list">
 			<view class="yt-list-cell b-b">
 				<text class="cell-tit clamp">商品金额</text>
-				<text class="cell-tip">￥{{orderReqeust.totalPrice | priceFormat}}</text>
+				<text class="cell-tip">￥{{orderReqeust.totalOriginalPrice | priceFormat}}</text>
 			</view>
 			<view v-if="orderReqeust.totalOriginalPrice - orderReqeust.totalPrice > 0" class="yt-list-cell b-b">
 				<text class="cell-tit clamp">折扣金额</text>
@@ -68,7 +68,7 @@
 			</view>
 			<view v-if="orderReqeust.coupon" class="yt-list-cell b-b">
 				<text class="cell-tit clamp">优惠券立减</text>
-				<text class="cell-tip red">-￥{{orderReqeust.coupon.discount | priceFormat}}</text>
+				<text class="cell-tip red">-￥{{orderReqeust.coupon?orderReqeust.coupon.discount:0 | priceFormat}}</text>
 			</view>
 			<view class="yt-list-cell b-b">
 				<text class="cell-tit clamp">运费</text>
@@ -76,7 +76,7 @@
 			</view>
 			<view class="yt-list-cell desc-cell">
 				<text class="cell-tit clamp">备注</text>
-				<input class="desc" type="text" v-model="desc" placeholder="请填写备注信息" placeholder-class="placeholder" />
+				<input class="desc" type="text" v-model="orderReqeust.mono" placeholder="请填写备注信息" placeholder-class="placeholder" />
 			</view>
 		</view>
 
@@ -133,12 +133,12 @@
 					skuList: [],
 					totalOriginalPrice: 0,
 					totalPrice: 0, //商品折扣（仅算VIP和限时打折）后总价
-					coupon: undefined
+					coupon: undefined,
+					mono: '',
+					takeWay: '',
 				},
 				skuCategoryPriceMap: {},
 				maskState: 0, //优惠券面板显示状态
-				desc: '', //备注
-				payType: 1, //1微信 2支付宝
 				couponList: [],
 
 				addressData: {
@@ -155,6 +155,9 @@
 		onLoad(option) {
 			//商品数据
 			const that = this
+			if (option.takeway) {
+				that.orderReqeust.takeWay = option.takeway
+			}
 			that.orderReqeust.skuList = JSON.parse(option.data);
 			let totalOriginalPrice = 0
 			let totalPrice = 0
@@ -196,18 +199,15 @@
 			numberChange(data) {
 				this.number = data.number;
 			},
-			changePayType(type) {
-				this.payType = type;
-			},
 			submit() {
 				const that = this
 				that.$api.request('order', 'takeOrder', {
 					orderRequest : JSON.stringify(that.orderReqeust),
-					channel: 'MINI'
+					channel: uni.getSystemInfoSync().platform
 				}).then(res => {
 					//提交订单成功
 					uni.redirectTo({
-						url: '/pages/money/pay'
+						url: '/pages/money/pay?orderno='+ res.data + '&price=' + that.orderReqeust.totalPrice
 					})
 				})
 				

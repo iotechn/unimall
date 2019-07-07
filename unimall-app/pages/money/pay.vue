@@ -2,7 +2,7 @@
 	<view class="app">
 		<view class="price-box">
 			<text>支付金额</text>
-			<text class="price">38.88</text>
+			<text class="price">{{price}}</text>
 		</view>
 
 		<view class="pay-type-list">
@@ -18,17 +18,17 @@
 					</radio>
 				</label>
 			</view>
-			<view class="type-item b-b" @click="changePayType(2)">
+			<view class="type-item b-b">
 				<text class="icon yticon icon-alipay"></text>
 				<view class="con">
-					<text class="tit">支付宝支付</text>
+					<text class="tit">支付宝（敬请期待）</text>
 				</view>
 				<label class="radio">
-					<radio value="" color="#fa436a" :checked='payType == 2' />
+					<radio disabled="true" value="" color="#fa436a" :checked='payType == 2' />
 					</radio>
 				</label>
 			</view>
-			<view class="type-item" @click="changePayType(3)">
+			<!-- <view class="type-item" @click="changePayType(3)">
 				<text class="icon yticon icon-erjiye-yucunkuan"></text>
 				<view class="con">
 					<text class="tit">预存款支付</text>
@@ -38,39 +38,64 @@
 					<radio value="" color="#fa436a" :checked='payType == 3' />
 					</radio>
 				</label>
-			</view>
+			</view> -->
 		</view>
-		
+
 		<text class="mix-btn" @click="confirm">确认支付</text>
 	</view>
 </template>
 
 <script>
-
 	export default {
 		data() {
 			return {
 				payType: 1,
-				orderInfo: {}
+				price: 0,
+				orderNo: ''
+
 			};
 		},
 		computed: {
-		
+
 		},
 		onLoad(options) {
-			
+			this.price = options.price
+			this.orderNo = options.orderno
 		},
 
 		methods: {
 			//选择支付方式
 			changePayType(type) {
-				this.payType = type;
+				// this.payType = type;
 			},
 			//确认支付
 			confirm: async function() {
-				uni.redirectTo({
-					url: '/pages/money/paySuccess'
+				const that = this
+				that.$api.request('order', 'wxPrepay', {
+					orderNo : that.orderNo
+				}).then(res => {
+					const payParam = prepayRes.result;
+					uni.requestPayment({
+						timeStamp: payParam.timeStamp,
+						nonceStr: payParam.nonceStr,
+						package: payParam.packageValue,
+						signType: payParam.signType,
+						paySign: payParam.paySign,
+						success: function(res) {
+							console.log("支付过程成功");
+							that.onLoad()
+						},
+						fail: function(res) {
+							console.log("支付过程失败");
+							console.log(res)
+							util.showToast('支付失败')
+						},
+						complete: function(res) {
+							console.log("支付过程结束")
+						}
+					});
 				})
+
 			},
 		}
 	}
@@ -91,11 +116,12 @@
 		font-size: 28upx;
 		color: #909399;
 
-		.price{
+		.price {
 			font-size: 50upx;
 			color: #303133;
 			margin-top: 12upx;
-			&:before{
+
+			&:before {
 				content: '￥';
 				font-size: 40upx;
 			}
@@ -106,8 +132,8 @@
 		margin-top: 20upx;
 		background-color: #fff;
 		padding-left: 60upx;
-		
-		.type-item{
+
+		.type-item {
 			height: 120upx;
 			padding: 20upx 0;
 			display: flex;
@@ -115,28 +141,33 @@
 			align-items: center;
 			padding-right: 60upx;
 			font-size: 30upx;
-			position:relative;
+			position: relative;
 		}
-		
-		.icon{
+
+		.icon {
 			width: 100upx;
 			font-size: 52upx;
 		}
+
 		.icon-erjiye-yucunkuan {
 			color: #fe8e2e;
 		}
+
 		.icon-weixinzhifu {
 			color: #36cb59;
 		}
+
 		.icon-alipay {
 			color: #01aaef;
 		}
-		.tit{
+
+		.tit {
 			font-size: $font-lg;
 			color: $font-color-dark;
 			margin-bottom: 4upx;
 		}
-		.con{
+
+		.con {
 			flex: 1;
 			display: flex;
 			flex-direction: column;
@@ -144,6 +175,7 @@
 			color: $font-color-light;
 		}
 	}
+
 	.mix-btn {
 		display: flex;
 		align-items: center;
@@ -157,5 +189,4 @@
 		border-radius: 10upx;
 		box-shadow: 1px 2px 5px rgba(219, 63, 96, 0.4);
 	}
-
 </style>

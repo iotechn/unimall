@@ -37,4 +37,10 @@ public interface OrderService {
             @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单号") Long orderId,
             @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
+    @HttpMethod(description = "微信小程序预先支付")
+    public Object wxPrepay(
+            @NotNull @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单串号") String orderNo,
+            @HttpParam(name = "ip", type = HttpParamType.IP, description = "ip地址") String ip,
+            @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
+
 }

@@ -1,5 +1,7 @@
 package com.iotechn.unimall.data.dto.order;
 
+import com.iotechn.unimall.data.domain.OrderSkuDO;
+import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.Data;
 
 import java.util.Date;
@@ -9,7 +11,7 @@ import java.util.List;
  * Created by rize on 2019/7/6.
  */
 @Data
-public class OrderDTO {
+public class OrderDTO extends SuperDTO {
 
     /**
      * 用户下单渠道
@@ -22,6 +24,7 @@ public class OrderDTO {
 
     private Integer status;
 
+    private Integer skuOriginalTotalPrice;
     /**
      * 商品总价
      */
@@ -76,6 +79,6 @@ public class OrderDTO {
      */
     private Date gmtConfirm;
 
-    private List<OrderSkuDTO> skuList;
+    private List<OrderSkuDO> skuList;
 
 }

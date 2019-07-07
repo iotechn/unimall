@@ -19,6 +19,7 @@ import com.iotechn.unimall.launcher.model.GatewayResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
@@ -52,6 +53,9 @@ public class ApiController {
     private ApplicationContext applicationContext;
     @Autowired
     private StringRedisTemplate userRedisTemplate;
+
+    @Value("${com.iotechn.unimall.env}")
+    private String ENV;
 
     @RequestMapping(method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
@@ -208,7 +212,12 @@ public class ApiController {
                     }
                 } else if (httpParam.type() == HttpParamType.IP) {
                     //这里根据实际情况来定。 若使用了负载均衡，Ip将会被代理服务器设置到某个Header里面
-                    args[i] = request.getHeader("X-Forwarded-For");
+                    if (ENV.equals("1")) {
+                        //若是开发环境
+                        args[i] = "27.10.60.71";
+                    } else {
+                        args[i] = request.getHeader("X-Forwarded-For");
+                    }
                 } else if (httpParam.type() == HttpParamType.COOKIE) {
                     Cookie[] cookies = request.getCookies();
                     inner: for(Cookie cookie : cookies){
