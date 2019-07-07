@@ -21,7 +21,9 @@ public class AppraiseDO extends SuperDO{
     @TableField("user_id")
     private Long userId;
 
+    //评论内容
     private String content;
+    //评论星数
     private Integer score;
 
 

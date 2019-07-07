@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.AppraiseMapper">
+
+
+    <select id="selectUserAllAppraise" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponsetDTO">
+        select
+            a.id as id,
+            a.gmt_create as gmtCreate,
+            a.gmt_update as gmtUpdate,
+            a.content as content,
+            a.score as score,
+            a.user_id as userId,
+            u.nickname as userNickName,
+            u.avatar_url as userAvatarUrl,
+            a.order_id as orderId,
+            a.spu_id as spuId,
+            a.sku_id as skuId,
+            sk.title as skuTitle,
+            sp.title as spuTitle
+        from
+            unimall_appraise a,
+            unimall_user u,
+            unimall_sku sk,
+            unimall_spu sp
+        where
+            a.user_id = u.id
+            and a.spu_id = sp.id
+            and a.sku_id = sk.id
+            and a.user_id = #{userId}
+        limit #{offset},#{size}
+    </select>
+
+    <select id="selectSpuAllAppraise" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponsetDTO">
+        select
+            a.id as id,
+            a.gmt_create as gmtCreate,
+            a.gmt_update as gmtUpdate,
+            a.content as content,
+            a.score as score,
+            a.user_id as userId,
+            u.nickname as userNickName,
+            u.avatar_url as userAvatarUrl,
+            a.order_id as orderId,
+            a.spu_id as spuId,
+            a.sku_id as skuId,
+            sk.title as skuTitle,
+            sp.title as spuTitle
+        from
+            unimall_appraise a,
+            unimall_user u,
+            unimall_sku sk,
+            unimall_spu sp
+        where
+            a.user_id = u.id
+            and a.spu_id = sp.id
+            and a.sku_id = sk.id
+            and a.spu_id = #{spuId}
+        limit #{offset},#{size}
+    </select>
+
+    <select id="selectOneById" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponsetDTO">
+        select
+            a.id as id,
+            a.gmt_create as gmtCreate,
+            a.gmt_update as gmtUpdate,
+            a.content as content,
+            a.score as score,
+            a.user_id as userId,
+            u.nickname as userNickName,
+            u.avatar_url as userAvatarUrl,
+            a.order_id as orderId,
+            a.spu_id as spuId,
+            a.sku_id as skuId,
+            sk.title as skuTitle,
+            sp.title as spuTitle
+        from
+            unimall_appraise a,
+            unimall_user u,
+            unimall_sku sk,
+            unimall_spu sp
+        where
+            a.user_id = u.id
+            and a.spu_id = sp.id
+            and a.sku_id = sk.id
+            and a.id = #{appraiseId}
+    </select>
+
+</mapper>

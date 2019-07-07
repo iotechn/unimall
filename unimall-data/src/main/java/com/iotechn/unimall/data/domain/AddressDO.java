@@ -17,14 +17,15 @@ import lombok.NoArgsConstructor;
 @TableName("unimall_address")
 public class AddressDO extends SuperDO{
 
+    //省份
     private String province;
-
+    //市/县
     private String city;
-
+    //行政区/镇
     private String county;
-
+    //详细地址
     private String address;
-
+    //是否是默认地址
     @TableField("default_address")
     private Integer defaultAddress;
 
@@ -32,7 +33,7 @@ public class AddressDO extends SuperDO{
     private Long userId;
 
     private String phone;
-
+    //收件人
     private String consignee;
 
 
