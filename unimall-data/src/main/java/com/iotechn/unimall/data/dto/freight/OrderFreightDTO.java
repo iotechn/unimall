@@ -13,5 +13,4 @@ import lombok.Data;
 @Data
 public class OrderFreightDTO extends SuperDTO {
 
-    private
 }

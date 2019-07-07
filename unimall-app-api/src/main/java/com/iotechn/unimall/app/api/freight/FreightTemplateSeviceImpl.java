@@ -1,5 +1,7 @@
 package com.iotechn.unimall.app.api.freight;
 
+import com.iotechn.unimall.app.exception.AppExceptionDefinition;
+import com.iotechn.unimall.app.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +22,9 @@ public class FreightTemplateSeviceImpl implements FreightTemplateService{
 
     @Override
     public Integer getFreightMoney(Long userId, OrderRequestDTO orderRequestDTO) throws ServiceException {
-
-        freightTemplateBizService.getFreightMoney(orderRequestDTO);
-        return null;
+        if(orderRequestDTO == null){
+            throw new AppServiceException(AppExceptionDefinition.Freight_PARAM_CHECK_FAILED);
+        }
+        return freightTemplateBizService.getFreightMoney(orderRequestDTO);
     }
 }
