@@ -108,4 +108,7 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition APPRAISE_PARAM_CHECK_FAILED  =
             new ServiceExceptionDefinition(17001, "参数校验失败");
 
+    public static final ServiceExceptionDefinition APPRAISE_Order_CHECK_FAILED  =
+            new ServiceExceptionDefinition(17002, "当前状态不允许评价");
+
 }

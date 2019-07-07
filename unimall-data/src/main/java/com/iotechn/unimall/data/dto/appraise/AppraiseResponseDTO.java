@@ -14,7 +14,7 @@ import lombok.Data;
 * */
 
 @Data
-public class AppraiseResponsetDTO extends SuperDTO {
+public class AppraiseResponseDTO extends SuperDTO {
 
     private String content;
     private Integer score;
