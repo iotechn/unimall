@@ -10,7 +10,7 @@ import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseDTO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseRequestDTO;
-import com.iotechn.unimall.data.dto.appraise.AppraiseResponsetDTO;
+import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.mapper.AppraiseMapper;
@@ -54,7 +54,7 @@ public class AppraiseServiceImpl implements AppraiseService {
                 .eq("id", appraiseRequestDTO.getOrderId())
                 .eq("user_id", userId));
         if(integer == 0){
-            throw new AppServiceException(AppExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
+            throw new AppServiceException(AppExceptionDefinition.APPRAISE_Order_CHECK_FAILED);
         }
 
         //如果传入评价list中没有数据，就直接转变订单状态发出
@@ -77,6 +77,7 @@ public class AppraiseServiceImpl implements AppraiseService {
 
             AppraiseDO appraiseDO = new AppraiseDO();
             BeanUtils.copyProperties(appraiseDTO,appraiseDO);
+            appraiseDO.setId(null); //防止传入id,导致插入数据库出错
             appraiseDO.setOrderId(appraiseRequestDTO.getOrderId()); //从传入数据取出，不使用DTO中的冗余数据
             appraiseDO.setUserId(userId);
             appraiseDO.setGmtCreate(now);
@@ -123,7 +124,7 @@ public class AppraiseServiceImpl implements AppraiseService {
     }
 
     @Override
-    public Page<AppraiseResponsetDTO> getUserAllAppraise(Long userId, Integer page, Integer size) throws ServiceException {
+    public Page<AppraiseResponseDTO> getUserAllAppraise(Long userId, Integer page, Integer size) throws ServiceException {
         Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("user_id",userId));
         Integer totalPage = 1;
         if(size <= 0 || page <= 0){
@@ -138,18 +139,18 @@ public class AppraiseServiceImpl implements AppraiseService {
             page = totalPage;
         }
         Integer offset = size * (page-1);
-        List<AppraiseResponsetDTO> appraiseResponsetDTOS = appraiseMapper.selectUserAllAppraise(userId,offset,size);
-        for (AppraiseResponsetDTO appraiseResponsetDTO : appraiseResponsetDTOS){
-            appraiseResponsetDTO.setAppraiseImgUrl(getAppraiseImgUrl(appraiseResponsetDTO));
+        List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectUserAllAppraise(userId,offset,size);
+        for (AppraiseResponseDTO appraiseResponseDTO : appraiseResponseDTOS){
+            appraiseResponseDTO.setAppraiseImgUrl(getAppraiseImgUrl(appraiseResponseDTO));
         }
-        Page<AppraiseResponsetDTO> pageination = new Page<>(appraiseResponsetDTOS,page,size,count);
+        Page<AppraiseResponseDTO> pageination = new Page<>(appraiseResponseDTOS,page,size,count);
         return pageination;
     }
 
 
 
     @Override
-    public Page<AppraiseResponsetDTO> getSpuAllAppraise(Long userId, Long spuId, Integer page, Integer size) throws ServiceException {
+    public Page<AppraiseResponseDTO> getSpuAllAppraise(Long userId, Long spuId, Integer page, Integer size) throws ServiceException {
         Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("spu_id",spuId));
         Integer totalPage = 1;
         if(size <= 0 || page <= 0){
@@ -164,29 +165,30 @@ public class AppraiseServiceImpl implements AppraiseService {
             page = totalPage;
         }
         Integer offset = size * (page-1);
-        List<AppraiseResponsetDTO> appraiseResponsetDTOS = appraiseMapper.selectUserAllAppraise(spuId,offset,size);
-        for (AppraiseResponsetDTO appraiseResponsetDTO : appraiseResponsetDTOS){
-            appraiseResponsetDTO.setAppraiseImgUrl(getAppraiseImgUrl(appraiseResponsetDTO));
+        List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectSpuAllAppraise(spuId,offset,size);
+        for (AppraiseResponseDTO appraiseResponseDTO : appraiseResponseDTOS){
+            appraiseResponseDTO.setAppraiseImgUrl(getAppraiseImgUrl(appraiseResponseDTO));
         }
-        Page<AppraiseResponsetDTO> pageination = new Page<>(appraiseResponsetDTOS,page,size,count);
+        Page<AppraiseResponseDTO> pageination = new Page<>(appraiseResponseDTOS,page,size,count);
         return pageination;
     }
 
     @Override
-    public AppraiseResponsetDTO getOneById(Long userId, Long appraiseId) throws ServiceException {
+    public AppraiseResponseDTO getOneById(Long userId, Long appraiseId) throws ServiceException {
 
 
-        AppraiseResponsetDTO appraiseResponsetDO = appraiseMapper.selectOneById(appraiseId);
-        if(appraiseResponsetDO == null){
+        AppraiseResponseDTO appraiseResponseDTO = appraiseMapper.selectOneById(appraiseId);
+        if(appraiseResponseDTO == null){
             throw new AppServiceException(AppExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
         }
+        appraiseResponseDTO.setAppraiseImgUrl(getAppraiseImgUrl(appraiseResponseDTO));
 
-        return appraiseResponsetDO;
+        return appraiseResponseDTO;
     }
 
 
-    public String getAppraiseImgUrl(AppraiseResponsetDTO appraiseResponsetDTO){
-        List<String> imgUrlList = imgMapper.getImgs(BizType.COMMENT.getCode(),appraiseResponsetDTO.getId());
+    public String getAppraiseImgUrl(AppraiseResponseDTO appraiseResponseDTO){
+        List<String> imgUrlList = imgMapper.getImgs(BizType.COMMENT.getCode(), appraiseResponseDTO.getId());
         StringBuffer buffer = new StringBuffer();
         if(imgUrlList != null || imgUrlList.size() != 0){
             for(String imgUrl : imgUrlList){

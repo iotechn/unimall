@@ -3,7 +3,7 @@
 <mapper namespace="com.iotechn.unimall.data.mapper.AppraiseMapper">
 
 
-    <select id="selectUserAllAppraise" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponsetDTO">
+    <select id="selectUserAllAppraise" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
         select
             a.id as id,
             a.gmt_create as gmtCreate,
@@ -31,7 +31,7 @@
         limit #{offset},#{size}
     </select>
 
-    <select id="selectSpuAllAppraise" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponsetDTO">
+    <select id="selectSpuAllAppraise" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
         select
             a.id as id,
             a.gmt_create as gmtCreate,
@@ -59,7 +59,7 @@
         limit #{offset},#{size}
     </select>
 
-    <select id="selectOneById" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponsetDTO">
+    <select id="selectOneById" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
         select
             a.id as id,
             a.gmt_create as gmtCreate,
