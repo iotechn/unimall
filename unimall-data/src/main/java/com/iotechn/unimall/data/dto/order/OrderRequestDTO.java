@@ -22,4 +22,11 @@ public class OrderRequestDTO {
 
     private Long addressId;
 
+    private String mono;
+
+    /**
+     * 购物车 ？ 直接点击购买商品
+     */
+    private String takeWay;
+
 }
