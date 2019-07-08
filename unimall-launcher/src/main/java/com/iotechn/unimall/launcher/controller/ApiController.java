@@ -10,6 +10,7 @@ import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.annotation.param.TextFormat;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.util.SessionUtil;
 import com.iotechn.unimall.launcher.exception.LauncherExceptionDefinition;
@@ -120,11 +121,11 @@ public class ApiController {
                 if (StringUtils.isEmpty(admin)) {
                     throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_ADMIN_NOT_LOGIN);
                 }
-//TODO                AdminDTO adminDTO = JSONObject.parseObject(admin, AdminDTO.class);
-//                SessionUtil.setAdmin(adminDTO);
-//                if (!SessionUtil.hasPerm(permission)) {
-//                    throw new ManagerServiceException(LauncherExceptionDefinition.CLOUD_PERMISSION_DENY);
-//                }
+                AdminDTO adminDTO = JSONObject.parseObject(admin, AdminDTO.class);
+                SessionUtil.setAdmin(adminDTO);
+                if (!SessionUtil.hasPerm(permission)) {
+                    throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_ADMIN_PERMISSION_DENY);
+                }
 
             }
             Object serviceBean = applicationContext.getBean(method.getDeclaringClass());
@@ -200,14 +201,14 @@ public class ApiController {
                     if (!StringUtils.isEmpty(accessToken)) {
                         String userJson = userRedisTemplate.opsForValue().get(Const.ADMIN_REDIS_PREFIX + accessToken);
                         if (!StringUtils.isEmpty(userJson)) {
-//TODO                            AdminDTO adminDTO = JSONObject.parseObject(userJson, AdminDTO.class);
-//                            SessionUtil.setAdmin(adminDTO);
-//                            args[i] = adminDTO.getId();
+                            AdminDTO adminDTO = JSONObject.parseObject(userJson, AdminDTO.class);
+                            SessionUtil.setAdmin(adminDTO);
+                            args[i] = adminDTO.getId();
                             userRedisTemplate.expire(Const.ADMIN_REDIS_PREFIX + accessToken, 30, TimeUnit.MINUTES);
                             continue;
                         }
                     }
-                    if (args[i] == null) {
+                    if (args[i] == null && methodParam.getAnnotation(NotNull.class) != null) {
                         throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_ADMIN_NOT_LOGIN);
                     }
                 } else if (httpParam.type() == HttpParamType.IP) {
@@ -218,19 +219,11 @@ public class ApiController {
                     } else {
                         args[i] = request.getHeader("X-Forwarded-For");
                     }
-                } else if (httpParam.type() == HttpParamType.COOKIE) {
-                    Cookie[] cookies = request.getCookies();
-                    inner: for(Cookie cookie : cookies){
-                        if(httpParam.name().equals(cookie.getName())) {
-                            args[i] = cookie.getValue();
-                            break inner;
-                        }
-                    }
-                    if(args[i] == null){
-                        String[] paramArray = parameterMap.get(httpParam.name());
-                        if(paramArray.length > 0){
-                            args[i] = paramArray[0];
-                        }
+                } else if (httpParam.type() == HttpParamType.HEADER) {
+                    String header = request.getHeader(httpParam.name());
+                    args[i] = header;
+                    if (header == null && methodParam.getAnnotation(NotNull.class) != null) {
+                        throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_PARAM_CHECK_FAILED);
                     }
                 }
             }

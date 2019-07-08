@@ -47,3 +47,8 @@ mvnw.cmd
 
 ###password###
 /unimall-launcher/src/main/resources/application.properties
+
+
+
+###node_modules###
+/unimall-admin/node_modules/
