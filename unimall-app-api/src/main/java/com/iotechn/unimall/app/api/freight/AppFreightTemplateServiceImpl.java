@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
  * Time: 下午7:50
  */
 @Service
-public class FreightTemplateSeviceImpl implements FreightTemplateService{
+public class AppFreightTemplateServiceImpl implements AppFreightTemplateService {
 
     @Autowired
-    private  FreightTemplateBizService freightTemplateBizService;
+    private AppFreightTemplateBizService freightTemplateBizService;
 
     @Override
     public Integer getFreightMoney(Long userId, OrderRequestDTO orderRequestDTO) throws ServiceException {

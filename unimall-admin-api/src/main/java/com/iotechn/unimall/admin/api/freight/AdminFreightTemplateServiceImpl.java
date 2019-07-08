@@ -27,7 +27,7 @@ import java.util.List;
  * Time: 下午4:25
  */
 @Service
-public class FreightTemplateServiceImpl implements FreightTemplateService{
+public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateService {
 
     @Autowired
     private FreightTemplateMapper freightTemplateMapper;

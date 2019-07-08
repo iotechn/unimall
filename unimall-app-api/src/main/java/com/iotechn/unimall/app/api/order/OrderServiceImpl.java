@@ -6,7 +6,7 @@ import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
-import com.iotechn.unimall.app.api.freight.FreightTemplateBizService;
+import com.iotechn.unimall.app.api.freight.AppFreightTemplateBizService;
 import com.iotechn.unimall.app.exception.AppExceptionDefinition;
 import com.iotechn.unimall.app.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -76,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
     private LockComponent lockComponent;
 
     @Autowired
-    private FreightTemplateBizService freightTemplateBizService;
+    private AppFreightTemplateBizService freightTemplateBizService;
 
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;

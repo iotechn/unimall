@@ -19,7 +19,7 @@ import java.util.List;
  * Time: 下午3:37
  */
 @HttpOpenApi(group = "freightTemplate",description = "运费模板")
-public interface FreightTemplateService {
+public interface AdminFreightTemplateService {
 
     @HttpMethod(description = "增加运费模板")
     public boolean addFreightTemplate(@NotNull @HttpParam(name = "templateName",type = HttpParamType.COMMON,description = "模板名称")String templateName

@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Time: 下午7:40
  */
 @HttpOpenApi(group = "freight",description = "运费计算api")
-public interface FreightTemplateService {
+public interface AppFreightTemplateService {
 
     @HttpMethod(description = "得到订单的运费")
     public Integer getFreightMoney(@NotNull @HttpParam(name = "userId",type = HttpParamType.USER_ID,description = "用户ID")Long userId
