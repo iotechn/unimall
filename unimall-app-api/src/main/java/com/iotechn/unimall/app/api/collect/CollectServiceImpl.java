@@ -61,11 +61,10 @@ public class CollectServiceImpl implements CollectService{
 
     @Override
     @Transactional
-    public Boolean deleteCollect(Long userId, Long spuId,Long collectId) throws ServiceException {
+    public Boolean deleteCollect(Long userId, Long spuId) throws ServiceException {
         Integer num = collectMapper.delete(new EntityWrapper<CollectDO>()
                 .eq("user_id",userId)
                 .eq("spu_id",spuId)
-                .eq("id",collectId)
         );
         if(num > 0){
             cacheComponent.removeSetRaw(CA_USER_COLLECT_HASH + userId, spuId + "");
@@ -107,6 +106,10 @@ public class CollectServiceImpl implements CollectService{
         if (!hasKey) {
             //若没有Key，则添加缓存
             List<String> spuIds = collectMapper.getUserCollectSpuIds(userId);
+            if (CollectionUtils.isEmpty(spuIds)) {
+                //redis set不能为空
+                spuIds.add("0");
+            }
             cacheComponent.putSetRawAll(CA_USER_COLLECT_HASH + userId, spuIds.toArray(new String[0]), Const.CACHE_ONE_DAY);
         }
         return cacheComponent.isSetMember(CA_USER_COLLECT_HASH + userId, spuId + "");

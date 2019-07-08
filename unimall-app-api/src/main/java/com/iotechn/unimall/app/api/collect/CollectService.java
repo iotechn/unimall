@@ -27,8 +27,7 @@ public interface CollectService{
 
     @HttpMethod(description = "删除收藏记录")
     public Boolean deleteCollect(@NotNull @HttpParam(name = "userId",type = HttpParamType.USER_ID,description = "用户Id")Long userId
-            ,@NotNull @HttpParam(name="spuId",type = HttpParamType.COMMON,description = "商品ID")Long spuId
-            ,@NotNull @HttpParam(name="collectId",type = HttpParamType.COMMON,description = "收藏记录ID")Long collectId) throws ServiceException;
+            ,@NotNull @HttpParam(name="spuId",type = HttpParamType.COMMON,description = "商品ID")Long spuId) throws ServiceException;
 
     @HttpMethod(description = "查询某一用户收藏记录")
     public Page<CollectDTO> getCollectAll(@NotNull @HttpParam(name = "userId",type = HttpParamType.USER_ID,description = "用户Id")Long userId

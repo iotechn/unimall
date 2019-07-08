@@ -109,11 +109,8 @@
 				<text class="yticon icon-gouwuche"></text>
 				<text>购物车</text>
 			</navigator>
-			<!-- <view class="p-b-btn" :class="{active: favorite}" @click="toFavorite">
-				<text class="yticon icon-shoucang"></text>
-				<text>收藏</text>
-			</view> -->
-			<view class="p-b-btn" @click="toFavorite">
+
+			<view class="p-b-btn" :class="{active: goods.collect}" @click="toFavorite">
 				<text class="yticon icon-shoucang"></text>
 				<text>收藏</text>
 			</view>
@@ -175,7 +172,6 @@
 				goods: {},
 				specClass: 'none',
 				specSelected: [],
-				favorite: true,
 				shareList: [],
 				selectedSku: {},
 				toggleCallback: undefined
@@ -208,7 +204,7 @@
 							this.toggleCallback()
 							this.toggleCallback = undefined
 						}
-					}, 250);
+					}, 150);
 				} else if (this.specClass === 'none') {
 					this.specClass = 'show';
 					if (!this.selectedSku.title) {
@@ -245,7 +241,20 @@
 			},
 			//收藏
 			toFavorite() {
-				this.favorite = !this.favorite;
+				if (goods.collect) {
+					//取消收藏
+					goods.collect = false
+					this.$api.request('collect','deleteCollect', {
+						spuId : goods.id
+					}).then(res => {
+						
+					})
+				} else {
+					//添加收藏
+					this.$api.request('collect','addCollect', {
+						spuId: goods.id
+					})
+				}
 			},
 			buy() {
 				uni.navigateTo({

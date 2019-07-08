@@ -142,8 +142,9 @@ public class CacheComponent {
         stringRedisTemplate.expire(key, expireSec, TimeUnit.SECONDS);
     }
 
-    public void putSetRawAll(String key, String[] set, Integer expireSet) {
+    public void putSetRawAll(String key, String[] set, Integer expireSec) {
         stringRedisTemplate.opsForSet().add(key, set);
+        stringRedisTemplate.expire(key, expireSec, TimeUnit.SECONDS);
     }
 
     public void removeSetRaw(String key, String member) {

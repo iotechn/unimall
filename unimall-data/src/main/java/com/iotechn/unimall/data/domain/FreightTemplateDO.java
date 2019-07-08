@@ -34,13 +34,13 @@ public class FreightTemplateDO extends SuperDO{
     @TableField("default_free_price")
     private Integer defaultFreePrice;
 
-    @TableField("default_first_num)")
+    @TableField("default_first_num")
     private Integer defaultFirstNum;
 
-    @TableField("default_first_money)")
+    @TableField("default_first_money")
     private Integer defaultFirstMoney;
 
-    @TableField("default_continue_num)")
+    @TableField("default_continue_num")
     private Integer defaultContinueNum;
 
     @TableField("default_continue_money")
