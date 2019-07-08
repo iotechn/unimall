@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.FootprintMapper">
+    <select id="getAllFootprint" resultType="com.iotechn.unimall.data.dto.FootprintDTO">
+        SELECT
+        fp.id as id,
+        fp.user_id as userId,
+        fp.spu_id as spuId,
+        sp.price as spuPrice,
+        sp.title as spuTitle,
+        sp.img as spuImg,
+        fp.gmt_create as gmtCreate,
+        fp.gmt_update as gmtUpdate
+        from
+        unimall_footprint as fp,
+        unimall_spu as sp,
+        unimall_user as us
+        where
+        fp.user_id = us.id
+        and fp.spu_id = sp.id
+        and fp.user_id = #{userId}
+        ORDER BY fp.gmt_update
+        limit
+        #{offset},#{size}
+    </select>
+</mapper>
