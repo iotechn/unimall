@@ -126,4 +126,7 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition APPRAISE_Order_CHECK_FAILED  =
             new ServiceExceptionDefinition(17002, "当前状态不允许评价");
 
+    public static final ServiceExceptionDefinition Freight_PARAM_CHECK_FAILED  =
+            new ServiceExceptionDefinition(18001, "大兄弟，你传给计算邮费的信息不对啊！");
+
 }

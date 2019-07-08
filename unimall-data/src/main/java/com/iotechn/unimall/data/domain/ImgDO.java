@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import lombok.Data;
 
+import java.security.KeyStore;
+import java.util.HashMap;
+
 /**
  * Created by rize on 2019/2/13.
  */
@@ -18,5 +21,6 @@ public class ImgDO extends SuperDO {
     private Long bizId;
 
     private String url;
+
 
 }
