@@ -20,6 +20,7 @@
         WHERE
           re.spu_id = sp.id
           and re.recommend_type = #{recommendType}
+        limit #{pageNo},#{pageSize}
     </select>
 
 </mapper>

@@ -2,6 +2,9 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,6 +14,9 @@ import com.baomidou.mybatisplus.annotations.TableName;
  * Time: 下午3:28
  */
 @TableName("unimall_recommend")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RecommendDO extends SuperDO {
 
     @TableField("spu_id")

@@ -3,6 +3,7 @@ package com.iotechn.unimall.data.mapper;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.iotechn.unimall.data.domain.RecommendDO;
 import com.iotechn.unimall.data.dto.RecommendDTO;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -16,5 +17,5 @@ import java.util.List;
 public interface RecommendMapper extends BaseMapper<RecommendDO> {
 
     //根据推荐类型，查找商品信息
-    public List<RecommendDTO> getRecommendByType(Integer recommendType);
+    public List<RecommendDTO> getRecommendByType(@Param("recommendType") Integer recommendType,@Param("pageNo") Integer pageNo,@Param("pageSize") Integer pageSize);
 }

@@ -60,5 +60,15 @@ public class AdminExceptionDefinition {
     public static final ServiceExceptionDefinition FREIGHT_SPU_QUERY_HAS =
             new ServiceExceptionDefinition(51007, "当前仍有商品使用该模板");
 
+    public static final ServiceExceptionDefinition RECOMMEND_SPU_NO_HAS =
+            new ServiceExceptionDefinition(52001, "你要加入推荐的商品不存在");
+    public static final ServiceExceptionDefinition RECOMMEND_ALREADY_HAS =
+            new ServiceExceptionDefinition(52002, "你要加入推荐的商品已推荐");
+    public static final ServiceExceptionDefinition RECOMMEND_SQL_ADD_FAILED =
+            new ServiceExceptionDefinition(52003, "加入推荐数据库失败");
+    public static final ServiceExceptionDefinition RECOMMEND_SQL_DELETE_FAILED =
+            new ServiceExceptionDefinition(52004, "删除推荐数据库失败");
+
+
 
 }

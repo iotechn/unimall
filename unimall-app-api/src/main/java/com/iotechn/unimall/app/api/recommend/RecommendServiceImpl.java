@@ -25,12 +25,12 @@ public class RecommendServiceImpl implements RecommendService {
     private RecommendMapper recommendMapper;
 
     @Override
-    public List<RecommendDTO> getRecommendByType(Integer recommedType) throws ServiceException {
-        List<RecommendDTO> recommendDTOList = cacheComponent.getObjList(RecommendType.RECOMMEND_NAME+Integer.toString(recommedType),RecommendDTO.class);
+    public List<RecommendDTO> getRecommendByType(Integer recommendType,Integer pageNo,Integer pageSize) throws ServiceException {
+        List<RecommendDTO> recommendDTOList = cacheComponent.getObjList(RecommendType.RECOMMEND_NAME+Integer.toString(recommendType),RecommendDTO.class);
         if(CollectionUtils.isEmpty(recommendDTOList)){
-            recommendDTOList = recommendMapper.getRecommendByType(recommedType);
+            recommendDTOList = recommendMapper.getRecommendByType(recommendType,pageNo,pageSize);
             if(!CollectionUtils.isEmpty(recommendDTOList)){
-                cacheComponent.putObj(RecommendType.RECOMMEND_NAME+Integer.toString(recommedType),recommendDTOList,1000);
+                cacheComponent.putObj(RecommendType.RECOMMEND_NAME+Integer.toString(recommendType),recommendDTOList,1000);
             }
         }
         return recommendDTOList;
