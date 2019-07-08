@@ -47,7 +47,7 @@ public interface UserService {
 
     @HttpMethod(description = "用户注销")
     public String logout(
-            @NotNull @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.COOKIE, description = "用户访问Cookie") String accessToken,
+            @NotNull @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "用户访问") String accessToken,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
 

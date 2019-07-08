@@ -3,6 +3,7 @@ package com.iotechn.unimall.app.api.goods;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.iotechn.unimall.app.api.collect.CollectService;
+import com.iotechn.unimall.app.api.freight.FreightTemplateBizService;
 import com.iotechn.unimall.app.api.freight.FreightTemplateService;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -51,6 +52,9 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Autowired
     private CollectService collectService;
+
+    @Autowired
+    private FreightTemplateBizService freightTemplateBizService;
 
     @Autowired
     private CacheComponent cacheComponent;
@@ -154,7 +158,8 @@ public class GoodsServiceImpl implements GoodsService {
         List<SpuAttributeDO> spuAttributeList = spuAttributeMapper.selectList(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));
         spuDTO.setAttributeList(spuAttributeList);
         //获取运费模板
-//TODO        freightTemplateService.get
+        FreightTemplateDTO templateDTO = freightTemplateBizService.getTemplateById(spuDO.getFreightTemplateId());
+        spuDTO.setFreightTemplate(templateDTO);
         //放入缓存
         cacheComponent.putObj(CA_SPU_PREFIX + spuId, spuDTO, Const.CACHE_ONE_DAY);
         packSpuCollectInfo(spuDTOFromCache, userId);

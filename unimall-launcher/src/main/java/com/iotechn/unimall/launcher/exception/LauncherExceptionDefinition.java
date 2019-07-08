@@ -34,4 +34,7 @@ public class LauncherExceptionDefinition {
     public static final ServiceExceptionDefinition LAUNCHER_SYSTEM_BUSY =
             new ServiceExceptionDefinition(10007, "系统繁忙～");
 
+    public static final ServiceExceptionDefinition LAUNCHER_ADMIN_PERMISSION_DENY =
+            new ServiceExceptionDefinition(10008, "管理员权限不足");
+
 }

@@ -144,7 +144,7 @@ public class FreightTemplateBizService {
 
         //查出副表中其他地区的东西
         List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new EntityWrapper<FreightTemplateCarriageDO>()
-                .eq("templateId", freightTemplateDO.getId()));
+                .eq("template_id", freightTemplateDO.getId()));
 
         FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO(freightTemplateDO,freightTemplateCarriageDOList);
         return freightTemplateDTO;
