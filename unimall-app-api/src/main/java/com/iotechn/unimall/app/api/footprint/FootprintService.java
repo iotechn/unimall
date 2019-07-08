@@ -22,10 +22,6 @@ import java.util.List;
 @HttpOpenApi(group = "footprint",description = "足迹")
 public interface FootprintService {
 
-    @HttpMethod(description = "增加或者更新足迹")
-    public boolean addOrUpdateFootprint(@NotNull @HttpParam(name="userId",type = HttpParamType.USER_ID,description = "用户ID")Long userId
-            , @NotNull @HttpParam(name="spuId",type = HttpParamType.COMMON,description = "商品ID")Long spuId)throws ServiceException;
-
     @HttpMethod(description = "删除足迹")
     public boolean deleteFootprint(@NotNull @HttpParam(name="userId",type = HttpParamType.USER_ID,description = "用户ID")Long userId
             ,@NotNull @HttpParam(name="footprintId",type = HttpParamType.COMMON,description = "足迹Id")Long footprintId) throws ServiceException;

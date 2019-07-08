@@ -29,24 +29,6 @@ public class FootprintServiceImpl implements  FootprintService {
     private FootprintMapper footprintMapper;
 
 
-    @Override
-    @Transactional
-    public boolean addOrUpdateFootprint(Long userId, Long spuId) throws ServiceException {
-
-        Date now = new Date();
-        List<FootprintDO> footprintDOList = footprintMapper.selectList(new EntityWrapper<FootprintDO>()
-                .eq("user_id",userId)
-                .eq("spu_id",spuId));
-        if(footprintDOList == null || footprintDOList.size() == 0){
-            FootprintDO footprintDO = new FootprintDO(userId,spuId);
-            footprintDO.setGmtCreate(now);
-            footprintDO.setGmtUpdate(footprintDO.getGmtCreate());
-            return footprintMapper.insert(footprintDO)>0;
-        }
-        FootprintDO footprintDO = footprintDOList.get(0);
-        footprintDO.setGmtUpdate(now);
-        return footprintMapper.updateById(footprintDO) > 0;
-    }
 
     @Override
     @Transactional
