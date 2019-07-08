@@ -51,7 +51,7 @@
             },
             "icons" : {
                 "ios" : {
-                    "appstore" : "/Users/rize/Downloads/logo.png",
+                    "appstore" : "unpackage/res/icons/1024x1024.png",
                     "ipad" : {
                         "app" : "unpackage/res/icons/76x76.png",
                         "app@2x" : "unpackage/res/icons/152x152.png",

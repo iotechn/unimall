@@ -17,7 +17,9 @@
             <if test="status != null and status != 0">
                 AND `status` = #{status}
             </if>
+        ORDER BY id DESC
             LIMIT #{offset}, #{limit}
+
     </select>
     <select id="countOrder" resultType="java.lang.Long">
         SELECT

@@ -35,6 +35,15 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition USER_PHONE_OR_PASSWORD_NOT_CORRECT =
             new ServiceExceptionDefinition(11006, "手机号或密码错误!");
 
+    public static final ServiceExceptionDefinition USER_THIRD_PART_LOGIN_FAILED =
+            new ServiceExceptionDefinition(11007, "用户第三方登录失败");
+
+    public static final ServiceExceptionDefinition USER_THIRD_UNEXPECT_RESPONSE =
+            new ServiceExceptionDefinition(11008, "第三方登录期望之外的错误");
+
+    public static final ServiceExceptionDefinition USER_THIRD_PART_NOT_SUPPORT =
+            new ServiceExceptionDefinition(11009, "未知的第三方登录平台");
+
 
     public static final ServiceExceptionDefinition CART_UPDATE_FAILED =
             new ServiceExceptionDefinition(12001, "购物车更新失败");
