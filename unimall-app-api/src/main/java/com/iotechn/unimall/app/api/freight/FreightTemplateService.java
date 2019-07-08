@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Date: 2019-07-07
  * Time: 下午7:40
  */
-@HttpOpenApi(group = "freightTemplate",description = "运费计算api")
+@HttpOpenApi(group = "freight",description = "运费计算api")
 public interface FreightTemplateService {
 
     @HttpMethod(description = "得到订单的运费")

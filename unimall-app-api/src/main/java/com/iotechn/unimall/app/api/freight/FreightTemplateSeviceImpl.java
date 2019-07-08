@@ -22,9 +22,6 @@ public class FreightTemplateSeviceImpl implements FreightTemplateService{
 
     @Override
     public Integer getFreightMoney(Long userId, OrderRequestDTO orderRequestDTO) throws ServiceException {
-        if(orderRequestDTO == null){
-            throw new AppServiceException(AppExceptionDefinition.FREIGHT_PARAM_CHECK_FAILED);
-        }
         return freightTemplateBizService.getFreightMoney(orderRequestDTO);
     }
 }

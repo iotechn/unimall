@@ -37,7 +37,7 @@
 						<view class="item-right">
 							<text class="clamp title">{{item.title}}</text>
 							<text class="attr">{{item.skuTitle}}{{item.num > item.stock?(' (库存不足 剩余:' + item.stock + ')') : ''}}</text>
-							<text class="price"><text v-if="item.originalPrice > item.price" style="text-decoration:line-through">¥{{item.originalPrice | priceFormat}}</text> ¥{{item.price | priceFormat}}</text>
+							<text class="price"><text v-if="item.originalPrice > item.price" style="text-decoration:line-through">¥{{item.originalPrice / 100.0}}</text> ¥{{item.price / 100.0}}</text>
 							<uni-number-box 
 								class="step"
 								:min="1" 
@@ -64,7 +64,7 @@
 					</view>
 				</view>
 				<view class="total-box">
-					<text class="price">¥{{total | priceFormat}}</text>
+					<text class="price">¥{{total / 100.0}}</text>
 					<text class="coupon">
 						总共
 						<text>{{totalItems}}</text>
@@ -83,11 +83,6 @@
 	} from 'vuex';
 	import uniNumberBox from '@/components/uni-number-box.vue'
 	export default {
-		filters: {
-			priceFormat(price) {
-				return price / 100.0
-			}
-		},
 		components: {
 			uniNumberBox
 		},

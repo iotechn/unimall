@@ -69,10 +69,16 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 								content: '您尚未登录，是否立即登录？',
 								showCancel: true,
 								confirmText: '登录',
-								success: () => {
-									uni.navigateTo({
-										url: '/pages/public/login'
-									})
+								success: (e) => {
+									if (e.confirm) {
+										uni.navigateTo({
+											url: '/pages/public/login'
+										})
+									}
+
+								},
+								fail: () => {
+
 								}
 							})
 						}

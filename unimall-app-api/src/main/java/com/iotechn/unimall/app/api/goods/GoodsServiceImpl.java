@@ -3,6 +3,7 @@ package com.iotechn.unimall.app.api.goods;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.iotechn.unimall.app.api.collect.CollectService;
+import com.iotechn.unimall.app.api.footprint.FootprintBizService;
 import com.iotechn.unimall.app.api.freight.FreightTemplateBizService;
 import com.iotechn.unimall.app.api.freight.FreightTemplateService;
 import com.iotechn.unimall.core.Const;
@@ -55,6 +56,9 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Autowired
     private FreightTemplateBizService freightTemplateBizService;
+
+    @Autowired
+    private FootprintBizService footprintBizService;
 
     @Autowired
     private CacheComponent cacheComponent;
@@ -137,6 +141,9 @@ public class GoodsServiceImpl implements GoodsService {
         SpuDTO spuDTOFromCache = cacheComponent.getObj(CA_SPU_PREFIX + spuId, SpuDTO.class);
         if (spuDTOFromCache != null) {
             packSpuCollectInfo(spuDTOFromCache, userId);
+            if (userId != null) {
+                footprintBizService.addOrUpdateFootprint(userId, spuId);
+            }
             return spuDTOFromCache;
         }
         SpuDO spuDO = spuMapper.selectById(spuId);
@@ -162,7 +169,10 @@ public class GoodsServiceImpl implements GoodsService {
         spuDTO.setFreightTemplate(templateDTO);
         //放入缓存
         cacheComponent.putObj(CA_SPU_PREFIX + spuId, spuDTO, Const.CACHE_ONE_DAY);
-        packSpuCollectInfo(spuDTOFromCache, userId);
+        packSpuCollectInfo(spuDTO, userId);
+        if (userId != null) {
+            footprintBizService.addOrUpdateFootprint(userId, spuId);
+        }
         return spuDTO;
     }
 

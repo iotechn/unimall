@@ -32,4 +32,6 @@ public class OrderRequestDTO {
      */
     private String takeWay;
 
+    private Integer freightPrice;
+
 }

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class CollectServiceImpl implements CollectService{
+public class CollectServiceImpl implements CollectService {
 
 
     @Autowired
@@ -48,10 +48,10 @@ public class CollectServiceImpl implements CollectService{
         List<CollectDO> collectDOS = collectMapper.selectList(new EntityWrapper<CollectDO>()
                 .eq("user_id", userId)
                 .eq("spu_id", spuId));
-        if(CollectionUtils.isEmpty(collectDOS)){
+        if (!CollectionUtils.isEmpty(collectDOS)) {
             throw new AppServiceException(AppExceptionDefinition.COLLECT_ALREADY_EXISTED);
         }
-        CollectDO collectDO = new CollectDO(userId,spuId);
+        CollectDO collectDO = new CollectDO(userId, spuId);
         Date now = new Date();
         collectDO.setGmtCreate(now);
         collectDO.setGmtUpdate(collectDO.getGmtCreate());
@@ -63,10 +63,10 @@ public class CollectServiceImpl implements CollectService{
     @Transactional
     public Boolean deleteCollect(Long userId, Long spuId) throws ServiceException {
         Integer num = collectMapper.delete(new EntityWrapper<CollectDO>()
-                .eq("user_id",userId)
-                .eq("spu_id",spuId)
+                .eq("user_id", userId)
+                .eq("spu_id", spuId)
         );
-        if(num > 0){
+        if (num > 0) {
             cacheComponent.removeSetRaw(CA_USER_COLLECT_HASH + userId, spuId + "");
             return true;
         }
@@ -76,28 +76,28 @@ public class CollectServiceImpl implements CollectService{
 
     @Override
     public Page<CollectDTO> getCollectAll(Long userId, Integer page, Integer size) throws ServiceException {
-        Integer count = collectMapper.countCollect(userId);
+        Integer count = collectMapper.selectCount(new EntityWrapper<CollectDO>().eq("user_id", userId));
         Integer totalPage = 1;
-        if(size <= 0 || page <= 0){
+        if (size <= 0 || page <= 0) {
             throw new AppServiceException(AppExceptionDefinition.COLLECT_PARAM_CHECK_FAILED);
         }
-        if(count % size == 0 && count != 0){
+        if (count % size == 0 && count != 0) {
             totalPage = count / size;
-        }else {
+        } else {
             totalPage = count / size + 1;
         }
-        if(page >= totalPage){
+        if (page >= totalPage) {
             page = totalPage;
         }
-        Integer offset = size * (page-1);
+        Integer offset = size * (page - 1);
         List<CollectDTO> collectAll = collectMapper.getCollectAll(userId, offset, size);
-        Page<CollectDTO> pageination = new Page<CollectDTO>(collectAll,page,size,totalPage);
+        Page<CollectDTO> pageination = new Page<CollectDTO>(collectAll, page, size, count);
         return pageination;
     }
 
     @Override
     public CollectDTO getCollectById(Long userId, Long collectId, Long spuId) throws ServiceException {
-        return collectMapper.getCollectById(userId,collectId,spuId);
+        return collectMapper.getCollectById(userId, collectId, spuId);
     }
 
     @Override

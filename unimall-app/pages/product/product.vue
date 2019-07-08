@@ -54,15 +54,14 @@
 				<text class="con t-r red">领取优惠券</text>
 				<text class="yticon icon-you"></text>
 			</view>
-			<!-- <view class="c-row b-b">
-				<text class="tit">促销活动</text>
+			<view class="c-row b-b">
+				<text class="tit">配送费用</text>
 				<view class="con-list">
-					<text>新人首单送20元无门槛代金券</text>
-					<text>订单满50减10</text>
-					<text>订单满100减30</text>
-					<text>单笔购买满两件免邮费</text>
+					<text>单笔购买满¥{{goods.freightTemplate.freightTemplateDO.defaultFreePrice / 100.0}}元免邮费</text>
+					<text v-if="goods.freightTemplate.freightTemplateDO.defaultContinueMoney > 0">每增加{{goods.freightTemplate.freightTemplateDO.defaultFirstNum}}件，增加运费¥{{goods.freightTemplate.freightTemplateDO.defaultContinueMoney / 100.0}}元</text>
+					<text v-if="goods.freightTemplate.freightTemplateCarriageDOList.length > 0">TODO 特殊情况说明页面</text>
 				</view>
-			</view> -->
+			</view>
 			<view v-for="(item, index) in goods.attributeList" :key="index" class="c-row b-b">
 				<text class="tit">{{item.attribute}}</text>
 				<view class="bz-list con">
@@ -241,18 +240,20 @@
 			},
 			//收藏
 			toFavorite() {
-				if (goods.collect) {
+				const that = this
+				if (that.goods.collect) {
 					//取消收藏
-					goods.collect = false
+					that.goods.collect = false
 					this.$api.request('collect','deleteCollect', {
-						spuId : goods.id
+						spuId : that.goods.id
 					}).then(res => {
 						
 					})
 				} else {
 					//添加收藏
+					that.goods.collect = true
 					this.$api.request('collect','addCollect', {
-						spuId: goods.id
+						spuId: that.goods.id
 					})
 				}
 			},

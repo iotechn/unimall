@@ -29,7 +29,7 @@
 					<text class="title clamp">{{item.title}}</text>
 					<text class="spec">{{item.skuTitle}}</text>
 					<view class="price-box">
-						<text class="price"><text v-if="item.price < item.originalPrice" style="text-decoration:line-through">￥{{item.originalPrice | priceFormat}}</text>￥{{item.price | priceFormat}}</text>
+						<text class="price"><text v-if="item.price < item.originalPrice" style="text-decoration:line-through">￥{{item.originalPrice / 100.0}}</text>￥{{item.price / 100.0}}</text>
 						<text class="number">x {{item.num}}</text>
 					</view>
 				</view>
@@ -60,19 +60,23 @@
 		<view class="yt-list">
 			<view class="yt-list-cell b-b">
 				<text class="cell-tit clamp">商品金额</text>
-				<text class="cell-tip">￥{{orderReqeust.totalOriginalPrice | priceFormat}}</text>
+				<text class="cell-tip">￥{{orderReqeust.totalOriginalPrice / 100.0}}</text>
 			</view>
 			<view v-if="orderReqeust.totalOriginalPrice - orderReqeust.totalPrice > 0" class="yt-list-cell b-b">
 				<text class="cell-tit clamp">折扣金额</text>
-				<text class="cell-tip red">-￥{{(orderReqeust.totalOriginalPrice - orderReqeust.totalPrice) | priceFormat}}</text>
+				<text class="cell-tip red">-￥{{(orderReqeust.totalOriginalPrice - orderReqeust.totalPrice) / 100.0}}</text>
 			</view>
 			<view v-if="orderReqeust.coupon" class="yt-list-cell b-b">
 				<text class="cell-tit clamp">优惠券立减</text>
-				<text class="cell-tip red">-￥{{orderReqeust.coupon?orderReqeust.coupon.discount:0 | priceFormat}}</text>
+				<text class="cell-tip red">-￥{{orderReqeust.coupon.discount / 100.0}}</text>
 			</view>
-			<view class="yt-list-cell b-b">
+			<view v-if="orderReqeust.freightPrice === 0" class="yt-list-cell b-b">
 				<text class="cell-tit clamp">运费</text>
 				<text class="cell-tip">免运费</text>
+			</view>
+			<view v-if="orderReqeust.freightPrice > 0" class="yt-list-cell b-b">
+				<text class="cell-tit clamp">运费</text>
+				<text class="cell-tip">¥ {{orderReqeust.freightPrice / 100.0}}</text>
 			</view>
 			<view class="yt-list-cell desc-cell">
 				<text class="cell-tit clamp">备注</text>
@@ -85,7 +89,7 @@
 			<view class="price-content">
 				<text>实付款</text>
 				<text class="price-tip">￥</text>
-				<text class="price">{{orderReqeust.totalPrice - (orderReqeust.coupon?orderReqeust.coupon.discount:0) | priceFormat}}</text>
+				<text class="price">{{(orderReqeust.totalPrice - (orderReqeust.coupon?orderReqeust.coupon.discount:0) + orderReqeust.freightPrice) / 100.0}}</text>
 			</view>
 			<text class="submit" @click="submit">提交订单</text>
 		</view>
@@ -94,15 +98,15 @@
 		<view class="mask" :class="maskState===0 ? 'none' : maskState===1 ? 'show' : ''" @click="toggleMask">
 			<view class="mask-content" @click.stop.prevent="stopPrevent">
 				<!-- 优惠券页面，仿mt -->
-				<view @click="selectCoupon(item)" v-if="(!item.categoryId && orderReqeust.totalPrice > item.min) || (item.categoryId && skuCategoryPriceMap[item.categoryId] && skuCategoryPriceMap[item.categoryId] > item.min)" class="coupon-item" v-for="(item,index) in couponList" :key="index">
+				<view @click="selectCoupon(item)" v-if="(!item.categoryId && orderReqeust.totalPrice >= item.min) || (item.categoryId && skuCategoryPriceMap[item.categoryId] && skuCategoryPriceMap[item.categoryId] > item.min)" class="coupon-item" v-for="(item,index) in couponList" :key="index">
 					<view class="con">
 						<view class="left">
 							<text class="title">{{item.title}}</text>
-							<text class="time">有效期至{{item.gmtEnd | dateFormat}}</text>
+							<text class="time">有效期至{{item.gmtEnd / 100.0}}</text>
 						</view>
 						<view class="right">
-							<text class="price">{{item.discount | priceFormat}}</text>
-							<text>满{{item.min | priceFormat}}可用</text>
+							<text class="price">{{item.discount / 100.0}}</text>
+							<text>满{{item.min / 100.0}}可用</text>
 						</view>
 
 						<view class="circle l"></view>
@@ -119,9 +123,6 @@
 <script>
 	export default {
 		filters: {
-			priceFormat(price) {
-				return price / 100.0
-			},
 			dateFormat(time) {
 				return 'temp'
 				//return formatDate(new Date(time),'yyyy-MM-dd HH:mm')
@@ -136,6 +137,7 @@
 					coupon: undefined,
 					mono: '',
 					takeWay: '',
+					freightPrice: 0
 				},
 				skuCategoryPriceMap: {},
 				maskState: 0, //优惠券面板显示状态
@@ -184,7 +186,9 @@
 			
 			that.$api.request('address', 'getDefAddress').then(res => {
 				that.addressData = res.data
+				that.calcFreightPrice()
 			})
+
 		},
 		methods: {
 			//显示优惠券面板
@@ -195,6 +199,14 @@
 				setTimeout(() => {
 					this.maskState = state;
 				}, timer)
+			},
+			calcFreightPrice() {
+				const that = this
+				that.$api.request('freight', 'getFreightMoney', {
+					orderRequestDTO: JSON.stringify(that.orderReqeust)
+				}).then(res => {
+					that.orderReqeust.freightPrice = res.data
+				})
 			},
 			numberChange(data) {
 				this.number = data.number;
@@ -215,6 +227,7 @@
 			selectCoupon(couponItem) {
 				this.orderReqeust.coupon = couponItem
 				this.maskState = 0
+				this.calcFreightPrice()
 			},
 			stopPrevent() {},
 		}

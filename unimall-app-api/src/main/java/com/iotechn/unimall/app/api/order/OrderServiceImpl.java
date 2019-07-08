@@ -6,10 +6,12 @@ import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
+import com.iotechn.unimall.app.api.freight.FreightTemplateBizService;
 import com.iotechn.unimall.app.exception.AppExceptionDefinition;
 import com.iotechn.unimall.app.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
+import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.CouponDTO;
@@ -72,6 +74,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private LockComponent lockComponent;
+
+    @Autowired
+    private FreightTemplateBizService freightTemplateBizService;
 
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;
@@ -170,9 +175,10 @@ public class OrderServiceImpl implements OrderService {
                 }
 
                 //TODO 运费
+                Integer freightPrice = freightTemplateBizService.getFreightMoney(orderRequest);
                 //参数强校验 END
                 //???是否校验actualPrice??强迫校验？
-                int actualPrice = skuPrice - couponPrice;
+                int actualPrice = skuPrice - couponPrice - freightPrice;
                 Date now = new Date();
                 OrderDO orderDO = new OrderDO();
                 orderDO.setSkuTotalPrice(skuPrice);
