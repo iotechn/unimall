@@ -123,11 +123,15 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition APPRAISE_PARAM_CHECK_FAILED  =
             new ServiceExceptionDefinition(17001, "参数校验失败");
 
-    public static final ServiceExceptionDefinition APPRAISE_Order_CHECK_FAILED  =
+    public static final ServiceExceptionDefinition APPRAISE_ORDER_CHECK_FAILED  =
             new ServiceExceptionDefinition(17002, "当前状态不允许评价");
 
-    public static final ServiceExceptionDefinition Freight_PARAM_CHECK_FAILED  =
+    public static final ServiceExceptionDefinition FREIGHT_PARAM_CHECK_FAILED  =
             new ServiceExceptionDefinition(18001, "大兄弟，你传给计算邮费的信息不对啊！");
+    public static final ServiceExceptionDefinition FOOTPRINT_DELETE_FAILED  =
+            new ServiceExceptionDefinition(19001, "大兄弟，没有你传的足迹，或者你在误删他人足迹");
+    public static final ServiceExceptionDefinition FOOTPRINT_SELECT_PARAM_CHECK  =
+            new ServiceExceptionDefinition(19002, "大兄弟，不会传分页数据，你就别传！有默认值");
 
 
 

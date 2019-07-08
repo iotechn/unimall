@@ -54,7 +54,7 @@ public class AppraiseServiceImpl implements AppraiseService {
                 .eq("id", appraiseRequestDTO.getOrderId())
                 .eq("user_id", userId));
         if(integer == 0){
-            throw new AppServiceException(AppExceptionDefinition.APPRAISE_Order_CHECK_FAILED);
+            throw new AppServiceException(AppExceptionDefinition.APPRAISE_ORDER_CHECK_FAILED);
         }
 
         //如果传入评价list中没有数据，就直接转变订单状态发出
