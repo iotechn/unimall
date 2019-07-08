@@ -2,7 +2,7 @@
 	<view class="app">
 		<view class="price-box">
 			<text>支付金额</text>
-			<text class="price">{{price}}</text>
+			<text class="price">{{price / 100.0}}</text>
 		</view>
 
 		<view class="pay-type-list">
@@ -73,8 +73,8 @@
 				const that = this
 				that.$api.request('order', 'wxPrepay', {
 					orderNo : that.orderNo
-				}).then(res => {
-					const payParam = prepayRes.result;
+				}).then(prepayRes => {
+					const payParam = prepayRes.data;
 					uni.requestPayment({
 						timeStamp: payParam.timeStamp,
 						nonceStr: payParam.nonceStr,

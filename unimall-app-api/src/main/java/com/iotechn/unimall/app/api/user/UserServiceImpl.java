@@ -13,8 +13,14 @@ import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.mapper.UserMapper;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.apache.commons.codec.digest.Md5Crypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import sun.security.provider.MD5;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -32,6 +39,8 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private static final String VERIFY_CODE_PREFIX = "VERIFY_CODE_";
+
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private UserMapper userMapper;
@@ -44,6 +53,14 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private StringRedisTemplate userRedisTemplate;
+
+    private OkHttpClient okHttpClient = new OkHttpClient();
+
+    @Value("${com.iotechn.unimall.wx.app-id}")
+    private String wxMiNiAppid;
+
+    @Value("${com.iotechn.unimall.wx.app-secret}")
+    private String wxMiNisecret;
 
     @Override
     public String sendVerifyCode(String phone) throws ServiceException {
@@ -171,8 +188,54 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO thirdPartLogin(String platformCode, String raw) throws ServiceException {
-        return null;
+    public UserDTO thirdPartLogin(String platformCode, String ip, String raw) throws ServiceException {
+        try {
+            if ("weixin".equals(platformCode)) {
+                //微信第三方登录
+                JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
+                String code = thirdPartJsonObject.getString("code");
+                String body = okHttpClient.newCall(new Request.Builder()
+                        .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + wxMiNiAppid +
+                                "&secret=" + wxMiNisecret +
+                                "&grant_type=authorization_code&js_code=" + code).get().build()).execute().body().string();
+                JSONObject jsonObject = JSONObject.parseObject(body);
+                Integer errcode = jsonObject.getInteger("errcode");
+                if (errcode == null || errcode == 0) {
+                    String miniOpenId = jsonObject.getString("openid");
+                    List<UserDO> userDOS = userMapper.selectList(new EntityWrapper<UserDO>().eq("mini_open_id", miniOpenId));
+                    UserDO userDO;
+                    if (CollectionUtils.isEmpty(userDOS)) {
+                        //若用户为空，则注册此用户
+                        Date now = new Date();
+                        UserDO newUserDO = new UserDO();
+                        newUserDO.setMiniOpenId(miniOpenId);
+                        newUserDO.setLastLoginIp(ip);
+                        newUserDO.setGmtLastLogin(now);
+                        newUserDO.setGmtUpdate(now);
+                        newUserDO.setGmtCreate(now);
+                        userMapper.insert(newUserDO);
+                        userDO = newUserDO;
+                    } else {
+                        userDO = userDOS.get(0);
+                    }
+                    String accessToken = GeneratorUtil.genSessionId();
+                    UserDTO userDTO = new UserDTO();
+                    BeanUtils.copyProperties(userDO, userDTO);
+                    userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
+                    userDTO.setAccessToken(accessToken);
+                    return userDTO;
+                } else {
+                    throw new AppServiceException(AppExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
+                }
+            } else {
+                throw new AppServiceException(AppExceptionDefinition.USER_THIRD_PART_NOT_SUPPORT);
+            }
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("[用户第三方登录] 异常", e);
+            throw new AppServiceException(AppExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
+        }
     }
 
 

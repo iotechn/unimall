@@ -42,6 +42,7 @@ mvnw.cmd
 /unimall-data/target/
 /unimall-core/target/
 /unimall-launcher/target/
+/unimall-app/unpackage/dist/
 
 
 ###password###

@@ -31,7 +31,7 @@
 								<view class="right">
 									<text class="title clamp">{{skuItem.spuTitle}}</text>
 									<text class="attr-box">{{skuItem.title}} x {{skuItem.num}}</text>
-									<text class="price">{{skuItem.price | price}}</text>
+									<text class="price">{{skuItem.price / 100.0}}</text>
 								</view>
 							</view>
 
@@ -39,7 +39,7 @@
 								共
 								<text class="num">{{item.skuCount}}</text>
 								件商品 实付款
-								<text class="price">{{item.actualPrice | priceFormat}}</text>
+								<text class="price">{{item.actualPrice / 100.0}}</text>
 							</view>
 						</navigator>
 						<view class="action-box b-t" v-if="item.status == 10">
@@ -71,11 +71,7 @@
 	import empty from "@/components/empty";
 	import Json from '@/Json';
 	export default {
-		filters: {
-			priceFormat(price) {
-				return price / 100.0
-			}
-		},
+		
 		components: {
 			uniLoadMore,
 			empty
@@ -172,20 +168,6 @@
 				let orderList = that.$api.request('order', 'getOrderPage', {
 					pageNo: navItem.pageNo,
 					status: navItem.state
-				}, failRes => {
-					if (failRes.errno === 10001) {
-						uni.showModal({
-							title: '登录提示',
-							content: '您尚未登录，是否立即登录？',
-							showCancel: true,
-							confirmText: '登录',
-							success: () => {
-								uni.navigateTo({
-									url: '/pages/public/login'
-								})
-							}
-						})
-					}
 				}).then(res => {
 					navItem.pageNo = res.data.pageNo + 1
 					navItem.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'noMore'

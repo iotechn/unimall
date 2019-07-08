@@ -54,6 +54,7 @@ public interface UserService {
     @HttpMethod(description = "第三方登录")
     public UserDTO thirdPartLogin(
             @NotNull @HttpParam(name = "platformCode", type = HttpParamType.COMMON, description = "平台代码") String platformCode,
+            @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "用户Ip") String ip,
             @NotNull @HttpParam(name = "raw", type = HttpParamType.COMMON, description = "第三方平台返回的数据") String raw) throws ServiceException;
 
 }

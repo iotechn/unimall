@@ -13,6 +13,9 @@ import java.util.Date;
 @TableName("unimall_user")
 public class UserDO extends SuperDO {
 
+    @TableField("mini_open_id")
+    private String miniOpenId;
+
     private String phone;
 
     private String password;

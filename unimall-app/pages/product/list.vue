@@ -23,7 +23,7 @@
 				</view>
 				<text class="title clamp">{{item.title}}</text>
 				<view class="price-box">
-					<text class="price">{{item.price}}</text>
+					<text class="price">{{item.price / 100.0}}</text>
 					<text>已售 {{item.sales?item.sales:0}}</text>
 				</view>
 			</view>
@@ -115,13 +115,15 @@
 					this.loadingType = 'more'
 				}
 
-
 				//TODO 传入排序信息
 				if (this.filterIndex === 1) {
 					//销量排序
 				}
 				if (this.filterIndex === 2) {
 					//价格排序 需要从新获取Page
+				}
+				if (type === 'refresh') {
+					this.pageNo = 1
 				}
 				this.$api.request('goods', 'getGoodsPage', {
 					categoryId: this.cateId,
@@ -132,9 +134,8 @@
 						this.goodsList = [];
 					}
 					this.goodsList = this.goodsList.concat(tempList);
-					this.pageNo = res.data.pageNo
-					//判断是否还有下一页，有是more  没有是nomore(测试数据判断大于20就没有了)
-					this.loadingType = res.data.totalPageNo.length >= res.data.pageNo ? 'nomore' : 'more';
+					this.pageNo = res.data.pageNo + 1
+					this.loadingType = res.data.totalPageNo > res.data.pageNo ? 'more' : 'nomore';
 					if (type === 'refresh') {
 						if (loading == 1) {
 							uni.hideLoading()

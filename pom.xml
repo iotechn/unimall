@@ -30,6 +30,13 @@
 	<dependencyManagement>
 		<dependencies>
 
+			<!-- http客户端 -->
+			<dependency>
+				<groupId>com.squareup.okhttp3</groupId>
+				<artifactId>okhttp</artifactId>
+				<version>3.10.0</version>
+			</dependency>
+
 			<!-- 良心云 sms -->
 			<dependency>
 				<groupId>com.github.qcloudsms</groupId>
