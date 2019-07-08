@@ -129,4 +129,15 @@ public class AppExceptionDefinition {
     public static final ServiceExceptionDefinition Freight_PARAM_CHECK_FAILED  =
             new ServiceExceptionDefinition(18001, "大兄弟，你传给计算邮费的信息不对啊！");
 
+
+
+
+
+
+    public static final ServiceExceptionDefinition FREIGHT_TEMPLATE_NOT_EXIST =
+            new ServiceExceptionDefinition(18002, "运费模版不存在");
+
+    public static final ServiceExceptionDefinition GOODS_NOT_EXIST =
+            new ServiceExceptionDefinition(20001, "商品并不存在");
+
 }

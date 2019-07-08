@@ -21,13 +21,13 @@ public interface CartService {
     public Boolean addCartItem(
             @NotNull @HttpParam(name = "skuId", type = HttpParamType.COMMON, description = "商品Id") Long skuId,
             @Range(min = 1) @HttpParam(name = "num", type = HttpParamType.COMMON, description = "加入数量", valueDef = "1") Integer num,
-            @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
+            @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
     @HttpMethod(description = "减少购物车")
     public Boolean subCartItem(
             @NotNull @HttpParam(name = "skuId", type = HttpParamType.COMMON, description = "商品Id") Long skuId,
             @Range(min = 1) @HttpParam(name = "num", type = HttpParamType.COMMON, description = "加入数量", valueDef = "1") Integer num,
-            @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
+            @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
     @HttpMethod(description = "将购物车商品删除")
     public Boolean removeCartItem(

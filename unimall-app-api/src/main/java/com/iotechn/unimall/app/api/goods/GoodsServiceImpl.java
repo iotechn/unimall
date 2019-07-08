@@ -2,11 +2,14 @@ package com.iotechn.unimall.app.api.goods;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.iotechn.unimall.app.api.collect.CollectService;
+import com.iotechn.unimall.app.api.freight.FreightTemplateService;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.SpuDTO;
+import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.enums.SpuStatusType;
 import com.iotechn.unimall.data.mapper.*;
@@ -45,6 +48,9 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private CollectService collectService;
 
     @Autowired
     private CacheComponent cacheComponent;
@@ -123,9 +129,10 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public SpuDTO getGoods(Long spuId) throws ServiceException {
+    public SpuDTO getGoods(Long spuId, Long userId) throws ServiceException {
         SpuDTO spuDTOFromCache = cacheComponent.getObj(CA_SPU_PREFIX + spuId, SpuDTO.class);
         if (spuDTOFromCache != null) {
+            packSpuCollectInfo(spuDTOFromCache, userId);
             return spuDTOFromCache;
         }
         SpuDO spuDO = spuMapper.selectById(spuId);
@@ -143,11 +150,21 @@ public class GoodsServiceImpl implements GoodsService {
         }
         int sum = skuDOList.stream().mapToInt(item -> item.getStock()).sum();
         spuDTO.setStock(sum);
-
+        //获取商品属性
         List<SpuAttributeDO> spuAttributeList = spuAttributeMapper.selectList(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));
         spuDTO.setAttributeList(spuAttributeList);
+        //获取运费模板
+//TODO        freightTemplateService.get
         //放入缓存
         cacheComponent.putObj(CA_SPU_PREFIX + spuId, spuDTO, Const.CACHE_ONE_DAY);
+        packSpuCollectInfo(spuDTOFromCache, userId);
         return spuDTO;
+    }
+
+    private void packSpuCollectInfo(SpuDTO spuDTO, Long userId) throws ServiceException {
+        if (userId != null) {
+            Boolean collectStatus = collectService.getCollectBySpuId(spuDTO.getId(), userId);
+            spuDTO.setCollect(collectStatus);
+        }
     }
 }

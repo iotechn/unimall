@@ -238,5 +238,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public String syncUserInfo(String nickname, String avatarUrl, Long userId) throws ServiceException {
+        UserDO updateUserDO = new UserDO();
+        updateUserDO.setId(userId);
+        updateUserDO.setNickname(nickname);
+        updateUserDO.setAvatarUrl(avatarUrl);
+        if (userMapper.updateById(updateUserDO) > 0) {
+            return "ok";
+        }
+        throw new AppServiceException(AppExceptionDefinition.USER_UNKNOWN_EXCEPTION);
+    }
+
 
 }

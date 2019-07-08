@@ -54,7 +54,4 @@ public interface FreightTemplateService {
     @HttpMethod(description = "查询所有运费模板")
     public List<FreightTemplateDTO> getAllFreightTemplate(@NotNull @HttpParam(name="adminId",type = HttpParamType.ADMIN_ID,description = "管理员ID")Long adminId)throws ServiceException;
 
-    @HttpMethod(description = "根据ID查询一个运费模板")
-    public FreightTemplateDTO getTemplateById(@NotNull @HttpParam(name="adminId",type = HttpParamType.ADMIN_ID,description = "管理员ID")Long adminId
-            ,@NotNull @HttpParam(name="templateId",type = HttpParamType.COMMON,description = "模板ID")Long templateId)throws ServiceException;
 }

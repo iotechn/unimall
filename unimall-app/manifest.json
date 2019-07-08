@@ -47,7 +47,8 @@
             "ios" : {},
             /* ios打包配置 */
             "sdkConfigs" : {
-                "payment" : {}
+                "payment" : {},
+                "oauth" : {}
             },
             "icons" : {
                 "ios" : {

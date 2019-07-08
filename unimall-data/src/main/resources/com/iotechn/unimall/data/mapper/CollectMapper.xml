@@ -85,4 +85,8 @@
             </if>
     </select>
 
+    <select id="getUserCollectSpuIds" resultType="java.lang.String">
+      SELECT spu_id FROM  unimall_collect WHERE user_id = #{userId}
+    </select>
+
 </mapper>

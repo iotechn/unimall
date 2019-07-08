@@ -16,6 +16,7 @@ import com.iotechn.unimall.data.dto.CollectDTO;
 import com.iotechn.unimall.data.model.Page;
 
 import java.util.List;
+import java.util.Set;
 
 @HttpOpenApi(group = "collect",description = "收藏表单")
 public interface CollectService{
@@ -40,6 +41,8 @@ public interface CollectService{
             ,@NotNull @HttpParam(name="collectId",type = HttpParamType.COMMON,description = "收藏记录id")Long collectId
             ,@HttpParam(name="spuId",type = HttpParamType.COMMON,description = "商品ID")Long spuId) throws  ServiceException;
 
-
+    @HttpMethod(description = "判断用户是否收藏")
+    public Boolean getCollectBySpuId(@NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "商品Id") Long spuId
+            ,@NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
 }

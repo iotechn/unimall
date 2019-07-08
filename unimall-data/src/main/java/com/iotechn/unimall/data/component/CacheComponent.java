@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -112,8 +113,6 @@ public class CacheComponent {
     }
 
 
-
-
     public void putRaw(String key, String value) {
         putRaw(key, value, null);
     }
@@ -132,6 +131,27 @@ public class CacheComponent {
 
     public void del(String key) {
         stringRedisTemplate.delete(key);
+    }
+
+    public boolean hasKey(String key) {
+        return stringRedisTemplate.hasKey(key);
+    }
+
+    public void putSetRaw(String key, String member, Integer expireSec) {
+        stringRedisTemplate.opsForSet().add(key, member);
+        stringRedisTemplate.expire(key, expireSec, TimeUnit.SECONDS);
+    }
+
+    public void putSetRawAll(String key, String[] set, Integer expireSet) {
+        stringRedisTemplate.opsForSet().add(key, set);
+    }
+
+    public void removeSetRaw(String key, String member) {
+        stringRedisTemplate.opsForSet().remove(key, member);
+    }
+
+    public boolean isSetMember(String key, String member) {
+        return stringRedisTemplate.opsForSet().isMember(key, member);
     }
 
 

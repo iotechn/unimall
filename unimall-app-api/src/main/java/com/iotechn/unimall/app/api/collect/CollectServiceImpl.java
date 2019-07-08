@@ -6,54 +6,56 @@ package com.iotechn.unimall.app.api.collect;
 */
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.iotechn.unimall.app.api.goods.GoodsBizService;
 import com.iotechn.unimall.app.exception.AppExceptionDefinition;
 import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CollectDO;
-import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.CollectDTO;
 import com.iotechn.unimall.data.mapper.CollectMapper;
-import com.iotechn.unimall.data.mapper.SpuMapper;
-import com.iotechn.unimall.data.mapper.UserMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CollectServiceImpl implements CollectService{
 
-    @Autowired
-    private UserMapper userMapper;
-
-    @Autowired
-    private SpuMapper spuMapper;
 
     @Autowired
     private CollectMapper collectMapper;
 
+    @Autowired
+    private CacheComponent cacheComponent;
+
+    @Autowired
+    private GoodsBizService goodsBizService;
+
+    private static final String CA_USER_COLLECT_HASH = "CA_USER_COLLECT_";
+
     @Override
     @Transactional
     public Boolean addCollect(Long userId, Long spuId) throws ServiceException {
-        SpuDO spuDO = spuMapper.selectById(spuId);
+        //校验SPU是否存在
+        goodsBizService.getSpuById(spuId);
         List<CollectDO> collectDOS = collectMapper.selectList(new EntityWrapper<CollectDO>()
                 .eq("user_id", userId)
                 .eq("spu_id", spuId));
-        if(spuDO == null){
-            throw new AppServiceException(AppExceptionDefinition.APP_PARAM_CHECK_FAILED);
-        }
-        if(collectDOS != null){
+        if(CollectionUtils.isEmpty(collectDOS)){
             throw new AppServiceException(AppExceptionDefinition.COLLECT_ALREADY_EXISTED);
         }
-
         CollectDO collectDO = new CollectDO(userId,spuId);
         Date now = new Date();
         collectDO.setGmtCreate(now);
         collectDO.setGmtUpdate(collectDO.getGmtCreate());
+        cacheComponent.putSetRaw(CA_USER_COLLECT_HASH + userId, spuId + "", Const.CACHE_ONE_DAY);
         return collectMapper.insert(collectDO) > 0;
     }
 
@@ -66,6 +68,7 @@ public class CollectServiceImpl implements CollectService{
                 .eq("id",collectId)
         );
         if(num > 0){
+            cacheComponent.removeSetRaw(CA_USER_COLLECT_HASH + userId, spuId + "");
             return true;
         }
 
@@ -96,5 +99,16 @@ public class CollectServiceImpl implements CollectService{
     @Override
     public CollectDTO getCollectById(Long userId, Long collectId, Long spuId) throws ServiceException {
         return collectMapper.getCollectById(userId,collectId,spuId);
+    }
+
+    @Override
+    public Boolean getCollectBySpuId(Long spuId, Long userId) throws ServiceException {
+        boolean hasKey = cacheComponent.hasKey(CA_USER_COLLECT_HASH + userId);
+        if (!hasKey) {
+            //若没有Key，则添加缓存
+            List<String> spuIds = collectMapper.getUserCollectSpuIds(userId);
+            cacheComponent.putSetRawAll(CA_USER_COLLECT_HASH + userId, spuIds.toArray(new String[0]), Const.CACHE_ONE_DAY);
+        }
+        return cacheComponent.isSetMember(CA_USER_COLLECT_HASH + userId, spuId + "");
     }
 }

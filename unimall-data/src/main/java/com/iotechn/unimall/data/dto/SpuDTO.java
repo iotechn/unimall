@@ -2,6 +2,7 @@ package com.iotechn.unimall.data.dto;
 
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
+import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -47,6 +48,10 @@ public class SpuDTO extends SuperDTO {
     private List<SpuAttributeDO> attributeList;
 
     private String unit;
+
+    private FreightTemplateDTO freightTemplate;
+
+    private Boolean collect;
 
     private Integer status;
 

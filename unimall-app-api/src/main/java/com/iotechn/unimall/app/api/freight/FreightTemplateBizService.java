@@ -1,6 +1,9 @@
 package com.iotechn.unimall.app.api.freight;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.iotechn.unimall.app.exception.AppExceptionDefinition;
+import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.domain.FreightTemplateDO;
@@ -131,5 +134,19 @@ public class FreightTemplateBizService {
             open = open + freightTemplateDO.getDefaultContinueNum() * (num / freightTemplateDO.getDefaultContinueNum());
         }
         return open;
+    }
+
+    public FreightTemplateDTO getTemplateById(Long templateId) throws ServiceException {
+        FreightTemplateDO freightTemplateDO = freightTemplateMapper.selectById(templateId);
+        if(freightTemplateDO == null){
+            throw new AppServiceException(AppExceptionDefinition.FREIGHT_TEMPLATE_NOT_EXIST);
+        }
+
+        //查出副表中其他地区的东西
+        List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new EntityWrapper<FreightTemplateCarriageDO>()
+                .eq("templateId", freightTemplateDO.getId()));
+
+        FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO(freightTemplateDO,freightTemplateCarriageDOList);
+        return freightTemplateDTO;
     }
 }

@@ -192,7 +192,7 @@ public class ApiController {
                             continue;
                         }
                     }
-                    if (args[i] == null) {
+                    if (args[i] == null && methodParam.getAnnotation(NotNull.class) != null) {
                         throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_USER_NOT_LOGIN);
                     }
                 } else if (httpParam.type() == HttpParamType.ADMIN_ID) {

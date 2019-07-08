@@ -57,4 +57,10 @@ public interface UserService {
             @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "用户Ip") String ip,
             @NotNull @HttpParam(name = "raw", type = HttpParamType.COMMON, description = "第三方平台返回的数据") String raw) throws ServiceException;
 
+    @HttpMethod(description = "同步用户信息")
+    public String syncUserInfo(
+            @NotNull @HttpParam(name = "nickname", type = HttpParamType.COMMON, description = "用户昵称") String nickname,
+            @NotNull @HttpParam(name = "avatarUrl", type = HttpParamType.COMMON, description = "用户头像") String avatarUrl,
+            @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
+
 }

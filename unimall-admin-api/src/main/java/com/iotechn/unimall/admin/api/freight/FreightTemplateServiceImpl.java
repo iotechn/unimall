@@ -140,18 +140,5 @@ public class FreightTemplateServiceImpl implements FreightTemplateService{
         return freightTemplateDTOList;
     }
 
-    @Override
-    public FreightTemplateDTO getTemplateById(Long adminId, Long templateId) throws ServiceException {
-        FreightTemplateDO freightTemplateDO = freightTemplateMapper.selectById(templateId);
-        if(freightTemplateDO == null){
-            throw  new AdminServiceException(AdminExceptionDefinition.FREIGHT_TEMPLATE_QUERY_FAILED);
-        }
 
-        //查出副表中其他地区的东西
-        List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new EntityWrapper<FreightTemplateCarriageDO>()
-                .eq("templateId", freightTemplateDO.getId()));
-
-        FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO(freightTemplateDO,freightTemplateCarriageDOList);
-        return freightTemplateDTO;
-    }
 }
