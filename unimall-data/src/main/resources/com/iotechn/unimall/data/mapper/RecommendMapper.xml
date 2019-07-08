@@ -23,4 +23,24 @@
         limit #{pageNo},#{pageSize}
     </select>
 
+    <select id="getAllRecommend" resultType="com.iotechn.unimall.data.dto.RecommendDTO">
+
+        SELECT
+        re.id as id,
+        re.recommend_type as recommendType,
+        re.spu_id as spuId,
+        sp.original_price  as spuOriginalPrice,
+        sp.price as spuPrice,
+        sp.vip_price as spuVipPrice,
+        sp.sales as spuSales,
+        sp.img as spuImg,
+        sp.category_id as spuCategoryId
+        FROM
+        unimall_recommend re,
+        unimall_spu sp
+        WHERE
+        re.spu_id = sp.id
+        limit #{pageNo},#{pageSize}
+    </select>
+
 </mapper>

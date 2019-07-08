@@ -1,6 +1,7 @@
 package com.iotechn.unimall.data.dto;
 
 import com.iotechn.unimall.data.dto.SuperDTO;
+import lombok.Data;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,6 +10,7 @@ import com.iotechn.unimall.data.dto.SuperDTO;
  * Date: 2019-07-08
  * Time: 下午3:30
  */
+@Data
 public class RecommendDTO extends SuperDTO {
 
     private Integer recommendType;

@@ -5,9 +5,12 @@ import com.iotechn.unimall.core.annotation.HttpOpenApi;
 import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
+import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.RecommendDO;
 import com.iotechn.unimall.data.dto.RecommendDTO;
+import com.iotechn.unimall.data.model.Page;
+import org.apache.ibatis.annotations.Param;
 
 import java.rmi.ServerException;
 import java.util.List;
@@ -21,7 +24,7 @@ import java.util.List;
  */
 
 @HttpOpenApi(group = "recommend", description = "推荐商品")
-public interface RecommendService {
+public interface AdminRecommendService {
 
     @HttpMethod(description = "创建", permission = "promote:recommend:create", permissionParentName = "推广管理", permissionName = "推荐管理")
     public Boolean addRecomend(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
@@ -34,9 +37,14 @@ public interface RecommendService {
                                   @NotNull @HttpParam(name = "recommendType", type = HttpParamType.COMMON, description = "推荐类型") Integer recommendType) throws ServiceException;
 
     @HttpMethod(description = "查询", permission = "promote:recommend:query", permissionParentName = "推广管理", permissionName = "推荐管理")
-    public List<RecommendDTO> queryRecommend(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
+    public Page<RecommendDTO> queryRecommendByType(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
                                              @NotNull @HttpParam(name = "recommendType", type = HttpParamType.COMMON, description = "推荐类型") Integer recommendType,
-                                             @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码",valueDef = "1") Integer pageNo,
-                                             @HttpParam(name = "pageSize", type = HttpParamType.COMMON, description = "页面长度",valueDef = "10")Integer pageSize ) throws ServiceException;
+                                             @Range(min = 1) @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码",valueDef = "1") Integer pageNo,
+                                             @Range(min = 1) @HttpParam(name = "pageSize", type = HttpParamType.COMMON, description = "页面长度",valueDef = "10")Integer pageSize ) throws ServiceException;
+
+    @HttpMethod(description = "查询", permission = "promote:recommend:query", permissionParentName = "推广管理", permissionName = "推荐管理")
+    public Page<RecommendDTO> queryAllRecommend(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
+                                             @Range(min = 1) @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码",valueDef = "1") Integer pageNo,
+                                             @Range(min = 1) @HttpParam(name = "pageSize", type = HttpParamType.COMMON, description = "页面长度",valueDef = "10")Integer pageSize ) throws ServiceException;
 
 }

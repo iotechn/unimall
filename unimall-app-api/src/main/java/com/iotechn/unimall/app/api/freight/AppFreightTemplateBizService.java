@@ -29,7 +29,7 @@ import java.util.ListIterator;
  * Time: 下午7:48
  */
 @Service
-public class FreightTemplateBizService {
+public class AppFreightTemplateBizService {
 
     @Autowired
     FreightTemplateMapper freightTemplateMapper;

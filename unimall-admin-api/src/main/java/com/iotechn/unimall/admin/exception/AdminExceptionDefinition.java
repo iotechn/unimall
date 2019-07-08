@@ -69,6 +69,13 @@ public class AdminExceptionDefinition {
     public static final ServiceExceptionDefinition RECOMMEND_SQL_DELETE_FAILED =
             new ServiceExceptionDefinition(52004, "删除推荐数据库失败");
 
+    public static final ServiceExceptionDefinition ADVERTISEMENT_SQL_ADD_FAILED =
+            new ServiceExceptionDefinition(53001, "添加广告数据库失败");
+    public static final ServiceExceptionDefinition ADVERTISEMENT_SQL_DELETE_FAILED =
+            new ServiceExceptionDefinition(53002, "删除广告数据库失败");
+    public static final ServiceExceptionDefinition ADVERTISEMENT_SQL_UPDATE_FAILED =
+            new ServiceExceptionDefinition(53003, "修改广告数据库失败");
+
 
 
 }

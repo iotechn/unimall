@@ -3,8 +3,7 @@ package com.iotechn.unimall.app.api.goods;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.iotechn.unimall.app.api.collect.CollectService;
-import com.iotechn.unimall.app.api.freight.FreightTemplateBizService;
-import com.iotechn.unimall.app.api.freight.FreightTemplateService;
+import com.iotechn.unimall.app.api.freight.AppFreightTemplateBizService;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
@@ -26,7 +25,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 /**
@@ -54,7 +52,7 @@ public class GoodsServiceImpl implements GoodsService {
     private CollectService collectService;
 
     @Autowired
-    private FreightTemplateBizService freightTemplateBizService;
+    private AppFreightTemplateBizService freightTemplateBizService;
 
     @Autowired
     private CacheComponent cacheComponent;

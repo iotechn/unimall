@@ -11,12 +11,12 @@ import com.iotechn.unimall.data.dto.RecommendDTO;
 import com.iotechn.unimall.data.enums.RecommendType;
 import com.iotechn.unimall.data.mapper.RecommendMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
+import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.xml.ws.Service;
-import java.rmi.ServerException;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +27,8 @@ import java.util.List;
  * Date: 2019-07-08
  * Time: 下午5:47
  */
-public class RecommendServiceImpl implements RecommendService {
+@Service
+public class AdminRecommendServiceImpl implements AdminRecommendService {
 
     @Autowired
     private CacheComponent cacheComponent;
@@ -44,9 +45,9 @@ public class RecommendServiceImpl implements RecommendService {
             throw new AdminServiceException(AdminExceptionDefinition.RECOMMEND_SPU_NO_HAS);
         }
 
-        if (!(recommendMapper.selectCount(new EntityWrapper<RecommendDO>()
+        if (recommendMapper.selectCount(new EntityWrapper<RecommendDO>()
                 .eq("spu_id", spuId)
-                .eq("recommend_type", recommendType)) > 0)) {
+                .eq("recommend_type", recommendType)) > 0) {
             throw new AdminServiceException(AdminExceptionDefinition.RECOMMEND_ALREADY_HAS);
         }
         RecommendDO recommendDO = new RecommendDO(spuId, recommendType);
@@ -77,15 +78,19 @@ public class RecommendServiceImpl implements RecommendService {
     }
 
     @Override
-    public List<RecommendDTO> queryRecommend(Long adminId, Integer recommendType, Integer pageNo, Integer pageSize) throws ServiceException {
-        //先从缓存中找
-        List<RecommendDTO> recommendDTOList = cacheComponent.getObjList(RecommendType.RECOMMEND_NAME+Integer.toString(recommendType),RecommendDTO.class);
-        if(CollectionUtils.isEmpty(recommendDTOList)){
-            recommendDTOList = recommendMapper.getRecommendByType(recommendType,pageNo,pageSize);
-            if(!CollectionUtils.isEmpty(recommendDTOList)){
-                cacheComponent.putObj(RecommendType.RECOMMEND_NAME+Integer.toString(recommendType),recommendDTOList,1000);
-            }
-        }
-        return recommendDTOList;
+    public Page<RecommendDTO> queryRecommendByType(Long adminId, Integer recommendType, Integer pageNo, Integer pageSize) throws ServiceException {
+
+        Integer count = recommendMapper.selectCount(new EntityWrapper<RecommendDO>().eq("recommend_type",recommendType));
+        List<RecommendDTO> recommendDTOList = recommendMapper.getRecommendByType(recommendType,pageNo,pageSize);
+        Page<RecommendDTO> page = new Page<>(recommendDTOList,pageNo,pageSize,count);
+        return page;
+    }
+
+    @Override
+    public Page<RecommendDTO> queryAllRecommend(Long adminId, Integer pageNo, Integer pageSize) throws ServiceException {
+        Integer count = recommendMapper.selectCount(null);
+        List<RecommendDTO> recommendDTOList = recommendMapper.getAllRecommend(pageNo,pageSize);
+        Page<RecommendDTO> page = new Page<>(recommendDTOList,pageNo,pageSize,count);
+        return page;
     }
 }

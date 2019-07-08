@@ -6,6 +6,7 @@ import com.iotechn.unimall.data.dto.RecommendDTO;
 import com.iotechn.unimall.data.enums.RecommendType;
 import com.iotechn.unimall.data.mapper.RecommendMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -17,7 +18,8 @@ import java.util.List;
  * Date: 2019-07-08
  * Time: 下午3:40
  */
-public class RecommendServiceImpl implements RecommendService {
+@Service
+public class AppRecommendServiceImpl implements AppRecommendService {
 
     @Autowired
     private CacheComponent cacheComponent;
