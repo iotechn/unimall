@@ -48,7 +48,7 @@ export function deleteAd(id) {
     params: {
       _gp: 'nearby',
       _mt: 'addelete',
-      adId : id
+      adId: id
     }
   })
 }

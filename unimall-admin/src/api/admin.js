@@ -53,7 +53,6 @@ export function deleteAdmin(id) {
   })
 }
 
-
 export function initTenement(params) {
   return request({
     method: 'post',

@@ -1,14 +1,13 @@
 <template>
   <div class="app-container">
-
     <el-card class="box-card">
       <h3>商品介绍</h3>
       <el-form ref="dataForm" :rules="rules" :model="goods" label-width="150px">
         <el-form-item label="商品编号" prop="goodsSn">
-          <el-input v-model="goods.goodsSn"/>
+          <el-input v-model="goods.goodsSn" />
         </el-form-item>
         <el-form-item label="商品名称" prop="title">
-          <el-input v-model="goods.title"/>
+          <el-input v-model="goods.title" />
         </el-form-item>
         <el-form-item label="原始价格" prop="originalPriceRaw">
           <el-input v-model="goods.originalPriceRaw" placeholder="0.00">
@@ -22,10 +21,8 @@
         </el-form-item>
 
         <el-form-item label="剩余库存" prop="stock">
-          <el-input v-model="goods.stock" placeholder="0">
-          </el-input>
+          <el-input v-model="goods.stock" placeholder="0"/>
         </el-form-item>
-
 
         <el-form-item label="是否在售" prop="status">
           <el-radio-group v-model="goods.status">
@@ -43,26 +40,32 @@
             :on-success="handleGalleryUrl"
             :on-remove="handleRemove"
             multiple
-            accept=".jpg,.jpeg,.png,.gif"
-            list-type="picture-card">
-            <i class="el-icon-plus"/>
+            accept=".jpg, .jpeg, .png, .gif"
+            list-type="picture-card"
+          >
+            <i class="el-icon-plus" />
           </el-upload>
         </el-form-item>
 
         <el-form-item label="商品单位" prop="unit">
-          <el-input v-model="goods.unit" placeholder="件 / 个 / 盒"/>
+          <el-input v-model="goods.unit" placeholder="件 / 个 / 盒" />
         </el-form-item>
 
         <el-form-item label="所属类目" prop="category">
-          <el-cascader :options="categoryList" v-model="categoryIds" expand-trigger="hover" @change="handleCategoryChange"/>
+          <el-cascader
+            :options="categoryList"
+            v-model="categoryIds"
+            expand-trigger="hover"
+            @change="handleCategoryChange"
+          />
         </el-form-item>
 
         <el-form-item label="商品简介" prop="description">
-          <el-input v-model="goods.description"/>
+          <el-input v-model="goods.description" />
         </el-form-item>
 
         <el-form-item label="商品详细介绍" prop="detail">
-          <editor :init="editorInit" v-model="goods.detail"/>
+          <editor :init="editorInit" v-model="goods.detail" />
         </el-form-item>
       </el-form>
     </el-card>
@@ -71,9 +74,14 @@
       <h3>商品参数</h3>
       <el-button :plain="true" type="primary" @click="handleAttributeShow">添加</el-button>
       <el-table :data="attributes">
-        <el-table-column property="attribute" label="商品参数名称"/>
-        <el-table-column property="value" label="商品参数值"/>
-        <el-table-column align="center" label="操作" width="100" class-name="small-padding fixed-width">
+        <el-table-column property="attribute" label="商品参数名称" />
+        <el-table-column property="value" label="商品参数值" />
+        <el-table-column
+          align="center"
+          label="操作"
+          width="100"
+          class-name="small-padding fixed-width"
+        >
           <template slot-scope="scope">
             <el-button type="danger" size="mini" @click="handleAttributeDelete(scope.row)">删除</el-button>
           </template>
@@ -87,12 +95,13 @@
           status-icon
           label-position="left"
           label-width="100px"
-          style="width: 400px; margin-left:50px;">
+          style="width: 400px; margin-left:50px;"
+        >
           <el-form-item label="商品参数名称" prop="attribute">
-            <el-input v-model="attributeForm.attribute"/>
+            <el-input v-model="attributeForm.attribute" />
           </el-form-item>
           <el-form-item label="商品参数值" prop="value">
-            <el-input v-model="attributeForm.value"/>
+            <el-input v-model="attributeForm.value" />
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -106,53 +115,52 @@
       <el-button @click="handleCancel">取消</el-button>
       <el-button type="primary" @click="handlePublish">上架</el-button>
     </div>
-
   </div>
 </template>
 
 <style>
-  .el-card {
-    margin-bottom: 10px;
-  }
+.el-card {
+  margin-bottom: 10px;
+}
 
-  .el-tag + .el-tag {
-    margin-left: 10px;
-  }
+.el-tag + .el-tag {
+  margin-left: 10px;
+}
 
-  .input-new-keyword {
-    width: 90px;
-    margin-left: 10px;
-    vertical-align: bottom;
-  }
+.input-new-keyword {
+  width: 90px;
+  margin-left: 10px;
+  vertical-align: bottom;
+}
 
-  .avatar-uploader .el-upload {
-    width: 145px;
-    height: 145px;
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
+.avatar-uploader .el-upload {
+  width: 145px;
+  height: 145px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
 
-  .avatar-uploader .el-upload:hover {
-    border-color: #20a0ff;
-  }
+.avatar-uploader .el-upload:hover {
+  border-color: #20a0ff;
+}
 
-  .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 120px;
-    height: 120px;
-    line-height: 120px;
-    text-align: center;
-  }
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 120px;
+  height: 120px;
+  line-height: 120px;
+  text-align: center;
+}
 
-  .avatar {
-    width: 145px;
-    height: 145px;
-    display: block;
-  }
+.avatar {
+  width: 145px;
+  height: 145px;
+  display: block;
+}
 </style>
 
 <script>
@@ -171,35 +179,58 @@ export default {
       uploadPath,
       categoryList: [],
       categoryIds: [],
-      goods: {imgs: [] },
+      goods: { imgs: [] },
       attributeVisiable: false,
       attributeForm: { attribute: '', value: '' },
       attributes: [],
       rules: {
-        status :[{ required: true, message: '请选择商品状态', trigger: 'blur' }],
-        goodsSn: [{ required: true, message: '商品编号不能为空', trigger: 'blur' }],
-        title: [{ required: true, message: '商品名称不能为空', trigger: 'blur' }],
-        description: [{ required: true, message: '商品描述不能为空', trigger: 'blur' }],
-        priceRaw: [{ required: true, message: '商品现价不能为空', trigger: 'blur' }],
-        originalPriceRaw :[{ required: true, message: '商品原价不能为空', trigger: 'blur' }],
-        stock: [{ required: true, message: '剩余库存不能为空', trigger: 'blur' }],
-        unit :[{ required: true, message: '物件单位不能为空', trigger: 'blur' }],
-//        category :[{ required: true, message: '商品分类不能为空', trigger: 'blur' }],
-        detail: [{ required: true, message: '请填写商品详情', trigger: 'blur' }],
+        status: [
+          { required: true, message: '请选择商品状态', trigger: 'blur' }
+        ],
+        goodsSn: [
+          { required: true, message: '商品编号不能为空', trigger: 'blur' }
+        ],
+        title: [
+          { required: true, message: '商品名称不能为空', trigger: 'blur' }
+        ],
+        description: [
+          { required: true, message: '商品描述不能为空', trigger: 'blur' }
+        ],
+        priceRaw: [
+          { required: true, message: '商品现价不能为空', trigger: 'blur' }
+        ],
+        originalPriceRaw: [
+          { required: true, message: '商品原价不能为空', trigger: 'blur' }
+        ],
+        stock: [
+          { required: true, message: '剩余库存不能为空', trigger: 'blur' }
+        ],
+        unit: [
+          { required: true, message: '物件单位不能为空', trigger: 'blur' }
+        ],
+        //        category :[{ required: true, message: '商品分类不能为空', trigger: 'blur' }],
+        detail: [{ required: true, message: '请填写商品详情', trigger: 'blur' }]
       },
       editorInit: {
         language: 'zh_CN',
         convert_urls: false,
-        plugins: ['advlist anchor autolink autosave code codesample colorpicker colorpicker contextmenu directionality emoticons fullscreen hr image imagetools importcss insertdatetime link lists media nonbreaking noneditable pagebreak paste preview print save searchreplace spellchecker tabfocus table template textcolor textpattern visualblocks visualchars wordcount'],
-        toolbar: ['searchreplace bold italic underline strikethrough alignleft aligncenter alignright outdent indent  blockquote undo redo removeformat subscript superscript code codesample', 'hr bullist numlist link image charmap preview anchor pagebreak insertdatetime media table emoticons forecolor backcolor fullscreen'],
+        plugins: [
+          'advlist anchor autolink autosave code codesample colorpicker colorpicker contextmenu directionality emoticons fullscreen hr image imagetools importcss insertdatetime link lists media nonbreaking noneditable pagebreak paste preview print save searchreplace spellchecker tabfocus table template textcolor textpattern visualblocks visualchars wordcount'
+        ],
+        toolbar: [
+          'searchreplace bold italic underline strikethrough alignleft aligncenter alignright outdent indent  blockquote undo redo removeformat subscript superscript code codesample',
+          'hr bullist numlist link image charmap preview anchor pagebreak insertdatetime media table emoticons forecolor backcolor fullscreen'
+        ],
         images_upload_handler: function(blobInfo, success, failure) {
           const formData = new FormData()
           formData.append('file', blobInfo.blob())
-          createStorage(formData).then(res => {
-            success(res.data.url)
-          }).catch(() => {
-            failure('上传失败，请重新上传')
-          })
+          createStorage(formData)
+            .then(res => {
+              success(res.data.url)
+            })
+            .catch(() => {
+              failure('上传失败，请重新上传')
+            })
         }
       }
     }
@@ -207,7 +238,7 @@ export default {
   computed: {
     headers() {
       return {
-        'accessToken': getToken()
+        accessToken: getToken()
       }
     }
   },
@@ -237,25 +268,29 @@ export default {
             })
           } else {
             this.goods.price = parseInt(this.goods.priceRaw * 100)
-            this.goods.originalPrice = parseInt(this.goods.originalPriceRaw * 100)
+            this.goods.originalPrice = parseInt(
+              this.goods.originalPriceRaw * 100
+            )
             const finalGoods = {
               goods: this.goods,
               specifications: this.specifications,
               products: this.products,
               attributes: this.attributes
             }
-            publishGoods(finalGoods).then(response => {
-              this.$notify.success({
-                title: '成功',
-                message: '创建成功'
+            publishGoods(finalGoods)
+              .then(response => {
+                this.$notify.success({
+                  title: '成功',
+                  message: '创建成功'
+                })
+                this.$router.push({ path: '/goods/list' })
               })
-              this.$router.push({ path: '/goods/list' })
-            }).catch(response => {
-              MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
-                confirmButtonText: '确定',
-                type: 'error'
+              .catch(response => {
+                MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
+                  confirmButtonText: '确定',
+                  type: 'error'
+                })
               })
-            })
           }
         } else {
           this.$notify.error({
@@ -264,7 +299,6 @@ export default {
           })
         }
       })
-
     },
     uploadPicUrl: function(response) {
       this.goods.picUrl = response.url
@@ -301,8 +335,12 @@ export default {
     },
     specChanged: function(label) {
       if (label === false) {
-        this.specifications = [{ specification: '规格', value: '标准', picUrl: '' }]
-        this.products = [{ id: 0, specifications: ['标准'], price: 0.00, number: 0, url: '' }]
+        this.specifications = [
+          { specification: '规格', value: '标准', picUrl: '' }
+        ]
+        this.products = [
+          { id: 0, specifications: ['标准'], price: 0.0, number: 0, url: '' }
+        ]
       } else {
         this.specifications = []
         this.products = []
@@ -375,7 +413,13 @@ export default {
           var z = specValues[x][combination[x]]
           specifications.push(this.specifications[z].value)
         }
-        products[productsIndex] = { id: productsIndex, specifications: specifications, price: 0.00, number: 0, url: '' }
+        products[productsIndex] = {
+          id: productsIndex,
+          specifications: specifications,
+          price: 0.0,
+          number: 0,
+          url: ''
+        }
         productsIndex++
 
         index++

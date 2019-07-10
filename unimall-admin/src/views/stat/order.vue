@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <ve-line :extend="chartExtend" :data="chartData" :settings="chartSettings"/>
+    <ve-line :extend="chartExtend" :data="chartData" :settings="chartSettings" />
   </div>
 </template>
 
@@ -21,10 +21,10 @@ export default {
       this.chartData = response.data.data
       this.chartSettings = {
         labelMap: {
-          'orders': '订单量',
-          'customers': '下单用户',
-          'amount': '订单总额',
-          'pcr': '客单价'
+          orders: '订单量',
+          customers: '下单用户',
+          amount: '订单总额',
+          pcr: '客单价'
         }
       }
       this.chartExtend = {
@@ -32,6 +32,5 @@ export default {
       }
     })
   }
-
 }
 </script>

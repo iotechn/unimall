@@ -9,9 +9,10 @@ public enum OrderStatusType {
     WAIT_CONFIRM(30, "待收货"),
     WAIT_APPRAISE(40, "待评价"),
     COMPLETE(50, "已完成"),
-    CANCELING(60, "取消中"),
-    CANCELED(70, "已取消"),
-    CANCELED_SYS(80, "已取消（系统）");
+    REFUNDING(60, "退款中"),
+    REFUNDED(70, "已退款"),
+    CANCELED(80, "已取消"),
+    CANCELED_SYS(90, "已取消（系统）");
 
     OrderStatusType(int code, String msg) {
         this.code = code;
@@ -30,5 +31,17 @@ public enum OrderStatusType {
         return msg;
     }
 
+
+    /**
+     * 判断定订单是否可退款
+     * @return
+     */
+    public static boolean refundable(int orderStauts) {
+        if (orderStauts == WAIT_STOCK.getCode() || orderStauts == WAIT_CONFIRM.getCode()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 }

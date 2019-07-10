@@ -1,8 +1,8 @@
 package com.iotechn.unimall.admin.api.advertisement;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.admin.exception.AdminExceptionDefinition;
-import com.iotechn.unimall.admin.exception.AdminServiceException;
+import com.iotechn.unimall.core.exception.AdminServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AdvertisementDO;
@@ -42,7 +42,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
             cacheComponent.del(AdvertisementType.ADVERTISEMENT_NAME+adType.toString());
             return true;
         }
-        throw new AdminServiceException(AdminExceptionDefinition.ADVERTISEMENT_SQL_ADD_FAILED);
+        throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_ADD_FAILED);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
             cacheComponent.del(AdvertisementType.ADVERTISEMENT_NAME+adType.toString());
             return true;
         }
-        throw new AdminServiceException(AdminExceptionDefinition.ADVERTISEMENT_SQL_DELETE_FAILED);
+        throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_DELETE_FAILED);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
             cacheComponent.del(AdvertisementType.ADVERTISEMENT_NAME+adType.toString());
             return  true;
         }
-        throw new AdminServiceException(AdminExceptionDefinition.ADVERTISEMENT_SQL_UPDATE_FAILED);
+        throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_UPDATE_FAILED);
     }
 
     @Override

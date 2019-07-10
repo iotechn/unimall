@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.goods;
 
-import com.iotechn.unimall.app.exception.AppExceptionDefinition;
-import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
@@ -31,7 +31,7 @@ public class GoodsBizService {
         }
         SpuDO spuDO = spuMapper.selectById(spuId);
         if (spuDO == null) {
-            throw new AppServiceException(AppExceptionDefinition.GOODS_NOT_EXIST);
+            throw new AppServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
         }
         cacheComponent.putHashObj(CA_SPU_HASH, "S" + spuDO, spuDO, Const.CACHE_ONE_DAY);
         return spuDO;

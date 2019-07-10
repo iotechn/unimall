@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <ve-histogram :extend="chartExtend" :data="chartData" :settings="chartSettings"/>
+    <ve-histogram :extend="chartExtend" :data="chartData" :settings="chartSettings" />
   </div>
 </template>
 
@@ -22,7 +22,7 @@ export default {
       this.chartData = response.data.data
       this.chartSettings = {
         labelMap: {
-          'users': '用户增长数'
+          users: '用户增长数'
         }
       }
       this.chartExtend = {
@@ -33,6 +33,5 @@ export default {
       }
     })
   }
-
 }
 </script>

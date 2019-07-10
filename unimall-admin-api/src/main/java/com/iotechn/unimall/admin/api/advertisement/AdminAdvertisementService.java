@@ -22,7 +22,7 @@ import java.util.List;
  * Time: 下午8:23
  */
 
-@HttpOpenApi(group = "advertisement", description = "广告推销")
+@HttpOpenApi(group = "admin.advertisement", description = "广告推销")
 public interface AdminAdvertisementService {
 
     @HttpMethod(description = "创建", permission = "promote:advertisement:create", permissionParentName = "推广管理", permissionName = "广告管理")

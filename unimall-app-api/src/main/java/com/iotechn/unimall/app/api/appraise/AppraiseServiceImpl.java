@@ -1,8 +1,8 @@
 package com.iotechn.unimall.app.api.appraise;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.app.exception.AppExceptionDefinition;
-import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.domain.ImgDO;
@@ -46,7 +46,7 @@ public class AppraiseServiceImpl implements AppraiseService {
     @Transactional
     public Boolean addAppraise(AppraiseRequestDTO appraiseRequestDTO, Long userId) throws ServiceException {
         if(appraiseRequestDTO.getOrderId() == null){
-            throw new AppServiceException(AppExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
+            throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
         }
         //校验是否有对应等待评价的订单
         Integer integer = orderMapper.selectCount(new EntityWrapper<OrderDO>()
@@ -54,7 +54,7 @@ public class AppraiseServiceImpl implements AppraiseService {
                 .eq("id", appraiseRequestDTO.getOrderId())
                 .eq("user_id", userId));
         if(integer == 0){
-            throw new AppServiceException(AppExceptionDefinition.APPRAISE_ORDER_CHECK_FAILED);
+            throw new AppServiceException(ExceptionDefinition.APPRAISE_ORDER_CHECK_FAILED);
         }
 
         //如果传入评价list中没有数据，就直接转变订单状态发出
@@ -72,7 +72,7 @@ public class AppraiseServiceImpl implements AppraiseService {
             if(!(orderSkuMapper.selectCount(new EntityWrapper<OrderSkuDO>() //从order_sku表中 验证是否有对应的表单和商品
                     .eq("sku_id",appraiseDTO.getSkuId())
                     .eq("order_id",appraiseRequestDTO.getOrderId())) > 0)){
-                throw new AppServiceException(AppExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
+                throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
             }
 
             AppraiseDO appraiseDO = new AppraiseDO();
@@ -119,7 +119,7 @@ public class AppraiseServiceImpl implements AppraiseService {
         if(delete > 0){
             return true;
         }else{
-            throw new AppServiceException(AppExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
+            throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
         }
     }
 
@@ -128,7 +128,7 @@ public class AppraiseServiceImpl implements AppraiseService {
         Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("user_id",userId));
         Integer totalPage = 1;
         if(size <= 0 || page <= 0){
-            throw new AppServiceException(AppExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
+            throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
         }
         if(count % size == 0 && count != 0){
             totalPage = count / size;
@@ -154,7 +154,7 @@ public class AppraiseServiceImpl implements AppraiseService {
         Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("spu_id",spuId));
         Integer totalPage = 1;
         if(size <= 0 || page <= 0){
-            throw new AppServiceException(AppExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
+            throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
         }
         if(count % size == 0 && count != 0){
             totalPage = count / size;
@@ -179,7 +179,7 @@ public class AppraiseServiceImpl implements AppraiseService {
 
         AppraiseResponseDTO appraiseResponseDTO = appraiseMapper.selectOneById(appraiseId);
         if(appraiseResponseDTO == null){
-            throw new AppServiceException(AppExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
+            throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
         }
         appraiseResponseDTO.setAppraiseImgUrl(getAppraiseImgUrl(appraiseResponseDTO));
 

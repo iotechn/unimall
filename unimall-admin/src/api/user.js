@@ -11,7 +11,6 @@ export function fetchList(query) {
   })
 }
 
-
 export function activeUser(id, status) {
   return request({
     method: 'post',
@@ -24,18 +23,16 @@ export function activeUser(id, status) {
   })
 }
 
-
-export function fetchUserOrgApplyList(queryCondition,status) {
+export function fetchUserOrgApplyList(queryCondition, status) {
   return request({
     method: 'get',
     params: {
       _gp: 'user',
       _mt: 'getUserOrgApplyList',
-      ...queryCondition,
+      ...queryCondition
     }
   })
 }
-
 
 export function auditUserOrgApply(id) {
   return request({

@@ -22,6 +22,7 @@
 	<modules>
 		<module>unimall-core</module>
 		<module>unimall-data</module>
+		<module>unimall-biz</module>
 		<module>unimall-app-api</module>
 		<module>unimall-admin-api</module>
 		<module>unimall-launcher</module>

@@ -124,7 +124,7 @@ export const asyncRouterMap = [
     children: [
       {
         path: 'order',
-        component: () => import('@/views/mall/order'),
+        component: () => import('@/views/operation/order'),
         name: 'order',
         meta: {
           perms: ['admin:order:list', 'admin:order:detail', 'admin:order:ship'],
@@ -171,7 +171,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/goods/category'),
         name: 'goodsCategory',
         meta: {
-          perms: ['admin:category:create','admin:category:list','admin:category:update','admin:category:delete'],
+          perms: ['admin:category:create', 'admin:category:list', 'admin:category:update', 'admin:category:delete'],
           title: '商品类目',
           noCache: true
         }
@@ -229,7 +229,7 @@ export const asyncRouterMap = [
           title: '预申请表',
           noCache: true
         }
-      },
+      }
     ]
   },
   {
@@ -258,7 +258,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/tenement/qq'),
         name: 'qq',
         meta: {
-          perms: ['admin:qq:list', 'admin:qq:create', "admin:qq:delete", "admin:qq:update"],
+          perms: ['admin:qq:list', 'admin:qq:create', 'admin:qq:delete', 'admin:qq:update'],
           title: 'QQ群推广',
           noCache: true
         }
@@ -292,7 +292,7 @@ export const asyncRouterMap = [
           title: '大学生活',
           noCache: true
         }
-      },
+      }
       // {
       //   path: 'merch',
       //   component: () => import('@/views/tenement/merch'),

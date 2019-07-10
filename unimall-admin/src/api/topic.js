@@ -15,7 +15,7 @@ export function listTopic(query) {
 export function createTopic(data) {
   return request({
     method: 'post',
-    data : Qs.stringify({
+    data: Qs.stringify({
       _gp: 'article',
       _mt: 'create',
       article: JSON.stringify(data)
@@ -26,7 +26,7 @@ export function createTopic(data) {
 export function updateTopic(data) {
   return request({
     method: 'post',
-    data : Qs.stringify({
+    data: Qs.stringify({
       _gp: 'article',
       _mt: 'update',
       article: JSON.stringify(data)
@@ -44,7 +44,6 @@ export function deleteTopic(id) {
     }
   })
 }
-
 
 export function activeTopic(params) {
   return request({

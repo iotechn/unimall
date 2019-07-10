@@ -8,7 +8,7 @@ export function list(query) {
       _gp: 'qq',
       _mt: 'list',
       ...query
-    },
+    }
   })
 }
 
@@ -44,6 +44,4 @@ export function del(id) {
     }
   })
 }
-
-
 

@@ -35,9 +35,9 @@ export function updateRole(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
-      _gp : 'role',
-      _mt : 'update',
-      role : JSON.stringify(data)
+      _gp: 'role',
+      _mt: 'update',
+      role: JSON.stringify(data)
     })
   })
 }
@@ -46,9 +46,9 @@ export function deleteRole(id) {
   return request({
     method: 'post',
     params: {
-      _gp : 'role',
-      _mt : 'delete',
-      roleId : id
+      _gp: 'role',
+      _mt: 'delete',
+      roleId: id
     }
   })
 }

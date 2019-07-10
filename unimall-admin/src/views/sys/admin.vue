@@ -1,29 +1,52 @@
 <template>
   <div class="app-container">
-
     <!-- 查询和其他操作 -->
     <div class="filter-container">
-      <el-input v-model="listQuery.username" clearable class="filter-item" style="width: 200px;" placeholder="请输入管理员名称"/>
+      <el-input
+        v-model="listQuery.username"
+        clearable
+        class="filter-item"
+        style="width: 200px;"
+        placeholder="请输入管理员名称"
+      />
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
       <el-button class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">添加</el-button>
-      <el-button class="filter-item" type="primary" icon="el-icon-circle-plus-outline" @click="dialogTenementVisible = true">初始化租户</el-button>
+      <el-button
+        class="filter-item"
+        type="primary"
+        icon="el-icon-circle-plus-outline"
+        @click="dialogTenementVisible = true"
+      >初始化租户</el-button>
     </div>
 
     <!-- 查询结果 -->
-    <el-table v-loading="listLoading" :data="list" size="small" element-loading-text="正在查询中。。。" border fit highlight-current-row>
-      <el-table-column align="center" label="管理员ID" prop="id" sortable/>
+    <el-table
+      v-loading="listLoading"
+      :data="list"
+      size="small"
+      element-loading-text="正在查询中。。。"
+      border
+      fit
+      highlight-current-row
+    >
+      <el-table-column align="center" label="管理员ID" prop="id" sortable />
 
-      <el-table-column align="center" label="管理员名称" prop="username"/>
+      <el-table-column align="center" label="管理员名称" prop="username" />
 
       <el-table-column align="center" label="管理员头像" prop="avatar">
         <template slot-scope="scope">
-          <img v-if="scope.row.avatar" :src="scope.row.avatar" width="40">
+          <img v-if="scope.row.avatar" :src="scope.row.avatar" width="40" >
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="管理员角色" prop="roleIds">
         <template slot-scope="scope">
-          <el-tag v-for="roleId in scope.row.roleIds" :key="roleId" type="primary" style="margin-right: 20px;"> {{ formatRole(roleId) }} </el-tag>
+          <el-tag
+            v-for="roleId in scope.row.roleIds"
+            :key="roleId"
+            type="primary"
+            style="margin-right: 20px;"
+          >{{ formatRole(roleId) }}</el-tag>
         </template>
       </el-table-column>
 
@@ -35,16 +58,30 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.limit"
+      @pagination="getList"
+    />
 
     <!-- 创建租户对话框 -->
-    <el-dialog title="创建" :visible.sync="dialogTenementVisible">
-      <el-form ref="tenementForm" :rules="tenementRules" :model="tenementForm" status-icon label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+    <el-dialog :visible.sync="dialogTenementVisible" title="创建">
+      <el-form
+        ref="tenementForm"
+        :rules="tenementRules"
+        :model="tenementForm"
+        status-icon
+        label-position="left"
+        label-width="100px"
+        style="width: 400px; margin-left:50px;"
+      >
         <el-form-item label="租户名" prop="title">
-          <el-input v-model="tenementForm.title"/>
+          <el-input v-model="tenementForm.title" />
         </el-form-item>
         <el-form-item label="租户Code" prop="tenementCode">
-          <el-input v-model="tenementForm.tenementCode"/>
+          <el-input v-model="tenementForm.tenementCode" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -55,12 +92,20 @@
 
     <!-- 添加或修改对话框 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="dataForm" status-icon label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="dataForm"
+        status-icon
+        label-position="left"
+        label-width="100px"
+        style="width: 400px; margin-left:50px;"
+      >
         <el-form-item label="登录名" prop="username">
-          <el-input :disabled="dialogStatus === 'update'" v-model="dataForm.username"/>
+          <el-input :disabled="dialogStatus === 'update'" v-model="dataForm.username" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="dataForm.password" type="password" auto-complete="off"/>
+          <el-input v-model="dataForm.password" type="password" auto-complete="off" />
         </el-form-item>
         <el-form-item label="头像" prop="avatar">
           <el-upload
@@ -69,16 +114,17 @@
             :show-file-list="false"
             :on-success="uploadAvatar"
             class="avatar-uploader"
-            accept=".jpg,.jpeg,.png,.gif">
-            <img v-if="dataForm.avatar" :src="dataForm.avatar" class="avatar">
-            <i v-else class="el-icon-plus avatar-uploader-icon"/>
+            accept=".jpg, .jpeg, .png, .gif"
+          >
+            <img v-if="dataForm.avatar" :src="dataForm.avatar" class="avatar" >
+            <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
         </el-form-item>
         <el-form-item label="手机号" prop="phone">
-          <el-input v-model="dataForm.phone"/>
+          <el-input v-model="dataForm.phone" />
         </el-form-item>
         <el-form-item label="真实姓名" prop="realname">
-          <el-input v-model="dataForm.realname"/>
+          <el-input v-model="dataForm.realname" />
         </el-form-item>
         <el-form-item label="授权角色" prop="roleIds">
           <el-select v-model="dataForm.roleIds" multiple placeholder="请选择">
@@ -86,7 +132,8 @@
               v-for="item in roleOptions"
               :key="item.value"
               :label="item.label"
-              :value="item.value"/>
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </el-form>
@@ -96,7 +143,6 @@
         <el-button v-else type="primary" @click="updateData">确定</el-button>
       </div>
     </el-dialog>
-
   </div>
 </template>
 
@@ -127,7 +173,13 @@
 </style>
 
 <script>
-import { listAdmin, createAdmin, updateAdmin, deleteAdmin, initTenement } from '@/api/admin'
+import {
+  listAdmin,
+  createAdmin,
+  updateAdmin,
+  deleteAdmin,
+  initTenement
+} from '@/api/admin'
 import { roleOptions } from '@/api/role'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
@@ -151,10 +203,10 @@ export default {
         order: 'desc'
       },
       tenementForm: {
-          title: undefined,
-          tenementCode :undefined
+        title: undefined,
+        tenementCode: undefined
       },
-      dialogTenementVisible : false,
+      dialogTenementVisible: false,
       dataForm: {
         id: undefined,
         username: undefined,
@@ -170,30 +222,37 @@ export default {
       },
       tenementRules: {
         title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
-        tenementCode: [{ required: true, message: '租户Code不能为空', trigger: 'blur' }],
+        tenementCode: [
+          { required: true, message: '租户Code不能为空', trigger: 'blur' }
+        ]
       },
       rules: {
-        username: [{ required: true, message: '管理员名称不能为空', trigger: 'blur' }],
-        password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
+        username: [
+          { required: true, message: '管理员名称不能为空', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '密码不能为空', trigger: 'blur' }
+        ],
         phone: [{ required: true, message: '手机号不能为空', trigger: 'blur' }],
-        realname: [{ required: true, message: '真实姓名不能为空', trigger: 'blur' }],
-      },
+        realname: [
+          { required: true, message: '真实姓名不能为空', trigger: 'blur' }
+        ]
+      }
     }
   },
   computed: {
     headers() {
       return {
-        'accessToken': getToken()
+        accessToken: getToken()
       }
     }
   },
   created() {
     this.getList()
 
-    roleOptions()
-      .then(response => {
-        this.roleOptions = response.data.data
-      })
+    roleOptions().then(response => {
+      this.roleOptions = response.data.data
+    })
   },
   methods: {
     formatRole(roleId) {
@@ -326,8 +385,8 @@ export default {
               })
               this.dialogTenementVisible = false
               this.tenementForm = {
-                title : undefined,
-                tenementCode : undefined
+                title: undefined,
+                tenementCode: undefined
               }
             })
             .catch(response => {

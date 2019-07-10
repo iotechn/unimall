@@ -14,8 +14,8 @@ service.interceptors.request.use(
   config => {
     // Do something before request is sent
     if (store.getters.token) {
-      // 让每个请求携带token-- ['accessToken']为自定义key 请根据实际情况自行修改
-      config.headers['accessToken'] = getToken()
+      // 让每个请求携带token-- ['ADMINTOKEN']为自定义key 请根据实际情况自行修改
+      config.headers['ADMINTOKEN'] = getToken()
     }
     return config
   },
@@ -40,7 +40,7 @@ service.interceptors.response.use(
         })
       })
       return Promise.reject('error')
-    }  if (res.errno !== 200) {
+    } if (res.errno !== 200) {
       Message({
         message: res.errmsg + ' 异常代码：' + res.errno,
         type: 'error',

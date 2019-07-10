@@ -58,7 +58,7 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 			},
 			success: (res) => {
 				if (res.statusCode === 200) {
-					if (res.data.errno === 0) {
+					if (res.data.errno === 200) {
 						resolve(res.data);
 					} else if (res.data.errno === 10001) {
 						if (failCallback) {

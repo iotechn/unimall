@@ -250,7 +250,7 @@ public class ApiController {
                 }
             }
             GatewayResponse gatewayResponse = new GatewayResponse();
-            gatewayResponse.setErrno(0);
+            gatewayResponse.setErrno(200);
             gatewayResponse.setErrmsg("成功");
             gatewayResponse.setTimestamp(invokeTime);
             gatewayResponse.setData(invokeObj);

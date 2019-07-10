@@ -18,7 +18,7 @@ import java.util.List;
  * Date: 2019-07-07
  * Time: 下午3:37
  */
-@HttpOpenApi(group = "freightTemplate",description = "运费模板")
+@HttpOpenApi(group = "admin.freight",description = "运费模板")
 public interface AdminFreightTemplateService {
 
     @HttpMethod(description = "增加运费模板")

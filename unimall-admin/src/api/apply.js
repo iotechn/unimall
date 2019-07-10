@@ -1,5 +1,4 @@
 import request from '@/utils/request'
-import Qs from 'qs'
 
 export function listApply(query) {
   return request({
@@ -8,7 +7,7 @@ export function listApply(query) {
       _gp: 'nearby',
       _mt: 'applylist',
       ...query
-    },
+    }
   })
 }
 
@@ -19,7 +18,7 @@ export function applydeal(applyId, status) {
       _gp: 'nearby',
       _mt: 'handle',
       applyId,
-      status : status
+      status: status
     }
   })
 }

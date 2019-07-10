@@ -82,8 +82,9 @@
 						signType: payParam.signType,
 						paySign: payParam.paySign,
 						success: function(res) {
-							console.log("支付过程成功");
-							that.onLoad()
+							uni.navigateTo({
+								url: 'paySuccess'
+							})
 						},
 						fail: function(res) {
 							console.log("支付过程失败");

@@ -25,7 +25,7 @@ export function listCatL1() {
 export function createCategory(data) {
   return request({
     method: 'post',
-    data : Qs.stringify({
+    data: Qs.stringify({
       _gp: 'category',
       _mt: 'create',
       category: JSON.stringify(data)
@@ -36,7 +36,7 @@ export function createCategory(data) {
 export function updateCategory(data) {
   return request({
     method: 'post',
-    data : Qs.stringify({
+    data: Qs.stringify({
       _gp: 'category',
       _mt: 'update',
       category: JSON.stringify(data)
@@ -50,7 +50,7 @@ export function deleteCategory(id) {
     params: {
       _gp: 'category',
       _mt: 'delete',
-      categoryId : id
+      categoryId: id
     }
   })
 }

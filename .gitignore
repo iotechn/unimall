@@ -39,6 +39,7 @@ mvnw.cmd
 /target/
 /unimall-admin-api/target/
 /unimall-app-api/target/
+/unimall-biz/target/
 /unimall-data/target/
 /unimall-core/target/
 /unimall-launcher/target/

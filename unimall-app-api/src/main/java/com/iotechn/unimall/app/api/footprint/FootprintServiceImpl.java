@@ -1,18 +1,16 @@
 package com.iotechn.unimall.app.api.footprint;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.app.exception.AppExceptionDefinition;
-import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.FootprintDO;
 import com.iotechn.unimall.data.dto.FootprintDTO;
 import com.iotechn.unimall.data.mapper.FootprintMapper;
-import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,7 +37,7 @@ public class FootprintServiceImpl implements  FootprintService {
         if(judgeSQL > 0){
             return true;
         }
-        throw new AppServiceException(AppExceptionDefinition.FOOTPRINT_DELETE_FAILED);
+        throw new AppServiceException(ExceptionDefinition.FOOTPRINT_DELETE_FAILED);
     }
 
     @Override

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-
     <div class="table-layout">
       <el-row>
         <el-col :span="4" class="table-cell-title">名称</el-col>
@@ -38,34 +37,68 @@
 
     <!-- 查询操作 -->
     <div class="filter-container">
-      <el-input v-model="listQuery.userId" clearable class="filter-item" style="width: 200px;" placeholder="请输入用户ID"/>
-      <el-select v-model="listQuery.status" clearable style="width: 200px" class="filter-item" placeholder="请选择使用状态">
-        <el-option v-for="type in useStatusOptions" :key="type.value" :label="type.label" :value="type.value"/>
+      <el-input
+        v-model="listQuery.userId"
+        clearable
+        class="filter-item"
+        style="width: 200px;"
+        placeholder="请输入用户ID"
+      />
+      <el-select
+        v-model="listQuery.status"
+        clearable
+        style="width: 200px"
+        class="filter-item"
+        placeholder="请选择使用状态"
+      >
+        <el-option
+          v-for="type in useStatusOptions"
+          :key="type.value"
+          :label="type.label"
+          :value="type.value"
+        />
       </el-select>
-      <el-button v-permission="['GET /admin/coupon/listuser']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
+      <el-button
+        v-permission="['GET /admin/coupon/listuser']"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-search"
+        @click="handleFilter"
+      >查找</el-button>
     </div>
 
     <!-- 查询结果 -->
-    <el-table v-loading="listLoading" :data="list" size="small" element-loading-text="正在查询中。。。" border fit highlight-current-row>
+    <el-table
+      v-loading="listLoading"
+      :data="list"
+      size="small"
+      element-loading-text="正在查询中。。。"
+      border
+      fit
+      highlight-current-row
+    >
+      <el-table-column align="center" label="用户优惠券ID" prop="id" sortable />
 
-      <el-table-column align="center" label="用户优惠券ID" prop="id" sortable/>
+      <el-table-column align="center" label="用户ID" prop="userId" />
 
-      <el-table-column align="center" label="用户ID" prop="userId"/>
-
-      <el-table-column align="center" label="领取时间" prop="addTime"/>
+      <el-table-column align="center" label="领取时间" prop="addTime" />
 
       <el-table-column align="center" label="使用状态" prop="status">
         <template slot-scope="scope">{{ scope.row.status | formatUseStatus }}</template>
       </el-table-column>
 
-      <el-table-column align="center" label="订单ID" prop="orderId"/>
+      <el-table-column align="center" label="订单ID" prop="orderId" />
 
-      <el-table-column align="center" label="使用时间" prop="usedTime"/>
-
+      <el-table-column align="center" label="使用时间" prop="usedTime" />
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
-
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.limit"
+      @pagination="getList"
+    />
   </div>
 </template>
 
@@ -205,44 +238,45 @@ export default {
       if (this.coupon.timeType === 0) {
         return '领取' + this.coupon.days + '天有效'
       } else if (this.coupon.timeType === 1) {
-        return '自' + this.coupon.startTime + '至' + this.coupon.endTime + '有效'
+        return (
+          '自' + this.coupon.startTime + '至' + this.coupon.endTime + '有效'
+        )
       } else {
         return '未知'
       }
     },
-    getGoodsScope() {
-    }
+    getGoodsScope() {}
   }
 }
 </script>
 <style scoped>
-  .filter-container {
-    margin-top: 20px;
-  }
+.filter-container {
+  margin-top: 20px;
+}
 
-  .table-layout {
-    margin-top: 20px;
-    border-left: 1px solid #DCDFE6;
-    border-top: 1px solid #DCDFE6;
-  }
-  .table-cell {
-    height: 60px;
-    line-height: 40px;
-    border-right: 1px solid #DCDFE6;
-    border-bottom: 1px solid #DCDFE6;
-    padding: 10px;
-    font-size: 14px;
-    color: #606266;
-    text-align: center;
-    overflow: hidden;
-  }
-  .table-cell-title {
-    border-right: 1px solid #DCDFE6;
-    border-bottom: 1px solid #DCDFE6;
-    padding: 10px;
-    background: #F2F6FC;
-    text-align: center;
-    font-size: 14px;
-    color: #303133;
-  }
+.table-layout {
+  margin-top: 20px;
+  border-left: 1px solid #dcdfe6;
+  border-top: 1px solid #dcdfe6;
+}
+.table-cell {
+  height: 60px;
+  line-height: 40px;
+  border-right: 1px solid #dcdfe6;
+  border-bottom: 1px solid #dcdfe6;
+  padding: 10px;
+  font-size: 14px;
+  color: #606266;
+  text-align: center;
+  overflow: hidden;
+}
+.table-cell-title {
+  border-right: 1px solid #dcdfe6;
+  border-bottom: 1px solid #dcdfe6;
+  padding: 10px;
+  background: #f2f6fc;
+  text-align: center;
+  font-size: 14px;
+  color: #303133;
+}
 </style>

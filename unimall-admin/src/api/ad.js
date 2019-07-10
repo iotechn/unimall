@@ -48,7 +48,7 @@ export function deleteAd(id) {
     params: {
       _gp: 'ad',
       _mt: 'delete',
-      adId : id
+      adId: id
     }
   })
 }

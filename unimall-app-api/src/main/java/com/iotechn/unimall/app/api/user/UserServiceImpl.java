@@ -2,8 +2,8 @@ package com.iotechn.unimall.app.api.user;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.app.exception.AppExceptionDefinition;
-import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.notify.SMSClient;
@@ -26,9 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import sun.security.provider.MD5;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -70,7 +68,7 @@ public class UserServiceImpl implements UserService {
             cacheComponent.putRaw(VERIFY_CODE_PREFIX + phone, verifyCode, 300);
             return "ok";
         } else {
-            throw new AppServiceException(res.getMsg(), AppExceptionDefinition.USER_SEND_VERIFY_FAILED.getCode());
+            throw new AppServiceException(res.getMsg(), ExceptionDefinition.USER_SEND_VERIFY_FAILED.getCode());
         }
 
     }
@@ -85,7 +83,7 @@ public class UserServiceImpl implements UserService {
                 new EntityWrapper<UserDO>()
                         .eq("phone", phone));
         if (count > 0) {
-            throw new AppServiceException(AppExceptionDefinition.USER_PHONE_HAS_EXISTED);
+            throw new AppServiceException(ExceptionDefinition.USER_PHONE_HAS_EXISTED);
         }
         //3.校验成功，注册用户
         Date now = new Date();
@@ -112,7 +110,7 @@ public class UserServiceImpl implements UserService {
                 new EntityWrapper<UserDO>()
                         .eq("phone", phone));
         if (count > 0) {
-            throw new AppServiceException(AppExceptionDefinition.USER_PHONE_HAS_EXISTED);
+            throw new AppServiceException(ExceptionDefinition.USER_PHONE_HAS_EXISTED);
         }
         //3.校验成功，绑定手机
         UserDO updateUserDO = new UserDO();
@@ -123,7 +121,7 @@ public class UserServiceImpl implements UserService {
             cacheComponent.del(VERIFY_CODE_PREFIX + phone);
             return "ok";
         }
-        throw new AppServiceException(AppExceptionDefinition.USER_UNKNOWN_EXCEPTION);
+        throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
     }
 
     @Override
@@ -136,7 +134,7 @@ public class UserServiceImpl implements UserService {
                 new EntityWrapper<UserDO>()
                         .eq("phone", phone));
         if (CollectionUtils.isEmpty(targetUserList)) {
-            throw new AppServiceException(AppExceptionDefinition.USER_PHONE_NOT_EXIST);
+            throw new AppServiceException(ExceptionDefinition.USER_PHONE_NOT_EXIST);
         }
         Long id = targetUserList.get(0).getId();
         //3.校验成功，重置密码
@@ -148,7 +146,7 @@ public class UserServiceImpl implements UserService {
             cacheComponent.del(VERIFY_CODE_PREFIX + phone);
             return "ok";
         }
-        throw new AppServiceException(AppExceptionDefinition.USER_UNKNOWN_EXCEPTION);
+        throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
     }
 
     /**
@@ -160,10 +158,10 @@ public class UserServiceImpl implements UserService {
     private void checkVerifyCode(String phone, String verifyCode) throws ServiceException {
         String raw = cacheComponent.getRaw(VERIFY_CODE_PREFIX + phone);
         if (StringUtils.isEmpty(raw)) {
-            throw new AppServiceException(AppExceptionDefinition.USER_VERIFY_CODE_NOT_EXIST);
+            throw new AppServiceException(ExceptionDefinition.USER_VERIFY_CODE_NOT_EXIST);
         }
         if (!raw.equals(verifyCode)) {
-            throw new AppServiceException(AppExceptionDefinition.USER_VERIFY_CODE_NOT_CORRECT);
+            throw new AppServiceException(ExceptionDefinition.USER_VERIFY_CODE_NOT_CORRECT);
         }
     }
 
@@ -172,7 +170,7 @@ public class UserServiceImpl implements UserService {
         String cryptPassword = Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0,7));
         UserDTO userDTO = userMapper.login(phone, cryptPassword);
         if (userDTO == null) {
-            throw new AppServiceException(AppExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);
+            throw new AppServiceException(ExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);
         }
         String accessToken = GeneratorUtil.genSessionId();
         //放入SESSION专用Redis数据源中
@@ -225,16 +223,16 @@ public class UserServiceImpl implements UserService {
                     userDTO.setAccessToken(accessToken);
                     return userDTO;
                 } else {
-                    throw new AppServiceException(AppExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
+                    throw new AppServiceException(ExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
                 }
             } else {
-                throw new AppServiceException(AppExceptionDefinition.USER_THIRD_PART_NOT_SUPPORT);
+                throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_NOT_SUPPORT);
             }
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             logger.error("[用户第三方登录] 异常", e);
-            throw new AppServiceException(AppExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
+            throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
         }
     }
 
@@ -247,7 +245,7 @@ public class UserServiceImpl implements UserService {
         if (userMapper.updateById(updateUserDO) > 0) {
             return "ok";
         }
-        throw new AppServiceException(AppExceptionDefinition.USER_UNKNOWN_EXCEPTION);
+        throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
     }
 
 

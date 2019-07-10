@@ -1,10 +1,9 @@
 package com.iotechn.unimall.app.api.coupon;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.app.exception.AppExceptionDefinition;
-import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.exception.ServiceExceptionDefinition;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.domain.UserCouponDO;
@@ -21,9 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by rize on 2019/7/4.
@@ -51,21 +48,21 @@ public class CouponServiceImpl implements CouponService {
         if (lockComponent.tryLock(COUPON_USER_LOCK + userId + "_" + couponId, 10)) {
             CouponDO couponDO = couponMapper.selectById(couponId);
             if (couponDO.getStatus() == StatusType.LOCK.getCode()) {
-                throw new AppServiceException(AppExceptionDefinition.COUPON_HAS_LOCKED);
+                throw new AppServiceException(ExceptionDefinition.COUPON_HAS_LOCKED);
             }
             Date now = new Date();
             if (couponDO.getGmtEnd() != null && couponDO.getGmtEnd().getTime() < now.getTime()) {
-                throw new AppServiceException(AppExceptionDefinition.COUPON_ACTIVITY_HAS_END);
+                throw new AppServiceException(ExceptionDefinition.COUPON_ACTIVITY_HAS_END);
             }
             if (couponDO.getGmtStart() != null && couponDO.getGmtStart().getTime() > now.getTime()) {
-                throw new AppServiceException(AppExceptionDefinition.COUPON_ACTIVITY_NOT_START);
+                throw new AppServiceException(ExceptionDefinition.COUPON_ACTIVITY_NOT_START);
             }
             if (couponDO.getTotal() != -1 && couponDO.getSurplus() <= 0) {
-                throw new AppServiceException(AppExceptionDefinition.COUPON_ISSUE_OVER);
+                throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
             } else {
                 if (couponDO.getSurplus() == 1) {
                     if (!lockComponent.tryLock(COUPON_LOCK + couponId, 10)) {
-                        throw new AppServiceException(AppExceptionDefinition.COUPON_ISSUE_OVER);
+                        throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
                     }
                 }
                 couponMapper.decCoupon(couponId);
@@ -80,7 +77,7 @@ public class CouponServiceImpl implements CouponService {
                                 .eq("coupon_id", couponId));
 
                 if (count >= couponDO.getLimit()) {
-                    throw new AppServiceException(AppExceptionDefinition.COUPON_YOU_HAVE_OBTAINED);
+                    throw new AppServiceException(ExceptionDefinition.COUPON_YOU_HAVE_OBTAINED);
                 }
             }
 
@@ -97,7 +94,7 @@ public class CouponServiceImpl implements CouponService {
                 userCouponDO.setGmtStart(now);
                 userCouponDO.setGmtEnd(new Date(now.getTime() + 1000l * 60 * 60 * 24 * couponDO.getDays()));
             } else {
-                throw new AppServiceException(AppExceptionDefinition.COUPON_STRATEGY_INCORRECT);
+                throw new AppServiceException(ExceptionDefinition.COUPON_STRATEGY_INCORRECT);
             }
 
             userCouponDO.setGmtUpdate(now);
@@ -107,7 +104,7 @@ public class CouponServiceImpl implements CouponService {
             lockComponent.release(COUPON_USER_LOCK + userId + "_" + couponId);
             return "ok";
         } else {
-            throw new AppServiceException(AppExceptionDefinition.APP_SYSTEM_BUSY);
+            throw new AppServiceException(ExceptionDefinition.SYSTEM_BUSY);
         }
 
     }

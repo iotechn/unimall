@@ -18,7 +18,7 @@ export function deleteGoods(id) {
     params: {
       _gp: 'goods',
       _mt: 'delete',
-      goodsId : id
+      goodsId: id
     }
   })
 }
@@ -27,9 +27,9 @@ export function publishGoods(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
-      _gp : 'goods',
-      _mt : 'create',
-      allinone : JSON.stringify(data)
+      _gp: 'goods',
+      _mt: 'create',
+      allinone: JSON.stringify(data)
     })
   })
 }
@@ -38,8 +38,8 @@ export function detailGoods(id) {
   return request({
     method: 'get',
     params: {
-      _gp : 'goods',
-      _mt : 'detail',
+      _gp: 'goods',
+      _mt: 'detail',
       goodsId: id
     }
   })

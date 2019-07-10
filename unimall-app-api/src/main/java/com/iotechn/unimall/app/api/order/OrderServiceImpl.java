@@ -1,20 +1,18 @@
 package com.iotechn.unimall.app.api.order;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
-import com.iotechn.unimall.app.api.freight.AppFreightTemplateBizService;
-import com.iotechn.unimall.app.exception.AppExceptionDefinition;
-import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.biz.service.freight.FreightTemplateBizService;
+import com.iotechn.unimall.biz.service.order.OrderBizService;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
-import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.*;
-import com.iotechn.unimall.data.dto.CouponDTO;
 import com.iotechn.unimall.data.dto.SkuDTO;
 import com.iotechn.unimall.data.dto.UserCouponDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
@@ -25,13 +23,13 @@ import com.iotechn.unimall.data.enums.UserLevelType;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
-import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -76,7 +74,10 @@ public class OrderServiceImpl implements OrderService {
     private LockComponent lockComponent;
 
     @Autowired
-    private AppFreightTemplateBizService freightTemplateBizService;
+    private OrderBizService orderBizService;
+
+    @Autowired
+    private FreightTemplateBizService freightTemplateBizService;
 
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;
@@ -94,10 +95,10 @@ public class OrderServiceImpl implements OrderService {
                 //参数强校验 START
                 List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
                 if (CollectionUtils.isEmpty(skuList) || orderRequest.getTotalPrice() == null) {
-                    throw new AppServiceException(AppExceptionDefinition.APP_PARAM_CHECK_FAILED);
+                    throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
                 }
                 if (orderRequest.getTotalPrice() <= 0) {
-                    throw new AppServiceException(AppExceptionDefinition.ORDER_PRICE_MUST_GT_ZERO);
+                    throw new AppServiceException(ExceptionDefinition.ORDER_PRICE_MUST_GT_ZERO);
                 }
                 //商品价格
                 int skuPrice = 0;
@@ -110,11 +111,11 @@ public class OrderServiceImpl implements OrderService {
                     SkuDTO skuDTO = skuMapper.getSkuDTOById(orderRequestSkuDTO.getSkuId());
                     skuIdDTOMap.put(skuDTO.getId(), skuDTO);
                     if (skuDTO == null) {
-                        throw new AppServiceException(AppExceptionDefinition.ORDER_SKU_NOT_EXIST);
+                        throw new AppServiceException(ExceptionDefinition.ORDER_SKU_NOT_EXIST);
                     }
                     if (skuDTO.getStock() < orderRequestSkuDTO.getNum()) {
                         //TODO 这里存在并发问题
-                        throw new AppServiceException(AppExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH);
+                        throw new AppServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH);
                     }
                     int p;
                     if (userLevel == UserLevelType.VIP.getCode()) {
@@ -137,7 +138,7 @@ public class OrderServiceImpl implements OrderService {
                 }
 
                 if (skuPrice != orderRequest.getTotalPrice()) {
-                    throw new AppServiceException(AppExceptionDefinition.ORDER_PRICE_CHECK_FAILED);
+                    throw new AppServiceException(ExceptionDefinition.ORDER_PRICE_CHECK_FAILED);
                 }
 
                 //优惠券折扣价格
@@ -146,17 +147,17 @@ public class OrderServiceImpl implements OrderService {
                 UserCouponDTO userCouponFromFront = orderRequest.getCoupon();
                 if (userCouponFromFront != null) {
                     if (userCouponFromFront.getId() == null || userCouponFromFront.getDiscount() == null) {
-                        throw new AppServiceException(AppExceptionDefinition.APP_PARAM_CHECK_FAILED);
+                        throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
                     }
 
                     UserCouponDTO userCouponFromDB = userCouponMapper.getUserCouponById(userCouponFromFront.getId(), userId);
 
                     if (userCouponFromDB == null) {
-                        throw new AppServiceException(AppExceptionDefinition.ORDER_COUPON_NOT_EXIST);
+                        throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_NOT_EXIST);
                     }
 
                     if (!userCouponFromDB.getDiscount().equals(userCouponFromFront.getDiscount())) {
-                        throw new AppServiceException(AppExceptionDefinition.ORDER_COUPON_DISCOUNT_CHECK_FAILED);
+                        throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_DISCOUNT_CHECK_FAILED);
                     }
 
                     //校验优惠券策略是否满足
@@ -164,11 +165,11 @@ public class OrderServiceImpl implements OrderService {
                     if (categoryId != null) {
                         Integer p = categoryPriceMap.get(categoryId);
                         if (p < userCouponFromDB.getMin()) {
-                            throw new AppServiceException(AppExceptionDefinition.ORDER_COUPON_PRICE_NOT_ENOUGH);
+                            throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_PRICE_NOT_ENOUGH);
                         }
                     } else {
                         if (skuPrice < userCouponFromDB.getMin()) {
-                            throw new AppServiceException(AppExceptionDefinition.ORDER_COUPON_PRICE_NOT_ENOUGH);
+                            throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_PRICE_NOT_ENOUGH);
                         }
                     }
                     couponPrice = userCouponFromDB.getDiscount();
@@ -200,7 +201,7 @@ public class OrderServiceImpl implements OrderService {
                 if (orderRequest.getAddressId() != null) {
                     AddressDO addressDO = addressMapper.selectById(orderRequest.getAddressId());
                     if (!userId.equals(addressDO.getUserId())) {
-                        throw new AppServiceException(AppExceptionDefinition.ORDER_ADDRESS_NOT_BELONGS_TO_YOU);
+                        throw new AppServiceException(ExceptionDefinition.ORDER_ADDRESS_NOT_BELONGS_TO_YOU);
                     }
                     orderDO.setProvince(addressDO.getProvince());
                     orderDO.setCity(addressDO.getCity());
@@ -259,12 +260,12 @@ public class OrderServiceImpl implements OrderService {
 
             } catch (Exception e) {
                 logger.error("[提交订单] 异常", e);
-                throw new AppServiceException(AppExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+                throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
             } finally {
                 lockComponent.release(TAKE_ORDER_LOCK + userId);
             }
         }
-        throw new AppServiceException(AppExceptionDefinition.ORDER_SYSTEM_BUSY);
+        throw new AppServiceException(ExceptionDefinition.ORDER_SYSTEM_BUSY);
     }
 
     @Override
@@ -280,27 +281,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDTO getOrderDetail(Long orderId, Long userId) throws ServiceException {
-        List<OrderDO> orderDOS = orderMapper.selectList(
-                new EntityWrapper<OrderDO>()
-                        .eq("id", orderId)
-                        .eq("user_id", userId));
-
-        if (CollectionUtils.isEmpty(orderDOS)) {
-            throw new AppServiceException(AppExceptionDefinition.ORDER_NOT_EXIST);
-        }
-        OrderDTO orderDTO = new OrderDTO();
-        BeanUtils.copyProperties(orderDOS.get(0), orderDTO);
-        orderDTO.setSkuList(orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", orderId)));
-        return orderDTO;
+        return orderBizService.getOrderDetail(orderId, userId);
     }
 
 
     public Object wxPrepay(String orderNo, String ip, Long userId) throws ServiceException {
-        OrderDO orderDO = checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
         // 检测订单状态
         Integer status = orderDO.getStatus();
         if (status != OrderStatusType.UNPAY.getCode()) {
-            throw new AppServiceException(AppExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
         }
 
         String openid = SessionUtil.getUser().getMiniOpenId();
@@ -319,23 +309,24 @@ public class OrderServiceImpl implements OrderService {
 //TODO 缓存支付Id            userBizService.setVaildFormIdFromSession(prepayId);
         } catch (Exception e) {
             logger.error("[预付款异常]", e);
-            throw new AppServiceException(AppExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+            throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
         }
         return result;
     }
 
-
-
-    private OrderDO checkOrderExist(String orderNo, Long userId) throws ServiceException {
-        List<OrderDO> orderDOS = orderMapper.selectList(
-                new EntityWrapper<OrderDO>()
-                        .eq("order_no", orderNo)
-                        .eq("user_id", userId));
-        if (CollectionUtils.isEmpty(orderDOS)) {
-            throw new AppServiceException(AppExceptionDefinition.ORDER_NOT_EXIST);
+    @Override
+    @Transactional
+    public String refund(String orderNo, Long userId) throws ServiceException {
+        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        if (OrderStatusType.refundable(orderDO.getStatus())) {
+            OrderDO updateOrderDO = new OrderDO();
+            updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());
+            orderBizService.changeOrderStatus(orderNo, orderDO.getStatus() , updateOrderDO);
+            return "ok";
         }
-        return orderDOS.get(0);
+        throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_REFUND);
     }
+
 
 
 }

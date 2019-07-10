@@ -1,35 +1,45 @@
 import request from '@/utils/request'
-import Qs from 'qs'
 
 export function listOrder(query) {
   return request({
     method: 'get',
     params: {
-      _gp: 'order',
+      _gp: 'admin.order',
       _mt: 'list',
       ...query
     }
   })
 }
 
-export function detailOrder(id) {
+export function detailOrder(orderId) {
   return request({
     method: 'get',
     params: {
-      _gp: 'order',
+      _gp: 'admin.order',
       _mt: 'detail',
-      id
+      orderId
     }
   })
 }
 
-export function shipOrder(id) {
+export function shipOrder(orderNo) {
   return request({
     method: 'post',
     params: {
-      _gp: 'order',
+      _gp: 'admin.order',
       _mt: 'ship',
-      id
+      orderNo
+    }
+  })
+}
+
+export function refundOrder(refundForm) {
+  return request({
+    method: 'post',
+    params: {
+      _gp: 'admin.order',
+      _mt: 'refund',
+      ...refundForm
     }
   })
 }

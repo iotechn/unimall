@@ -7,8 +7,8 @@ package com.iotechn.unimall.app.api.collect;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.iotechn.unimall.app.api.goods.GoodsBizService;
-import com.iotechn.unimall.app.exception.AppExceptionDefinition;
-import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
@@ -23,7 +23,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CollectServiceImpl implements CollectService {
@@ -49,7 +48,7 @@ public class CollectServiceImpl implements CollectService {
                 .eq("user_id", userId)
                 .eq("spu_id", spuId));
         if (!CollectionUtils.isEmpty(collectDOS)) {
-            throw new AppServiceException(AppExceptionDefinition.COLLECT_ALREADY_EXISTED);
+            throw new AppServiceException(ExceptionDefinition.COLLECT_ALREADY_EXISTED);
         }
         CollectDO collectDO = new CollectDO(userId, spuId);
         Date now = new Date();
@@ -71,7 +70,7 @@ public class CollectServiceImpl implements CollectService {
             return true;
         }
 
-        throw new AppServiceException(AppExceptionDefinition.APP_PARAM_CHECK_FAILED);
+        throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
     }
 
     @Override
@@ -79,7 +78,7 @@ public class CollectServiceImpl implements CollectService {
         Integer count = collectMapper.selectCount(new EntityWrapper<CollectDO>().eq("user_id", userId));
         Integer totalPage = 1;
         if (size <= 0 || page <= 0) {
-            throw new AppServiceException(AppExceptionDefinition.COLLECT_PARAM_CHECK_FAILED);
+            throw new AppServiceException(ExceptionDefinition.COLLECT_PARAM_CHECK_FAILED);
         }
         if (count % size == 0 && count != 0) {
             totalPage = count / size;

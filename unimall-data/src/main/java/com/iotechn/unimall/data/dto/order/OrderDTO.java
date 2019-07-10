@@ -70,6 +70,10 @@ public class OrderDTO extends SuperDTO {
 
     private String address;
 
+    private String phone;
+
+    private String consignee;
+
     private String mono;
 
     private Date gmtShip;

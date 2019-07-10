@@ -1,12 +1,11 @@
 package com.iotechn.unimall.app.api.address;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.app.exception.AppExceptionDefinition;
-import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.mapper.AddressMapper;
-import com.iotechn.unimall.data.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +39,7 @@ public class AddressServiceImpl implements AddressService {
                         , new EntityWrapper<AddressDO>()
                                 .eq("user_id", userId)
                                 .eq("default_address", 1)) > 0)) {
-                    throw new AppServiceException(AppExceptionDefinition.ADDRESS_QUERY_FAILED);
+                    throw new AppServiceException(ExceptionDefinition.ADDRESS_QUERY_FAILED);
                 }
                 addressDO = new AddressDO(province, city, county, address, 1, userId, phone, consignee);
             } else {
@@ -53,7 +52,7 @@ public class AddressServiceImpl implements AddressService {
         if (addressMapper.insert(addressDO) > 0) {
             return true;
         } else {
-            throw new AppServiceException(AppExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
+            throw new AppServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
         }
     }
 
@@ -72,7 +71,7 @@ public class AddressServiceImpl implements AddressService {
             if (!(addressMapper.delete(new EntityWrapper<AddressDO>()
                     .eq("id", addressId)
                     .eq("user_id", userId)) > 0)) {
-                throw new AppServiceException(AppExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
+                throw new AppServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
             } else {
                 List<AddressDO> addressDOS = addressMapper.selectList(new EntityWrapper<AddressDO>().eq("user_id", userId));
                 if (addressDOS.size() != 0) {

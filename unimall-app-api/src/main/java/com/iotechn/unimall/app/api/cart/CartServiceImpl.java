@@ -2,15 +2,12 @@ package com.iotechn.unimall.app.api.cart;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.iotechn.unimall.app.api.category.CategoryService;
-import com.iotechn.unimall.app.exception.AppExceptionDefinition;
-import com.iotechn.unimall.app.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.exception.ServiceExceptionDefinition;
 import com.iotechn.unimall.data.domain.CartDO;
 import com.iotechn.unimall.data.dto.CartDTO;
-import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.mapper.CartMapper;
-import com.iotechn.unimall.data.util.SessionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,11 +91,11 @@ public class CartServiceImpl implements CartService {
     @Transactional
     public Boolean removeCartItemBatch(String cartIdList, Long userId) throws ServiceException {
         if (StringUtils.isEmpty(cartIdList)) {
-            throw new AppServiceException(AppExceptionDefinition.APP_PARAM_CHECK_FAILED);
+            throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
         }
         String[] split = cartIdList.split(",");
         if (split.length == 0) {
-            throw new AppServiceException(AppExceptionDefinition.APP_PARAM_CHECK_FAILED);
+            throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
         }
         List<Long> array = new ArrayList<>(split.length);
         for (String idRaw : split) {
@@ -121,7 +118,7 @@ public class CartServiceImpl implements CartService {
         if (update > 0) {
             return num;
         }
-        throw new AppServiceException(AppExceptionDefinition.CART_UPDATE_FAILED);
+        throw new AppServiceException(ExceptionDefinition.CART_UPDATE_FAILED);
     }
 
     @Override

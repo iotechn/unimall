@@ -3,9 +3,9 @@ package com.iotechn.unimall.admin.api.admin;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
-import com.iotechn.unimall.admin.exception.AdminExceptionDefinition;
-import com.iotechn.unimall.admin.exception.AdminServiceException;
 import com.iotechn.unimall.core.Const;
+import com.iotechn.unimall.core.exception.AdminServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.util.MD5Util;
 import com.iotechn.unimall.data.domain.AdminDO;
@@ -56,15 +56,15 @@ public class AdminServiceImpl implements AdminService {
                 new EntityWrapper<AdminDO>()
                         .eq("username", username));
         if (CollectionUtils.isEmpty(adminDOS)) {
-            throw new AdminServiceException(AdminExceptionDefinition.ADMIN_NOT_EXIST);
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_NOT_EXIST);
         }
         AdminDO adminDO = adminDOS.get(0);
         if (!MD5Util.verify(password, username, adminDO.getPassword())) {
-            throw new AdminServiceException(AdminExceptionDefinition.ADMIN_PASSWORD_ERROR);
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
         }
         List<Long> ids = JSONObject.parseArray(adminDO.getRoleIds(), Long.class);
         if (CollectionUtils.isEmpty(ids)) {
-            throw new AdminServiceException(AdminExceptionDefinition.ADMIN_ROLE_IS_EMPTY);
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_ROLE_IS_EMPTY);
         }
         List<RoleDO> roleDOList = roleMapper.selectList(
                 new EntityWrapper<RoleDO>()
@@ -131,7 +131,7 @@ public class AdminServiceImpl implements AdminService {
                 new EntityWrapper<AdminDO>()
                         .eq("username", adminDTO.getUsername()));
         if (count > 0) {
-            throw new AdminServiceException(AdminExceptionDefinition.ADMIN_USER_NAME_REPEAT);
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NAME_REPEAT);
         }
         BeanUtils.copyProperties(adminDTO, adminDO);
         adminDO.setRoleIds(JSONObject.toJSONString(adminDTO.getRoleIds()));
@@ -144,14 +144,14 @@ public class AdminServiceImpl implements AdminService {
             adminDTO.setId(adminDO.getId());
             return adminDTO;
         }
-        throw new AdminServiceException(AdminExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
     public String update(AdminDTO adminDTO, Long adminId) throws ServiceException {
         Long id = adminDTO.getId();
         if (id == null) {
-            throw new AdminServiceException(AdminExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
         }
         AdminDO adminDO = new AdminDO();
         BeanUtils.copyProperties(adminDTO, adminDO);
@@ -167,7 +167,7 @@ public class AdminServiceImpl implements AdminService {
         if (adminMapper.updateById(adminDO) > 0) {
             return "ok";
         }
-        throw new AdminServiceException(AdminExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
@@ -175,14 +175,14 @@ public class AdminServiceImpl implements AdminService {
         if (adminMapper.deleteById(id) > 0) {
             return "ok";
         }
-        throw new AdminServiceException(AdminExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
     public String newPassword(String accessToken, String oldPassword, String newPassword, Long adminId) throws ServiceException {
         AdminDO adminDOExist = adminMapper.selectById(adminId);
         if (!MD5Util.md5(oldPassword, adminDOExist.getUsername()).equals(adminDOExist.getPassword())) {
-            throw new AdminServiceException(AdminExceptionDefinition.ADMIN_PASSWORD_ERROR);
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
         }
         AdminDO adminDO = new AdminDO();
         adminDO.setId(adminId);
@@ -191,7 +191,7 @@ public class AdminServiceImpl implements AdminService {
             logout(accessToken, adminId);
             return "ok";
         }
-        throw new AdminServiceException(AdminExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     private String generateAccessToken() {

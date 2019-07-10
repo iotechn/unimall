@@ -11,25 +11,24 @@ export function listLife(query) {
   })
 }
 
-
 export function deleteLife(id) {
   return request({
     method: 'post',
     params: {
       _gp: 'life',
       _mt: 'delete',
-      lifeId : id
+      lifeId: id
     }
   })
 }
 
-export function pushLife(id,status) {
+export function pushLife(id, status) {
   return request({
     method: 'post',
     params: {
       _gp: 'life',
       _mt: 'push',
-      lifeId : id,
+      lifeId: id,
       status
     }
   })
