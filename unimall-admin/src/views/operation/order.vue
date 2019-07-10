@@ -147,11 +147,11 @@
         -x3c-style="width: 400px; margin-left:50px;"
       >
         -->
-        <el-form-item label="快递公司" prop="shipChannel">
-          <el-input v-model="shipForm.shipChannel" />
+        <el-form-item label="快递公司" prop="shipCode">
+          <el-input v-model="shipForm.shipCode" />
         </el-form-item>
-        <el-form-item label="快递编号" prop="shipSn">
-          <el-input v-model="shipForm.shipSn" />
+        <el-form-item label="快递编号" prop="shipNo">
+          <el-input v-model="shipForm.shipNo" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -204,6 +204,10 @@ const statusMap = {
   70: '已退款',
   80: '已取消',
   90: '已取消(系统)'
+}
+
+const shipCodeList = {
+  'ZTB': '中通快递'
 }
 
 export default {

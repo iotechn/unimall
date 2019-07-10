@@ -2,6 +2,7 @@ package com.iotechn.unimall.core.notify;
 
 import com.github.qcloudsms.SmsSingleSender;
 import com.github.qcloudsms.SmsSingleSenderResult;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ public class QCloudSMSClient implements SMSClient,InitializingBean {
             throw e;
         } catch (Exception e) {
             logger.error("[腾讯短信发送] 异常", e);
-            throw new ThirdPartServiceException("腾讯云短信发送未知异常", 0);
+            throw new ThirdPartServiceException("腾讯云短信发送未知异常", ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
         }
     }
 

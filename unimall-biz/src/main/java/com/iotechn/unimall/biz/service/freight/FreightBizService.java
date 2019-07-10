@@ -7,6 +7,7 @@ import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.domain.FreightTemplateDO;
+import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
@@ -27,7 +28,7 @@ import java.util.List;
  * Time: 下午7:48
  */
 @Service
-public class FreightTemplateBizService {
+public class FreightBizService {
 
     @Autowired
     private FreightTemplateMapper freightTemplateMapper;
@@ -35,6 +36,8 @@ public class FreightTemplateBizService {
     private FreightTemplateCarriageMapper freightTemplateCarriageMapper;
     @Autowired
     private AddressMapper addressMapper;
+    @Autowired
+    private ShipTraceQuery shipTraceQuery;
 
     //根据传入的订单数据，计算邮费
     public Integer getFreightMoney(OrderRequestDTO orderRequestDTO) {
@@ -146,5 +149,10 @@ public class FreightTemplateBizService {
 
         FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO(freightTemplateDO, freightTemplateCarriageDOList);
         return freightTemplateDTO;
+    }
+
+
+    public ShipTraceDTO getShipTraceList(String shipNo, String shipCode) throws ServiceException {
+        return shipTraceQuery.query(shipNo, shipCode);
     }
 }

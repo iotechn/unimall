@@ -2,6 +2,7 @@ package com.iotechn.unimall.data.dto.order;
 
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.dto.SuperDTO;
+import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import lombok.Data;
 
 import java.util.Date;
@@ -84,5 +85,7 @@ public class OrderDTO extends SuperDTO {
     private Date gmtConfirm;
 
     private List<OrderSkuDO> skuList;
+
+    private ShipTraceDTO shipTraceDTO;
 
 }

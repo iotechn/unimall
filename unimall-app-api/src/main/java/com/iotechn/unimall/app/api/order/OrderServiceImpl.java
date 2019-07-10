@@ -5,7 +5,7 @@ import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
-import com.iotechn.unimall.biz.service.freight.FreightTemplateBizService;
+import com.iotechn.unimall.biz.service.freight.FreightBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.AppServiceException;
@@ -25,7 +25,6 @@ import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -77,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
     private OrderBizService orderBizService;
 
     @Autowired
-    private FreightTemplateBizService freightTemplateBizService;
+    private FreightBizService freightBizService;
 
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;
@@ -176,7 +175,7 @@ public class OrderServiceImpl implements OrderService {
                 }
 
                 //TODO 运费
-                Integer freightPrice = freightTemplateBizService.getFreightMoney(orderRequest);
+                Integer freightPrice = freightBizService.getFreightMoney(orderRequest);
                 //参数强校验 END
                 //???是否校验actualPrice??强迫校验？
                 int actualPrice = skuPrice - couponPrice - freightPrice;
