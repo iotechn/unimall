@@ -35,6 +35,8 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
     @Autowired
     private CacheComponent cacheComponent;
 
+    private  final  static String  ADVERTISEMENT_NAME = "ADVERTISEMENT_TYPE_";
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addAdvertisement(Long adminId, Integer adType, String title, String url, String imgUrl, Integer status) throws ServiceException {
@@ -45,7 +47,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
         advertisementDO.setGmtUpdate(now);
 
         if(advertisementMapper.insert(advertisementDO) > 0){
-            cacheComponent.del(AdvertisementType.ADVERTISEMENT_NAME+adType.toString());
+            cacheComponent.del(ADVERTISEMENT_NAME+adType);
             return true;
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_ADD_FAILED);
@@ -58,7 +60,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
         if(advertisementMapper.delete(new EntityWrapper<AdvertisementDO>()
                 .eq("id",adId)
                 .eq("ad_type",adType)) > 0){
-            cacheComponent.del(AdvertisementType.ADVERTISEMENT_NAME+adType.toString());
+            cacheComponent.del(ADVERTISEMENT_NAME+adType);
             return true;
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_DELETE_FAILED);
@@ -71,7 +73,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
         advertisementDO.setId(adId);
         advertisementDO.setGmtUpdate(new Date());
         if(advertisementMapper.updateById(advertisementDO)>0){
-            cacheComponent.del(AdvertisementType.ADVERTISEMENT_NAME+adType.toString());
+            cacheComponent.del(ADVERTISEMENT_NAME+adType);
             return  true;
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_UPDATE_FAILED);

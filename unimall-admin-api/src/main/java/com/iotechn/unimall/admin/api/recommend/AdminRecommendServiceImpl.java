@@ -36,6 +36,8 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
     @Autowired
     private SpuMapper spuMapper;
 
+    private final static String RECOMMEND_NAME = "RECOMMEND_TYPE_";
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addRecommend(Long adminId, Long spuId, Integer recommendType) throws ServiceException {
@@ -56,7 +58,7 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
         if (!(recommendMapper.insert(recommendDO) > 0)) {
             throw new AdminServiceException(ExceptionDefinition.RECOMMEND_SQL_ADD_FAILED);
         }
-        cacheComponent.del(RecommendType.RECOMMEND_NAME + Integer.toString(recommendType));
+        cacheComponent.del(RECOMMEND_NAME + recommendType);
         return true;
     }
 
@@ -72,7 +74,7 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
             return true;
         }
 
-        cacheComponent.del(RecommendType.RECOMMEND_NAME + Integer.toString(recommendType));
+        cacheComponent.del(RECOMMEND_NAME + recommendType);
         throw new AdminServiceException(ExceptionDefinition.RECOMMEND_SQL_DELETE_FAILED);
     }
 

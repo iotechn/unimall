@@ -16,7 +16,7 @@
         class="filter-item"
         placeholder="请选择广告状态"
       >
-        <el-option v-for="(key, value) in adStatusMap" :key="key" :label="key" :value="value" />
+        <el-option v-for="(key,index) in adStatusMap" :key="index" :label="key.name" :value="key.value" />
       </el-select>
       <el-select
         v-model="listQuery.adType"
@@ -24,7 +24,7 @@
         class="filter-item"
         placeholder="请选择广告类型"
       >
-        <el-option v-for="(key, value) in adTypeMap" :key="key" :label="key" :value="value" />
+        <el-option v-for="(key,index) in adTypeMap" :key="index" :label="key.name" :value="key.value" />
       </el-select>
       <el-button
         v-permission="['promote:advertisement:query']"
@@ -125,13 +125,13 @@
           </el-upload>
         </el-form-item>
         <el-form-item label="广告类型" prop="adType">
-          <el-select v-model="dataForm.adType" :value-key="key" placeholder="请选择">
-            <el-option v-for="(key, value) in adTypeMap" :key="key" :label="key" :value="value" />
+          <el-select v-model="dataForm.adType" placeholder="请选择">
+            <el-option v-for="(key, index) in adTypeMap" :key="index" :label="key.name" :value="key.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="广告状态" prop="status">
           <el-select v-model="dataForm.status" placeholder="请选择">
-            <el-option v-for="(key, value) in adStatusMap" :key="key" :label="key" :value="value" se/>
+            <el-option v-for="(key, index) in adStatusMap" :key="index" :label="key.name" :value="key.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="活动链接" prop="url">
@@ -183,16 +183,19 @@ import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination'
 import ElOption from '../../../node_modules/element-ui/packages/select/src/option' // Secondary package based on el-pagination
 
-const adTypeMap = {
-  1: '轮播',
-  2: '商户列表三图',
-  '': '全部'
-}
-const adStatusMap = {
-  0: '冻结',
-  1: '激活',
-  '': '全部'
-}
+// const adTypeMap = {
+//   1: '轮播',
+//   2: '商户列表三图',
+//   '': '全部'
+// }
+
+const adTypeMap = [{ value: 1, name: '轮播' }, { value: 2, name: '商户三图' }, { value: '', name: '全部' }]
+const adStatusMap = [{ value: 0, name: '冻结' }, { value: 1, name: '激活' }, { value: '', name: '全部' }]
+// const adStatusMap = {
+//   0: '冻结',
+//   1: '激活',
+//   '': '全部'
+// }
 
 export default {
   name: 'Ad',
@@ -202,15 +205,16 @@ export default {
   },
   filters: {
     adTypeFilter(code) {
-      return adTypeMap[code]
+      return adTypeMap[code - 1]['name']
     },
     adStatusFilter(code) {
-      return adStatusMap[code]
+      return adStatusMap[code]['name']
     }
   },
   data() {
     return {
       uploadPath,
+      value: [],
       list: [],
       total: 0,
       listLoading: true,
