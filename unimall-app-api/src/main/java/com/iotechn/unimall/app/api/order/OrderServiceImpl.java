@@ -15,6 +15,7 @@ import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.SkuDTO;
 import com.iotechn.unimall.data.dto.UserCouponDTO;
+import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
@@ -314,7 +315,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public String refund(String orderNo, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
         if (OrderStatusType.refundable(orderDO.getStatus())) {
@@ -326,6 +327,45 @@ public class OrderServiceImpl implements OrderService {
         throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_REFUND);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String cancel(String orderNo, Long userId) throws ServiceException {
+        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        if (orderDO.getStatus() != OrderStatusType.UNPAY.getCode()) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CANCEL);
+        }
+        OrderDO updateOrderDO = new OrderDO();
+        updateOrderDO.setStatus(OrderStatusType.CANCELED.getCode());
+        updateOrderDO.setGmtUpdate(new Date());
+        orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
+        return "ok";
+    }
+
+    @Override
+    public String confirm(String orderNo, Long userId) throws ServiceException {
+        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        if (orderDO.getStatus() != OrderStatusType.WAIT_CONFIRM.getCode()) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CONFIRM);
+        }
+        OrderDO updateOrderDO = new OrderDO();
+        updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
+        updateOrderDO.setGmtUpdate(new Date());
+        orderBizService.changeOrderStatus(orderNo, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
+        return "ok";
+    }
+
+    @Override
+    public ShipTraceDTO queryShip(String orderNo, Long userId) throws ServiceException {
+        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        if (orderDO.getStatus() < OrderStatusType.WAIT_CONFIRM.getCode()) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_HAS_NOT_SHIP);
+        }
+        if (!StringUtils.isEmpty(orderDO.getShipCode()) && !StringUtils.isEmpty(orderDO.getShipNo())) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_DID_NOT_SET_SHIP);
+        }
+        ShipTraceDTO shipTraceList = freightBizService.getShipTraceList(orderDO.getShipNo(), orderDO.getShipCode());
+        return shipTraceList;
+    }
 
 
 }

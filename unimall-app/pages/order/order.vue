@@ -43,18 +43,20 @@
 							</view>
 						</navigator>
 						<view class="action-box b-t" v-if="item.status == 10">
-							<button class="action-btn" @click="cancelOrder(item)">取消订单</button>
+							<button :disabled="submiting" class="action-btn" @click="cancelOrder(item)">取消订单</button>
 							<button class="action-btn recom">立即支付</button>
 						</view>
 						<view class="action-box b-t" v-if="item.status == 20">
-							<button class="action-btn" @click="cancelOrder(item)">申请退款</button>
+							<button :disabled="submiting" class="action-btn" @click="refundOrder(item)">申请退款</button>
 						</view>
 						<view class="action-box b-t" v-if="item.status == 30">
-							<button class="action-btn" @click="cancelOrder(item)">申请退款</button>
-							<button class="action-btn recom">确认收货</button>
+							<button :disabled="submiting" class="action-btn" @click="refundOrder(item)">申请退款</button>
+							<button :disabled="submiting" class="action-btn recom" @click="confirmOrder(item)">确认收货</button>
 						</view>
 						<view class="action-box b-t" v-if="item.status == 40">
-							<button class="action-btn recom">立即评价</button>
+							<navigator url="./orderAppraise">
+								<button :disabled="submiting" class="action-btn recom" @click="appraiseOrder(item)">立即评价</button>
+							</navigator>
 						</view>
 					</view>
 
@@ -71,7 +73,7 @@
 	import empty from "@/components/empty";
 	import Json from '@/Json';
 	export default {
-		
+
 		components: {
 			uniLoadMore,
 			empty
@@ -85,9 +87,11 @@
 					40: '待评价',
 					50: '已完成',
 					60: '退款中',
-					70: '已取消',
-					80: '已取消(系统)'
+					70: '已退款',
+					80: '已取消',
+					90: '已取消(系统)'
 				},
+				submiting: false,
 				tabCurrentIndex: 0,
 				navList: [{
 						state: 0,
@@ -192,41 +196,55 @@
 			tabClick(index) {
 				this.tabCurrentIndex = index;
 			},
-			//删除订单
-			deleteOrder(index) {
-				uni.showLoading({
-					title: '请稍后'
-				})
-				setTimeout(() => {
-					this.navList[this.tabCurrentIndex].orderList.splice(index, 1);
-					uni.hideLoading();
-				}, 600)
-			},
 			//取消订单
 			cancelOrder(item) {
-				uni.showLoading({
-					title: '请稍后'
+				const that = this
+				that.submiting = true
+				that.$api.request('order', 'cancel', {
+					orderNo: item.orderNo
+				}, failres => {
+					that.submiting = false
+					that.$api.msg(failres.errmsg)
+				}).then(res => {
+					that.submiting = false
+					item.status = 80
 				})
-				// 				setTimeout(() => {
-				// 					let {
-				// 						stateTip,
-				// 						stateTipColor
-				// 					} = this.orderStateExp(9);
-				// 					item = Object.assign(item, {
-				// 						state: 9,
-				// 						stateTip,
-				// 						stateTipColor
-				// 					})
-				// 
-				// 					//取消订单后删除待付款中该项
-				// 					let list = this.navList[1].orderList;
-				// 					let index = list.findIndex(val => val.id === item.id);
-				// 					index !== -1 && list.splice(index, 1);
-				// 
-				// 					uni.hideLoading();
-				// 				}, 600)
 			},
-		},
+			//订单退款
+			refundOrder(item) {
+				const that = this
+				that.submiting = true
+				that.$api.request('order', 'refund', {
+					orderNo: item.orderNo
+				}, failres => {
+					that.submiting = false
+					that.$api.msg(failres.errmsg)
+				}).then(res => {
+					that.submiting = false
+					item.status = 60
+				})
+			},
+			//确认订单
+			confirmOrder(item) {
+				const that = this
+				that.submiting = true
+				that.$api.request('order', 'confirm', {
+					orderNo: item.orderNo
+				}, failres => {
+					that.submiting = false
+					that.$api.msg(failres.errmsg)
+				}).then(res => {
+					that.submiting = false
+					item.status = 40
+				})
+			},
+			//评价订单
+			appraiseOrder(item) {
+				uni.navigateTo({
+					url: './orderAppraise?orderid=' + item.id
+				})
+			}
+		}
 	}
 </script>
 

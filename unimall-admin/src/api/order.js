@@ -22,13 +22,13 @@ export function detailOrder(orderId) {
   })
 }
 
-export function shipOrder(orderNo) {
+export function shipOrder(shipForm) {
   return request({
     method: 'post',
     params: {
       _gp: 'admin.order',
       _mt: 'ship',
-      orderNo
+      ...shipForm
     }
   })
 }

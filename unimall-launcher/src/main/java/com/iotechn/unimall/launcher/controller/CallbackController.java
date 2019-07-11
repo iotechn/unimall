@@ -42,7 +42,7 @@ public class CallbackController {
     private OrderMapper orderMapper;
 
     @RequestMapping("/wxpay")
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Object wxpay(@RequestBody String body) {
         WxPayOrderNotifyResult result = null;
         try {

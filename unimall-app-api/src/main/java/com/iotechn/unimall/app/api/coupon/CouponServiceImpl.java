@@ -42,7 +42,7 @@ public class CouponServiceImpl implements CouponService {
     private static final String COUPON_USER_LOCK = "COUPON_USER_LOCK_";
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public String obtainCoupon(Long couponId, Long userId) throws ServiceException {
         //防止用户一瞬间提交两次表单，导致超领
         if (lockComponent.tryLock(COUPON_USER_LOCK + userId + "_" + couponId, 10)) {

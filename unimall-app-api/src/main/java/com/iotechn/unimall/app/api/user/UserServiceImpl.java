@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public String bindPhone(String phone, String password, String verifyCode, Long userId) throws ServiceException {
         //1.校验验证码
         checkVerifyCode(phone, verifyCode);
@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public String resetPassword(String phone, String password, String verifyCode) throws ServiceException {
         //1.校验验证码
         checkVerifyCode(phone, verifyCode);

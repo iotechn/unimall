@@ -49,6 +49,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     public Page<OrderDO> list(Integer pageNo, Integer pageSize, Integer status, String orderNo, Long adminId) throws ServiceException {
         Wrapper<OrderDO> wrapper = new EntityWrapper<OrderDO>();
+        wrapper.orderBy("id", false);
         if (!StringUtils.isEmpty(orderNo)) {
             wrapper.eq("order_no", orderNo);
         }
@@ -61,7 +62,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public String refund(String orderNo, Integer type, Long adminId) throws ServiceException {
         if (lockComponent.tryLock(OrderBizService.ORDER_REFUND_LOCK + orderNo, 30)) {
             try {
@@ -120,8 +121,21 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String ship(String orderNo, String shipCode, String shipNo, Long adminId) throws ServiceException {
-        return null;
+        orderBizService.checkOrderExist(orderNo, null);
+        OrderDO updateOrderDO = new OrderDO();
+        Date now = new Date();
+        updateOrderDO.setGmtUpdate(now);
+        updateOrderDO.setGmtShip(now);
+        updateOrderDO.setStatus(OrderStatusType.WAIT_CONFIRM.getCode());
+        if (!"NONE".equals(shipCode)) {
+            updateOrderDO.setShipCode(shipCode);
+            updateOrderDO.setShipNo(shipNo);
+        }
+        //流转订单状态
+        orderBizService.changeOrderStatus(orderNo, OrderStatusType.WAIT_STOCK.getCode(), updateOrderDO);
+        return "ok";
     }
 
     @Override

@@ -99,6 +99,17 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_REFUND_FAILED =
             new ServiceExceptionDefinition(13015, "微信退款失败 请检查微信账户余额");
 
+    public static final ServiceExceptionDefinition ORDER_STATUS_NOT_SUPPORT_CANCEL =
+            new ServiceExceptionDefinition(13016, "订单状态不支持取消");
+
+    public static final ServiceExceptionDefinition ORDER_STATUS_NOT_SUPPORT_CONFIRM =
+            new ServiceExceptionDefinition(13016, "订单状态不支持确认收货");
+
+    public static final ServiceExceptionDefinition ORDER_HAS_NOT_SHIP =
+            new ServiceExceptionDefinition(13017, "订单尚未发货");
+
+    public static final ServiceExceptionDefinition ORDER_DID_NOT_SET_SHIP =
+            new ServiceExceptionDefinition(13018, "订单不需要物流公司");
 
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =

@@ -46,6 +46,7 @@ mvnw.cmd
 /unimall-app/unpackage/dist/
 
 
+
 ###password###
 /unimall-launcher/src/main/resources/application.properties
 
@@ -53,3 +54,5 @@ mvnw.cmd
 
 ###node_modules###
 /unimall-admin/node_modules/
+/unimall-app/node_modules/
+

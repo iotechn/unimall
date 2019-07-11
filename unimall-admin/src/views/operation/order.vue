@@ -141,22 +141,24 @@
       <el-form
         ref="shipForm"
         :model="shipForm"
+        :rules="shipRules"
         status-icon
         label-position="left"
         label-width="100px"
-        -x3c-style="width: 400px; margin-left:50px;"
+        style="width: 400px; margin-left:50px;"
       >
-        -->
         <el-form-item label="快递公司" prop="shipCode">
-          <el-input v-model="shipForm.shipCode" />
+          <el-select v-model="shipForm.shipCode" placeholder="请选择快递公司">
+            <el-option v-for="(key, value) in shipCodeMap" :key="key" :label="key" :value="value"/>
+          </el-select>
         </el-form-item>
         <el-form-item label="快递编号" prop="shipNo">
-          <el-input v-model="shipForm.shipNo" />
+          <el-input :disabled="shipForm.shipCode === 'NONE'" v-model="shipForm.shipNo" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="shipDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmShip">确定</el-button>
+        <el-button :disabled="shipSubmiting" type="primary" @click="confirmShip">确定</el-button>
       </div>
     </el-dialog>
 
@@ -165,6 +167,7 @@
       <el-form
         ref="refundForm"
         :model="refundForm"
+        :rules="refundRules"
         status-icon
         label-position="left"
         label-width="100px"
@@ -180,7 +183,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="refundDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmRefund">确定</el-button>
+        <el-button :disabled="refundSubmiting" type="primary" @click="confirmRefund">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -206,8 +209,22 @@ const statusMap = {
   90: '已取消(系统)'
 }
 
-const shipCodeList = {
-  'ZTB': '中通快递'
+const shipCodeMap = {
+  'NONE': '无需物流公司',
+  'SF': '顺丰速运',
+  'HTKY': '百世快递',
+  'ZTO': '中通快递',
+  'STO': '申通快递',
+  'YTO': '圆通速递',
+  'YD': '韵达速递',
+  'YZPY': '邮政快递包裹',
+  'EMS': 'EMS',
+  'HHTT': '天天快递',
+  'JD': '京东快递',
+  'UC': '优速快递',
+  'DBL': '德邦快递',
+  'ZJS': '宅急送',
+  'TNT': 'TNT快递'
 }
 
 export default {
@@ -220,6 +237,7 @@ export default {
   },
   data() {
     return {
+      shipCodeMap,
       list: undefined,
       total: 0,
       listLoading: true,
@@ -240,13 +258,31 @@ export default {
         type: '0'
       },
       refundDialogVisible: false,
+      refundSubmiting: false,
       downloadLoading: false,
       shipForm: {
         orderNo: undefined,
-        shipCode: undefined,
+        shipCode: 'NONE',
         shipNo: undefined
       },
-      shipDialogVisible: false
+      shipDialogVisible: false,
+      shipSubmiting: false,
+      refundRules: {
+        orderNo: [
+          { required: true, message: '请使用非IE浏览器重试', trigger: 'blur' }
+        ],
+        type: [
+          { required: true, message: '请选择退货类型', trigger: 'blur' }
+        ]
+      },
+      shipRules: {
+        shipCode: [
+          { required: true, message: '请选择物流类型', trigger: 'blur' }
+        ],
+        orderNo: [
+          { required: true, message: '请使用非IE浏览器重试', trigger: 'blur' }
+        ]
+      }
     }
   },
   created() {
@@ -279,46 +315,61 @@ export default {
       this.orderDialogVisible = true
     },
     handleShip(row) {
-      this.$confirm('您确定要发货 ' + row.orderNo + ' 的订单吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+      this.shipDialogVisible = true
+      this.shipForm.orderNo = row.orderNo
+    },
+    confirmShip() {
+      this.$refs['shipForm'].validate(valid => {
+        if (valid) {
+          this.shipSubmiting = true
+          if (this.shipForm.shipCode !== 'NONE' && !this.shipForm.shipNo) {
+            this.$notify.error({
+              title: '失败',
+              message: '请填写运单号'
+            })
+          } else {
+            shipOrder(this.shipForm)
+              .then(response => {
+                this.shipSubmiting = false
+                this.shipDialogVisible = false
+                this.$notify.success({
+                  title: '成功',
+                  message: '确认发货成功！'
+                })
+                this.getList()
+              })
+              .catch(response => {
+                this.shipSubmiting = false
+                this.$notify.error({
+                  title: '失败',
+                  message: response.data.errmsg
+                })
+              })
+          }
+        }
       })
-        .then(() => {
-          shipOrder(row.orderNo)
-            .then(response => {
-              this.$notify.success({
-                title: '成功',
-                message: '确认发货成功'
-              })
-              this.getList()
-            })
-            .catch(response => {
-              this.$notify.error({
-                title: '失败',
-                message: response.data.errmsg
-              })
-            })
-        })
-        .catch(() => {})
     },
     handleRefund(row) {
       this.refundForm.orderNo = row.orderNo
       this.refundDialogVisible = true
+      this.shipForm.shipCode = 'NONE'
     },
     confirmRefund() {
       this.$refs['refundForm'].validate(valid => {
         if (valid) {
+          this.refundSubmiting = true
           refundOrder(this.refundForm)
             .then(response => {
+              this.refundSubmiting = false
               this.refundDialogVisible = false
               this.$notify.success({
                 title: '成功',
-                message: '确认退款成功'
+                message: '确认退款成功！'
               })
               this.getList()
             })
             .catch(response => {
+              this.refundSubmiting = false
               this.$notify.error({
                 title: '失败',
                 message: response.data.errmsg

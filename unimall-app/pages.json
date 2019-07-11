@@ -198,6 +198,12 @@
 				"navigationBarTitleText": "商品列表"
 			}
         }
+        ,{
+            "path" : "pages/order/orderAppraise",
+            "style" : {
+				"navigationBarTitleText": "评价订单"
+			}
+        }
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

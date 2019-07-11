@@ -19,7 +19,7 @@ import com.iotechn.unimall.data.model.Page;
 public interface AppraiseService {
 
     @HttpMethod(description = "增加评价")
-    public Boolean addAppraise(@NotNull @HttpParam(name = "AppraiseRequestDTO", type = HttpParamType.COMMON, description = "来自订单的评价数据") AppraiseRequestDTO appraiseRequestDTO
+    public Boolean addAppraise(@NotNull @HttpParam(name = "appraiseRequestDTO", type = HttpParamType.COMMON, description = "来自订单的评价数据") AppraiseRequestDTO appraiseRequestDTO
             , @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "上传用户ID") Long userId) throws ServiceException;
 
     @HttpMethod(description = "根据评论Id删除评论")

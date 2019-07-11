@@ -31,7 +31,7 @@ public class CartServiceImpl implements CartService {
     private CategoryService categoryService;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean addCartItem(Long skuId, Integer num, Long userId) throws ServiceException {
         List<CartDO> cartDOS = cartMapper.selectList(
                 new EntityWrapper<CartDO>()
@@ -57,7 +57,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean subCartItem(Long skuId, Integer num, Long userId) throws ServiceException {
         List<CartDO> cartDOS = cartMapper.selectList(
                 new EntityWrapper<CartDO>()
@@ -79,7 +79,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean removeCartItem(Long cartId, Long userId) throws ServiceException {
         return cartMapper.delete(
                 new EntityWrapper<CartDO>()
@@ -88,7 +88,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean removeCartItemBatch(String cartIdList, Long userId) throws ServiceException {
         if (StringUtils.isEmpty(cartIdList)) {
             throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
