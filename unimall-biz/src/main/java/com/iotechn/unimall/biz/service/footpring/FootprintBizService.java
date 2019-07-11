@@ -25,7 +25,7 @@ public class FootprintBizService {
     @Autowired
     private FootprintMapper footprintMapper;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean addOrUpdateFootprint(Long userId, Long spuId) throws ServiceException {
 
         Date now = new Date();

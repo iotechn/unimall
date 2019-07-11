@@ -29,7 +29,7 @@ public class FootprintServiceImpl implements  FootprintService {
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteFootprint(Long userId, Long footprintId) throws ServiceException {
         Integer judgeSQL = footprintMapper.delete(new EntityWrapper<FootprintDO>()
                 .eq("user_id",userId)

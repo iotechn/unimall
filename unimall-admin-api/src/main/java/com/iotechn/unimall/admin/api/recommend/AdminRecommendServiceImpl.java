@@ -37,8 +37,8 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
     private SpuMapper spuMapper;
 
     @Override
-    @Transactional
-    public Boolean addRecomend(Long adminId, Long spuId, Integer recommendType) throws ServiceException {
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean addRecommend(Long adminId, Long spuId, Integer recommendType) throws ServiceException {
 
         if (!(spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("id", spuId)) > 0)) {
             throw new AdminServiceException(ExceptionDefinition.RECOMMEND_SPU_NO_HAS);
@@ -61,8 +61,8 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
     }
 
     @Override
-    @Transactional
-    public Boolean deleteRecomend(Long adminId, Long spuId, Integer recommendType) throws ServiceException {
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteRecommend(Long adminId, Long spuId, Integer recommendType) throws ServiceException {
 
         Integer judgeSQL = recommendMapper.delete(new EntityWrapper<RecommendDO>()
                 .eq("spu_id", spuId)

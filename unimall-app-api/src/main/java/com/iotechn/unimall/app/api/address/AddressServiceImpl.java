@@ -25,7 +25,7 @@ public class AddressServiceImpl implements AddressService {
     private AddressMapper addressMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean addAddress(String province, String city, String county, String address, Integer defaultAddress, Long userId, String phone, String consignee) throws ServiceException {
         Integer addressNum = addressMapper.selectCount(new EntityWrapper<AddressDO>().eq("user_id", userId));
         AddressDO addressDO = null;
@@ -57,7 +57,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteAddress(Long addressId, Long userId) throws ServiceException {
         Integer defaultNum = addressMapper.selectCount(new EntityWrapper<AddressDO>()
                 .eq("user_id", userId)
@@ -85,7 +85,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateAddress(Long addressId, String province, String city, String county, String address, Integer defaultAddress, Long userId, String phone, String consignee) throws ServiceException {
         AddressDO addressDO = new AddressDO(province, city, county, address, defaultAddress, userId, phone, consignee);
         Date now = new Date();
