@@ -40,7 +40,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean addFreightTemplate(String templateName, String spuLocation, Integer deliveryDeadline, Integer  defaultFreePrice, Integer  defaultFirstNum, Integer  defaultFirstPrice, Integer  defaultContinueNum, Integer  defaultContinuePrice, List<FreightTemplateCarriageDO> freightTemplateCarriageDOList, Long adminId) throws ServiceException {
         Date now = new Date();
         FreightTemplateDO freightTemplateDO = new FreightTemplateDO(templateName,spuLocation,deliveryDeadline,defaultFreePrice,defaultFirstNum,defaultFirstPrice,defaultContinueNum,defaultContinuePrice);
@@ -69,7 +69,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteFreightTemplate(Long templateId, Long adminId) throws ServiceException {
         Integer judgeSQL = 1;
         if(spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("freight_template_id",templateId))>0){
@@ -93,7 +93,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateFreightTemplate(Long templateId,String templateName, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstNum, Integer defaultFirstPrice, Integer defaultContinueNum, Integer defaultContinuePrice, List<FreightTemplateCarriageDO> freightTemplateCarriageDOList, Long adminId) throws ServiceException {
         Date now = new Date();
         FreightTemplateDO freightTemplateDO = new FreightTemplateDO(templateName,spuLocation,deliveryDeadline,defaultFreePrice,defaultFirstNum,defaultFirstPrice,defaultContinueNum,defaultContinuePrice);

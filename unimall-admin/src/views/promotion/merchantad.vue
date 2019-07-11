@@ -9,6 +9,30 @@
         icon="el-icon-edit"
         @click="handleCreate"
       >添加</el-button>
+
+      <el-select
+        v-model="listQuery.status"
+        style="width: 200px"
+        class="filter-item"
+        placeholder="请选择广告状态"
+      >
+        <el-option v-for="(key, value) in adStatusMap" :key="key" :label="key" :value="value" />
+      </el-select>
+      <el-select
+        v-model="listQuery.adType"
+        style="width: 200px"
+        class="filter-item"
+        placeholder="请选择广告类型"
+      >
+        <el-option v-for="(key, value) in adTypeMap" :key="key" :label="key" :value="value" />
+      </el-select>
+      <el-button
+        v-permission="['promote:advertisement:query']"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-search"
+        @click="handleFilter"
+      >查找</el-button>
     </div>
 
     <!-- 查询结果 -->
@@ -25,15 +49,20 @@
 
       <el-table-column align="center" label="广告标题" prop="title" />
 
-      <el-table-column align="center" label="广告类型" prop="type">
+      <el-table-column align="center" label="广告类型" prop="adType">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.type | adTypeFilter }}</el-tag>
+          <el-tag>{{ scope.row.adType | adTypeFilter }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="广告状态" prop="status">
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.status | adStatusFilter }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="广告图片" prop="picUrl">
+      <el-table-column align="center" label="广告图片" prop="imgUrl">
         <template slot-scope="scope">
-          <img v-if="scope.row.picUrl" :src="scope.row.picUrl" width="80" >
+          <img v-if="scope.row.imgUrl" :src="scope.row.imgUrl" width="80" >
         </template>
       </el-table-column>
 
@@ -42,13 +71,13 @@
       <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
-            v-permission="['admin:nearby:adupdate']"
+            v-permission="['promote:advertisement:update']"
             type="primary"
             size="mini"
             @click="handleUpdate(scope.row)"
           >编辑</el-button>
           <el-button
-            v-permission="['admin:nearby:addelete']"
+            v-permission="['promote:advertisement:delete']"
             type="danger"
             size="mini"
             @click="handleDelete(scope.row)"
@@ -60,7 +89,7 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.page"
+      :page.sync="listQuery.pageNo"
       :limit.sync="listQuery.limit"
       @pagination="getList"
     />
@@ -76,10 +105,13 @@
         label-width="100px"
         style="width: 400px; margin-left:50px;"
       >
+        <el-form-item label="隐藏的广告id" prop="id" hidden>
+          <el-input v-model="dataForm.id" />
+        </el-form-item>
         <el-form-item label="广告标题" prop="title">
           <el-input v-model="dataForm.title" />
         </el-form-item>
-        <el-form-item label="广告图片" prop="picUrl">
+        <el-form-item label="广告图片" prop="imgUrl">
           <el-upload
             :headers="headers"
             :action="uploadPath"
@@ -88,13 +120,18 @@
             class="avatar-uploader"
             accept=".jpg, .jpeg, .png, .gif"
           >
-            <img v-if="dataForm.picUrl" :src="dataForm.picUrl" class="avatar" >
+            <img v-if="dataForm.imgUrl" :src="dataForm.imgUrl" class="avatar" >
             <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
         </el-form-item>
-        <el-form-item label="广告类型" prop="type">
-          <el-select v-model="dataForm.type" placeholder="请选择">
+        <el-form-item label="广告类型" prop="adType">
+          <el-select v-model="dataForm.adType" :value-key="key" placeholder="请选择">
             <el-option v-for="(key, value) in adTypeMap" :key="key" :label="key" :value="value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="广告状态" prop="status">
+          <el-select v-model="dataForm.status" placeholder="请选择">
+            <el-option v-for="(key, value) in adStatusMap" :key="key" :label="key" :value="value" se/>
           </el-select>
         </el-form-item>
         <el-form-item label="活动链接" prop="url">
@@ -148,7 +185,13 @@ import ElOption from '../../../node_modules/element-ui/packages/select/src/optio
 
 const adTypeMap = {
   1: '轮播',
-  2: '商户列表三图'
+  2: '商户列表三图',
+  '': '全部'
+}
+const adStatusMap = {
+  0: '冻结',
+  1: '激活',
+  '': '全部'
 }
 
 export default {
@@ -160,6 +203,9 @@ export default {
   filters: {
     adTypeFilter(code) {
       return adTypeMap[code]
+    },
+    adStatusFilter(code) {
+      return adStatusMap[code]
     }
   },
   data() {
@@ -169,16 +215,20 @@ export default {
       total: 0,
       listLoading: true,
       adTypeMap,
+      adStatusMap,
       listQuery: {
-        page: 1,
-        limit: 20
+        pageNo: 1,
+        limit: 20,
+        status: undefined,
+        adType: undefined
       },
       dataForm: {
         id: undefined,
+        adType: undefined,
         title: undefined,
-        type: undefined,
-        picUrl: undefined,
-        url: undefined
+        url: undefined,
+        imgUrl: undefined,
+        status: undefined
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -187,13 +237,10 @@ export default {
         create: '创建'
       },
       rules: {
-        title: [
-          { required: true, message: '广告标题不能为空', trigger: 'blur' }
-        ],
-        picUrl: [
-          { required: true, message: '广告图片不能为空', trigger: 'blur' }
-        ],
-        type: [{ required: true, message: '请选择广告类型', trigger: 'blur' }]
+        title: [{ required: true, message: '广告标题不能为空', trigger: 'blur' }],
+        imgUrl: [{ required: true, message: '广告图片不能为空', trigger: 'blur' }],
+        adType: [{ required: true, message: '请选择广告类型', trigger: 'blur' }],
+        status: [{ required: true, message: '请选择广告状态', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -245,7 +292,7 @@ export default {
       })
     },
     uploadUrl: function(response) {
-      this.dataForm.picUrl = response.url
+      this.dataForm.imgUrl = response.url
     },
     createData() {
       this.$refs['dataForm'].validate(valid => {
@@ -268,6 +315,7 @@ export default {
         }
       })
     },
+    // 点击编辑按钮时的处理
     handleUpdate(row) {
       this.dataForm = Object.assign({}, row)
       this.dialogStatus = 'update'
@@ -304,7 +352,7 @@ export default {
       })
     },
     handleDelete(row) {
-      deleteAd(row.id)
+      deleteAd(row.id, row.adType)
         .then(response => {
           this.$notify.success({
             title: '成功',

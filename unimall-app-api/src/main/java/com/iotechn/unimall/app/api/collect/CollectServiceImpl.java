@@ -40,7 +40,7 @@ public class CollectServiceImpl implements CollectService {
     private static final String CA_USER_COLLECT_HASH = "CA_USER_COLLECT_";
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean addCollect(Long userId, Long spuId) throws ServiceException {
         //校验SPU是否存在
         goodsBizService.getSpuById(spuId);
@@ -59,7 +59,7 @@ public class CollectServiceImpl implements CollectService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteCollect(Long userId, Long spuId) throws ServiceException {
         Integer num = collectMapper.delete(new EntityWrapper<CollectDO>()
                 .eq("user_id", userId)

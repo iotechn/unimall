@@ -5,8 +5,8 @@ export function listAd(query) {
   return request({
     method: 'get',
     params: {
-      _gp: 'nearby',
-      _mt: 'adlist',
+      _gp: 'admin.advertisement',
+      _mt: 'queryAdvertisement',
       ...query
     }
   })
@@ -16,9 +16,9 @@ export function createAd(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
-      _gp: 'nearby',
-      _mt: 'adcreate',
-      nearbyAd: JSON.stringify(data)
+      _gp: 'admin.advertisement',
+      _mt: 'addAdvertisement',
+      ...data
     })
   })
 }
@@ -35,20 +35,22 @@ export function updateAd(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
-      _gp: 'nearby',
-      _mt: 'adupdate',
-      nearbyAd: JSON.stringify(data)
+      _gp: 'admin.advertisement',
+      _mt: 'updateAdvertisement',
+      ...data,
+      adId: data.id
     })
   })
 }
 
-export function deleteAd(id) {
+export function deleteAd(id, adType) {
   return request({
     method: 'post',
     params: {
-      _gp: 'nearby',
-      _mt: 'addelete',
-      adId: id
+      _gp: 'admin.advertisement',
+      _mt: 'deleteAdvertisement',
+      adId: id,
+      adType: adType
     }
   })
 }

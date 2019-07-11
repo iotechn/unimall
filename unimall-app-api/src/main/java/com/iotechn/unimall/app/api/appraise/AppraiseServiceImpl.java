@@ -22,6 +22,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -43,7 +44,7 @@ public class AppraiseServiceImpl implements AppraiseService {
     private OrderSkuMapper orderSkuMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean addAppraise(AppraiseRequestDTO appraiseRequestDTO, Long userId) throws ServiceException {
         if(appraiseRequestDTO.getOrderId() == null){
             throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
@@ -69,14 +70,17 @@ public class AppraiseServiceImpl implements AppraiseService {
 
         //循环读取订单评价中所有商品的评价
         for (AppraiseDTO appraiseDTO : appraiseRequestDTO.getAppraiseDTOList()){
-            if(!(orderSkuMapper.selectCount(new EntityWrapper<OrderSkuDO>() //从order_sku表中 验证是否有对应的表单和商品
+            List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>()
                     .eq("sku_id",appraiseDTO.getSkuId())
-                    .eq("order_id",appraiseRequestDTO.getOrderId())) > 0)){
+                    .eq("order_id",appraiseRequestDTO.getOrderId()));
+            //从order_sku表中 验证是否有对应的表单和商品
+            if(CollectionUtils.isEmpty(orderSkuDOList)){
                 throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
             }
 
             AppraiseDO appraiseDO = new AppraiseDO();
             BeanUtils.copyProperties(appraiseDTO,appraiseDO);
+            appraiseDO.setSpuId(orderSkuDOList.get(0).getSpuId());
             appraiseDO.setId(null); //防止传入id,导致插入数据库出错
             appraiseDO.setOrderId(appraiseRequestDTO.getOrderId()); //从传入数据取出，不使用DTO中的冗余数据
             appraiseDO.setUserId(userId);
@@ -110,7 +114,7 @@ public class AppraiseServiceImpl implements AppraiseService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteAppraiseById(Long appraiseId, Long userId) throws ServiceException {
 
         Integer delete = appraiseMapper.delete(new EntityWrapper<AppraiseDO>()

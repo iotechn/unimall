@@ -11,7 +11,8 @@ package com.iotechn.unimall.data.enums;
 public enum  AdvertisementType {
 
     ADVERTISEMENT_NAME(0,"advertisement"),
-    CAROUSEL(1,"轮播")
+    CAROUSEL(1,"轮播"),
+    LISTFIGURE(2,"商户列表三图")
     ;
 
     AdvertisementType(int code, String msg) {

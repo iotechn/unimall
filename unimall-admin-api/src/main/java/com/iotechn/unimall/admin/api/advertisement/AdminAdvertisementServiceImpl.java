@@ -1,16 +1,21 @@
 package com.iotechn.unimall.admin.api.advertisement;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AdvertisementDO;
+import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.enums.AdvertisementType;
 import com.iotechn.unimall.data.mapper.AdvertisementMapper;
 import com.iotechn.unimall.data.model.Page;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -31,6 +36,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
     private CacheComponent cacheComponent;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean addAdvertisement(Long adminId, Integer adType, String title, String url, String imgUrl, Integer status) throws ServiceException {
 
         Date now = new Date();
@@ -46,6 +52,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteAdvertisement(Long adminId,Integer adType, Long adId) throws ServiceException {
 
         if(advertisementMapper.delete(new EntityWrapper<AdvertisementDO>()
@@ -58,6 +65,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateAdvertisement(Long adminId,Long adId, Integer adType, String title, String url, String imgUrl, Integer status) throws ServiceException {
         AdvertisementDO advertisementDO = new AdvertisementDO(adType,title,url,imgUrl,status);
         advertisementDO.setId(adId);
@@ -70,19 +78,25 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
     }
 
     @Override
-    public Page<AdvertisementDO> queryAdvertisement(Long adminId, Integer adType, Integer pageNo, Integer pageSize, Integer status) throws ServiceException {
+    public Page<AdvertisementDO> queryAdvertisement(Long adminId, Integer adType, Integer pageNo, Integer limit, Integer status) throws ServiceException {
+        Wrapper<AdvertisementDO> wrapper = new EntityWrapper<AdvertisementDO>();
+        if (adType != null) {
+            wrapper.eq("ad_type", adType);
+        }
+        if (status != null) {
+            wrapper.eq("status", status);
+        }
 
-        List<AdvertisementDO> advertisementDOList = advertisementMapper.getAdvertisementByTypeAndStatus(adType,status,pageSize*(pageNo - 1),pageSize);
-        Integer count = advertisementMapper.selectCount(new EntityWrapper<AdvertisementDO>()
-                .eq("status",status)
-        .eq("ad_type",adType));
+        List<AdvertisementDO> advertisementDOList = advertisementMapper.selectPage(new RowBounds(limit *(pageNo - 1), limit),wrapper);
+        Integer count = advertisementMapper.selectCount(wrapper);
 
-        Page<AdvertisementDO> page = new Page<>(advertisementDOList,pageNo,pageSize,count);
+        Page<AdvertisementDO> page = new Page<>(advertisementDOList,pageNo, limit,count);
 
         return page;
 
     }
 
+    //冗余，未使用
     @Override
     public Page<AdvertisementDO> queryAllAdvertisement(Long adminId,Integer pageNo,Integer pageSize) throws ServiceException {
 
