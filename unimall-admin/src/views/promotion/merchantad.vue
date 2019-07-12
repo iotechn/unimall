@@ -190,19 +190,8 @@ import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination'
 import ElOption from '../../../node_modules/element-ui/packages/select/src/option' // Secondary package based on el-pagination
 
-// const adTypeMap = {
-//   1: '轮播',
-//   2: '商户列表三图',
-//   '': '全部'
-// }
-
 const adTypeMap = [{ value: 1, name: '轮播' }, { value: 2, name: '商户三图' }, { value: '', name: '全部' }]
 const adStatusMap = [{ value: 0, name: '冻结' }, { value: 1, name: '激活' }, { value: '', name: '全部' }]
-// const adStatusMap = {
-//   0: '冻结',
-//   1: '激活',
-//   '': '全部'
-// }
 
 export default {
   name: 'Ad',
