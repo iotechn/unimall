@@ -40,3 +40,15 @@ export function numberFormatter(num, digits) {
 export function toThousandFilter(num) {
   return (+num || 0).toString().replace(/^-?\d+/g, m => m.replace(/(?=(?!\b)(\d{3})+$)/g, ','))
 }
+
+export function formatDate(time) {
+  if (time != null && time !== '') {
+    var date = new Date(time)
+    var year = date.getFullYear()
+    var month = date.getMonth()
+    var day = date.getDay()
+    return year + '-' + month + '-' + day
+  } else {
+    return ''
+  }
+}
