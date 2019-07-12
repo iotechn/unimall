@@ -6,9 +6,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -153,6 +153,22 @@ public class CacheComponent {
 
     public boolean isSetMember(String key, String member) {
         return stringRedisTemplate.opsForSet().isMember(key, member);
+    }
+
+    /**
+     * 获取指定前缀的Key
+     * @param prefix
+     * @return
+     */
+    public Set<String> getPrefixKeySet(String prefix) {
+        return stringRedisTemplate.keys(prefix + "*");
+    }
+
+    public void delPrefixKey(String prefix) {
+        Set<String> prefixKeySet = getPrefixKeySet(prefix);
+        for (String key : prefixKeySet) {
+            stringRedisTemplate.delete(key);
+        }
     }
 
 

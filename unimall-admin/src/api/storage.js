@@ -40,5 +40,5 @@ export function deleteStorage(data) {
   })
 }
 
-const uploadPath = process.env.BASE_API + '/storage/create'
+const uploadPath = process.env.HOST + '/upload/admin'
 export { uploadPath }

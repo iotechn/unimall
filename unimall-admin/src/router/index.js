@@ -157,16 +157,6 @@ export const asyncRouterMap = [
         }
       },
       {
-        path: 'create',
-        component: () => import('@/views/goods/create'),
-        name: 'goodsCreate',
-        meta: {
-          perms: ['admin:goods:create'],
-          title: '商品上架',
-          noCache: true
-        }
-      },
-      {
         path: 'category',
         component: () => import('@/views/goods/category'),
         name: 'goodsCategory',
@@ -177,11 +167,11 @@ export const asyncRouterMap = [
         }
       },
       {
-        path: 'edit',
-        component: () => import('@/views/goods/edit'),
-        name: 'goodsEdit',
+        path: 'upsert',
+        component: () => import('@/views/goods/upsert'),
+        name: 'goodsUpsert',
         meta: {
-          perms: ['admin:goods:detail', 'admin:goods:update'],
+          perms: ['operation:goods:create', 'operation:goods:edit'],
           title: '商品编辑',
           noCache: true
         },

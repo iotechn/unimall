@@ -44,7 +44,7 @@
 						</navigator>
 						<view class="action-box b-t" v-if="item.status == 10">
 							<button :disabled="submiting" class="action-btn" @click="cancelOrder(item)">取消订单</button>
-							<button class="action-btn recom">立即支付</button>
+							<button class="action-btn recom" @click="payOrder(item)">立即支付</button>
 						</view>
 						<view class="action-box b-t" v-if="item.status == 20">
 							<button :disabled="submiting" class="action-btn" @click="refundOrder(item)">申请退款</button>
@@ -195,6 +195,11 @@
 			//顶部tab点击
 			tabClick(index) {
 				this.tabCurrentIndex = index;
+			},
+			payOrder(item) {
+				uni.redirectTo({
+					url: '/pages/money/pay?orderno='+ item.orderNo + '&price=' + item.actualPrice
+				})
 			},
 			//取消订单
 			cancelOrder(item) {

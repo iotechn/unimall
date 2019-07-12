@@ -2,7 +2,7 @@ package com.iotechn.unimall.data.mapper;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.iotechn.unimall.data.domain.SkuDO;
-import com.iotechn.unimall.data.dto.SkuDTO;
+import com.iotechn.unimall.data.dto.goods.SkuDTO;
 import org.apache.ibatis.annotations.Param;
 
 /**

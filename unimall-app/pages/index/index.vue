@@ -54,7 +54,7 @@
 		</view>
 		
 		<!-- 秒杀楼层 -->
-		<view class="seckill-section m-t">
+		<!-- <view class="seckill-section m-t">
 			<view class="s-header">
 				<image class="s-img" src="/static/temp/secskill-img.jpg" mode="widthFix"></image>
 				<text class="tip">8点场</text>
@@ -76,14 +76,14 @@
 					</view>
 				</view>
 			</scroll-view>
-		</view>
+		</view> -->
 		
 		<!-- 团购楼层 -->
 		<view class="f-header m-t">
 			<image src="/static/temp/h1.png"></image>
 			<view class="tit-box">
-				<text class="tit">精品团购</text>
-				<text class="tit2">Boutique Group Buying</text>
+				<text class="tit">橱窗推荐</text>
+				<text class="tit2">Shop Window</text>
 			</view>
 			<text class="yticon icon-you"></text>
 		</view>
@@ -91,44 +91,39 @@
 			<swiper class="g-swiper" :duration="500">
 				<swiper-item
 					class="g-swiper-item"
-					v-for="(item, index) in goodsList" :key="index"
+					v-for="(item, index) in windowSpuList" :key="index"
 					v-if="index%2 === 0"
 					@click="navToDetailPage(item)"
 				>
 					<view class="g-item left">
-						<image :src="item.image" mode="aspectFill"></image>
+						<image :src="item.spuImg" mode="aspectFill"></image>
 						<view class="t-box">
-							<text class="title clamp">{{item.title}}</text>
+							<text class="title clamp">{{item.spuTitle}}</text>
 							<view class="price-box">
-								<text class="price">￥{{item.price}}</text> 
-								<text class="m-price">￥188</text> 
+								<text class="price">￥{{item.spuPrice / 100.0}}</text> 
+								<text v-if="item.spuOriginalPrice > item.spuPrice" class="m-price">￥{{item.spuOriginalPrice / 100}}</text> 
 							</view>
 							
 							<view class="pro-box">
-							  	<view class="progress-box">
-							  		<progress percent="72" activeColor="#fa436a" active stroke-width="6" />
-							  	</view>
-								<text>6人成团</text>
+								<text>累计销售:{{item.spuSales}}件</text>
 							</view>
 						</view>
 						            
 					</view>
-					<view class="g-item right">
-						<image :src="goodsList[index+1].image" mode="aspectFill"></image>
+					<view v-if="index + 1 < windowSpuList.length" class="g-item right">
+						<image :src="windowSpuList[index+1].spuImg" mode="aspectFill"></image>
 						<view class="t-box">
-							<text class="title clamp">{{goodsList[index+1].title}}</text>
+							<text class="title clamp">{{windowSpuList[index+1].spuTitle}}</text>
 							<view class="price-box">
-								<text class="price">￥{{goodsList[index+1].price}}</text> 
-								<text class="m-price">￥188</text> 
+								<text class="price">￥{{windowSpuList[index+1].spuPrice / 100.0}}</text> 
+								<text v-if="windowSpuList[index+1].spuOriginalPrice > windowSpuList[index+1].spuPrice" class="m-price">￥{{windowSpuList[index+1].spuOriginalPrice / 100.0}}</text> 
 							</view>
 							<view class="pro-box">
-							  	<view class="progress-box">
-							  		<progress percent="72" activeColor="#fa436a" active stroke-width="6" />
-							  	</view>
-								<text>10人成团</text>
+								<text>累计销售:{{item.spuSales}}件</text>
 							</view>
 						</view>
 					</view>
+					<view v-if="index + 1 === windowSpuList.length" class="g-item right"></view>
 				</swiper-item>
 
 			</swiper>
@@ -250,7 +245,8 @@
 				swiperCurrent: 0,
 				swiperLength: 0,
 				carouselList: [],
-				goodsList: []
+				goodsList: [],
+				windowSpuList: []
 			};
 		},
 
@@ -263,6 +259,12 @@
 			 * 分次请求未作整合
 			 */
 			async loadData() {
+				const that = this
+				that.$api.request('recommend', 'getRecommendByType', {
+					recommendType : 1
+				}).then(res => {
+					that.windowSpuList = res.data
+				})
 				let carouselList = await this.$api.json('carouselList');
 				this.titleNViewBackground = carouselList[0].background;
 				this.swiperLength = carouselList.length;

@@ -63,25 +63,24 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 					} else if (res.data.errno === 10001) {
 						if (failCallback) {
 							failCallback(res.data)
-						} else {
-							uni.showModal({
-								title: '登录提示',
-								content: '您尚未登录，是否立即登录？',
-								showCancel: true,
-								confirmText: '登录',
-								success: (e) => {
-									if (e.confirm) {
-										uni.navigateTo({
-											url: '/pages/public/login'
-										})
-									}
-
-								},
-								fail: () => {
-
-								}
-							})
 						}
+						uni.showModal({
+							title: '登录提示',
+							content: '您尚未登录，是否立即登录？',
+							showCancel: true,
+							confirmText: '登录',
+							success: (e) => {
+								if (e.confirm) {
+									uni.navigateTo({
+										url: '/pages/public/login'
+									})
+								}
+
+							},
+							fail: () => {
+
+							}
+						})
 					} else {
 						if (failCallback) {
 							failCallback(res.data)
@@ -96,6 +95,78 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 			}
 		})
 	})
+}
+
+const uploadImg = (successCallback) => {
+	uni.chooseImage({
+		sizeType: ['compressed'],
+		success: function(res) {
+			for (let i = 0; i < res.tempFilePaths.length; i++) {
+				uni.request({
+					url: baseUrl + '/upload',
+					method: 'get',
+					success: function(signRes) {
+						uni.showLoading({
+							title: '图片上传中',
+						})
+						let fileName = ('imgs/' + random_string(15) + get_suffix(res.tempFilePaths[i]))
+						uni.uploadFile({
+							url: signRes.data.baseUrl,
+							filePath: res.tempFilePaths[i],
+							name: 'file',
+							formData: {
+								name: res.tempFilePaths[i],
+								key: fileName,
+								policy: signRes.data.policy,
+								OSSAccessKeyId: signRes.data.accessid,
+								success_action_status: '200',
+								signature: signRes.data.signature
+							},
+							success: function(uploadRes) {
+								uni.hideLoading()
+								if (uploadRes.statusCode === 200) {
+									if (successCallback) {
+										successCallback(signRes.data.baseUrl + fileName)
+									} else {
+										uni.showToast({
+											title: '上传成功',
+											icon: 'none'
+										})
+									}
+								} else {
+									uni.hideLoading()
+									uni.showToast({
+										title: '网络错误 code=' + uploadRes.statusCode,
+										icon: 'none'
+									})
+								}
+							}
+						})
+					}
+				})
+			}
+		}
+	})
+}
+
+function get_suffix(filename) {
+  var pos = filename.lastIndexOf('.')
+  var suffix = ''
+  if (pos != -1) {
+    suffix = filename.substring(pos)
+  }
+  return suffix;
+}
+
+function random_string(len) {
+  　　len = len || 32;
+  　　var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+  　　var maxPos = chars.length;
+  　　var pwd = '';
+  　　for (var i = 0; i < len; i++) {
+    pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+  }
+  return pwd;
 }
 
 const prePage = () => {
@@ -114,7 +185,8 @@ Vue.prototype.$api = {
 	msg,
 	json,
 	prePage,
-	request
+	request,
+	uploadImg
 };
 
 App.mpType = 'app'

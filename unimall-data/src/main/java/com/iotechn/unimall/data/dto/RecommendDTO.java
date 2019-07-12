@@ -27,5 +27,7 @@ public class RecommendDTO extends SuperDTO {
 
     private String spuImg;
 
+    private String spuTitle;
+
     private Long spuCategoryId;
 }

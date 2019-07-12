@@ -13,6 +13,7 @@
           sp.vip_price as spuVipPrice,
           sp.sales as spuSales,
           sp.img as spuImg,
+          sp.title as spuTitle,
           sp.category_id as spuCategoryId
         FROM
           unimall_recommend re,
@@ -34,6 +35,7 @@
         sp.vip_price as spuVipPrice,
         sp.sales as spuSales,
         sp.img as spuImg,
+        sp.title as spuTitle,
         sp.category_id as spuCategoryId
         FROM
         unimall_recommend re,

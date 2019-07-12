@@ -6,7 +6,8 @@ package com.iotechn.unimall.app.api.collect;
 */
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.app.api.goods.GoodsBizService;
+import com.iotechn.unimall.biz.service.collect.CollectBizService;
+import com.iotechn.unimall.biz.service.goods.GoodsBizService;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.Const;
@@ -37,7 +38,10 @@ public class CollectServiceImpl implements CollectService {
     @Autowired
     private GoodsBizService goodsBizService;
 
-    private static final String CA_USER_COLLECT_HASH = "CA_USER_COLLECT_";
+    @Autowired
+    private CollectBizService collectBizService;
+
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -54,7 +58,7 @@ public class CollectServiceImpl implements CollectService {
         Date now = new Date();
         collectDO.setGmtCreate(now);
         collectDO.setGmtUpdate(collectDO.getGmtCreate());
-        cacheComponent.putSetRaw(CA_USER_COLLECT_HASH + userId, spuId + "", Const.CACHE_ONE_DAY);
+        cacheComponent.putSetRaw(CollectBizService.CA_USER_COLLECT_HASH + userId, spuId + "", Const.CACHE_ONE_DAY);
         return collectMapper.insert(collectDO) > 0;
     }
 
@@ -66,7 +70,7 @@ public class CollectServiceImpl implements CollectService {
                 .eq("spu_id", spuId)
         );
         if (num > 0) {
-            cacheComponent.removeSetRaw(CA_USER_COLLECT_HASH + userId, spuId + "");
+            cacheComponent.removeSetRaw(CollectBizService.CA_USER_COLLECT_HASH + userId, spuId + "");
             return true;
         }
 
@@ -101,16 +105,6 @@ public class CollectServiceImpl implements CollectService {
 
     @Override
     public Boolean getCollectBySpuId(Long spuId, Long userId) throws ServiceException {
-        boolean hasKey = cacheComponent.hasKey(CA_USER_COLLECT_HASH + userId);
-        if (!hasKey) {
-            //若没有Key，则添加缓存
-            List<String> spuIds = collectMapper.getUserCollectSpuIds(userId);
-            if (CollectionUtils.isEmpty(spuIds)) {
-                //redis set不能为空
-                spuIds.add("0");
-            }
-            cacheComponent.putSetRawAll(CA_USER_COLLECT_HASH + userId, spuIds.toArray(new String[0]), Const.CACHE_ONE_DAY);
-        }
-        return cacheComponent.isSetMember(CA_USER_COLLECT_HASH + userId, spuId + "");
+        return collectBizService.getCollectBySpuId(spuId, userId);
     }
 }

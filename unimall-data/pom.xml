@@ -19,6 +19,12 @@
 
 	<dependencies>
 
+		<!-- 阿里云对象存储 -->
+		<dependency>
+			<groupId>com.aliyun.oss</groupId>
+			<artifactId>aliyun-sdk-oss</artifactId>
+		</dependency>
+
 		<!-- mybatis plus 依赖 -->
 		<dependency>
 			<groupId>com.baomidou</groupId>
