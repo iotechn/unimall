@@ -10,7 +10,7 @@
 				</view>
 			</view>
 			<view class='appraise-title appraise-star-view'>
-				<text>宝贝评分{{item.score}}{{orderDetail.skuList[index].score}}</text>
+				<text>宝贝评分</text>
 				<view class="appraise-star-view">
 					<text class="appraise-star" v-for="(value,key) in stars" :key="key" :class="key < orderDetail.skuList[index].score ? 'active' : ''"
 					 @tap="chooseStar(value,index)"></text>
@@ -23,18 +23,18 @@
 				<view class="uni-uploader">
 					<view class="uni-uploader-head">
 						<view class="uni-uploader-title" style="color: #6f6f74;">晒一晒</view>
-						<view class="uni-uploader-info">{{imageList.length}}/8</view>
+						<view class="uni-uploader-info">{{item.imgs.length}}/8</view>
 					</view>
 					<view class="uni-uploader-body">
 						<view class="uni-uploader__files">
-							<block v-for="(image,imgIndex) in imageList" :key="imgIndex">
+							<block v-for="(image,imgIndex) in item.imgs" :key="imgIndex">
 								<view class="uni-uploader__file" style="position: relative;">
 									<image class="uni-uploader__img" :src="image" @tap="previewImage"></image>
-									<view class="close-view" @click="close(imgIndex)">x</view>
+									<view class="close-view" @click="close(item, index, imgIndex)">x</view>
 								</view>
 							</block>
 							<view class="uni-uploader__input-box" v-show="imageList.length < 8">
-								<view class="uni-uploader__input" @tap="chooseImg"></view>
+								<view class="uni-uploader__input" @tap="chooseImg(item,index)"></view>
 							</view>
 						</view>
 					</view>
@@ -82,24 +82,24 @@
 				that.orderDetail = res.data
 				that.orderDetail.skuList.forEach(item => {
 					item.score = 0
+					item.content = ''
+					item.imgs = []
 				})
 			})
 			
         },
         methods: {
-            close(e){
-                this.imageList.splice(e,1);
+            close(item, index, imgIndex){
+                item.imgs.splice(imgIndex,1);
+				this.orderDetail.skuList.splice(index, item)
             },
 
-            chooseImg() { //选择图片
-                uni.chooseImage({
-                    sourceType: ["camera", "album"],
-                    sizeType: "compressed",
-                    count: 8 - this.imageList.length,
-                    success: (res) => {
-                        this.imageList = this.imageList.concat(res.tempFilePaths);
-                    }
-                })
+            chooseImg(item,index) { //选择图片
+				const that = this
+                that.$api.uploadImg((res => {
+					item.imgs.push(res)
+					that.orderDetail.skuList.splice(index, that.orderDetail.skuList[index])
+				}))
             },
             chooseStar(e,index) { //点击评星
 				const that = this
@@ -112,38 +112,33 @@
                 });
             },
             send() { //发送反馈
-                console.log(JSON.stringify(this.sendDate));
-                let imgs = this.imageList.map((value, index) => {
-                    return {
-                        name: "image" + index,
-                        uri: value
-                    }
-                })
-                uni.uploadFile({
-                    url: "https://service.dcloud.net.cn/feedback",
-                    files: imgs,
-                    formData: this.sendDate,
-                    success: (res) => {
-                        if (res.statusCode === 200) {
-                            uni.showToast({
-                                title: "反馈成功!"
-                            });
-                            this.imageList = [];
-                            this.sendDate = {
-                                score: 0,
-                                content: "",
-                                contact: ""
-                            }
-                        }
-                    },
-                    fail: (res) => {
-                        uni.showToast({
-                            title: "失败",
-                            icon:"none"
-                        });
-                        console.log(res)
-                    }
-                });
+                const that = this
+				let requestItems = []
+				that.orderDetail.skuList.forEach(item => {
+					if (item.score <= 0) {
+						that.$api.msg('请为所有宝贝点上星星')
+						return
+					}
+
+					requestItems.push({
+						skuId: item.skuId,
+						score: item.score,
+						content: item.content,
+						imgUrl: item.imgs.length > 0 ? item.imgs.join(',') : ''
+					})
+				
+				})
+				
+				that.appraiseRequest.orderId = that.orderDetail.id
+				that.appraiseRequest.appraiseDTOList = requestItems
+				
+				that.$api.request('appraise', 'addAppraise', {
+					appraiseRequestDTO : JSON.stringify(that.appraiseRequest)
+				}).then(res => {
+					that.$api.msg('评价成功！')
+					that.$api.prePage().loadData('refresh')
+					uni.navigateBack()
+				})
             }
         }
     }

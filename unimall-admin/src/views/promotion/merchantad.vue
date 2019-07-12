@@ -134,8 +134,14 @@
             <el-option v-for="(key, index) in adStatusMap" :key="index" :label="key.name" :value="key.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="活动链接" prop="url">
-          <el-input v-model="dataForm.url" />
+        <el-form-item label="活动链接">
+          <el-cascader
+            :options="options"
+            :props="{ checkStrictly: true }"
+            placeholder="关联类目、商品"
+            filterable
+            @change="handleLink"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -178,6 +184,7 @@
 
 <script>
 import { listAd, createAd, updateAd, deleteAd } from '@/api/merchantad'
+import { spuTree } from '@/api/goods'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination'
@@ -203,6 +210,7 @@ export default {
   data() {
     return {
       uploadPath,
+      options: [],
       value: [],
       list: [],
       total: 0,
@@ -219,7 +227,7 @@ export default {
         id: undefined,
         adType: undefined,
         title: undefined,
-        url: undefined,
+        url: '',
         imgUrl: undefined,
         status: undefined
       },
@@ -263,6 +271,23 @@ export default {
           this.listLoading = false
         })
     },
+    handleLink(e) {
+      const tag = e[e.length - 1]
+      let url = ''
+      if (tag.startsWith('C')) {
+        if (e.length < 3) {
+          this.$notify.error({
+            title: '失败',
+            message: '请关联第三级类目'
+          })
+          return
+        }
+        url = '/pages/product/list?fid=' + e[0].substring(2) + '&tid=' + e[2].substring(2)
+      } else {
+        url = '/pages/product/product?id=' + (e[3].substring(2))
+      }
+      this.dataForm.url = url
+    },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
@@ -276,8 +301,16 @@ export default {
         url: undefined
       }
     },
+    refreshOptions() {
+      if (this.options.length === 0) {
+        spuTree().then(response => {
+          this.options = response.data.data
+        })
+      }
+    },
     handleCreate() {
       this.resetForm()
+      this.refreshOptions()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -311,6 +344,7 @@ export default {
     // 点击编辑按钮时的处理
     handleUpdate(row) {
       this.dataForm = Object.assign({}, row)
+      this.refreshOptions()
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

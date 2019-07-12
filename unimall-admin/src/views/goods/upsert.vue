@@ -1,11 +1,8 @@
 <template>
   <div class="app-container">
     <el-card class="box-card">
-      <h3>商品介绍</h3>
+      <h3>商品（Spu）介绍</h3>
       <el-form ref="dataForm" :rules="rules" :model="goods" label-width="150px">
-        <el-form-item label="商品编号" prop="goodsSn">
-          <el-input v-model="goods.goodsSn" />
-        </el-form-item>
         <el-form-item label="商品名称" prop="title">
           <el-input v-model="goods.title" />
         </el-form-item>
@@ -19,9 +16,20 @@
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
+        <el-form-item label="VIP价格" prop="vipPriceRaw">
+          <el-input v-model="goods.vipPriceRaw" placeholder="0.00">
+            <template slot="append">元</template>
+          </el-input>
+        </el-form-item>
 
         <el-form-item label="剩余库存" prop="stock">
-          <el-input v-model="goods.stock" placeholder="0"/>
+          <el-input v-model="goods.stock" :disabled="true" placeholder="0"/>
+        </el-form-item>
+
+        <el-form-item label="运费模板">
+          <el-select v-model="goods.freightTemplateId" placeholder="请关联商品运费模板">
+            <el-option v-for="(item, index) in freightList" :key="index" :label="item.freightTemplateDO.templateName" :value="item.freightTemplateDO.id"/>
+          </el-select>
         </el-form-item>
 
         <el-form-item label="是否在售" prop="status">
@@ -72,6 +80,81 @@
     </el-card>
 
     <el-card class="box-card">
+      <h3>商品类型(sku)</h3>
+      <el-button :plain="true" type="primary" @click="handleSkuShow">添加</el-button>
+      <el-table :data="skuList">
+        <el-table-column property="barCode" label="Sku条形码" />
+        <el-table-column property="title" label="类型名" />
+        <el-table-column property="originalPriceRaw" label="原价" />
+        <el-table-column property="priceRaw" label="现价" />
+        <el-table-column property="vipPriceRaw" label="VIP价" />
+        <el-table-column property="stock" label="库存" />
+        <el-table-column
+          align="center"
+          label="操作"
+          width="100"
+          class-name="small-padding fixed-width"
+        >
+          <template slot-scope="scope">
+            <el-button type="danger" size="mini" @click="handleSkuDelete(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 添加SKU的Dialog -->
+      <el-dialog :visible.sync="skuVisiable" title="添加商品类型（Sku）">
+        <el-form
+          ref="skuForm"
+          :model="skuForm"
+          :rules="skuRules"
+          status-icon
+          label-position="left"
+          label-width="100px"
+          style="width: 400px; margin-left:50px;"
+        >
+          <el-form-item label="类型条码" prop="barCode">
+            <el-input v-model="skuForm.barCode" />
+          </el-form-item>
+          <el-form-item label="类型名称" prop="title">
+            <el-input v-model="skuForm.title" />
+          </el-form-item>
+          <el-form-item label="类型图片">
+            <el-upload
+              :action="uploadPath"
+              :show-file-list="false"
+              :on-success="handleSkuImgSuccess"
+              class="avatar-uploader">
+              <img v-if="skuForm.img" :src="img" class="avatar">
+              <i v-else class="el-icon-plus avatar-uploader-icon"/>
+            </el-upload>
+          </el-form-item>
+          <el-form-item label="原始价格" prop="originalPriceRaw">
+            <el-input v-model="skuForm.originalPriceRaw" placeholder="0.00">
+              <template slot="append">元</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="当前价格" prop="priceRaw">
+            <el-input v-model="skuForm.priceRaw" placeholder="0.00">
+              <template slot="append">元</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="VIP价格" prop="vipPriceRaw">
+            <el-input v-model="skuForm.vipPriceRaw" placeholder="0.00">
+              <template slot="append">元</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="库存" prop="stock">
+            <el-input v-model="skuForm.stock" />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="skuVisiable = false">取消</el-button>
+          <el-button type="primary" @click="handleSkuAdd">确定</el-button>
+        </div>
+      </el-dialog>
+    </el-card>
+
+    <el-card class="box-card">
       <h3>商品参数</h3>
       <el-button :plain="true" type="primary" @click="handleAttributeShow">添加</el-button>
       <el-table :data="attributes">
@@ -93,6 +176,7 @@
         <el-form
           ref="attributeForm"
           :model="attributeForm"
+          :rules="attrRules"
           status-icon
           label-position="left"
           label-width="100px"
@@ -114,7 +198,8 @@
 
     <div class="op-container">
       <el-button @click="handleCancel">取消</el-button>
-      <el-button type="primary" @click="handleEdit">更新商品</el-button>
+      <el-button v-if="!goods.id" type="primary" @click="handleCreate">保存商品</el-button>
+      <el-button v-if="goods.id" type="primary" @click="handleEdit">更新商品</el-button>
     </div>
   </div>
 </template>
@@ -157,31 +242,34 @@
 </style>
 
 <script>
-import { detailGoods, editGoods, listCatAndBrand } from '@/api/goods'
+import { detailGoods, editGoods } from '@/api/goods'
+import { categoryTree } from '@/api/category'
+import { listFreight } from '@/api/freight'
 import { createStorage, uploadPath } from '@/api/storage'
 import Editor from '@tinymce/tinymce-vue'
 import { MessageBox } from 'element-ui'
 import { getToken } from '@/utils/auth'
 
 export default {
-  name: 'GoodsEdit',
+  name: 'GoodsUpsert',
   components: { Editor },
   data() {
     return {
       uploadPath,
+      freightList: [],
       imgsFileList: [],
       categoryList: [],
       categoryIds: [],
-      goods: { imgs: [] },
+      goods: { imgList: [] },
       attributeVisiable: false,
       attributeForm: { attribute: '', value: '' },
       attributes: [],
+      skuVisiable: false,
+      skuForm: {},
+      skuList: [],
       rules: {
         status: [
           { required: true, message: '请选择商品状态', trigger: 'blur' }
-        ],
-        goodsSn: [
-          { required: true, message: '商品编号不能为空', trigger: 'blur' }
         ],
         title: [
           { required: true, message: '商品名称不能为空', trigger: 'blur' }
@@ -195,14 +283,42 @@ export default {
         originalPriceRaw: [
           { required: true, message: '商品原价不能为空', trigger: 'blur' }
         ],
-        stock: [
-          { required: true, message: '剩余库存不能为空', trigger: 'blur' }
+        vipPriceRaw: [
+          { required: true, message: '商品ViP价格不能为空', trigger: 'blur' }
         ],
         unit: [
           { required: true, message: '物件单位不能为空', trigger: 'blur' }
         ],
         //        category :[{ required: true, message: '商品分类不能为空', trigger: 'blur' }],
         detail: [{ required: true, message: '请填写商品详情', trigger: 'blur' }]
+      },
+      skuRules: {
+        barCode: [
+          { required: true, message: '类型条码不能为空', trigger: 'blur' }
+        ],
+        title: [
+          { required: true, message: '类型名称不能为空', trigger: 'blur' }
+        ],
+        priceRaw: [
+          { required: true, message: '类型现价不能为空', trigger: 'blur' }
+        ],
+        originalPriceRaw: [
+          { required: true, message: '类型原价不能为空', trigger: 'blur' }
+        ],
+        vipPriceRaw: [
+          { required: true, message: '类型VIP价格不能为空', trigger: 'blur' }
+        ],
+        stock: [
+          { required: true, message: '类型库存不能为空', trigger: 'blur' }
+        ]
+      },
+      attrRules: {
+        attribute: [
+          { required: true, message: '属性名称不能为空', trigger: 'blur' }
+        ],
+        value: [
+          { required: true, message: '属性值不能为空', trigger: 'blur' }
+        ]
       },
       editorInit: {
         language: 'zh_CN',
@@ -240,27 +356,38 @@ export default {
   },
   methods: {
     init: function() {
-      if (this.$route.query.id == null) {
-        return
-      }
       const goodsId = this.$route.query.id
-      detailGoods(goodsId).then(response => {
-        this.goods = response.data.data.goods
-        this.goods.priceRaw = this.goods.price / 100
-        this.goods.originalPriceRaw = this.goods.originalPrice / 100
-        this.attributes = response.data.data.attributes
-        this.categoryIds = response.data.data.categoryIds
+      if (goodsId) {
+        detailGoods(goodsId).then(response => {
+          this.goods = response.data.data
+          this.goods.priceRaw = this.goods.price / 100
+          this.goods.originalPriceRaw = this.goods.originalPrice / 100
+          this.goods.vipPriceRaw = this.goods.vipPrice / 100
+          this.attributes = response.data.data.attributes ? response.data.data.attributes : []
+          this.categoryIds = response.data.data.categoryIds.reverse()
+          this.skuList = response.data.data.skuList
+          this.imgsFileList = []
+          for (var i = 0; i < this.goods.imgList.length; i++) {
+            this.imgsFileList.push({
+              url: this.goods.imgList[i]
+            })
+          }
+          if (this.goods.skuList) {
+            for (var j = 0; j < this.goods.skuList.length; j++) {
+              this.skuList[j].priceRaw = this.skuList[j].price / 100
+              this.skuList[j].originalPriceRaw = this.skuList[j].originalPrice / 100
+              this.skuList[j].vipPriceRaw = this.skuList[j].vipPrice / 100
+            }
+          }
+        })
+      }
 
-        this.imgsFileList = []
-        for (var i = 0; i < this.goods.imgs.length; i++) {
-          this.imgsFileList.push({
-            url: this.goods.imgs[i]
-          })
-        }
+      categoryTree().then(response => {
+        this.categoryList = response.data.data
       })
 
-      listCatAndBrand().then(response => {
-        this.categoryList = response.data.data
+      listFreight().then(response => {
+        this.freightList = response.data.data
       })
     },
     handleCategoryChange(value) {
@@ -268,6 +395,9 @@ export default {
     },
     handleCancel: function() {
       this.$router.push({ path: '/goods/list' })
+    },
+    handleCreate: function() {
+      debugger
     },
     handleEdit: function() {
       this.$refs['dataForm'].validate(valid => {
@@ -279,12 +409,12 @@ export default {
             })
           } else {
             this.goods.price = parseInt(this.goods.priceRaw * 100)
-            this.goods.originalPrice = parseInt(
-              this.goods.originalPriceRaw * 100
-            )
+            this.goods.originalPrice = parseInt(this.goods.originalPriceRaw * 100)
+            this.goods.vipPrice = parseInt(this.goods.vipPriceRaw * 100)
             const finalGoods = {
-              goods: this.goods,
-              attributes: this.attributes
+              ...this.goods,
+              attributeList: this.attributes,
+              skuList: this.skuList
             }
             editGoods(finalGoods)
               .then(response => {
@@ -317,12 +447,12 @@ export default {
     },
     handleimgsUrl(response, file, fileList) {
       if (response.errno === 200) {
-        this.goods.imgs.push(response.url)
-        this.goods.img = this.goods.imgs[0]
+        this.goods.imgList.push(response.url)
+        this.goods.img = this.goods.imgList[0]
       }
     },
     handleRemove: function(file, fileList) {
-      for (var i = 0; i < this.goods.imgs.length; i++) {
+      for (var i = 0; i < this.goods.imgList.length; i++) {
         // 这里存在两种情况
         // 1. 如果所删除图片是刚刚上传的图片，那么图片地址是file.response.url
         //    此时的file.url虽然存在，但是是本机地址，而不是远程地址。
@@ -334,26 +464,53 @@ export default {
           url = file.response.url
         }
 
-        if (this.goods.imgs[i] === url) {
-          this.goods.imgs.splice(i, 1)
+        if (this.goods.imgList[i] === url) {
+          this.goods.imgList.splice(i, 1)
         }
       }
-      if (this.goods.imgs.length > 0) {
-        this.goods.img = this.goods.imgs[0]
+      if (this.goods.imgList.length > 0) {
+        this.goods.img = this.goods.imgList[0]
       }
+    },
+    handleSkuImgSuccess(e) {
+      debugger
     },
     handleAttributeShow() {
       this.attributeForm = {}
       this.attributeVisiable = true
     },
     handleAttributeAdd() {
-      this.attributes.unshift(this.attributeForm)
-      this.attributeVisiable = false
+      this.$refs['attributeForm'].validate(valid => {
+        if (valid) {
+          this.attributes.unshift(this.attributeForm)
+          this.attributeVisiable = false
+        }
+      })
     },
     handleAttributeDelete(row) {
       const index = this.attributes.indexOf(row)
       this.attributes.splice(index, 1)
+    },
+    handleSkuShow() {
+      this.skuFrom = {}
+      this.skuVisiable = true
+    },
+    handleSkuAdd() {
+      this.$refs['skuForm'].validate(valid => {
+        if (valid) {
+          this.skuForm.price = parseInt(this.skuForm.priceRaw * 100)
+          this.skuForm.originalPrice = parseInt(this.skuForm.originalPriceRaw * 100)
+          this.skuForm.vipPrice = parseInt(this.skuForm.vipPriceRaw * 100)
+          this.skuList.unshift(this.skuForm)
+          this.skuVisiable = false
+        }
+      })
+    },
+    handleSkuDelete(row) {
+      const index = this.skuList.indexOf(row)
+      this.skuList.splice(index, 1)
     }
+
   }
 }
 </script>

@@ -201,6 +201,12 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition GOODS_NOT_EXIST =
             new ServiceExceptionDefinition(20001, "商品并不存在");
 
+    public static final ServiceExceptionDefinition GOODS_SKU_LIST_EMPTY =
+            new ServiceExceptionDefinition(20002, "商品的类型（Sku）列表不能为空");
+
+    public static final ServiceExceptionDefinition GOODS_CREATE_HAS_ID =
+            new ServiceExceptionDefinition(20003, "创建商品时请不要传入Id");
+
     public static final ServiceExceptionDefinition RECOMMEND_SPU_NO_HAS =
             new ServiceExceptionDefinition(21001, "你要加入推荐的商品不存在");
 

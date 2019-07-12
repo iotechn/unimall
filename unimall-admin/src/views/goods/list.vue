@@ -3,14 +3,7 @@
     <!-- 查询和其他操作 -->
     <div class="filter-container">
       <el-input
-        v-model="listQuery.goodsSn"
-        clearable
-        class="filter-item"
-        style="width: 200px;"
-        placeholder="请输入商品编号"
-      />
-      <el-input
-        v-model="listQuery.name"
+        v-model="listQuery.title"
         clearable
         class="filter-item"
         style="width: 200px;"
@@ -43,13 +36,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="商品编号" prop="goodsSn" />
+      <el-table-column align="center" label="商品编号" prop="id" />
 
       <el-table-column align="center" min-width="100" label="名称" prop="title" />
 
-      <el-table-column align="center" property="iconUrl" label="图片">
+      <el-table-column align="center" property="img" label="图片">
         <template slot-scope="scope">
-          <img :src="scope.row.picUrl" width="40" >
+          <img :src="scope.row.img" width="40" >
         </template>
       </el-table-column>
 
@@ -65,6 +58,8 @@
       <el-table-column align="center" label="原价" prop="originalPrice" />
 
       <el-table-column align="center" label="现价" prop="price" />
+
+      <el-table-column align="center" label="VIP价格" prop="vipPrice" />
 
       <el-table-column align="center" label="是否在售" prop="status">
         <template slot-scope="scope">
@@ -141,8 +136,7 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        goodsSn: undefined,
-        name: undefined,
+        title: undefined,
         sort: 'id',
         order: 'desc'
       },
@@ -161,6 +155,7 @@ export default {
           response.data.data.items.forEach(item => {
             item.price = item.price / 100
             item.originalPrice = item.originalPrice / 100
+            item.vipPrice = item.vipPrice / 100
           })
           this.list = response.data.data.items
           this.total = response.data.data.total
@@ -177,10 +172,10 @@ export default {
       this.getList()
     },
     handleCreate() {
-      this.$router.push({ path: '/goods/create' })
+      this.$router.push({ path: '/goods/upsert' })
     },
     handleUpdate(row) {
-      this.$router.push({ path: '/goods/edit', query: { id: row.id }})
+      this.$router.push({ path: '/goods/upsert', query: { id: row.id }})
     },
     showDetail(detail) {
       this.goodsDetail = detail

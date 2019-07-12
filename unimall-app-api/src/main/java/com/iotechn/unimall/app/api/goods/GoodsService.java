@@ -6,10 +6,8 @@ import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.dto.SpuDTO;
+import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.model.Page;
-
-import java.util.List;
 
 /**
  * Created by rize on 2019/7/1.

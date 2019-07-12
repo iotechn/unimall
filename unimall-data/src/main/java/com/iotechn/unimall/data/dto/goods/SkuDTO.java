@@ -1,5 +1,6 @@
-package com.iotechn.unimall.data.dto;
+package com.iotechn.unimall.data.dto.goods;
 
+import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.Data;
 
 /**

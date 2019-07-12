@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @TableName("unimall_spu_attribute")
 @Data
-public class SpuAttributeDO {
+public class SpuAttributeDO extends SuperDO {
 
     @TableField("spu_id")
     private Long spuId;

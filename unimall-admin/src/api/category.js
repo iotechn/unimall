@@ -1,6 +1,16 @@
 import request from '@/utils/request'
 import Qs from 'qs'
 
+export function categoryTree() {
+  return request({
+    method: 'get',
+    params: {
+      _gp: 'admin.category',
+      _mt: 'categoryTree'
+    }
+  })
+}
+
 export function listCategory(query) {
   return request({
     method: 'get',

@@ -7,7 +7,7 @@
     </update>
 
 
-    <select id="getSkuDTOById" resultType="com.iotechn.unimall.data.dto.SkuDTO">
+    <select id="getSkuDTOById" resultType="com.iotechn.unimall.data.dto.goods.SkuDTO">
         SELECT
             k.id,
             k.spu_id AS spuId,

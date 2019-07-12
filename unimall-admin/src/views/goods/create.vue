@@ -3,8 +3,8 @@
     <el-card class="box-card">
       <h3>商品介绍</h3>
       <el-form ref="dataForm" :rules="rules" :model="goods" label-width="150px">
-        <el-form-item label="商品编号" prop="goodsSn">
-          <el-input v-model="goods.goodsSn" />
+        <el-form-item label="商品编号" prop="barCode">
+          <el-input v-model="goods.barCode" />
         </el-form-item>
         <el-form-item label="商品名称" prop="title">
           <el-input v-model="goods.title" />
@@ -19,15 +19,19 @@
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
-
+        <el-form-item label="当前价格" prop="vipPriceRaw">
+          <el-input v-model="goods.vipPriceRaw" placeholder="0.00">
+            <template slot="append">元</template>
+          </el-input>
+        </el-form-item>
         <el-form-item label="剩余库存" prop="stock">
           <el-input v-model="goods.stock" placeholder="0"/>
         </el-form-item>
 
         <el-form-item label="是否在售" prop="status">
           <el-radio-group v-model="goods.status">
-            <el-radio :label="1">在售</el-radio>
-            <el-radio :label="2">下架</el-radio>
+            <el-radio :label="0">在售</el-radio>
+            <el-radio :label="1">下架</el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -187,7 +191,7 @@ export default {
         status: [
           { required: true, message: '请选择商品状态', trigger: 'blur' }
         ],
-        goodsSn: [
+        barCode: [
           { required: true, message: '商品编号不能为空', trigger: 'blur' }
         ],
         title: [
@@ -195,6 +199,9 @@ export default {
         ],
         description: [
           { required: true, message: '商品描述不能为空', trigger: 'blur' }
+        ],
+        vipPriceRaw: [
+          { required: true, message: '商品会员价不能为空', trigger: 'blur' }
         ],
         priceRaw: [
           { required: true, message: '商品现价不能为空', trigger: 'blur' }

@@ -1,7 +1,9 @@
-package com.iotechn.unimall.data.dto;
+package com.iotechn.unimall.data.dto.goods;
 
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
+import com.iotechn.unimall.data.dto.CategoryDTO;
+import com.iotechn.unimall.data.dto.SuperDTO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import lombok.Data;
 
@@ -43,11 +45,15 @@ public class SpuDTO extends SuperDTO {
 
     private Long categoryId;
 
+    private List<Long> categoryIds;
+
     private List<CategoryDTO> categoryList;
 
     private List<SpuAttributeDO> attributeList;
 
     private String unit;
+
+    private Long freightTemplateId;
 
     private FreightTemplateDTO freightTemplate;
 

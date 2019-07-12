@@ -54,17 +54,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         if(freightTemplateCarriageDOList == null || freightTemplateCarriageDOList.size() == 0){
             return true;
         }
-
-        //表中设定可默认值，所以就不检查是否为空
-        for(FreightTemplateCarriageDO freightTemplateCarriageDO : freightTemplateCarriageDOList){
-            freightTemplateCarriageDO.setTemplateId(freightTemplateDO.getId());
-            freightTemplateCarriageDO.setGmtCreate(now);
-            freightTemplateCarriageDO.setGmtUpdate(freightTemplateCarriageDO.getGmtCreate());
-            judgeSQL = freightTemplateCarriageMapper.insert(freightTemplateCarriageDO);
-            if(!(judgeSQL > 0)){
-                throw  new AdminServiceException(ExceptionDefinition.FREIGHT_CARRIAGE_INSERT_FAILED);
-            }
-        }
+        insertFreightTemplateCarriage(freightTemplateDO, freightTemplateCarriageDOList, now);
         return true;
     }
 
@@ -80,12 +70,12 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         if(!(judgeSQL > 0)){
             throw  new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_DELETE_FAILED);
         }
-        judgeSQL = freightTemplateCarriageMapper.selectCount(new EntityWrapper<FreightTemplateCarriageDO>().eq("templateId",templateId));
+        judgeSQL = freightTemplateCarriageMapper.selectCount(new EntityWrapper<FreightTemplateCarriageDO>().eq("template_id",templateId));
         if(judgeSQL == 0){
             return true;
         }
         judgeSQL = freightTemplateCarriageMapper.delete(new EntityWrapper<FreightTemplateCarriageDO>()
-                .eq("templateId",templateId));
+                .eq("template_id",templateId));
         if(judgeSQL > 0)
         {return true;}
         else
@@ -104,22 +94,26 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
             throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
         }
 
-        freightTemplateCarriageMapper.delete(new EntityWrapper<FreightTemplateCarriageDO>().eq("templateId",templateId));
+        freightTemplateCarriageMapper.delete(new EntityWrapper<FreightTemplateCarriageDO>().eq("template_id",templateId));
 
         if(freightTemplateCarriageDOList == null || freightTemplateCarriageDOList.size() == 0){
             return true;
         }
+        insertFreightTemplateCarriage(freightTemplateDO, freightTemplateCarriageDOList, now);
+        return true;
+    }
+
+    private void insertFreightTemplateCarriage(FreightTemplateDO freightTemplateDO, List<FreightTemplateCarriageDO> freightTemplateCarriageDOList, Date now) throws ServiceException {
         //表中设定可默认值，所以就不检查是否为空
         for(FreightTemplateCarriageDO freightTemplateCarriageDO : freightTemplateCarriageDOList){
             freightTemplateCarriageDO.setTemplateId(freightTemplateDO.getId());
             freightTemplateCarriageDO.setGmtCreate(now);
             freightTemplateCarriageDO.setGmtUpdate(freightTemplateCarriageDO.getGmtCreate());
-            judgeSQL = freightTemplateCarriageMapper.insert(freightTemplateCarriageDO);
+            Integer judgeSQL = freightTemplateCarriageMapper.insert(freightTemplateCarriageDO);
             if(!(judgeSQL > 0)){
                 throw  new AdminServiceException(ExceptionDefinition.FREIGHT_CARRIAGE_INSERT_FAILED);
             }
         }
-        return true;
     }
 
     @Override
@@ -132,7 +126,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         for (FreightTemplateDO freightTemplateDO : freightTemplateDOList){  //查出副表中，主表每条数据对应的数据
             FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO();
             List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new EntityWrapper<FreightTemplateCarriageDO>()
-                    .eq("templateId", freightTemplateDO.getId()));
+                    .eq("template_id", freightTemplateDO.getId()));
             freightTemplateDTO.setFreightTemplateDO(freightTemplateDO);
             freightTemplateDTO.setFreightTemplateCarriageDOList(freightTemplateCarriageDOList);
             freightTemplateDTOList.add(freightTemplateDTO);
