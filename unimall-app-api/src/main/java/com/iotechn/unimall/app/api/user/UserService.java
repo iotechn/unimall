@@ -43,7 +43,8 @@ public interface UserService {
     @HttpMethod(description = "用户登录")
     public UserDTO login(
             @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
-            @NotNull @TextFormat(lengthMin = 8,lengthMax = 18,notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password) throws ServiceException;
+            @NotNull @TextFormat(lengthMin = 8,lengthMax = 18,notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
+            @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "登录IP") String ip) throws ServiceException;
 
     @HttpMethod(description = "用户注销")
     public String logout(

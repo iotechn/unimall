@@ -47,6 +47,15 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition USER_THIRD_PART_NOT_SUPPORT =
             new ServiceExceptionDefinition(11009, "未知的第三方登录平台");
 
+    public static final ServiceExceptionDefinition USER_INFORMATION_MISSING =
+            new ServiceExceptionDefinition(11010, "用户信息缺失，不能添加");
+
+    public static final ServiceExceptionDefinition USER_PHONE_ALREADY_EXIST =
+            new ServiceExceptionDefinition(11011, "用户电话已经存在，不能添加");
+
+    public static final ServiceExceptionDefinition USER_CAN_NOT_ACTICE =
+            new ServiceExceptionDefinition(11012, "用户处于冻结状态，请联系管理员");
+
 
     public static final ServiceExceptionDefinition CART_UPDATE_FAILED =
             new ServiceExceptionDefinition(12001, "购物车更新失败");
