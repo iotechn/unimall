@@ -118,7 +118,7 @@
           <el-form-item label="类型名称" prop="title">
             <el-input v-model="skuForm.title" />
           </el-form-item>
-          <el-form-item label="类型图片">
+          <el-form-item label="图片(可空)">
             <el-upload
               :action="uploadPath"
               :show-file-list="false"
@@ -511,7 +511,7 @@ export default {
       }
     },
     handleSkuImgSuccess(e) {
-      debugger
+      this.skuForm.img = e.url
     },
     handleAttributeShow() {
       this.attributeForm = {}

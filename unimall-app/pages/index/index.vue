@@ -14,8 +14,8 @@
 			<!-- 背景色区域 -->
 			<view class="titleNview-background" :style="{backgroundColor:titleNViewBackground}"></view>
 			<swiper class="carousel" circular @change="swiperChange">
-				<swiper-item v-for="(item, index) in carouselList" :key="index" class="carousel-item" @click="navToDetailPage({title: '轮播广告'})">
-					<image :src="item.src" />
+				<swiper-item v-for="(item, index) in carouselList" :key="index" class="carousel-item" @click="naviageToPage(item.url)">
+					<image :src="item.imgUrl" />
 				</swiper-item>
 			</swiper>
 			<!-- 自定义swiper指示器 -->
@@ -265,11 +265,18 @@
 				}).then(res => {
 					that.windowSpuList = res.data
 				})
-				let carouselList = await this.$api.json('carouselList');
-				this.titleNViewBackground = carouselList[0].background;
-				this.swiperLength = carouselList.length;
-				this.carouselList = carouselList;
-				
+				that.$api.request('advertisement', 'getActiveAd', {
+					adType : 1
+				}).then(res => {
+					if (res.data.length > 0) {
+						res.data.forEach(item => {
+							item.background = 'rgb(205, 215, 218)'
+						})
+						this.carouselList = res.data
+						this.swiperLength = res.data.length
+						this.titleNViewBackground = res.data[0].background
+					}
+				})
 				let goodsList = await this.$api.json('goodsList');
 				this.goodsList = goodsList || [];
 			},
@@ -287,6 +294,11 @@
 					url: `/pages/product/product?id=${id}`
 				})
 			},
+			naviageToPage(page) {
+				uni.navigateTo({
+					url: page
+				})
+			}
 		},
 		// #ifndef MP
 		// 标题栏input搜索框点击
