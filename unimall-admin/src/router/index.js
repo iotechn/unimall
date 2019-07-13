@@ -190,33 +190,33 @@ export const asyncRouterMap = [
       icon: 'tree'
     },
     children: [
-      {
-        path: 'merchant',
-        component: () => import('@/views/promotion/merchant'),
-        name: 'merchant',
-        meta: {
-          perms: ['admin:nearby:detail', 'admin:nearby:upsert'],
-          title: '商铺管理',
-          noCache: true
-        }
-      },
+      // {
+      //   path: 'merchant',
+      //   component: () => import('@/views/promotion/merchant'),
+      //   name: 'merchant',
+      //   meta: {
+      //     perms: ['admin:nearby:detail', 'admin:nearby:upsert'],
+      //     title: '商铺管理',
+      //     noCache: true
+      //   }
+      // },
       {
         path: 'merchantad',
         component: () => import('@/views/promotion/merchantad'),
         name: 'merchantad',
         meta: {
-          perms: ['admin:nearby:adlist', 'admin:nearby:adcreate', 'admin:nearby:adupdate', 'admin:nearby:addelete'],
+          perms: ['promote:advertisement:create', 'promote:advertisement:delete', 'promote:advertisement:update', 'promote:advertisement:query'],
           title: '商铺广告',
           noCache: true
         }
       },
       {
-        path: 'nearbyform',
-        component: () => import('@/views/promotion/nearbyform'),
-        name: 'nearbyform',
+        path: 'coupon',
+        component: () => import('@/views/promotion/coupon'),
+        name: 'coupon',
         meta: {
-          perms: ['admin:nearbyform:list', 'admin:nearbyform:complete'],
-          title: '预申请表',
+          perms: ['promote:coupon:create', 'promote:coupon:delete', 'promote:coupon:update', 'promote:coupon:query'],
+          title: '优惠卷管理',
           noCache: true
         }
       }

@@ -30,4 +30,6 @@ public class AdvertisementDO extends SuperDO {
     private String imgUrl;
 
     private Integer status;
+
+    private String color;
 }

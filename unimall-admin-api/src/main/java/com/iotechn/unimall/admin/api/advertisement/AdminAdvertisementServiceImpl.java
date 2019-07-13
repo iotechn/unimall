@@ -39,10 +39,10 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean addAdvertisement(Long adminId, Integer adType, String title, String url, String imgUrl, Integer status) throws ServiceException {
+    public Boolean addAdvertisement(Long adminId, Integer adType, String title, String url, String imgUrl, Integer status,String color) throws ServiceException {
 
         Date now = new Date();
-        AdvertisementDO advertisementDO = new AdvertisementDO(adType,title,url,imgUrl,status);
+        AdvertisementDO advertisementDO = new AdvertisementDO(adType,title,url,imgUrl,status,color);
         advertisementDO.setGmtCreate(now);
         advertisementDO.setGmtUpdate(now);
 
@@ -68,8 +68,8 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean updateAdvertisement(Long adminId,Long adId, Integer adType, String title, String url, String imgUrl, Integer status) throws ServiceException {
-        AdvertisementDO advertisementDO = new AdvertisementDO(adType,title,url,imgUrl,status);
+    public Boolean updateAdvertisement(Long adminId,Long adId, Integer adType, String title, String url, String imgUrl, Integer status,String color) throws ServiceException {
+        AdvertisementDO advertisementDO = new AdvertisementDO(adType,title,url,imgUrl,status,color);
         advertisementDO.setId(adId);
         advertisementDO.setGmtUpdate(new Date());
         if(advertisementMapper.updateById(advertisementDO)>0){

@@ -23,7 +23,7 @@ import java.util.List;
  * Time: 下午3:42
  */
 
-@HttpOpenApi(group = "recommend", description = "推荐商品")
+@HttpOpenApi(group = "admin.recommend", description = "推荐商品")
 public interface AdminRecommendService {
 
     @HttpMethod(description = "创建", permission = "promote:recommend:create", permissionParentName = "推广管理", permissionName = "推荐管理")

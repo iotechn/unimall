@@ -31,7 +31,8 @@ public interface AdminAdvertisementService {
                                     @HttpParam(name = "title", type = HttpParamType.COMMON, description = "广告标题") String title,
                                     @NotNull @HttpParam(name = "url", type = HttpParamType.COMMON, description = "广告地址") String url,
                                     @NotNull @HttpParam(name = "imgUrl", type = HttpParamType.COMMON, description = "广告图片地址") String imgUrl,
-                                    @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "广告状态") Integer status) throws ServiceException;
+                                    @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "广告状态") Integer status,
+                                    @NotNull @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色") String color) throws ServiceException;
 
     @HttpMethod(description = "删除", permission = "promote:advertisement:delete", permissionParentName = "推广管理", permissionName = "广告管理")
     public Boolean deleteAdvertisement(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
@@ -45,7 +46,8 @@ public interface AdminAdvertisementService {
                                        @HttpParam(name = "title", type = HttpParamType.COMMON, description = "广告标题") String title,
                                        @HttpParam(name = "url", type = HttpParamType.COMMON, description = "广告地址") String url,
                                        @HttpParam(name = "imgUrl", type = HttpParamType.COMMON, description = "广告图片地址") String imgUrl,
-                                       @HttpParam(name = "status", type = HttpParamType.COMMON, description = "广告状态") Integer status) throws ServiceException;
+                                       @HttpParam(name = "status", type = HttpParamType.COMMON, description = "广告状态") Integer status,
+                                       @NotNull @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色") String color) throws ServiceException;
 
 
     @HttpMethod(description = "查询", permission = "promote:advertisement:query", permissionParentName = "推广管理", permissionName = "广告管理")

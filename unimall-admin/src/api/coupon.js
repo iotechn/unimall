@@ -2,9 +2,12 @@ import request from '@/utils/request'
 
 export function listCoupon(query) {
   return request({
-    url: '/coupon/list',
     method: 'get',
-    params: query
+    params: {
+      _gp: 'admin.coupon',
+      _mt: 'queryCouponByTitle',
+      ...query
+    }
   })
 }
 

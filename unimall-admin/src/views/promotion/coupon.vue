@@ -2,50 +2,22 @@
   <div class="app-container">
     <!-- 查询和其他操作 -->
     <div class="filter-container">
-      <el-input
-        v-model="listQuery.name"
-        clearable
-        class="filter-item"
-        style="width: 200px;"
-        placeholder="请输入优惠券标题"
-      />
-      <el-select
-        v-model="listQuery.type"
-        clearable
-        style="width: 200px"
-        class="filter-item"
-        placeholder="请选择优惠券类型"
-      >
-        <el-option
-          v-for="type in typeOptions"
-          :key="type.value"
-          :label="type.label"
-          :value="type.value"
-        />
+      <el-input v-model="listQuery.title" clearable class="filter-item" style="width: 200px;" placeholder="请输入优惠券标题" />
+      <el-select v-model="listQuery.type" clearable style="width: 200px" class="filter-item" placeholder="请选择优惠券类型" >
+        <el-option v-for="(item,index) in couponTypeMap" :key="index" :label="item.name" :value="item.value" />
       </el-select>
-      <el-select
-        v-model="listQuery.status"
-        clearable
-        style="width: 200px"
-        class="filter-item"
-        placeholder="请选择优惠券状态"
-      >
-        <el-option
-          v-for="type in statusOptions"
-          :key="type.value"
-          :label="type.label"
-          :value="type.value"
-        />
+      <el-select v-model="listQuery.status" clearable style="width: 200px" class="filter-item" placeholder="请选择优惠券状态" >
+        <el-option v-for="(item,index) in couponStatusMap" :key="index" :label="item.name" :value="item.value" />
       </el-select>
       <el-button
-        v-permission="['GET /admin/coupon/list']"
+        v-permission="['promote:coupon:query']"
         class="filter-item"
         type="primary"
         icon="el-icon-search"
         @click="handleFilter"
       >查找</el-button>
       <el-button
-        v-permission="['POST /admin/coupon/create']"
+        v-permission="['promote:coupon:create']"
         class="filter-item"
         type="primary"
         icon="el-icon-edit"
@@ -72,56 +44,64 @@
     >
       <el-table-column align="center" label="优惠券ID" prop="id" sortable />
 
-      <el-table-column align="center" label="优惠券名称" prop="name" />
+      <el-table-column align="center" label="优惠券名称" prop="title" />
 
-      <el-table-column align="center" label="介绍" prop="desc" />
-
-      <el-table-column align="center" label="标签" prop="tag" />
-
-      <el-table-column align="center" label="最低消费" prop="min">
-        <template slot-scope="scope">满{{ scope.row.min }}元可用</template>
+      <el-table-column align="center" label="优惠券类型" prop="type">
+        <template slot-scope="scope">{{ couponTypeMap[scope.row.type-1]?couponTypeMap[scope.row.type-1].name:'错误类型' }}</template>
       </el-table-column>
 
-      <el-table-column align="center" label="满减金额" prop="discount">
-        <template slot-scope="scope">减免{{ scope.row.discount }}元</template>
+      <el-table-column align="center" label="介绍" prop="description" />
+
+      <el-table-column align="center" label="优惠券数量" prop="total">
+        <template slot-scope="scope">{{ scope.row.total >= 0 ? scope.row.total : "不限" }}</template>
+      </el-table-column>
+
+      <el-table-column align="center" label="剩余数量" prop="surplus">
+        <template slot-scope="scope">{{ scope.row.total >= 0 ? scope.row.total : "不限" }}</template>
       </el-table-column>
 
       <el-table-column align="center" label="每人限领" prop="limit">
         <template slot-scope="scope">{{ scope.row.limit != 0 ? scope.row.limit : "不限" }}</template>
       </el-table-column>
 
-      <el-table-column align="center" label="商品使用范围" prop="goodsType">
-        <template slot-scope="scope">{{ scope.row.goodsType | formatGoodsType }}</template>
+      <el-table-column align="center" label="满减金额" prop="discount">
+        <template slot-scope="scope">减免{{ scope.row.discount }}元</template>
       </el-table-column>
 
-      <el-table-column align="center" label="优惠券类型" prop="type">
-        <template slot-scope="scope">{{ scope.row.type | formatType }}</template>
-      </el-table-column>
-
-      <el-table-column align="center" label="优惠券数量" prop="total">
-        <template slot-scope="scope">{{ scope.row.total != 0 ? scope.row.total : "不限" }}</template>
+      <el-table-column align="center" label="最低消费" prop="min">
+        <template slot-scope="scope">满{{ scope.row.min }}元可用</template>
       </el-table-column>
 
       <el-table-column align="center" label="状态" prop="status">
-        <template slot-scope="scope">{{ scope.row.status | formatStatus }}</template>
+        <template slot-scope="scope">{{ scope.row.status }}</template>
+      </el-table-column>
+
+      <el-table-column align="center" label="使用类别范围" prop="categoryId" />
+
+      <el-table-column align="center" label="领券相对天数" prop="days" />
+      <el-table-column align="center" label="领券开始时间" prop="gmtStart">
+        <template slot-scope="scope">{{ scope.row.gmtStart | formatTime }}</template>
+      </el-table-column>
+      <el-table-column align="center" label="领券结束时间" prop="gmtEnd">
+        <template slot-scope="scope">{{ scope.row.gmtStart | formatTime }}</template>
       </el-table-column>
 
       <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
-            v-permission="['GET /admin/coupon/read']"
+            v-permission="['']"
             type="primary"
             size="mini"
             @click="handleDetail(scope.row)"
           >详情</el-button>
           <el-button
-            v-permission="['POST /admin/coupon/update']"
+            v-permission="['promote:coupon:update']"
             type="info"
             size="mini"
             @click="handleUpdate(scope.row)"
           >编辑</el-button>
           <el-button
-            v-permission="['POST /admin/coupon/delete']"
+            v-permission="['promote:coupon:delete']"
             type="danger"
             size="mini"
             @click="handleDelete(scope.row)"
@@ -264,54 +244,14 @@
 </style>
 
 <script>
-import {
-  listCoupon,
-  createCoupon,
-  updateCoupon,
-  deleteCoupon
-} from '@/api/coupon'
+import { listCoupon, createCoupon, updateCoupon, deleteCoupon } from '@/api/coupon'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-
-const defaultTypeOptions = [
-  {
-    label: '通用领券',
-    value: 0
-  },
-  {
-    label: '注册赠券',
-    value: 1
-  },
-  {
-    label: '兑换码',
-    value: 2
-  }
-]
-
-const defaultStatusOptions = [
-  {
-    label: '正常',
-    value: 0
-  },
-  {
-    label: '已过期',
-    value: 1
-  },
-  {
-    label: '已下架',
-    value: 2
-  }
-]
 
 export default {
   name: 'Coupon',
   components: { Pagination },
   filters: {
     formatType(type) {
-      for (let i = 0; i < defaultTypeOptions.length; i++) {
-        if (type === defaultTypeOptions[i].value) {
-          return defaultTypeOptions[i].label
-        }
-      }
       return ''
     },
     formatGoodsType(goodsType) {
@@ -335,19 +275,17 @@ export default {
   },
   data() {
     return {
-      typeOptions: Object.assign({}, defaultTypeOptions),
-      statusOptions: Object.assign({}, defaultStatusOptions),
+      couponTypeMap: [{ value: 1, name: '满减卷' }, { value: '', name: '全部' }],
+      couponStatusMap: [{ value: 0, name: '下架' }, { value: 1, name: '正常' }, { value: 0, name: '已过期' }, { value: '', name: '全部' }],
       list: undefined,
       total: 0,
       listLoading: true,
       listQuery: {
-        page: 1,
+        pageNo: 1,
         limit: 20,
-        name: undefined,
         type: undefined,
         status: undefined,
-        sort: 'add_time',
-        order: 'desc'
+        title: undefined
       },
       dataForm: {
         id: undefined,

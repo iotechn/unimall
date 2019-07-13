@@ -139,6 +139,12 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition COUPON_STRATEGY_INCORRECT =
             new ServiceExceptionDefinition(14006, "优惠券策略不正确");
 
+    public static final ServiceExceptionDefinition COUPON_NOT_EXIST =
+            new ServiceExceptionDefinition(14006, "优惠券不存在");
+
+    public static final ServiceExceptionDefinition COUPON_CHECK_DATA_FAILED =
+            new ServiceExceptionDefinition(14006, "优惠券审核数据失败");
+
 
     public static final ServiceExceptionDefinition COLLECT_ALREADY_EXISTED =
             new ServiceExceptionDefinition(15001, "该商品不允许重复收藏");
