@@ -242,10 +242,10 @@
 </style>
 
 <script>
-import { detailGoods, editGoods } from '@/api/goods'
+import { detailGoods, editGoods, createGoods } from '@/api/goods'
 import { categoryTree } from '@/api/category'
 import { listFreight } from '@/api/freight'
-import { createStorage, uploadPath } from '@/api/storage'
+import { uploadPath } from '@/api/storage'
 import Editor from '@tinymce/tinymce-vue'
 import { MessageBox } from 'element-ui'
 import { getToken } from '@/utils/auth'
@@ -329,18 +329,7 @@ export default {
         toolbar: [
           'searchreplace bold italic underline strikethrough alignleft aligncenter alignright outdent indent  blockquote undo redo removeformat subscript superscript code codesample',
           'hr bullist numlist link image charmap preview anchor pagebreak insertdatetime media table emoticons forecolor backcolor fullscreen'
-        ],
-        images_upload_handler: function(blobInfo, success, failure) {
-          const formData = new FormData()
-          formData.append('file', blobInfo.blob())
-          createStorage(formData)
-            .then(res => {
-              success(res.data.url)
-            })
-            .catch(() => {
-              failure('上传失败，请重新上传')
-            })
-        }
+        ]
       }
     }
   },
@@ -397,17 +386,66 @@ export default {
       this.$router.push({ path: '/goods/list' })
     },
     handleCreate: function() {
-      debugger
+      this.$refs['dataForm'].validate(valid => {
+        if (valid) {
+          if (this.skuList.length === 0) {
+            this.$notify.error({
+              title: '失败',
+              message: '请添加类型（Sku）'
+            })
+          } else if (this.categoryIds.length !== 3) {
+            this.$notify.error({
+              title: '失败',
+              message: '请选择类目'
+            })
+          } else {
+            this.goods.categoryId = this.categoryIds[2]
+            this.goods.price = parseInt(this.goods.priceRaw * 100)
+            this.goods.originalPrice = parseInt(this.goods.originalPriceRaw * 100)
+            this.goods.vipPrice = parseInt(this.goods.vipPriceRaw * 100)
+            const finalGoods = {
+              ...this.goods,
+              attributeList: this.attributes,
+              skuList: this.skuList
+            }
+            createGoods(finalGoods)
+              .then(response => {
+                this.$notify.success({
+                  title: '成功',
+                  message: '添加成功'
+                })
+                this.$router.push({ path: '/goods/list' })
+              })
+              .catch(response => {
+                MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
+                  confirmButtonText: '确定',
+                  type: 'error'
+                })
+              })
+          }
+        } else {
+          this.$notify.error({
+            title: '失败',
+            message: '请完善以上表单'
+          })
+        }
+      })
     },
     handleEdit: function() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          if (!this.goods.categoryId) {
+          if (this.skuList.length === 0) {
             this.$notify.error({
               title: '失败',
-              message: '请选择分类'
+              message: '请添加类型（Sku）'
+            })
+          } else if (this.categoryIds.length !== 3) {
+            this.$notify.error({
+              title: '失败',
+              message: '请选择类目'
             })
           } else {
+            this.goods.categoryId = this.categoryIds[2]
             this.goods.price = parseInt(this.goods.priceRaw * 100)
             this.goods.originalPrice = parseInt(this.goods.originalPriceRaw * 100)
             this.goods.vipPrice = parseInt(this.goods.vipPriceRaw * 100)

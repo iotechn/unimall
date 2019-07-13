@@ -16,4 +16,5 @@ public class AdminServiceException extends ServiceException {
     public AdminServiceException(String message, int code) {
         super(message,code);
     }
+
 }

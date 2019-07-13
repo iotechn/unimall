@@ -44,13 +44,13 @@ export function deleteGoods(id) {
   })
 }
 
-export function publishGoods(data) {
+export function createGoods(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.goods',
       _mt: 'create',
-      allinone: JSON.stringify(data)
+      spuDTO: JSON.stringify(data)
     })
   })
 }
