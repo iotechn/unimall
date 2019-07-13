@@ -510,9 +510,11 @@ export default {
         this.goods.img = this.goods.imgList[0]
       }
     },
-    handleSkuImgSuccess(e) {
+    handleSkuImgSuccess(e, file) {
       this.skuForm.img = e.url
-    },
+      this.skuVisiable = false
+      this.skuVisiable = true
+    }
     handleAttributeShow() {
       this.attributeForm = {}
       this.attributeVisiable = true

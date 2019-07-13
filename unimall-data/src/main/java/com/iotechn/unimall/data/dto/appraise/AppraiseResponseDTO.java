@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.Data;
 
+import java.util.List;
+
 /*
 @author kbq
 @date  2019/7/6 - 10:39
@@ -18,7 +20,7 @@ public class AppraiseResponseDTO extends SuperDTO {
 
     private String content;
     private Integer score;
-    private String appraiseImgUrl;
+    private List<String> imgList;
     private Long userId;
     private String userNickName;
     private String userAvatarUrl;

@@ -49,14 +49,14 @@
 				</view>
 				<text class="yticon icon-you"></text>
 			</view>
-			<view class="c-row b-b">
+			<view v-if="couponList.length > 0" @click="toggleMask('show')" class="c-row b-b">
 				<text class="tit">优惠券</text>
 				<text class="con t-r red">领取优惠券</text>
 				<text class="yticon icon-you"></text>
 			</view>
 			<view class="c-row b-b">
 				<text class="tit">配送费用</text>
-				<view class="con-list">
+				<view v-if="goods.freightTemplate" class="con-list">
 					<text>单笔购买满¥{{goods.freightTemplate.freightTemplateDO.defaultFreePrice / 100.0}}元免邮费</text>
 					<text v-if="goods.freightTemplate.freightTemplateDO.defaultContinueMoney > 0">每增加{{goods.freightTemplate.freightTemplateDO.defaultFirstNum}}件，增加运费¥{{goods.freightTemplate.freightTemplateDO.defaultContinueMoney / 100.0}}元</text>
 					<text v-if="goods.freightTemplate.freightTemplateCarriageDOList.length > 0">TODO 特殊情况说明页面</text>
@@ -71,21 +71,21 @@
 		</view>
 
 		<!-- 评价 -->
-		<view class="eva-section">
+		<view v-if="goods.appraisePage && goods.appraisePage.items.length > 0" class="eva-section">
 			<view class="e-header">
 				<text class="tit">评价</text>
-				<text>(86)</text>
-				<text class="tip">好评率 100%</text>
+				<text>({{goods.appraisePage.count}})</text>
+				<text @click="navAllAppraise" class="tip">全部评论</text>
 				<text class="yticon icon-you"></text>
 			</view>
 			<view class="eva-box">
-				<image class="portrait" src="http://img3.imgtn.bdimg.com/it/u=1150341365,1327279810&fm=26&gp=0.jpg" mode="aspectFill"></image>
+				<image class="portrait" :src="goods.appraisePage.items[0].userAvatarUrl ? goods.appraisePage.items[0].userAvatarUrl : '/static/missing-face.png'" mode="aspectFill"></image>
 				<view class="right">
-					<text class="name">Leo yo</text>
-					<text class="con">商品收到了，79元两件，质量不错，试了一下有点瘦，但是加个外罩很漂亮，我很喜欢</text>
+					<text class="name">{{goods.appraisePage.items[0].userNickName?goods.appraisePage.items[0].userNickName:('用户' + goods.appraisePage.items[0].userId)}}</text>
+					<text class="con">{{goods.appraisePage.items[0].content}}</text>
 					<view class="bot">
-						<text class="attr">购买类型：XL 红色</text>
-						<text class="time">2019-04-01 19:21</text>
+						<text class="attr">购买类型：{{goods.appraisePage.items[0].skuTitle}}</text>
+						<text class="time">{{goods.appraisePage.items[0].gmtCreate}}</text>
 					</view>
 				</view>
 			</view>
@@ -116,6 +116,27 @@
 			<view class="action-btn-group">
 				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">立即购买</button>
 				<button type="primary" class=" action-btn no-border add-cart-btn" @click="addCart">加入购物车</button>
+			</view>
+		</view>
+
+		<view class="mask" :class="maskState===0 ? 'none' : maskState===1 ? 'show' : ''" @click="toggleMask">
+			<view class="mask-content" @click.stop.prevent="stopPrevent">
+				<view @click="obtainCoupon(index)" class="coupon-item" v-for="(item,index) in couponList" :key="index">
+					<view class="con">
+						<view class="left">
+							<text class="title">{{item.title}}</text>
+							<text v-if="item.gmtEnd" class="time">在{{item.gmtEnd}}前有效。 可领{{item.limit}}张，已领{{item.nowCount}}张</text>
+							<text v-if="!item.gmtEnd" class="time">在领取后{{item.days}}天内有效。可领{{item.limit}}张，已领{{item.nowCount}}张</text>
+						</view>
+						<view class="right">
+							<text class="price">{{item.discount / 100.0}}</text>
+							<text>满{{item.min / 100.0}}可用</text>
+						</view>
+						<view class="circle l"></view>
+						<view class="circle r"></view>
+					</view>
+					<text class="tips">{{item.categoryTitle?'限' + item.categoryTitle + '可用': '全品类可用'}}</text>
+				</view>
 			</view>
 		</view>
 
@@ -168,12 +189,19 @@
 		},
 		data() {
 			return {
-				goods: {},
+				goods: {
+					freightTemplate: undefined,
+					skuList: [],
+					categoryList: [],
+					appraisePage: undefined
+				},
 				specClass: 'none',
 				specSelected: [],
 				shareList: [],
 				selectedSku: {},
-				toggleCallback: undefined
+				toggleCallback: undefined,
+				maskState: 0, //优惠券面板显示状态
+				couponList: []
 
 			};
 		},
@@ -182,16 +210,32 @@
 			that.$api.request('goods', 'getGoods', {
 				spuId: options.id
 			}).then(res => {
-				//res.data.detail = '<div style="width:100%">' + res.data.detail + '</div>'
 				that.goods = res.data
-				//that.selectedSku = res.data.skuList[0]
 			})
-
-
-
-			//this.shareList = await this.$api.json('shareList');
+			that.$api.request('coupon', 'getObtainableCoupon').then(res => {
+				that.couponList = res.data
+			})
 		},
 		methods: {
+			toggleMask(type) {
+				let timer = type === 'show' ? 10 : 300;
+				let state = type === 'show' ? 1 : 0;
+				this.maskState = 2;
+				setTimeout(() => {
+					this.maskState = state;
+				}, timer)
+			},
+			//领取优惠券
+			obtainCoupon(index) {
+				const that = this
+				that.$api.request('coupon', 'obtainCoupon', {
+					couponId : that.couponList[index].id
+				}).then(res => {
+					that.$api.msg('领取成功')
+					that.couponList[index].nowCount++
+					that.toggleMask()
+				})
+			},
 			//规格弹窗开关
 			toggleSpec(e) {
 				if (this.specClass === 'show') {
@@ -228,7 +272,7 @@
 						skuId: that.selectedSku.id,
 						num: 1
 					}).then(res => {
-						debugger
+						that.$api.msg('添加购物车成功')
 					})
 				}
 
@@ -258,8 +302,15 @@
 				}
 			},
 			buy() {
+				//TODO 构建orderReqeust
 				uni.navigateTo({
 					url: `/pages/order/createOrder`
+				})
+			},
+			//查看所有评价
+			navAllAppraise() {
+				uni.navigateTo({
+					url: `/pages/product/appraise?firstpage=${JSON.stringify(this.goods.appraisePage)}`
 				})
 			},
 			stopPrevent() {}
@@ -834,6 +885,131 @@
 				padding: 0;
 				border-radius: 0;
 				background: transparent;
+			}
+		}
+	}
+	/* 优惠券面板 */
+	.mask {
+		display: flex;
+		align-items: flex-end;
+		position: fixed;
+		left: 0;
+		top: var(--window-top);
+		bottom: 0;
+		width: 100%;
+		background: rgba(0, 0, 0, 0);
+		z-index: 9995;
+		transition: .3s;
+
+		.mask-content {
+			width: 100%;
+			min-height: 30vh;
+			max-height: 70vh;
+			background: #f3f3f3;
+			transform: translateY(100%);
+			transition: .3s;
+			overflow-y: scroll;
+		}
+
+		&.none {
+			display: none;
+		}
+
+		&.show {
+			background: rgba(0, 0, 0, .4);
+
+			.mask-content {
+				transform: translateY(0);
+			}
+		}
+	}
+
+	/* 优惠券列表 */
+	.coupon-item {
+		display: flex;
+		flex-direction: column;
+		margin: 20upx 24upx;
+		background: #fff;
+
+		.con {
+			display: flex;
+			align-items: center;
+			position: relative;
+			height: 120upx;
+			padding: 0 30upx;
+
+			&:after {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				content: '';
+				width: 100%;
+				height: 0;
+				border-bottom: 1px dashed #f3f3f3;
+				transform: scaleY(50%);
+			}
+		}
+
+		.left {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			flex: 1;
+			overflow: hidden;
+			height: 100upx;
+		}
+
+		.title {
+			font-size: 32upx;
+			color: $font-color-dark;
+			margin-bottom: 10upx;
+		}
+
+		.time {
+			font-size: 24upx;
+			color: $font-color-light;
+		}
+
+		.right {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			font-size: 26upx;
+			color: $font-color-base;
+			height: 100upx;
+		}
+
+		.price {
+			font-size: 44upx;
+			color: $base-color;
+
+			&:before {
+				content: '￥';
+				font-size: 34upx;
+			}
+		}
+
+		.tips {
+			font-size: 24upx;
+			color: $font-color-light;
+			line-height: 60upx;
+			padding-left: 30upx;
+		}
+
+		.circle {
+			position: absolute;
+			left: -6upx;
+			bottom: -10upx;
+			z-index: 10;
+			width: 20upx;
+			height: 20upx;
+			background: #f3f3f3;
+			border-radius: 100px;
+
+			&.r {
+				left: auto;
+				right: -6upx;
 			}
 		}
 	}

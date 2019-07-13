@@ -1,9 +1,12 @@
 package com.iotechn.unimall.app.api.appraise;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
+import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.domain.ImgDO;
 import com.iotechn.unimall.data.domain.OrderDO;
@@ -42,6 +45,10 @@ public class AppraiseServiceImpl implements AppraiseService {
     private AppraiseMapper appraiseMapper;
     @Autowired
     private OrderSkuMapper orderSkuMapper;
+    @Autowired
+    private CacheComponent cacheComponent;
+    @Autowired
+    private AppraiseBizService appraiseBizService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -87,6 +94,7 @@ public class AppraiseServiceImpl implements AppraiseService {
             appraiseDO.setGmtCreate(now);
             appraiseDO.setGmtUpdate(appraiseDO.getGmtCreate());
             appraiseMapper.insert(appraiseDO);  //插入该订单该商品评价
+            cacheComponent.delPrefixKey(AppraiseBizService.CA_APPRAISE_KEY + appraiseDO.getSpuId()); //删除商品评论缓存
             if(appraiseDTO.getImgUrl() == null || appraiseDTO.getImgUrl().equals("")){
                 continue;
             }
@@ -109,14 +117,12 @@ public class AppraiseServiceImpl implements AppraiseService {
         orderDO.setId(appraiseRequestDTO.getOrderId());
         orderDO.setGmtUpdate(now);
         orderMapper.updateById(orderDO);
-
         return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteAppraiseById(Long appraiseId, Long userId) throws ServiceException {
-
         Integer delete = appraiseMapper.delete(new EntityWrapper<AppraiseDO>()
                 .eq("id", appraiseId)
                 .eq("user_id", userId)); //根据用户Id,评价Id
@@ -127,54 +133,36 @@ public class AppraiseServiceImpl implements AppraiseService {
         }
     }
 
+    //TODO 去除冗余代码
     @Override
-    public Page<AppraiseResponseDTO> getUserAllAppraise(Long userId, Integer page, Integer size) throws ServiceException {
+    public Page<AppraiseResponseDTO> getUserAllAppraise(Long userId, Integer pageNo, Integer pageSize) throws ServiceException {
         Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("user_id",userId));
         Integer totalPage = 1;
-        if(size <= 0 || page <= 0){
+        if(pageSize <= 0 || pageNo <= 0){
             throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
         }
-        if(count % size == 0 && count != 0){
-            totalPage = count / size;
+        if(count % pageSize == 0 && count != 0){
+            totalPage = count / pageSize;
         }else {
-            totalPage = count / size + 1;
+            totalPage = count / pageSize + 1;
         }
-        if(page >= totalPage){
-            page = totalPage;
+        if(pageNo >= totalPage){
+            pageNo = totalPage;
         }
-        Integer offset = size * (page-1);
-        List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectUserAllAppraise(userId,offset,size);
+        Integer offset = pageSize * (pageNo-1);
+        List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectUserAllAppraise(userId,offset,pageSize);
         for (AppraiseResponseDTO appraiseResponseDTO : appraiseResponseDTOS){
-            appraiseResponseDTO.setAppraiseImgUrl(getAppraiseImgUrl(appraiseResponseDTO));
+            appraiseResponseDTO.setImgList(imgMapper.getImgs(BizType.COMMENT.getCode(), appraiseResponseDTO.getId()));
         }
-        Page<AppraiseResponseDTO> pageination = new Page<>(appraiseResponseDTOS,page,size,count);
+        Page<AppraiseResponseDTO> pageination = new Page<>(appraiseResponseDTOS,pageNo,pageSize,count);
         return pageination;
     }
 
 
 
     @Override
-    public Page<AppraiseResponseDTO> getSpuAllAppraise(Long userId, Long spuId, Integer page, Integer size) throws ServiceException {
-        Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("spu_id",spuId));
-        Integer totalPage = 1;
-        if(size <= 0 || page <= 0){
-            throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
-        }
-        if(count % size == 0 && count != 0){
-            totalPage = count / size;
-        }else {
-            totalPage = count / size + 1;
-        }
-        if(page >= totalPage){
-            page = totalPage;
-        }
-        Integer offset = size * (page-1);
-        List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectSpuAllAppraise(spuId,offset,size);
-        for (AppraiseResponseDTO appraiseResponseDTO : appraiseResponseDTOS){
-            appraiseResponseDTO.setAppraiseImgUrl(getAppraiseImgUrl(appraiseResponseDTO));
-        }
-        Page<AppraiseResponseDTO> pageination = new Page<>(appraiseResponseDTOS,page,size,count);
-        return pageination;
+    public Page<AppraiseResponseDTO> getSpuAllAppraise(Long spuId, Integer pageNo, Integer pageSize) throws ServiceException {
+        return appraiseBizService.getSpuAllAppraise(spuId, pageNo, pageSize);
     }
 
     @Override
@@ -185,21 +173,10 @@ public class AppraiseServiceImpl implements AppraiseService {
         if(appraiseResponseDTO == null){
             throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
         }
-        appraiseResponseDTO.setAppraiseImgUrl(getAppraiseImgUrl(appraiseResponseDTO));
+        appraiseResponseDTO.setImgList(imgMapper.getImgs(BizType.COMMENT.getCode(), appraiseResponseDTO.getId()));
 
         return appraiseResponseDTO;
     }
 
 
-    public String getAppraiseImgUrl(AppraiseResponseDTO appraiseResponseDTO){
-        List<String> imgUrlList = imgMapper.getImgs(BizType.COMMENT.getCode(), appraiseResponseDTO.getId());
-        StringBuffer buffer = new StringBuffer();
-        if(imgUrlList != null || imgUrlList.size() != 0){
-            for(String imgUrl : imgUrlList){
-                buffer.append(imgUrl);
-            }
-            return buffer.toString();
-        }
-        return null;
-    }
 }

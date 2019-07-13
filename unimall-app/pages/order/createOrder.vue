@@ -18,10 +18,6 @@
 		</navigator>
 
 		<view class="goods-section">
-			<!-- <view class="g-header b-b">
-				<image class="logo" src="http://duoduo.qibukj.cn/./Upload/Images/20190321/201903211727515.png"></image>
-				<text class="name">西城小店铺</text>
-			</view> -->
 			<!-- 商品列表 -->
 			<view v-for="(item, index) in orderReqeust.skuList" :key="index" class="g-item">
 				<image :src="item.skuImg?item.skuImg:item.spuImg"></image>
@@ -48,13 +44,6 @@
 				</text>
 				<text class="cell-more wanjia wanjia-gengduo-d"></text>
 			</view>
-			<!-- <view class="yt-list-cell b-b">
-				<view class="cell-icon hb">
-					减
-				</view>
-				<text class="cell-tit clamp">商家促销</text>
-				<text class="cell-tip disabled">暂无可用优惠</text>
-			</view> -->
 		</view>
 		<!-- 金额明细 -->
 		<view class="yt-list">

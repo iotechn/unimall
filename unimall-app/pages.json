@@ -204,6 +204,12 @@
 				"navigationBarTitleText": "评价订单"
 			}
         }
+        ,{
+            "path" : "pages/product/appraise",
+            "style" : {
+				"navigationBarTitleText": "全部评价"
+			}
+        }
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
