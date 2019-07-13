@@ -198,6 +198,10 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition GOODS_CREATE_HAS_ID =
             new ServiceExceptionDefinition(20003, "创建商品时请不要传入Id");
 
+    public static final ServiceExceptionDefinition GOODS_CREATE_BARCODE_REPEAT =
+            new ServiceExceptionDefinition(20004, "商品条码已经存在了 商品Id:${0} 重复Sku:${1}");
+
+
     public static final ServiceExceptionDefinition RECOMMEND_SPU_NO_HAS =
             new ServiceExceptionDefinition(21001, "你要加入推荐的商品不存在");
 
@@ -247,6 +251,14 @@ public class ExceptionDefinition {
 
 
 
+
+    public static ServiceExceptionDefinition buildVariableException(ServiceExceptionDefinition definition, String ...args) {
+        String msg = definition.getMsg();
+        for (int i = 0; i < args.length; i++) {
+            msg = msg.replace("${" + i + "}", args[i]);
+        }
+        return new ServiceExceptionDefinition(definition.getCode(), msg);
+    }
 
 
 

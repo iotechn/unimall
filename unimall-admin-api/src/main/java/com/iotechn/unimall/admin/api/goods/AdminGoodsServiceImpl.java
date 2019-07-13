@@ -6,16 +6,12 @@ import com.iotechn.unimall.biz.service.goods.GoodsBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.domain.CategoryDO;
-import com.iotechn.unimall.data.domain.SkuDO;
-import com.iotechn.unimall.data.domain.SpuAttributeDO;
-import com.iotechn.unimall.data.domain.SpuDO;
+import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.dto.goods.SpuTreeNodeDTO;
-import com.iotechn.unimall.data.mapper.CategoryMapper;
-import com.iotechn.unimall.data.mapper.SkuMapper;
-import com.iotechn.unimall.data.mapper.SpuAttributeMapper;
-import com.iotechn.unimall.data.mapper.SpuMapper;
+import com.iotechn.unimall.data.enums.BizType;
+import com.iotechn.unimall.data.enums.SpuStatusType;
+import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +41,9 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
 
     @Autowired
     private SpuAttributeMapper spuAttributeMapper;
+
+    @Autowired
+    private ImgMapper imgMapper;
 
     @Autowired
     private GoodsBizService goodsBizService;
@@ -99,6 +98,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String create(SpuDTO spuDTO, Long adminId) throws ServiceException {
         //参数校验
         if (CollectionUtils.isEmpty(spuDTO.getSkuList())) {
@@ -107,12 +107,36 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         if (spuDTO.getId() != null) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_CREATE_HAS_ID);
         }
+        //校验Sku是否重复
+        List<String> barCodes = spuDTO.getSkuList().stream().map(item -> item.getBarCode()).collect(Collectors.toList());
+        List<SkuDO> existSkuDO = skuMapper.selectList(new EntityWrapper<SkuDO>().in("bar_code", barCodes));
+        if (!CollectionUtils.isEmpty(existSkuDO)) {
+            String spuIds = existSkuDO.stream().map(item -> item.getSpuId().toString()).collect(Collectors.joining(","));
+            String skuIds = existSkuDO.stream().map(item -> item.getBarCode()).collect(Collectors.joining(","));
+            throw new AdminServiceException(ExceptionDefinition
+                    .buildVariableException(ExceptionDefinition.GOODS_CREATE_BARCODE_REPEAT, spuIds, skuIds));
+        }
         Date now = new Date();
         SpuDO spuDO = new SpuDO();
         BeanUtils.copyProperties(spuDTO, spuDO);
         spuDO.setGmtUpdate(now);
         spuDO.setGmtCreate(now);
-        return null;
+        spuDO.setSales(0);
+        spuMapper.insert(spuDO);
+        //插入SKU表
+        for (SkuDO skuDO : spuDTO.getSkuList()) {
+            skuDO.setSpuId(spuDO.getId());
+            skuDO.setGmtUpdate(now);
+            skuDO.setGmtCreate(now);
+            skuDO.setFreezeStock(0);
+            skuMapper.insert(skuDO);
+        }
+        //插入spuAttr
+        insertSpuAttribute(spuDTO, now);
+        //插入IMG
+        insertSpuImg(spuDTO, spuDO.getId(), now);
+        goodsBizService.clearGoodsCache(spuDO.getId());
+        return "ok";
     }
 
     @Override
@@ -129,23 +153,55 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         BeanUtils.copyProperties(spuDTO, spuDO);
         spuDO.setGmtUpdate(now);
         spuMapper.updateById(spuDO);
-        skuMapper.delete(new EntityWrapper<SkuDO>().eq("spu_id", spuDTO.getId()));
+        List<String> barCodes = new LinkedList<>();
         for (SkuDO skuDO : spuDTO.getSkuList()) {
+            skuDO.setId(null);
             skuDO.setSpuId(spuDO.getId());
             skuDO.setGmtUpdate(now);
-            skuDO.setGmtCreate(now);
             skuDO.setFreezeStock(0);
-            skuMapper.insert(skuDO);
+            if (skuMapper.update(skuDO,
+                    new EntityWrapper<SkuDO>()
+                            .eq("bar_code", skuDO.getBarCode())) <= 0) {
+                skuDO.setGmtCreate(now);
+                skuMapper.insert(skuDO);
+            }
+            barCodes.add(skuDO.getBarCode());
         }
+        //删除多余barCode
+        skuMapper.delete(new EntityWrapper<SkuDO>().eq("spu_id", spuDO.getId()).notIn("bar_code",barCodes));
+        //插入spuAttr
         spuAttributeMapper.delete(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuDTO.getId()));
-        for (SpuAttributeDO spuAttributeDO : spuDTO.getAttributeList()) {
-            spuAttributeDO.setSpuId(spuDTO.getId());
-            spuAttributeDO.setGmtUpdate(now);
-            spuAttributeDO.setGmtCreate(now);
-            spuAttributeMapper.insert(spuAttributeDO);
-        }
+        insertSpuAttribute(spuDTO, now);
+        imgMapper.delete(new EntityWrapper<ImgDO>().eq("biz_id", spuDO.getId()).eq("biz_type", BizType.GOODS.getCode()));
+        //插入IMG
+        insertSpuImg(spuDTO, spuDO.getId(), now);
         goodsBizService.clearGoodsCache(spuDTO.getId());
         return "ok";
+    }
+
+    private void insertSpuAttribute(SpuDTO spuDTO, Date now) {
+        if (!CollectionUtils.isEmpty(spuDTO.getAttributeList())) {
+            for (SpuAttributeDO spuAttributeDO : spuDTO.getAttributeList()) {
+                spuAttributeDO.setSpuId(spuDTO.getId());
+                spuAttributeDO.setGmtUpdate(now);
+                spuAttributeDO.setGmtCreate(now);
+                spuAttributeMapper.insert(spuAttributeDO);
+            }
+        }
+    }
+
+    private void insertSpuImg(SpuDTO spuDTO, Long bizId, Date now) {
+        List<String> imgList = spuDTO.getImgList();
+        List<ImgDO> imgDOList = imgList.stream().map(item -> {
+            ImgDO imgDO = new ImgDO();
+            imgDO.setBizType(BizType.GOODS.getCode());
+            imgDO.setBizId(bizId);
+            imgDO.setUrl(item);
+            imgDO.setGmtCreate(now);
+            imgDO.setGmtUpdate(now);
+            return imgDO;
+        }).collect(Collectors.toList());
+        imgMapper.insertImgs(imgDOList);
     }
 
     @Override

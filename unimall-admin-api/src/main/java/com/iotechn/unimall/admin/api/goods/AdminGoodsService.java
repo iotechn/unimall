@@ -26,13 +26,13 @@ public interface AdminGoodsService {
     @HttpMethod(description = "创建", permission = "operation:goods:create", permissionParentName = "商品管理", permissionName = "商品上架")
     public String create(
             @NotNull @HttpParam(name = "spuDTO", type = HttpParamType.COMMON, description = "商品JSON数据") SpuDTO spuDTO,
-            @HttpParam(name = "adminId", type = HttpParamType.USER_ID, description = "管理员ID") Long adminId) throws ServiceException;
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
 
     @HttpMethod(description = "编辑", permission = "operation:goods:edit", permissionParentName = "商品管理", permissionName = "商品上架")
     public String edit(
             @NotNull @HttpParam(name = "spuDTO", type = HttpParamType.COMMON, description = "商品JSON数据") SpuDTO spuDTO,
-            @HttpParam(name = "adminId", type = HttpParamType.USER_ID, description = "管理员ID") Long adminId) throws ServiceException;
+            @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "列表", permission = "operation:goods:list", permissionParentName = "运营管理", permissionName = "订单管理")
     public Page<SpuDTO> list(

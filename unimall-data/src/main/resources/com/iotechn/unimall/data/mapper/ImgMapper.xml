@@ -6,4 +6,20 @@
         SELECT url FROM unimall_img WHERE biz_type = #{bizType} AND biz_id = #{bizId};
     </select>
 
+    <insert id="insertImgs" parameterType="list">
+        INSERT INTO
+            unimall_img
+            (biz_type,biz_id,url,gmt_update,gmt_create)
+        VALUES
+        <foreach collection="list" separator="," item="imgDO" index="i">
+            (
+            #{imgDO.bizType},
+            #{imgDO.bizId},
+            #{imgDO.url},
+            #{imgDO.gmtUpdate},
+            #{imgDO.gmtCreate}
+            )
+        </foreach>
+    </insert>
+
 </mapper>
