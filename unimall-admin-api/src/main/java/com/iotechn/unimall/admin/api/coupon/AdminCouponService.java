@@ -7,6 +7,7 @@ import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.CouponDO;
+import com.iotechn.unimall.data.dto.CouponAdminDTO;
 import com.iotechn.unimall.data.model.Page;
 
 import java.util.Date;
@@ -61,11 +62,11 @@ public interface AdminCouponService {
 
 
     @HttpMethod(description = "查询", permission = "promote:coupon:query", permissionParentName = "推广管理", permissionName = "优惠管理")
-    public Page<CouponDO> queryCouponByTitle(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
-                                             @HttpParam(name = "title", type = HttpParamType.COMMON, description = "优惠卷标题") String title,
-                                             @HttpParam(name = "type", type = HttpParamType.COMMON, description = "优惠卷标题") Integer type,
-                                             @HttpParam(name = "status", type = HttpParamType.COMMON, description = "优惠卷标题") Integer status,
-                                             @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码",valueDef = "1") Integer pageNo,
-                                             @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页码长度",valueDef = "10") Integer limit) throws ServiceException;
+    public Page<CouponAdminDTO> queryCouponByTitle(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
+                                                   @HttpParam(name = "title", type = HttpParamType.COMMON, description = "优惠卷标题") String title,
+                                                   @HttpParam(name = "type", type = HttpParamType.COMMON, description = "优惠卷标题") Integer type,
+                                                   @HttpParam(name = "status", type = HttpParamType.COMMON, description = "优惠卷标题") Integer status,
+                                                   @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码",valueDef = "1") Integer pageNo,
+                                                   @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页码长度",valueDef = "10") Integer limit) throws ServiceException;
 
 }

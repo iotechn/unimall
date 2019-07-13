@@ -116,11 +116,12 @@
             :headers="headers"
             :action="uploadPath"
             :show-file-list="false"
-            :on-success="uploadUrl"
+            :on-success="uploadSuccessHandle"
+            :before-upload="onBeforeUpload"
             class="avatar-uploader"
             accept=".jpg, .jpeg, .png, .gif"
           >
-            <img v-if="dataForm.imgUrl" :src="dataForm.imgUrl" class="avatar" >
+            <img v-if="dataForm.imgUrl" ref="adImg" :src="dataForm.imgUrl" class="avatar">
             <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
         </el-form-item>
@@ -150,6 +151,8 @@
         <el-button v-else type="primary" @click="updateData">确定</el-button>
       </div>
     </el-dialog>
+
+    <canvas ref="canvas" hidden/>
   </div>
 </template>
 
@@ -183,14 +186,14 @@
 </style>
 
 <script>
-import { listAd, createAd, updateAd, deleteAd } from '@/api/merchantad'
+import { listAd, createAd, updateAd, deleteAd, getImageColor } from '@/api/merchantad'
 import { spuTree } from '@/api/goods'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination'
 import ElOption from '../../../node_modules/element-ui/packages/select/src/option' // Secondary package based on el-pagination
 
-const adTypeMap = [{ value: 1, name: '轮播' }, { value: 2, name: '商户三图' }, { value: '', name: '全部' }]
+const adTypeMap = [{ value: 1, name: '轮播' }, { value: 2, name: '分类精选' }, { value: 3, name: '横幅' }, { value: '', name: '全部' }]
 const adStatusMap = [{ value: 0, name: '冻结' }, { value: 1, name: '激活' }, { value: '', name: '全部' }]
 
 export default {
@@ -229,7 +232,8 @@ export default {
         title: undefined,
         url: '',
         imgUrl: undefined,
-        status: undefined
+        status: undefined,
+        color: undefined
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -295,10 +299,12 @@ export default {
     resetForm() {
       this.dataForm = {
         id: undefined,
+        adType: undefined,
         title: undefined,
-        type: undefined,
-        picUrl: undefined,
-        url: undefined
+        url: '',
+        imgUrl: undefined,
+        status: undefined,
+        color: undefined
       }
     },
     refreshOptions() {
@@ -394,6 +400,34 @@ export default {
             message: response.data.errmsg
           })
         })
+    },
+    // 上传图片了处理图片
+    uploadSuccessHandle(e, file) {
+      const that = this
+      this.dataForm.imgUrl = e.url
+      this.dialogFormVisible = false
+      this.dialogFormVisible = true
+      const img = new Image()
+      // 加载完成执行
+      img.src = e.url
+      img.setAttribute('crossOrigin', 'anonymous')
+      img.src = e.url + '?time=' + new Date().valueOf()
+      img.onload = function(e) {
+        var canvas = that.$refs.canvas
+        that.dataForm.color = getImageColor(canvas, img)
+      }
+    },
+    onBeforeUpload(file) {
+      const isIMAGE = file.type === 'image/jpeg' || 'image/gif' || 'image/png' || 'image/jpg'
+      const isLt1M = file.size / 1024 / 1024 < 1
+
+      if (!isIMAGE) {
+        this.$message.error('上传文件只能是图片格式!')
+      }
+      if (!isLt1M) {
+        this.$message.error('上传文件大小不能超过 1MB!')
+      }
+      return isIMAGE && isLt1M
     }
   }
 }

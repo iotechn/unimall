@@ -73,10 +73,12 @@
       </el-table-column>
 
       <el-table-column align="center" label="状态" prop="status">
-        <template slot-scope="scope">{{ scope.row.status }}</template>
+        <template slot-scope="scope">
+          <el-tag> {{ scope.row.status | formatStatus }} </el-tag>
+        </template>
       </el-table-column>
 
-      <el-table-column align="center" label="使用类别范围" prop="categoryId" />
+      <el-table-column align="center" label="使用类别范围" prop="categoryTitle" />
 
       <el-table-column align="center" label="领券相对天数" prop="days" />
       <el-table-column align="center" label="领券开始时间" prop="gmtStart">
@@ -265,18 +267,20 @@ export default {
     },
     formatStatus(status) {
       if (status === 0) {
-        return '正常'
+        return '下架'
       } else if (status === 1) {
+        return '正常'
+      } else if (status < 0) {
         return '已过期'
       } else {
-        return '已下架'
+        return '错误状态'
       }
     }
   },
   data() {
     return {
       couponTypeMap: [{ value: 1, name: '满减卷' }, { value: '', name: '全部' }],
-      couponStatusMap: [{ value: 0, name: '下架' }, { value: 1, name: '正常' }, { value: 0, name: '已过期' }, { value: '', name: '全部' }],
+      couponStatusMap: [{ value: 0, name: '下架' }, { value: 1, name: '正常' }, { value: -1, name: '已过期' }, { value: '', name: '全部' }],
       list: undefined,
       total: 0,
       listLoading: true,
@@ -327,6 +331,12 @@ export default {
       this.listLoading = true
       listCoupon(this.listQuery)
         .then(response => {
+          response.data.data.items.forEach(item => {
+            var now = new Date()
+            if (item.gmtEnd < now) {
+              item.status = -1
+            }
+          })
           this.list = response.data.data.items
           this.total = response.data.data.total
           this.listLoading = false

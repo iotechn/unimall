@@ -47,7 +47,7 @@ public interface AdminAdvertisementService {
                                        @HttpParam(name = "url", type = HttpParamType.COMMON, description = "广告地址") String url,
                                        @HttpParam(name = "imgUrl", type = HttpParamType.COMMON, description = "广告图片地址") String imgUrl,
                                        @HttpParam(name = "status", type = HttpParamType.COMMON, description = "广告状态") Integer status,
-                                       @NotNull @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色") String color) throws ServiceException;
+                                       @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色") String color) throws ServiceException;
 
 
     @HttpMethod(description = "查询", permission = "promote:advertisement:query", permissionParentName = "推广管理", permissionName = "广告管理")

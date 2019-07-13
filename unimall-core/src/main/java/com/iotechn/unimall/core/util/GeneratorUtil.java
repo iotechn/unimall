@@ -30,4 +30,8 @@ public class GeneratorUtil {
             i += 1000;
         return env + machineNo + ORDER_ID_FORMAT.format(new Date()) + i;
     }
+
+    public static String genFileName(){
+        return UUID.randomUUID().toString().replaceAll("-", "");
+    }
 }

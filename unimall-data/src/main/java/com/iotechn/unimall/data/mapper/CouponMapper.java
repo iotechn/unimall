@@ -2,11 +2,13 @@ package com.iotechn.unimall.data.mapper;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.iotechn.unimall.data.domain.CouponDO;
+import com.iotechn.unimall.data.dto.CouponAdminDTO;
 import com.iotechn.unimall.data.dto.CouponDTO;
 import com.iotechn.unimall.data.dto.UserCouponDTO;
 import com.iotechn.unimall.data.model.KVModel;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,4 +20,5 @@ public interface CouponMapper extends BaseMapper<CouponDO> {
 
     public List<KVModel<Long,Integer>> getUserCouponsCount(@Param("userId") Long userId, @Param("couponIds") List<Long> couponIds);
 
+    public List<CouponAdminDTO> getAdminCouponList(@Param("title")String title, @Param("type") Integer type, @Param("status")Integer status, @Param("now")Date now,@Param("offset") Integer offset,@Param("limit") Integer limit);
 }

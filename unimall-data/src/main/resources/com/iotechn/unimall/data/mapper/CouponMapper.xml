@@ -19,5 +19,44 @@
             coupon_id;
     </select>
 
+    <select id="getAdminCouponList" resultType="com.iotechn.unimall.data.dto.CouponAdminDTO">
+        SELECT
+          c.id AS id,
+          c.title AS title,
+          c.`type` AS `type`,
+          c.description AS description,
+          c.total AS total,
+          c.surplus AS surplus,
+          c.`limit` AS `limit`,
+          c.discount AS discount,
+          c.min AS min,
+          c.status AS status,
+          g.title as categoryTitle,
+          c.days AS days,
+          c.gmt_start as gmtStart,
+          c.gmt_end as gmtEnd
+        FROM
+          unimall_coupon c
+        LEFT JOIN unimall_category g on c.category_id = g.id
+        WHERE
+        1 = 1
+        <if test="title != null">
+            AND c.title like concat("%",#{title},"%")
+        </if>
+        <if test="type != null">
+            AND c.title = #{type}
+        </if>
+        <if test="status != null">
+          <if test="status >= 0">
+              AND c.status = #{status} AND c.gmt_end &gt; #{now}
+          </if>
+          <if test="status &lt; 0">
+              AND c.gmt_end &lt; #{now}
+          </if>
+        </if>
+        limit #{offset},#{limit}
+    </select>
+
+
 
 </mapper>
