@@ -166,16 +166,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO login(String phone, String password) throws ServiceException {
+    public UserDTO login(String phone, String password,String ip) throws ServiceException {
         String cryptPassword = Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0,7));
         UserDTO userDTO = userMapper.login(phone, cryptPassword);
         if (userDTO == null) {
             throw new AppServiceException(ExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);
         }
+        //检查帐号是否已经冻结
+        if(userDTO.getStatus() == 0){
+            throw  new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
+        }
         String accessToken = GeneratorUtil.genSessionId();
         //放入SESSION专用Redis数据源中
         userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
         userDTO.setAccessToken(accessToken);
+        UserDO userUpdateDO = new UserDO();
+        userUpdateDO.setId(userDTO.getId());
+        userUpdateDO.setGmtLastLogin(new Date());
+        userUpdateDO.setLastLoginIp(ip);
+        userMapper.updateById(userUpdateDO);
         return userDTO;
     }
 
@@ -215,6 +224,15 @@ public class UserServiceImpl implements UserService {
                         userDO = newUserDO;
                     } else {
                         userDO = userDOS.get(0);
+                        UserDO userUpdateDO = new UserDO();
+                        userUpdateDO.setId(userDO.getId());
+                        userUpdateDO.setGmtLastLogin(new Date());
+                        userUpdateDO.setLastLoginIp(ip);
+                        userMapper.updateById(userUpdateDO);
+                    }
+                    //检查帐号是否已经冻结
+                    if(userDO.getStatus() == 0){
+                        throw  new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
                     }
                     String accessToken = GeneratorUtil.genSessionId();
                     UserDTO userDTO = new UserDTO();
