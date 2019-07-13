@@ -4,7 +4,10 @@ import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
 import com.iotechn.unimall.data.dto.SuperDTO;
+import com.iotechn.unimall.data.dto.appraise.AppraiseDTO;
+import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
+import com.iotechn.unimall.data.model.Page;
 import lombok.Data;
 
 import java.util.List;
@@ -50,6 +53,11 @@ public class SpuDTO extends SuperDTO {
     private List<CategoryDTO> categoryList;
 
     private List<SpuAttributeDO> attributeList;
+
+    /**
+     * 商品的第一页(前10条)评价
+     */
+    private Page<AppraiseResponseDTO> appraisePage;
 
     private String unit;
 

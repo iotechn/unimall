@@ -2,6 +2,7 @@ package com.iotechn.unimall.biz.service.goods;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.biz.service.collect.CollectBizService;
 import com.iotechn.unimall.biz.service.footpring.FootprintBizService;
@@ -15,6 +16,7 @@ import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
 import com.iotechn.unimall.data.domain.SpuDO;
+import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.enums.BizType;
@@ -89,6 +91,9 @@ public class GoodsBizService {
     @Autowired
     private FootprintBizService footprintBizService;
 
+    @Autowired
+    private AppraiseBizService appraiseBizService;
+
     public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, String title) throws ServiceException {
         Wrapper<SpuDO> wrapper = new EntityWrapper<SpuDO>();
         if (!StringUtils.isEmpty(title)) {
@@ -156,6 +161,12 @@ public class GoodsBizService {
     }
 
 
+    /**
+     * 通过Id获取SpuDO 领域对象
+     * @param spuId
+     * @return
+     * @throws ServiceException
+     */
     public SpuDO getSpuById(Long spuId) throws ServiceException {
         SpuDO objFromCache = cacheComponent.getHashObj(CA_SPU_HASH, "S" + spuId, SpuDO.class);
         if (objFromCache != null) {
@@ -174,6 +185,9 @@ public class GoodsBizService {
         SpuDTO spuDTOFromCache = cacheComponent.getObj(CA_SPU_PREFIX + spuId, SpuDTO.class);
         if (spuDTOFromCache != null) {
             packSpuCollectInfo(spuDTOFromCache, userId);
+            //获取第一页评论
+            Page<AppraiseResponseDTO> spuAppraise = appraiseBizService.getSpuAllAppraise(spuId, 1, 10);
+            spuDTOFromCache.setAppraisePage(spuAppraise);
             if (userId != null) {
                 footprintBizService.addOrUpdateFootprint(userId, spuId);
             }
@@ -204,6 +218,9 @@ public class GoodsBizService {
         //放入缓存
         cacheComponent.putObj(CA_SPU_PREFIX + spuId, spuDTO, Const.CACHE_ONE_DAY);
         packSpuCollectInfo(spuDTO, userId);
+        //获取第一页评论
+        Page<AppraiseResponseDTO> spuAppraise = appraiseBizService.getSpuAllAppraise(spuId, 1, 10);
+        spuDTOFromCache.setAppraisePage(spuAppraise);
         if (userId != null) {
             footprintBizService.addOrUpdateFootprint(userId, spuId);
         }

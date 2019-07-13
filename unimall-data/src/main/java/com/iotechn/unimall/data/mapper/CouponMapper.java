@@ -18,7 +18,10 @@ public interface CouponMapper extends BaseMapper<CouponDO> {
 
     public Integer decCoupon(Long couponId);
 
-    public List<KVModel<Long,Integer>> getUserCouponsCount(@Param("userId") Long userId, @Param("couponIds") List<Long> couponIds);
+    //这样写MyBatis无法直接映射泛型，只能用Long了
+    public List<KVModel<Long,Long>> getUserCouponsCount(@Param("userId") Long userId, @Param("couponIds") List<Long> couponIds);
+
+    public List<CouponDTO> getActiveCoupons();
 
     public List<CouponAdminDTO> getAdminCouponList(@Param("title")String title, @Param("type") Integer type, @Param("status")Integer status, @Param("now")Date now,@Param("offset") Integer offset,@Param("limit") Integer limit);
 }

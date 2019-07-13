@@ -30,6 +30,8 @@ public class CouponDTO extends SuperDTO {
 
     private Long categoryId;
 
+    private String categoryTitle;
+
     private Integer days;
 
     /**

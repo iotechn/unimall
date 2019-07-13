@@ -11,6 +11,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition THIRD_PART_SERVICE_EXCEPTION =
             new ServiceExceptionDefinition(0, "第三方服务异常");
 
+    public static final ServiceExceptionDefinition APP_UNKNOWN_EXCEPTION =
+            new ServiceExceptionDefinition(10000, "系统未知异常");
+
     public static final ServiceExceptionDefinition PARAM_CHECK_FAILED =
             new ServiceExceptionDefinition(10002, "参数校验失败");
 

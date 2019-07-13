@@ -92,7 +92,7 @@
 				<swiper-item
 					class="g-swiper-item"
 					v-for="(item, index) in windowSpuList" :key="index"
-					v-if="index%2 === 0"
+					v-if="index % 2 === 0"
 					@click="navToDetailPage(item)"
 				>
 					<view class="g-item left">
@@ -289,7 +289,7 @@
 			//详情页
 			navToDetailPage(item) {
 				//测试数据没有写id，用title代替
-				let id = item.title;
+				let id = item.spuId;
 				uni.navigateTo({
 					url: `/pages/product/product?id=${id}`
 				})
