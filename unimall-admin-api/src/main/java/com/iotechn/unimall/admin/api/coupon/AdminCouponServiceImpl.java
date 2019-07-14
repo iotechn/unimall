@@ -1,5 +1,6 @@
 package com.iotechn.unimall.admin.api.coupon;
 
+import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -69,6 +70,7 @@ public class AdminCouponServiceImpl implements  AdminCouponService {
     @Override
     public Page<CouponAdminDTO> queryCouponByTitle(Long adminId, String title,Integer type,Integer status,Integer pageNo, Integer limit) throws ServiceException {
         EntityWrapper wrapper = new EntityWrapper();
+        Date now = new Date();
         if(!StringUtils.isEmpty(title)){
             wrapper.like("title", title);
         }
@@ -77,17 +79,16 @@ public class AdminCouponServiceImpl implements  AdminCouponService {
         }
         if(status != null){
             if(status >= 0 && status < 2){
-                wrapper.eq("status", status).gt("gmt_end", new Date());
-                wrapper.addFilter("and status ="+status + "",)
-
+                wrapper.eq("status", status);
+                wrapper.andNew().gt("gmt_end", now).or().isNotNull("days"); //coupon -> conpon.gt("gmt_end", now).or().isNotNull("days")
             } else if(status < 0){
-                wrapper.lt("gmt_end", new Date());
+                wrapper.lt("gmt_end", now);
             } else{
                 throw new AppServiceException(ExceptionDefinition.COUPON_CHECK_DATA_FAILED);
             }
         }
         Integer count = couponMapper.selectCount(wrapper);
-        List<CouponAdminDTO> couponDTOList = couponMapper.getAdminCouponList(title,type,status,new Date(),(pageNo-1)*limit,limit);
+        List<CouponAdminDTO> couponDTOList = couponMapper.getAdminCouponList(title,type,status,now,(pageNo-1)*limit,limit);
         Page<CouponAdminDTO> page = new Page<CouponAdminDTO>(couponDTOList,pageNo,limit,count);
         return page;
     }
