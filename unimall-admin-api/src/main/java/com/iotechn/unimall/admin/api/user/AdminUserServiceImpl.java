@@ -78,6 +78,21 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
+    public Boolean updateStatus(Long adminId, Long userId,Integer status) throws ServiceException {
+        if(userId == null || status == null || (status != 0 && status != 1)){
+            throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
+        }
+        UserDO userDO = new UserDO();
+        userDO.setId(userId);
+        userDO.setStatus(status);
+        userDO.setGmtUpdate(new Date());
+        if(userMapper.updateById(userDO) > 0){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public Page<UserDO> getUser(Long adminId, Long id, String nickname, Integer level, Integer gender, Integer status,Integer pageNo,Integer limit) throws ServiceException {
         Integer count = userMapper. countUser(id,nickname,level,gender,status);
         List<UserDO> userDOList = userMapper.getUserList(id,nickname,level,gender,status,limit*(pageNo-1),limit);

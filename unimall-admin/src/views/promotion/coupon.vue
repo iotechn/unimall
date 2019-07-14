@@ -41,6 +41,7 @@
       border
       fit
       highlight-current-row
+      style="white-space: pre-line"
     >
       <el-table-column align="center" label="优惠券ID" prop="id" sortable />
 
@@ -57,11 +58,11 @@
       </el-table-column>
 
       <el-table-column align="center" label="剩余数量" prop="surplus">
-        <template slot-scope="scope">{{ scope.row.total >= 0 ? scope.row.total : "不限" }}</template>
+        <template slot-scope="scope">{{ scope.row.surplus >= 0 ? scope.row.surplus : "不限" }}</template>
       </el-table-column>
 
       <el-table-column align="center" label="每人限领" prop="limit">
-        <template slot-scope="scope">{{ scope.row.limit != 0 ? scope.row.limit : "不限" }}</template>
+        <template slot-scope="scope">{{ scope.row.limit >= 0 ? scope.row.limit : "不限" }}</template>
       </el-table-column>
 
       <el-table-column align="center" label="满减金额" prop="discount">
@@ -78,14 +79,20 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="使用类别范围" prop="categoryTitle" />
+      <el-table-column align="center" label="使用类目范围" prop="categoryTitle" width="100">
+        <template slot-scope="scope">
+          <el-tag> {{ scope.row.categoryTitle != null?scope.row.categoryTitle:"全部类目" }} </el-tag>
+        </template>
+      </el-table-column>
 
-      <el-table-column align="center" label="领券相对天数" prop="days" />
+      <el-table-column align="center" label="领券相对天数" prop="days">
+        <template slot-scope="scope">{{ scope.row.days != null ? scope.row.days : "无" }}</template>
+      </el-table-column>
       <el-table-column align="center" label="领券开始时间" prop="gmtStart">
-        <template slot-scope="scope">{{ scope.row.gmtStart | formatTime }}</template>
+        <template slot-scope="scope">{{ scope.row.gmtStart | formatGmt }}</template>
       </el-table-column>
       <el-table-column align="center" label="领券结束时间" prop="gmtEnd">
-        <template slot-scope="scope">{{ scope.row.gmtStart | formatTime }}</template>
+        <template slot-scope="scope">{{ scope.row.gmtEnd | formatGmt }}</template>
       </el-table-column>
 
       <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
@@ -131,23 +138,20 @@
         label-width="100px"
         style="width: 400px; margin-left:50px;"
       >
-        <el-form-item label="优惠券名称" prop="name">
+        <el-form-item label="优惠券名称" prop="title">
           <el-input v-model="dataForm.name" />
         </el-form-item>
-        <el-form-item label="介绍" prop="desc">
+        <el-form-item label="优惠卷类型" prop="type">
+          <el-select v-model="dataForm.type">
+            <el-option v-for="(item,index) in couponTypeOptions" :key="index" :label="item.name" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="介绍" prop="description">
           <el-input v-model="dataForm.desc" />
         </el-form-item>
-        <el-form-item label="标签" prop="tag">
-          <el-input v-model="dataForm.tag" />
-        </el-form-item>
-        <el-form-item label="最低消费" prop="min">
-          <el-input v-model="dataForm.min">
-            <template slot="append">元</template>
-          </el-input>
-        </el-form-item>
-        <el-form-item label="满减金额" prop="discount">
-          <el-input v-model="dataForm.discount">
-            <template slot="append">元</template>
+        <el-form-item label="优惠券数量" prop="total">
+          <el-input v-model="dataForm.total">
+            <template slot="append">张</template>
           </el-input>
         </el-form-item>
         <el-form-item label="每人限领" prop="limit">
@@ -155,20 +159,20 @@
             <template slot="append">张</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="分发类型" prop="type">
-          <el-select v-model="dataForm.type">
-            <el-option
-              v-for="type in typeOptions"
-              :key="type.value"
-              :label="type.label"
-              :value="type.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="优惠券数量" prop="total">
-          <el-input v-model="dataForm.total">
-            <template slot="append">张</template>
+        <el-form-item label="满减金额" prop="discount">
+          <el-input v-model="dataForm.discount">
+            <template slot="append">元</template>
           </el-input>
+        </el-form-item>
+        <el-form-item label="最低消费" prop="min">
+          <el-input v-model="dataForm.min">
+            <template slot="append">元</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="优惠卷状态" prop="status">
+          <el-select v-model="dataForm.status">
+            <el-option v-for="(item,index) in couponStatusOptions" :key="index" :label="item.name" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="有效期">
           <el-radio-group v-model="dataForm.timeType">
@@ -220,6 +224,9 @@
 </template>
 
 <style>
+.el-table .cell {
+  white-space: pre-line;
+}
 .avatar-uploader .el-upload {
   border: 1px dashed #d9d9d9;
   border-radius: 6px;
@@ -247,14 +254,18 @@
 
 <script>
 import { listCoupon, createCoupon, updateCoupon, deleteCoupon } from '@/api/coupon'
+import { formatDateAndTime } from '@/filters'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
   name: 'Coupon',
   components: { Pagination },
   filters: {
-    formatType(type) {
-      return ''
+    formatGmt(time) {
+      if (time == null || time === '') {
+        return '无'
+      }
+      return formatDateAndTime(time)
     },
     formatGoodsType(goodsType) {
       if (goodsType === 0) {
@@ -281,6 +292,8 @@ export default {
     return {
       couponTypeMap: [{ value: 1, name: '满减卷' }, { value: '', name: '全部' }],
       couponStatusMap: [{ value: 0, name: '下架' }, { value: 1, name: '正常' }, { value: -1, name: '已过期' }, { value: '', name: '全部' }],
+      couponStatusOptions: [{ value: 1, name: '正常' }, { value: 0, name: '下架' }],
+      couponTypeOptions: [{ value: 1, name: '满减卷' }],
       list: undefined,
       total: 0,
       listLoading: true,
@@ -293,19 +306,19 @@ export default {
       },
       dataForm: {
         id: undefined,
-        name: undefined,
+        title: undefined,
         desc: undefined,
         tag: undefined,
         total: 0,
         discount: 0,
         min: 0,
-        limit: 1,
-        type: 0,
-        status: 0,
-        goodsType: 0,
-        goodsValue: [],
-        timeType: 0,
-        days: 0,
+        limit: undefined,
+        type: undefined,
+        status: undefined,
+        goodsType: undefined,
+        goodsValue: undefined,
+        timeType: undefined,
+        days: undefined,
         startTime: null,
         endTime: null
       },
@@ -331,6 +344,7 @@ export default {
       this.listLoading = true
       listCoupon(this.listQuery)
         .then(response => {
+          // 为过期优惠卷赋负值
           response.data.data.items.forEach(item => {
             var now = new Date()
             if (item.gmtEnd < now) {
@@ -354,19 +368,19 @@ export default {
     resetForm() {
       this.dataForm = {
         id: undefined,
-        name: undefined,
+        title: undefined,
         desc: undefined,
         tag: undefined,
         total: 0,
         discount: 0,
         min: 0,
-        limit: 1,
-        type: 0,
-        status: 0,
-        goodsType: 0,
-        goodsValue: [],
-        timeType: 0,
-        days: 0,
+        limit: 0,
+        type: undefined,
+        status: undefined,
+        goodsType: undefined,
+        goodsValue: undefined,
+        timeType: undefined,
+        days: undefined,
         startTime: null,
         endTime: null
       }

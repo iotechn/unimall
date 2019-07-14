@@ -77,7 +77,9 @@ public class AdminCouponServiceImpl implements  AdminCouponService {
         }
         if(status != null){
             if(status >= 0 && status < 2){
-                wrapper.eq("status", status).gt("gmt_end", new Date());;
+                wrapper.eq("status", status).gt("gmt_end", new Date());
+                wrapper.addFilter("and status ="+status + "",)
+
             } else if(status < 0){
                 wrapper.lt("gmt_end", new Date());
             } else{
