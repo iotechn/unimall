@@ -29,7 +29,7 @@
         type="primary"
         icon="el-icon-download"
         @click="handleDownload"
-      >导出</el-button>
+      >当前页导出</el-button>
     </div>
 
     <!-- 查询结果 -->
@@ -79,11 +79,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="使用类目范围" prop="categoryTitle" width="100">
+      <el-table-column align="center" label="使用类目名称" prop="categoryTitle" width="100">
         <template slot-scope="scope">
           <el-tag> {{ scope.row.categoryTitle != null?scope.row.categoryTitle:"全部类目" }} </el-tag>
         </template>
       </el-table-column>
+
+      <el-table-column v-show="false" align="center" label="使用类目ID" prop="categoryId" width="100" />
 
       <el-table-column align="center" label="领券相对天数" prop="days">
         <template slot-scope="scope">{{ scope.row.days != null ? scope.row.days : "无" }}</template>
@@ -98,17 +100,17 @@
       <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
-            v-permission="['']"
+            v-permission="['promote:coupon:update']"
             type="primary"
             size="mini"
-            @click="handleDetail(scope.row)"
-          >详情</el-button>
+            @click="handleStatus(scope.row)"
+          >{{ scope.row.status | formatStatusBtn }}</el-button>
           <el-button
             v-permission="['promote:coupon:update']"
             type="info"
             size="mini"
-            @click="handleUpdate(scope.row)"
-          >编辑</el-button>
+            @click="handleRead(scope.row)"
+          >查看</el-button>
           <el-button
             v-permission="['promote:coupon:delete']"
             type="danger"
@@ -122,7 +124,7 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.page"
+      :page.sync="listQuery.pageNo"
       :limit.sync="listQuery.limit"
       @pagination="getList"
     />
@@ -139,56 +141,57 @@
         style="width: 400px; margin-left:50px;"
       >
         <el-form-item label="优惠券名称" prop="title">
-          <el-input v-model="dataForm.name" />
+          <el-input v-model="dataForm.title" :disabled="dialogStatus === 'update'"/>
         </el-form-item>
         <el-form-item label="优惠卷类型" prop="type">
-          <el-select v-model="dataForm.type">
+          <el-select v-model="dataForm.type" :disabled="dialogStatus === 'update'">
             <el-option v-for="(item,index) in couponTypeOptions" :key="index" :label="item.name" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="介绍" prop="description">
-          <el-input v-model="dataForm.desc" />
+        <el-form-item label="介绍" prop="description" >
+          <el-input v-model="dataForm.description" :disabled="dialogStatus === 'update'"/>
         </el-form-item>
         <el-form-item label="优惠券数量" prop="total">
-          <el-input v-model="dataForm.total">
+          <el-input v-model="dataForm.total" :disabled="dialogStatus === 'update'">
             <template slot="append">张</template>
           </el-input>
         </el-form-item>
         <el-form-item label="每人限领" prop="limit">
-          <el-input v-model="dataForm.limit">
+          <el-input v-model="dataForm.limit" :disabled="dialogStatus === 'update'">
             <template slot="append">张</template>
           </el-input>
         </el-form-item>
         <el-form-item label="满减金额" prop="discount">
-          <el-input v-model="dataForm.discount">
+          <el-input v-model="dataForm.discount" :disabled="dialogStatus === 'update'">
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
         <el-form-item label="最低消费" prop="min">
-          <el-input v-model="dataForm.min">
+          <el-input v-model="dataForm.min" :disabled="dialogStatus === 'update'">
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
         <el-form-item label="优惠卷状态" prop="status">
-          <el-select v-model="dataForm.status">
+          <el-select v-model="dataForm.status" :disabled="dialogStatus === 'update'">
             <el-option v-for="(item,index) in couponStatusOptions" :key="index" :label="item.name" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="有效期">
-          <el-radio-group v-model="dataForm.timeType">
+          <el-radio-group v-model="dataForm.timeType" :disabled="dialogStatus === 'update'">
             <el-radio-button :label="0">领券相对天数</el-radio-button>
             <el-radio-button :label="1">指定绝对时间</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-show="dataForm.timeType === 0">
-          <el-input v-model="dataForm.days">
+        <el-form-item v-show="dataForm.timeType === 0" prop="days">
+          <el-input v-model="dataForm.days" :disabled="dialogStatus === 'update'">
             <template slot="append">天</template>
           </el-input>
         </el-form-item>
-        <el-form-item v-show="dataForm.timeType === 1">
-          <el-col :span="11">
+        <el-form-item v-show="dataForm.timeType === 1" prop="time">
+          <el-col :span="11" >
             <el-date-picker
-              v-model="dataForm.startTime"
+              :disabled="dialogStatus === 'update'"
+              v-model="dataForm.gmtStart"
               type="datetime"
               placeholder="选择日期"
               style="width: 100%;"
@@ -197,7 +200,8 @@
           <el-col :span="2" class="line">至</el-col>
           <el-col :span="11">
             <el-date-picker
-              v-model="dataForm.endTime"
+              :disabled="dialogStatus === 'update'"
+              v-model="dataForm.gmtEnd"
               type="datetime"
               placeholder="选择日期"
               style="width: 100%;"
@@ -205,19 +209,28 @@
           </el-col>
         </el-form-item>
         <el-form-item label="商品限制范围">
-          <el-radio-group v-model="dataForm.goodsType">
+          <el-radio-group v-model="dataForm.goodsType" :disabled="dialogStatus === 'update'">
             <el-radio-button :label="0">全场通用</el-radio-button>
             <el-radio-button :label="1">指定分类</el-radio-button>
-            <el-radio-button :label="2">指定商品</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-show="dataForm.goodsType === 1">目前不支持</el-form-item>
-        <el-form-item v-show="dataForm.goodsType === 2">目前不支持</el-form-item>
+        <el-form-item v-if="dialogStatus === 'update'" v-show="dataForm.goodsType === 1" label="优惠类目">
+          <el-input v-model="dataForm.categoryTitle" :disabled="dialogStatus === 'update'"/>
+        </el-form-item>
+        <el-form-item v-if="dialogStatus === 'create'" v-show="dataForm.goodsType === 1" label="优惠类目">
+          <el-cascader
+            :options="options"
+            :props="{ checkStrictly: true }"
+            placeholder="关联类目、商品"
+            filterable
+            @change="handleLink"
+          />
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
         <el-button v-if="dialogStatus=='create'" type="primary" @click="createData">确定</el-button>
-        <el-button v-else type="primary" @click="updateData">确定</el-button>
+        <!-- <el-button v-else type="primary" @click="updateData">确定</el-button> -->
       </div>
     </el-dialog>
   </div>
@@ -253,7 +266,8 @@
 </style>
 
 <script>
-import { listCoupon, createCoupon, updateCoupon, deleteCoupon } from '@/api/coupon'
+import { listCoupon, createCoupon, deleteCoupon, activeCoupon } from '@/api/coupon'
+import { categoryTree } from '@/api/category'
 import { formatDateAndTime } from '@/filters'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
@@ -267,20 +281,22 @@ export default {
       }
       return formatDateAndTime(time)
     },
-    formatGoodsType(goodsType) {
-      if (goodsType === 0) {
-        return '全场通用'
-      } else if (goodsType === 1) {
-        return '指定分类'
-      } else {
-        return '指定商品'
-      }
-    },
     formatStatus(status) {
       if (status === 0) {
         return '下架'
       } else if (status === 1) {
         return '正常'
+      } else if (status < 0) {
+        return '已过期'
+      } else {
+        return '错误状态'
+      }
+    },
+    formatStatusBtn(status) {
+      if (status === 1) {
+        return '冻结'
+      } else if (status === 0) {
+        return '激活'
       } else if (status < 0) {
         return '已过期'
       } else {
@@ -304,23 +320,26 @@ export default {
         status: undefined,
         title: undefined
       },
+      options: [],
       dataForm: {
         id: undefined,
         title: undefined,
-        desc: undefined,
-        tag: undefined,
+        type: 1,
+        description: undefined,
         total: 0,
         discount: 0,
+        limit: 0,
         min: 0,
-        limit: undefined,
-        type: undefined,
-        status: undefined,
-        goodsType: undefined,
+        status: 1,
+        tag: undefined,
+        categoryId: undefined,
+        categoryTitle: undefined,
+        goodsType: 0,
         goodsValue: undefined,
-        timeType: undefined,
+        timeType: 1,
         days: undefined,
-        startTime: null,
-        endTime: null
+        gmtStart: null,
+        gmtEnd: null
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -329,9 +348,13 @@ export default {
         create: '创建'
       },
       rules: {
-        name: [
-          { required: true, message: '优惠券标题不能为空', trigger: 'blur' }
-        ]
+        title: [{ required: true, message: '优惠券标题不能为空', trigger: 'blur' }],
+        type: [{ required: true, message: '优惠券类型不能为空', trigger: 'blur' }],
+        total: [{ required: true, message: '优惠券总量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
+        limit: [{ required: true, message: '优惠券限领不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
+        discount: [{ required: true, message: '优惠券折扣金额不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
+        min: [{ required: true, message: '优惠券使用门栏不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
+        status: [{ required: true, message: '优惠券状态不能为空', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -362,7 +385,7 @@ export default {
         })
     },
     handleFilter() {
-      this.listQuery.page = 1
+      this.listQuery.pageNo = 1
       this.getList()
     },
     resetForm() {
@@ -375,30 +398,90 @@ export default {
         discount: 0,
         min: 0,
         limit: 0,
-        type: undefined,
-        status: undefined,
-        goodsType: undefined,
+        type: 1,
+        status: 1,
+        goodsType: 0,
         goodsValue: undefined,
-        timeType: undefined,
+        timeType: 0,
         days: undefined,
-        startTime: null,
-        endTime: null
+        categoryId: undefined,
+        categoryTitle: undefined,
+        gmtStart: null,
+        gmtEnd: null
       }
+    },
+    refreshOptions() {
+      if (this.options.length === 0) {
+        categoryTree().then(response => {
+          this.options = response.data.data
+        })
+      }
+    },
+    handleLink(e) {
+      const tag = e[e.length - 1]
+      this.dataForm.categoryId = tag // 回调指定分类
     },
     handleCreate() {
       this.resetForm()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
+      this.refreshOptions()
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
     createData() {
+      // 时间
+      if (this.dataForm.days == null && (this.dataForm.gmtStart == null || this.dataForm.gmtEnd == null)) {
+        this.$notify.error({
+          title: '失败',
+          message: '请填写优惠卷使用区间'
+        })
+        return false
+      }
+      // 使用时间类型，不能为空，值要互斥
+      if (this.dataForm.timeType === 1) {
+        this.dataForm.days = undefined
+        if (this.dataForm.gmtEnd < this.dataForm.gmtStart || this.dataForm.gmtStart == null || this.dataForm.gmtEnd == null) {
+          this.$notify.error({
+            title: '失败',
+            message: '请正确选择日期'
+          })
+          return false
+        }
+        var start = new Date(this.dataForm.gmtStart)
+        var end = new Date(this.dataForm.gmtEnd)
+        this.dataForm.gmtStart = start.getTime()
+        this.dataForm.gmtEnd = end.getTime()
+      } else {
+        if (this.dataForm.days == null || this.dataForm.days === '0') {
+          this.$notify.error({
+            title: '失败',
+            message: '请正确填写时长,不能为空或为0'
+          })
+          return false
+        }
+        this.dataForm.gmtStart = undefined
+        this.dataForm.gmtEnd = undefined
+      }
+      // 判定全场通用，类型置为空
+      if (parseInt(this.dataForm.goodsType) === 0) {
+        this.dataForm.categoryId = undefined
+      }
+
+      // 判定满减门栏与折扣金额，如果折扣金额高于满减门栏，返回错误
+      if (this.dataForm.discount > this.dataForm.min) {
+        this.$notify.error({
+          title: '失败',
+          message: '满减门栏不能低于折扣金额，但是可以等于'
+        })
+        return false
+      }
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           createCoupon(this.dataForm)
             .then(response => {
-              this.list.unshift(response.data.data)
+              this.getList()
               this.dialogFormVisible = false
               this.$notify.success({
                 title: '成功',
@@ -414,56 +497,99 @@ export default {
         }
       })
     },
-    handleUpdate(row) {
+    handleRead(row) {
       this.dataForm = Object.assign({}, row)
-
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
+      this.refreshOptions()
+      if (this.dataForm.days === 0 || this.dataForm.days == null) {
+        this.dataForm.timeType = 1
+      } else {
+        this.dataForm.timeType = 0
+      }
+      if (this.dataForm.categoryId === '' || this.dataForm.categoryId == null) {
+        this.dataForm.goodsType = 0
+      } else {
+        this.dataForm.goodsType = 1
+      }
       this.$nextTick(() => {
-        if (this.dataForm.days === 0) {
-          this.dataForm.daysType = 1
-        } else {
-          this.dataForm.daysType = 0
-        }
         this.$refs['dataForm'].clearValidate()
       })
     },
-    updateData() {
-      this.$refs['dataForm'].validate(valid => {
-        if (valid) {
-          updateCoupon(this.dataForm)
-            .then(() => {
-              for (const v of this.list) {
-                if (v.id === this.dataForm.id) {
-                  const index = this.list.indexOf(v)
-                  this.list.splice(index, 1, this.dataForm)
-                  break
-                }
-              }
-              this.dialogFormVisible = false
-              this.$notify.success({
-                title: '成功',
-                message: '更新优惠券成功'
-              })
+    // 本来用来修改的，但是技术有限，暂且放置
+    // updateData() {
+    //   this.$refs['dataForm'].validate(valid => {
+    //     if (valid) {
+    //       updateCoupon(this.dataForm)
+    //         .then(() => {
+    //           for (const v of this.list) {
+    //             if (v.id === this.dataForm.id) {
+    //               const index = this.list.indexOf(v)
+    //               this.list.splice(index, 1, this.dataForm)
+    //               break
+    //             }
+    //           }
+    //           this.dialogFormVisible = false
+    //           this.$notify.success({
+    //             title: '成功',
+    //             message: '更新优惠券成功'
+    //           })
+    //         })
+    //         .catch(response => {
+    //           this.$notify.error({
+    //             title: '失败',
+    //             message: response.data.errmsg
+    //           })
+    //         })
+    //     }
+    //   })
+    // },
+    // 删除优惠卷
+    handleDelete(row) {
+      this.$confirm('此操作将永久删除该优惠卷' + row.title + ', 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteCoupon(row)
+          .then(response => {
+            this.$notify.success({
+              title: '成功',
+              message: '删除优惠券成功'
             })
-            .catch(response => {
-              this.$notify.error({
-                title: '失败',
-                message: response.data.errmsg
-              })
+            const index = this.list.indexOf(row)
+            this.list.splice(index, 1)
+          })
+          .catch(response => {
+            this.$notify.error({
+              title: '失败',
+              message: response.data.errmsg
             })
-        }
+          })
+      }).catch(() => {
+        return false
       })
     },
-    handleDelete(row) {
-      deleteCoupon(row)
+    // 改变优惠卷状态
+    handleStatus(row) {
+      // 如果优惠卷已经过期
+      if (row.status < 0) {
+        this.$notify.error({
+          title: '失败',
+          message: '过期优惠卷，请编辑后使用'
+        })
+        return false
+      }
+      this.dataForm = Object.assign({}, row)
+      this.dataForm.status = this.dataForm.status === 1 ? 0 : 1
+      activeCoupon(this.dataForm)
         .then(response => {
           this.$notify.success({
             title: '成功',
-            message: '删除优惠券成功'
+            message: '修改优惠券成功'
           })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
+          // this.getList()
+          row.status = row.status === 1 ? 0 : 1
         })
         .catch(response => {
           this.$notify.error({
@@ -472,40 +598,43 @@ export default {
           })
         })
     },
-    handleDetail(row) {
-      this.$router.push({
-        path: '/promotion/couponDetail',
-        query: { id: row.id }
-      })
-    },
+    // 到处excl表
     handleDownload() {
+      var temp = new Date()
+      var date = temp.getFullYear + '-' + temp.getMonth + '-' + temp.getDate
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = [
           '优惠券ID',
           '名称',
-          '内容',
-          '标签',
+          '介绍',
+          '类型',
           '最低消费',
           '减免金额',
           '每人限领',
-          '优惠券数量'
+          '优惠券数量',
+          '剩余数量',
+          '状态',
+          '使用类目'
         ]
         const filterVal = [
           'id',
-          'name',
-          'desc',
-          'tag',
+          'title',
+          'description',
+          'type',
           'min',
           'discount',
           'limit',
-          'total'
+          'total',
+          'surplus',
+          'status',
+          'cateotry'
         ]
         excel.export_json_to_excel2(
           tHeader,
           this.list,
           filterVal,
-          '优惠券信息'
+          date + ' 优惠券信息'
         )
         this.downloadLoading = false
       })

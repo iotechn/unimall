@@ -36,6 +36,7 @@
           c.min AS min,
           c.status AS status,
           g.title as categoryTitle,
+          c.category_id as categoryId,
           c.days AS days,
           c.gmt_start as gmtStart,
           c.gmt_end as gmtEnd
@@ -58,6 +59,7 @@
               AND c.gmt_end &lt; #{now}
           </if>
         </if>
+        order BY c.id DESC
         limit #{offset},#{limit}
     </select>
 

@@ -36,6 +36,8 @@ public class CouponAdminDTO extends SuperDTO {
 
     private String categoryTitle;
 
+    private Long categoryId;
+
     private Integer days;
 
     private Date gmtStart;
