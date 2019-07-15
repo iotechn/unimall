@@ -220,7 +220,7 @@ public class GoodsBizService {
         packSpuCollectInfo(spuDTO, userId);
         //获取第一页评论
         Page<AppraiseResponseDTO> spuAppraise = appraiseBizService.getSpuAllAppraise(spuId, 1, 10);
-        spuDTOFromCache.setAppraisePage(spuAppraise);
+        spuDTO.setAppraisePage(spuAppraise);
         if (userId != null) {
             footprintBizService.addOrUpdateFootprint(userId, spuId);
         }

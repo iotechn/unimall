@@ -65,12 +65,14 @@ public class CouponServiceImpl implements CouponService {
                 if (couponDO.getTotal() != -1 && couponDO.getSurplus() <= 0) {
                     throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
                 } else {
-                    if (couponDO.getSurplus() == 1) {
-                        if (!lockComponent.tryLock(COUPON_LOCK + couponId, 10)) {
-                            throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
+                    if (couponDO.getTotal() >= 0) {
+                        if (couponDO.getSurplus() == 1) {
+                            if (!lockComponent.tryLock(COUPON_LOCK + couponId, 10)) {
+                                throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
+                            }
                         }
+                        couponMapper.decCoupon(couponId);
                     }
-                    couponMapper.decCoupon(couponId);
                 }
 
 

@@ -1,11 +1,8 @@
 package com.iotechn.unimall.data.dto.appraise;
 
-import com.alibaba.fastjson.JSONObject;
-import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -19,7 +16,7 @@ import java.util.List;
 @Data
 public class AppraiseRequestDTO extends SuperDTO {
     private Long orderId;
-    private List<AppraiseDTO> appraiseDTOList;
+    private List<AppraiseRequestItemDTO> appraiseDTOList;
 }
 
 

@@ -4,7 +4,6 @@ import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
 import com.iotechn.unimall.data.dto.SuperDTO;
-import com.iotechn.unimall.data.dto.appraise.AppraiseDTO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.model.Page;

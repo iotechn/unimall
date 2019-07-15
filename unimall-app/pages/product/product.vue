@@ -310,7 +310,7 @@
 			//查看所有评价
 			navAllAppraise() {
 				uni.navigateTo({
-					url: `/pages/product/appraise?firstpage=${JSON.stringify(this.goods.appraisePage)}`
+					url: `/pages/product/appraise?spuid=${this.goods.id}&firstpage=${JSON.stringify(this.goods.appraisePage)}`
 				})
 			},
 			stopPrevent() {}

@@ -55,14 +55,7 @@
 				"navigationBarTitleText": "商品收藏"
 			}
 		}, {
-			"path": "pages/set/set",
-			"style": {
-				"navigationBarTitleText": "设置"
-			}
-		},
-
-		{
-			"path": "pages/userinfo/userinfo",
+			"path": "pages/user/profile",
 			"style": {
 				"navigationBarTitleText": "修改资料"
 			}

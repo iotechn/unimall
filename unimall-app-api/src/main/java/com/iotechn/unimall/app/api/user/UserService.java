@@ -60,8 +60,11 @@ public interface UserService {
 
     @HttpMethod(description = "同步用户信息")
     public String syncUserInfo(
-            @NotNull @HttpParam(name = "nickname", type = HttpParamType.COMMON, description = "用户昵称") String nickname,
-            @NotNull @HttpParam(name = "avatarUrl", type = HttpParamType.COMMON, description = "用户头像") String avatarUrl,
-            @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
+            @HttpParam(name = "nickname", type = HttpParamType.COMMON, description = "用户昵称") String nickName,
+            @HttpParam(name = "avatarUrl", type = HttpParamType.COMMON, description = "用户头像url") String avatarUrl,
+            @HttpParam(name = "gender", type = HttpParamType.COMMON, description = "性别0未知1男2女") Integer gender,
+            @HttpParam(name = "birthday", type = HttpParamType.COMMON, description = "用户生日") Long birthday,
+            @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "访问令牌") String accessToken,
+            @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
 
 }

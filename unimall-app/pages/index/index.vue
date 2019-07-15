@@ -49,8 +49,8 @@
 			</view>
 		</view>
 		
-		<view class="ad-1">
-			<image src="/static/temp/ad1.jpg" mode="scaleToFill"></image>
+		<view v-if="banner" @click="naviageToPage(banner.url)" class="ad-1">
+			<image :src="banner.imgUrl" mode="scaleToFill"></image>
 		</view>
 		
 		<!-- 秒杀楼层 -->
@@ -68,7 +68,7 @@
 					<view 
 						v-for="(item, index) in goodsList" :key="index"
 						class="floor-item"
-						@click="navToDetailPage(item)"
+						@click="navToDetailPage(item.id)"
 					>
 						<image :src="item.image" mode="aspectFill"></image>
 						<text class="title clamp">{{item.title}}</text>
@@ -85,15 +85,14 @@
 				<text class="tit">橱窗推荐</text>
 				<text class="tit2">Shop Window</text>
 			</view>
-			<text class="yticon icon-you"></text>
 		</view>
 		<view class="group-section">
 			<swiper class="g-swiper" :duration="500">
 				<swiper-item
 					class="g-swiper-item"
-					v-for="(item, index) in windowSpuList" :key="index"
 					v-if="index % 2 === 0"
-					@click="navToDetailPage(item)"
+					v-for="(item, index) in windowSpuList" :key="index"
+					@click="navToDetailPage(item.spuId)"
 				>
 					<view class="g-item left">
 						<image :src="item.spuImg" mode="aspectFill"></image>
@@ -138,22 +137,21 @@
 				<text class="tit">分类精选</text>
 				<text class="tit2">Competitive Products For You</text>
 			</view>
-			<text class="yticon icon-you"></text>
 		</view>
-		<view class="hot-floor">
+		<view v-for="(item, index) in categoryPickList" :key="index" class="hot-floor">
 			<view class="floor-img-box">
-				<image class="floor-img" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1553409398864&di=4a12763adccf229133fb85193b7cc08f&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201703%2F19%2F20170319150032_MNwmn.jpeg" mode="scaleToFill"></image>
+				<image class="floor-img" :src="item.imgUrl" mode="scaleToFill"></image>
 			</view>
 			<scroll-view class="floor-list" scroll-x>
 				<view class="scoll-wrapper">
 					<view 
-						v-for="(item, index) in goodsList" :key="index"
+						v-for="(spuItem, skuIndex) in item.data" :key="skuIndex"
 						class="floor-item"
-						@click="navToDetailPage(item)"
+						@click="navToDetailPage(spuItem.id)"
 					>
-						<image :src="item.image" mode="aspectFill"></image>
-						<text class="title clamp">{{item.title}}</text>
-						<text class="price">￥{{item.price}}</text>
+						<image :src="spuItem.img" mode="aspectFill"></image>
+						<text class="title clamp">{{spuItem.title}}</text>
+						<text class="price">￥{{spuItem.price / 100}}</text>
 					</view>
 					<view class="more">
 						<text>查看全部</text>
@@ -162,72 +160,27 @@
 				</view>
 			</scroll-view>
 		</view>
-		<view class="hot-floor">
-			<view class="floor-img-box">
-				<image class="floor-img" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1553409984228&di=dee176242038c2d545b7690b303d65ea&imgtype=0&src=http%3A%2F%2Fhbimg.b0.upaiyun.com%2F5ef4da9f17faaf4612f0d5046f4161e556e9bbcfdb5b-rHjf00_fw658" mode="scaleToFill"></image>
-			</view>
-			<scroll-view class="floor-list" scroll-x>
-				<view class="scoll-wrapper">
-					<view 
-						v-for="(item, index) in goodsList" :key="index"
-						class="floor-item"
-						@click="navToDetailPage(item)"
-					>
-						<image :src="item.image3" mode="aspectFill"></image>
-						<text class="title clamp">{{item.title}}</text>
-						<text class="price">￥{{item.price}}</text>
-					</view>
-					<view class="more">
-						<text>查看全部</text>
-						<text>More+</text>
-					</view>
-				</view>
-			</scroll-view>
-		</view>
-		<view class="hot-floor">
-			<view class="floor-img-box">
-				<image class="floor-img" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1553409794730&di=12b840ec4f5748ef06880b85ff63e34e&imgtype=0&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01dc03589ed568a8012060c82ac03c.jpg%40900w_1l_2o_100sh.jpg" mode="scaleToFill"></image>
-			</view>
-			<scroll-view class="floor-list" scroll-x>
-				<view class="scoll-wrapper">
-					<view 
-						v-for="(item, index) in goodsList" :key="index"
-						class="floor-item"
-						@click="navToDetailPage(item)"
-					>
-						<image :src="item.image2" mode="aspectFill"></image>
-						<text class="title clamp">{{item.title}}</text>
-						<text class="price">￥{{item.price}}</text>
-					</view>
-					<view class="more">
-						<text>查看全部</text>
-						<text>More+</text>
-					</view>
-				</view>
-			</scroll-view>
-		</view>
-
-		<!-- 猜你喜欢 -->
+		
+		<!-- 销量top -->
 		<view class="f-header m-t">
 			<image src="/static/temp/h1.png"></image>
 			<view class="tit-box">
-				<text class="tit">猜你喜欢</text>
-				<text class="tit2">Guess You Like It</text>
+				<text class="tit">热销宝贝</text>
+				<text class="tit2">Hot Sale</text>
 			</view>
-			<text class="yticon icon-you"></text>
 		</view>
 		
 		<view class="guess-section">
 			<view 
-				v-for="(item, index) in goodsList" :key="index"
+				v-for="(item, index) in salesTop" :key="index"
 				class="guess-item"
-				@click="navToDetailPage(item)"
+				@click="navToDetailPage(item.id)"
 			>
 				<view class="image-wrapper">
-					<image :src="item.image" mode="aspectFill"></image>
+					<image :src="item.img" mode="aspectFill"></image>
 				</view>
 				<text class="title clamp">{{item.title}}</text>
-				<text class="price">￥{{item.price}}</text>
+				<text class="price">￥{{item.price / 100}}</text>
 			</view>
 		</view>
 		
@@ -245,8 +198,10 @@
 				swiperCurrent: 0,
 				swiperLength: 0,
 				carouselList: [],
-				goodsList: [],
-				windowSpuList: []
+				windowSpuList: [],
+				categoryPickList: [],
+				salesTop: [],
+				banner: undefined
 			};
 		},
 
@@ -260,25 +215,32 @@
 			 */
 			async loadData() {
 				const that = this
-				that.$api.request('recommend', 'getRecommendByType', {
-					recommendType : 1
-				}).then(res => {
-					that.windowSpuList = res.data
-				})
-				that.$api.request('advertisement', 'getActiveAd', {
-					adType : 1
-				}).then(res => {
-					if (res.data.length > 0) {
-						res.data.forEach(item => {
-							item.background = 'rgb(205, 215, 218)'
-						})
-						this.carouselList = res.data
-						this.swiperLength = res.data.length
-						this.titleNViewBackground = res.data[0].background
+				that.$api.request('integral', 'getIndexData').then(res => {
+					let data = res.data
+					//橱窗
+					that.windowSpuList = data.windowRecommend
+					//轮播
+					data.advertisement.t1.forEach(item => {
+						if (!item.color) {
+							item.color = 'rgb(205, 215, 218)'
+						}
+					})
+					that.carouselList = data.advertisement.t1
+					that.swiperLength = data.advertisement.t1.length
+					that.titleNViewBackground = data.advertisement.t1[0].background
+					//分类精选
+					if (data.advertisement.t2) {
+						that.categoryPickList = data.advertisement.t2
+					}
+					//横幅
+					if (data.advertisement.t3 && data.advertisement.t3.length > 0) {
+						that.banner = data.advertisement.t3[0]
+					}
+					//热销
+					if (data.salesTop) {
+						that.salesTop = data.salesTop
 					}
 				})
-				let goodsList = await this.$api.json('goodsList');
-				this.goodsList = goodsList || [];
 			},
 			//轮播图切换修改背景色
 			swiperChange(e) {
@@ -287,9 +249,7 @@
 				this.titleNViewBackground = this.carouselList[index].background;
 			},
 			//详情页
-			navToDetailPage(item) {
-				//测试数据没有写id，用title代替
-				let id = item.spuId;
+			navToDetailPage(id) {
 				uni.navigateTo({
 					url: `/pages/product/product?id=${id}`
 				})
@@ -306,24 +266,24 @@
 			this.$api.msg('点击了搜索框');
 		},
 		//点击导航栏 buttons 时触发
-		onNavigationBarButtonTap(e) {
-			const index = e.index;
-			if (index === 0) {
-				this.$api.msg('点击了扫描');
-			} else if (index === 1) {
-				// #ifdef APP-PLUS
-				const pages = getCurrentPages();
-				const page = pages[pages.length - 1];
-				const currentWebview = page.$getAppWebview();
-				currentWebview.hideTitleNViewButtonRedDot({
-					index
-				});
-				// #endif
-				uni.navigateTo({
-					url: '/pages/notice/notice'
-				})
-			}
-		}
+		// onNavigationBarButtonTap(e) {
+		// 	const index = e.index;
+		// 	if (index === 0) {
+		// 		this.$api.msg('点击了扫描');
+		// 	} else if (index === 1) {
+		// 		// #ifdef APP-PLUS
+		// 		const pages = getCurrentPages();
+		// 		const page = pages[pages.length - 1];
+		// 		const currentWebview = page.$getAppWebview();
+		// 		currentWebview.hideTitleNViewButtonRedDot({
+		// 			index
+		// 		});
+		// 		// #endif
+		// 		uni.navigateTo({
+		// 			url: '/pages/notice/notice'
+		// 		})
+		// 	}
+		// }
 		// #endif
 	}
 </script>

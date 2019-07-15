@@ -10,10 +10,8 @@
 				<view class="right">
 					<text class="name">{{item.userNickName?item.userNickName:('用户' + item.userId)}}</text>
 					<text class="con">{{item.content}}</text>
-					<view class="imgs">
-						<image class="ig" src="../../static/temp/banner1.jpg"></image>
-						<image class="ig" src="../../static/temp/banner1.jpg"></image>
-						<image class="ig" src="../../static/temp/banner1.jpg"></image>
+					<view v-if="item.imgList && item.imgList.length > 0" class="imgs">
+						<image @click="previewImg(item.imgList, imgIndex)" v-for="(imgItem, imgIndex) in item.imgList" :key="imgIndex" class="ig" :src="imgItem"></image>
 					</view>
 					<view class="bot">
 						<text class="attr">购买类型：{{item.skuTitle}}</text>
@@ -22,22 +20,51 @@
 				</view>
 			</view>
 		</view>
+		<uni-load-more :status="loadingType"></uni-load-more>
 	</view>
 </template>
 
 <script>
+	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
 	export default {
+		components: {
+			uniLoadMore
+		},
 		data() {
 			return {
-				page : {}
+				page : {},
+				spuId: undefined,
+				loadingType: 'more'
 			}
 		},
 		onLoad(option) {
 			this.page = JSON.parse(option.firstpage)
-		
+			this.spuId = option.spuid
+			this.loadingType = this.page.pageNo < this.page.totalPageNo ? 'more' : 'nomore'
+		},
+		onReachBottom(e) {
+			const that = this
+			if (that.loadingType === 'more') {
+				that.loadingType = 'loading'
+				that.$api.request('appraise', 'getSpuAllAppraise', {
+					spuId: that.spuId,
+					pageNo: that.page.pageNo + 1,
+					pageSize: 10
+				}).then(res => {
+					that.page.items = that.page.items.concat(res.data.items)
+					that.page.pageNo = res.data.pageNo
+					that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'nomore'
+				})
+			}
+			
 		},
 		methods: {
-			
+			previewImg(imgs,index) {
+				uni.previewImage({
+					current: index,
+					urls: imgs
+				})
+			}
 		}
 	}
 </script>

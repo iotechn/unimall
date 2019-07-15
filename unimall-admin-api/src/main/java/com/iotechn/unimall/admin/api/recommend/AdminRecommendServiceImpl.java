@@ -1,6 +1,7 @@
 package com.iotechn.unimall.admin.api.recommend;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.iotechn.unimall.biz.service.biz.RecommendBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -35,6 +36,8 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
     private RecommendMapper recommendMapper;
     @Autowired
     private SpuMapper spuMapper;
+    @Autowired
+    private RecommendBizService recommendBizService;
 
     private final static String RECOMMEND_NAME = "RECOMMEND_TYPE_";
 
@@ -89,9 +92,6 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
 
     @Override
     public Page<RecommendDTO> queryAllRecommend(Long adminId, Integer pageNo, Integer pageSize) throws ServiceException {
-        Integer count = recommendMapper.selectCount(null);
-        List<RecommendDTO> recommendDTOList = recommendMapper.getAllRecommend(pageNo,pageSize);
-        Page<RecommendDTO> page = new Page<>(recommendDTOList,pageNo,pageSize,count);
-        return page;
+        return recommendBizService.queryAllRecommend(pageNo, pageSize);
     }
 }

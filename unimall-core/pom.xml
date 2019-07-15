@@ -7,6 +7,7 @@
 		<artifactId>unimall</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
+	<packaging>jar</packaging>
 	<groupId>com.iotechn</groupId>
 	<artifactId>unimall-core</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -40,14 +41,5 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>

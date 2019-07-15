@@ -1,29 +1,3 @@
-/* 用户 */
-const userInfo = {
-	status: 1,
-	data: {
-		id: 1,
-		mobile: 18888888888,
-		nickname: 'Leo yo',
-		portrait: 'http://img.61ef.cn/news/201409/28/2014092805595807.jpg'
-	},
-	msg: '提示'
-}
-/* 首页轮播图 */
-const carouselList = [{
-		src: "/static/temp/banner3.jpg",
-		background: "rgb(203, 87, 60)",
-	},
-	{
-		src: "/static/temp/banner2.jpg",
-		background: "rgb(205, 215, 218)",
-	},
-	{
-		src: "/static/temp/banner4.jpg",
-		background: "rgb(183, 73, 69)",
-	}
-]
-/* 商品列表 */
 const goodsList = [{
 		image: "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1553187020783&di=bac9dd78b36fd984502d404d231011c0&imgtype=0&src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201609%2F26%2F20160926173213_s5adi.jpeg",
 		image2: "http://pic.rmb.bdstatic.com/819a044daa66718c2c40a48c1ba971e6.jpeg",
@@ -648,11 +622,9 @@ const cateList = [{
 ]
 
 export default {
-	carouselList,
 	cartList,
 	detailData,
 	lazyLoadList,
-	userInfo,
 	shareList,
 	goodsList,
 	orderList,
