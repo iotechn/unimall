@@ -23,6 +23,6 @@ import java.util.List;
 public interface AppAdvertisementService {
 
     @HttpMethod(description = "取得活跃广告")
-    public List<AdvertisementDO> getActiveAd(@NotNull @HttpParam(name = "adType",type = HttpParamType.COMMON,description = "广告类型")Integer adType)throws ServiceException;
+    public List<AdvertisementDO> getActiveAd(@HttpParam(name = "adType",type = HttpParamType.COMMON,description = "广告类型")Integer adType)throws ServiceException;
 
 }

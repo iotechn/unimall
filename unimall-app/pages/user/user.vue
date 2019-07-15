@@ -4,7 +4,7 @@
 			<image class="bg" src="/static/user-bg.jpg"></image>
 			<view class="user-info-box">
 				<view class="portrait-box">
-					<image class="portrait" :src="userInfo.portrait || '/static/missing-face.png'"></image>
+					<image class="portrait" :src="userInfo.avatarUrl || '/static/missing-face.png'"></image>
 				</view>
 				<view class="info-box">
 					<text class="username">{{ hasLogin? (userInfo.nickname || '未设置昵称') : '立即登录' }}</text>
@@ -81,7 +81,8 @@
 				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/address')"></list-cell>
 				<list-cell icon="icon-pinglun-copy" iconColor="#ee883b" title="晒单" ></list-cell>
 				<list-cell icon="icon-shoucang_xuanzhongzhuangtai" iconColor="#54b4ef" title="我的收藏" @eventClick="navTo('/pages/product/favorite')"></list-cell>
-				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="设置" border="" @eventClick="navTo('/pages/set/set')"></list-cell>
+				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="个人资料" @eventClick="navTo('/pages/user/profile')"></list-cell>
+				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="关于" border="" @eventClick="navTo('/pages/user/profile')"></list-cell>
 			</view> 
 		</view>
 			

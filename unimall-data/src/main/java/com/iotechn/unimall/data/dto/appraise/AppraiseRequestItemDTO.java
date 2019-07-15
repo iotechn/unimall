@@ -12,7 +12,7 @@ import lombok.Data;
 * 订单评价时，用来存储每种商品时的数据结构
 * */
 @Data
-public class AppraiseDTO extends SuperDTO {
+public class AppraiseRequestItemDTO extends SuperDTO {
 
     private Long spuId;
     private Long skuId;

@@ -3,6 +3,7 @@ package com.iotechn.unimall.app.api.order;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
+import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
 import com.iotechn.unimall.biz.service.freight.FreightBizService;
@@ -10,6 +11,7 @@ import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.*;
@@ -307,6 +309,9 @@ public class OrderServiceImpl implements OrderService {
             String prepayId = result.getPackageValue();
             prepayId = prepayId.replace("prepay_id=", "");
 //TODO 缓存支付Id            userBizService.setVaildFormIdFromSession(prepayId);
+        } catch (WxPayException e) {
+            logger.error("[微信支付] 异常", e);
+            throw new ThirdPartServiceException(e.getReturnMsg(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
         } catch (Exception e) {
             logger.error("[预付款异常]", e);
             throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);

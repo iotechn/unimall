@@ -105,12 +105,27 @@
 							raw: JSON.stringify(wxres)
 						}).then(res => {
 							that.logining = false
-							//将返回的用户信息设置到Store里面
-							that.$store.commit('login', res.data)
-							if (that.$api.prePage().lodaData) {
-								that.$api.prePage().loadData()
-							}
-							uni.navigateBack()
+							uni.getUserInfo({
+								lang: 'zh_CN',
+								success: (e) => {
+									e.userInfo.nickname = e.userInfo.nickName
+									that.$api.request('user', 'syncUserInfo', e.userInfo).then(syncRes => {
+										//同步过后
+										res.nickname = e.userInfo.nickName
+										res.avatarUrl = e.userInfo.avatarUrl
+										res.gender = e.userInfo.gender
+									})
+								},
+								complete: (e) => {
+									//将返回的用户信息设置到Store里面
+									that.$store.commit('login', res.data)
+									if (that.$api.prePage().lodaData) {
+										that.$api.prePage().loadData()
+									}
+									uni.navigateBack()
+								}
+							})
+							
 						})
 					})
 				})

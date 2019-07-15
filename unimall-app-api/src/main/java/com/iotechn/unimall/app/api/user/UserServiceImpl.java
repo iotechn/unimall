@@ -13,6 +13,7 @@ import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.mapper.UserMapper;
+import com.iotechn.unimall.data.util.SessionUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.apache.commons.codec.digest.Md5Crypt;
@@ -89,7 +90,7 @@ public class UserServiceImpl implements UserService {
         Date now = new Date();
         UserDO userDO = new UserDO();
         userDO.setPhone(phone);
-        userDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0,7)));
+        userDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0, 7)));
         userDO.setLastLoginIp(ip);
         userDO.setGmtLastLogin(now);
         userDO.setGmtUpdate(now);
@@ -140,7 +141,7 @@ public class UserServiceImpl implements UserService {
         //3.校验成功，重置密码
         UserDO updateUserDO = new UserDO();
         updateUserDO.setId(id);
-        updateUserDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(),"$1$" + phone.substring(0,7)));
+        updateUserDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0, 7)));
         updateUserDO.setGmtUpdate(new Date());
         if (userMapper.updateById(updateUserDO) > 0) {
             cacheComponent.del(VERIFY_CODE_PREFIX + phone);
@@ -151,6 +152,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 验证码抽取校验
+     *
      * @param phone
      * @param verifyCode
      * @throws ServiceException
@@ -166,15 +168,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO login(String phone, String password,String ip) throws ServiceException {
-        String cryptPassword = Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0,7));
+    public UserDTO login(String phone, String password, String ip) throws ServiceException {
+        String cryptPassword = Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0, 7));
         UserDTO userDTO = userMapper.login(phone, cryptPassword);
         if (userDTO == null) {
             throw new AppServiceException(ExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);
         }
         //检查帐号是否已经冻结
-        if(userDTO.getStatus() == 0){
-            throw  new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
+        if (userDTO.getStatus() == 0) {
+            throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
         }
         String accessToken = GeneratorUtil.genSessionId();
         //放入SESSION专用Redis数据源中
@@ -231,8 +233,8 @@ public class UserServiceImpl implements UserService {
                         userMapper.updateById(userUpdateDO);
                     }
                     //检查帐号是否已经冻结
-                    if(userDO.getStatus() == 0){
-                        throw  new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
+                    if (userDO.getStatus() == 0) {
+                        throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
                     }
                     String accessToken = GeneratorUtil.genSessionId();
                     UserDTO userDTO = new UserDTO();
@@ -255,12 +257,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String syncUserInfo(String nickname, String avatarUrl, Long userId) throws ServiceException {
+    public String syncUserInfo(String nickName, String avatarUrl, Integer gender, Long birthday, String accessToken, Long userId) throws ServiceException {
         UserDO updateUserDO = new UserDO();
         updateUserDO.setId(userId);
-        updateUserDO.setNickname(nickname);
+        updateUserDO.setNickname(nickName);
         updateUserDO.setAvatarUrl(avatarUrl);
+        updateUserDO.setGender(gender);
+        updateUserDO.setGmtUpdate(new Date());
+        if (birthday != null)
+            updateUserDO.setBirthday(new Date(birthday));
         if (userMapper.updateById(updateUserDO) > 0) {
+            //更新SESSION缓存
+            UserDTO user = SessionUtil.getUser();
+            BeanUtils.copyProperties(updateUserDO, user);
+            userRedisTemplate.opsForValue().set(accessToken, JSONObject.toJSONString(user));
             return "ok";
         }
         throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);

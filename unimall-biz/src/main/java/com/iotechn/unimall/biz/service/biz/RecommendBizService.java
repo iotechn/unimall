@@ -5,6 +5,7 @@ import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.dto.RecommendDTO;
 import com.iotechn.unimall.data.enums.RecommendType;
 import com.iotechn.unimall.data.mapper.RecommendMapper;
+import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -37,5 +38,12 @@ public class RecommendBizService {
             }
         }
         return recommendDTOList;
+    }
+
+    public Page<RecommendDTO> queryAllRecommend(Integer pageNo, Integer pageSize) throws ServiceException {
+        Integer count = recommendMapper.selectCount(null);
+        List<RecommendDTO> recommendDTOList = recommendMapper.getAllRecommend(pageNo,pageSize);
+        Page<RecommendDTO> page = new Page<>(recommendDTOList,pageNo,pageSize,count);
+        return page;
     }
 }

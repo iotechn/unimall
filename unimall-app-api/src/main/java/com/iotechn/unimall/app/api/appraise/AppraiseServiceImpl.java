@@ -2,7 +2,6 @@ package com.iotechn.unimall.app.api.appraise;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
-import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -11,7 +10,7 @@ import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.domain.ImgDO;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
-import com.iotechn.unimall.data.dto.appraise.AppraiseDTO;
+import com.iotechn.unimall.data.dto.appraise.AppraiseRequestItemDTO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseRequestDTO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.enums.BizType;
@@ -76,7 +75,7 @@ public class AppraiseServiceImpl implements AppraiseService {
         }
 
         //循环读取订单评价中所有商品的评价
-        for (AppraiseDTO appraiseDTO : appraiseRequestDTO.getAppraiseDTOList()){
+        for (AppraiseRequestItemDTO appraiseDTO : appraiseRequestDTO.getAppraiseDTOList()){
             List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>()
                     .eq("sku_id",appraiseDTO.getSkuId())
                     .eq("order_id",appraiseRequestDTO.getOrderId()));

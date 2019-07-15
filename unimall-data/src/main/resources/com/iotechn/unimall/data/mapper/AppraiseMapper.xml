@@ -28,8 +28,8 @@
             and a.spu_id = sp.id
             and a.sku_id = sk.id
             and a.user_id = #{userId}
-        limit #{offset},#{size}
-            order by a.id desc
+        order by a.id desc
+            limit #{offset},#{size}
     </select>
 
     <select id="selectSpuAllAppraise" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
@@ -57,8 +57,8 @@
             and a.spu_id = sp.id
             and a.sku_id = sk.id
             and a.spu_id = #{spuId}
-        limit #{offset},#{size}
-            order by a.id desc
+        order by a.id desc
+            limit #{offset},#{size}
     </select>
 
     <select id="selectOneById" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
