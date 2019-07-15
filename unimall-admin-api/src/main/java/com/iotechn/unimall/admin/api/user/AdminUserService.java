@@ -34,6 +34,12 @@ public interface AdminUserService {
     public Boolean updateUser(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
                               @NotNull @HttpParam(name = "user", type = HttpParamType.COMMON, description = "用户信息") UserDO user) throws ServiceException;
 
+    @HttpMethod(description = "激活冻结", permission = "system:user:update", permissionParentName = "系统管理", permissionName = "用户管理")
+    public Boolean updateStatus(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
+                              @NotNull @HttpParam(name = "userId", type = HttpParamType.COMMON, description = "用户信息") Long userId,
+                                @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "用户信息") Integer status) throws ServiceException;
+
+
     @HttpMethod(description = "查询", permission = "system:user:query", permissionParentName = "系统管理", permissionName = "用户管理")
     public Page<UserDO> getUser(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
                                 @HttpParam(name = "id", type = HttpParamType.COMMON, description = "用户ID") Long id,

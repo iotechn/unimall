@@ -75,13 +75,13 @@
 
       <el-table-column align="center" label="性别" prop="gender">
         <template slot-scope="scope">
-          <el-tag>{{ genderDic[scope.row.gender].name?genderDic[scope.row.gender].name:'未知' }}</el-tag>
+          <el-tag>{{ scope.row.gender | genderDicFilter }}</el-tag>
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="会员等级" prop="level">
         <template slot-scope="scope">
-          <el-tag>{{ levelDic[scope.row.level].name?levelDic[scope.row.level].name:'错误用户' }}</el-tag>
+          <el-tag>{{ scope.row.level | levelDicFilter }}</el-tag>
         </template>
       </el-table-column>
 
@@ -185,9 +185,28 @@
 import { fetchList, activeUser, createUser, updateUser, deleteUser } from '@/api/user'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
+const genderDic = [{ value: 1, name: '女' }, { value: 2, name: '男' }, { value: '', name: '全部' }]
+const levelDic = [{ value: 0, name: '普通会员' }, { value: 1, name: 'VIP会员' }, { value: '', name: '全部' }]
+const statusDic = [{ value: 0, name: '冻结' }, { value: 1, name: '激活' }, { value: '', name: '全部' }]
 export default {
   name: 'User',
   components: { Pagination },
+  filters: {
+    genderDicFilter(code) {
+      if (code === 1 || code === 2) {
+        return genderDic[code - 1].name
+      } else {
+        return '未知性别'
+      }
+    },
+    levelDicFilter(code) {
+      if (code === 0 || code === 1) {
+        return levelDic[code].name
+      } else {
+        return '未知等级'
+      }
+    }
+  },
   data() {
     return {
       list: [],
@@ -213,9 +232,9 @@ export default {
         password: undefined
       },
       downloadLoading: false,
-      genderDic: [{ value: 0, name: '女' }, { value: 1, name: '男' }, { value: '', name: '全部' }],
-      levelDic: [{ value: 0, name: '普通会员' }, { value: 1, name: 'VIP会员' }, { value: '', name: '全部' }],
-      statusDic: [{ value: 0, name: '冻结' }, { value: 1, name: '激活' }, { value: '', name: '全部' }],
+      genderDic,
+      levelDic,
+      statusDic,
       textMap: { update: '编辑', create: '创建' },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -265,7 +284,6 @@ export default {
     handleStatus(row) {
       this.resetForm()
       this.dataForm.id = row.id
-      this.dataForm.phone = row.phone
       this.dataForm.status = row.status === 1 ? 0 : 1
       activeUser(this.dataForm)
         .then(res => {

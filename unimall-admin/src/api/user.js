@@ -16,8 +16,9 @@ export function activeUser(data) {
     method: 'post',
     params: {
       _gp: 'admin.user',
-      _mt: 'updateUser',
-      user: JSON.stringify(data)
+      _mt: 'updateStatus',
+      userId: data.id,
+      status: data.status
     }
   })
 }

@@ -48,11 +48,11 @@
             AND c.title like concat("%",#{title},"%")
         </if>
         <if test="type != null">
-            AND c.title = #{type}
+            AND c.type = #{type}
         </if>
         <if test="status != null">
           <if test="status >= 0">
-              AND c.status = #{status} AND c.gmt_end &gt; #{now}
+              AND c.status = #{status} AND (c.gmt_end &gt; #{now} or c.days is not null)
           </if>
           <if test="status &lt; 0">
               AND c.gmt_end &lt; #{now}

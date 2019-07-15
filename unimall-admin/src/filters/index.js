@@ -45,9 +45,23 @@ export function formatDate(time) {
   if (time != null && time !== '') {
     var date = new Date(time)
     var year = date.getFullYear()
-    var month = date.getMonth()
-    var day = date.getDay()
+    var month = date.getMonth() + 1
+    var day = date.getDate()
     return year + '-' + month + '-' + day
+  } else {
+    return ''
+  }
+}
+export function formatDateAndTime(time) {
+  if (time != null || time !== '') {
+    var date = new Date(time)
+    var year = date.getFullYear()
+    var month = date.getMonth() + 1
+    var day = date.getDate()
+    var hour = date.getHours()
+    var minute = date.getMinutes()
+    var second = date.getSeconds()
+    return year + '-' + month + '-' + day + '\n' + hour + ':' + minute + ':' + second
   } else {
     return ''
   }
