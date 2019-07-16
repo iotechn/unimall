@@ -1,58 +1,58 @@
 <template>
   <div class="dashboard-editor-container">
-    <el-row :gutter="40" class="panel-group">
-      <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-        <div class="card-panel" @click="handleSetLineChartData('newVisitis')">
-          <div class="card-panel-icon-wrapper icon-people">
-            <svg-icon icon-class="peoples" class-name="card-panel-icon" />
-          </div>
-          <div class="card-panel-description">
-            <div class="card-panel-text">用户数量</div>
-            <count-to :start-val="0" :end-val="userCount" :duration="2600" class="card-panel-num" />
-          </div>
-        </div>
+    <el-row>
+      <el-col :span="5">
+        <el-row class="panel-group">
+          <el-col class="card-panel-col">
+            <div class="card-panel" @click="handleSetLineChartData('newVisitis')">
+              <div class="card-panel-icon-wrapper icon-people">
+                <svg-icon icon-class="peoples" class-name="card-panel-icon" />
+              </div>
+              <div class="card-panel-description">
+                <div class="card-panel-text">商品数量</div>
+                <count-to :start-val="0" :end-val="goodsCount" :duration="2600" class="card-panel-num" />
+              </div>
+            </div>
+          </el-col>
+        </el-row>
+        <el-row class="panel-group">
+          <el-col class="card-panel-col">
+            <div class="card-panel" @click="handleSetLineChartData('messages')">
+              <div class="card-panel-icon-wrapper icon-message">
+                <svg-icon icon-class="message" class-name="card-panel-icon" />
+              </div>
+              <div class="card-panel-description">
+                <div class="card-panel-text">未发货单</div>
+                <count-to
+                  :start-val="0"
+                  :end-val="waitStockCount"
+                  :duration="3000"
+                  class="card-panel-num"
+                />
+              </div>
+            </div>
+          </el-col>
+        </el-row>
       </el-col>
-      <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-        <div class="card-panel" @click="handleSetLineChartData('messages')">
-          <div class="card-panel-icon-wrapper icon-message">
-            <svg-icon icon-class="message" class-name="card-panel-icon" />
-          </div>
-          <div class="card-panel-description">
-            <div class="card-panel-text">日活数量</div>
-            <count-to
-              :start-val="0"
-              :end-val="activeUserCount"
-              :duration="3000"
-              class="card-panel-num"
-            />
-          </div>
-        </div>
-      </el-col>
-      <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-        <div class="card-panel" @click="handleSetLineChartData('purchases')">
-          <div class="card-panel-icon-wrapper icon-money">
-            <svg-icon icon-class="message" class-name="card-panel-icon" />
-          </div>
-          <div class="card-panel-description">
-            <div class="card-panel-text">动态数量</div>
-            <count-to :start-val="0" :end-val="lifeCount" :duration="3200" class="card-panel-num" />
-          </div>
-        </div>
-      </el-col>
-      <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-        <div class="card-panel" @click="handleSetLineChartData('shoppings')">
-          <div class="card-panel-icon-wrapper icon-shoppingCard">
-            <svg-icon icon-class="money" class-name="card-panel-icon" />
-          </div>
-          <div class="card-panel-description">
-            <div class="card-panel-text">未发货数</div>
-            <count-to :start-val="0" :end-val="orderCount" :duration="3600" class="card-panel-num" />
-          </div>
-        </div>
+      <el-col :span="16">
+        <div id="orderChart" class="chart" style="height: 350px; padding: 20px; padding-left: 80px"/>
       </el-col>
     </el-row>
-
-    <div id="userChart" class="chart" style="height: 400px"/>
+    <el-row>
+      <el-col :span="10">
+        <div id="sumChart" class="chart" style="height: 400px; padding: 30px"/>
+      </el-col>
+      <el-col :span="11">
+        <el-row>
+          <el-col :span="12">
+            <div id="areaChart" class="chart" style="height: 400px; padding: 30px"/>
+          </el-col>
+          <el-col :span="12">
+            <div id="channelChart" class="chart" style="height: 400px; padding: 30px"/>
+          </el-col>
+        </el-row>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -66,40 +66,28 @@ export default {
   },
   data() {
     return {
-      userCount: 0,
-      activeUserCount: 0,
-      lifeCount: 0,
-      orderCount: 0,
-      dayMap: {}
+      goodsCount: 0,
+      waitStockCount: 0
     }
   },
   created() {
     info().then(response => {
-      this.userCount = response.data.data.userCount
-      this.activeUserCount = response.data.data.activeUserCount
-      this.lifeCount = response.data.data.lifeCount
-      this.orderCount = response.data.data.orderCount
-
-      this.userChart = echarts.init(document.getElementById('userChart'))
-      // 转换
-      const dayMap = response.data.data.dayMap
-
-      const nameArray = []
-      const valueArray = []
-      for (var key in dayMap) {
-        nameArray.push(key)
-        valueArray.push(dayMap[key])
-      }
-
-      this.userChart.setOption({
-        title: { text: '15日新用户' },
+      const orderChart = echarts.init(document.getElementById('orderChart'))
+      const sumChart = echarts.init(document.getElementById('sumChart'))
+      const areaChart = echarts.init(document.getElementById('areaChart'))
+      const channelChart = echarts.init(document.getElementById('channelChart'))
+      this.waitStockCount = response.data.data.waitStockCount
+      this.goodsCount = response.data.data.goodsCount
+      // 每日订单走势
+      orderChart.setOption({
+        title: { text: '7日订单' },
         legend: {
-          data: ['新用户'],
+          data: ['订单数'],
           right: 1
         },
         yAxis: [
           {
-            name: '新用户',
+            name: '订单数',
             type: 'value',
             axisLine: {
               show: false
@@ -122,15 +110,93 @@ export default {
             fontSize: 12,
             margin: 12
           },
-          data: nameArray
+          data: response.data.data.daysOrder[0]
         },
         series: [
           {
-            name: '新用户',
+            name: '订单数',
             yAxisIndex: 0,
-            data: valueArray,
+            data: response.data.data.daysOrder[1],
             type: 'bar',
-            color: '#00B5FF'
+            color: '#00B5FF',
+            barWidth: 30
+          }
+        ]
+      })
+      // 订单金额走势
+      sumChart.setOption({
+        title: { text: '7日成交金额' },
+        legend: {
+          data: ['订单数'],
+          right: 1
+        },
+        yAxis: [
+          {
+            name: '订单数',
+            type: 'value',
+            axisLine: {
+              show: false
+            },
+            axisTick: {
+              show: false
+            },
+            axisLabel: {
+              color: '#666',
+              fontSize: 12
+            }
+          }
+        ],
+        xAxis: {
+          axisTick: {
+            show: false
+          },
+          axisLabel: {
+            color: '#666',
+            fontSize: 12,
+            margin: 12
+          },
+          data: response.data.data.daysSum[0]
+        },
+        series: [
+          {
+            name: '订单数',
+            yAxisIndex: 0,
+            data: response.data.data.daysSum[1],
+            type: 'line',
+            color: '#20B2AA'
+          }
+        ]
+      })
+      // 地区饼图
+      areaChart.setOption({
+        title: { text: '订单地区分布' },
+        legend: {
+          data: ['地区分布'],
+          right: 1,
+          color: '#20B2AA'
+        },
+        series: [
+          {
+            type: 'pie',
+            name: '地区分布',
+            data: response.data.data.area
+          }
+        ]
+      })
+      // 渠道饼图
+      channelChart.setOption({
+        title: { text: '订单渠道分布' },
+        legend: {
+          data: ['渠道分布'],
+          right: 1,
+          color: '#20B2AA'
+        },
+        series: [
+          {
+            type: 'pie',
+            name: '地区分布',
+
+            data: response.data.data.channel
           }
         ]
       })
@@ -157,6 +223,7 @@ export default {
 
 .panel-group {
   margin-top: 18px;
+  padding-left: 30px;
 
   .card-panel-col {
     margin-bottom: 32px;

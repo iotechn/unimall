@@ -116,6 +116,11 @@
 				}
 			}
 		}, {
+			"path":"pages/user/about",
+			"style": {
+				"navigationBarTitleText":"关于"
+			}
+		}, {
 			"path": "pages/detail/detail",
 			"style": {
 				"navigationBarTitleText": "",
