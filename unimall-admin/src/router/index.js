@@ -131,6 +131,16 @@ export const asyncRouterMap = [
           title: '订单管理',
           noCache: true
         }
+      },
+      {
+        path: 'appraise',
+        component: () => import('@/views/operation/appraise'),
+        name: 'order',
+        meta: {
+          perms: ['admin:order:list', 'admin:order:detail', 'admin:order:ship'],
+          title: '评论管理',
+          noCache: true
+        }
       }
     ]
   },
@@ -190,16 +200,6 @@ export const asyncRouterMap = [
       icon: 'tree'
     },
     children: [
-      // {
-      //   path: 'merchant',
-      //   component: () => import('@/views/promotion/merchant'),
-      //   name: 'merchant',
-      //   meta: {
-      //     perms: ['admin:nearby:detail', 'admin:nearby:upsert'],
-      //     title: '商铺管理',
-      //     noCache: true
-      //   }
-      // },
       {
         path: 'merchantad',
         component: () => import('@/views/promotion/merchantad'),
