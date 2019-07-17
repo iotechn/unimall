@@ -15,6 +15,16 @@ public class CategoryTreeNodeDTO {
 
     private Long value;
 
+    private String fullName;
+
+    private Long parent;
+
+    private Integer level;
+
+    private String iconUrl;
+
+    private String pirUrl;
+
     private List<CategoryTreeNodeDTO> children;
 
 }

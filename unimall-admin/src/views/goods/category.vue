@@ -42,23 +42,23 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="类目ID" prop="id" />
+      <el-table-column align="center" label="类目ID" prop="value" />
 
-      <el-table-column align="center" label="类目名" prop="title" />
-
-      <el-table-column align="center" label="全类目名" prop="fullTitle" />
-
-      <el-table-column
-        :filters="[{ text: '一级类目', value: 'L1' }, { text: '二级类目', value: 'L2' }]"
-        :filter-method="filterLevel"
-        align="center"
-        label="级别"
-        prop="level"
-      >
+      <el-table-column align="center" label="类目名" prop="label">
         <template slot-scope="scope">
-          <el-tag
-            :type="scope.row.parentId === 0 ? 'primary' : 'info' "
-          >{{ scope.row.parentId === 0 ? '一级类目' : '二级类目' }}</el-tag>
+          <el-tag>{{ scope.row.label }}</el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="全类目名" prop="fullName">
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.fullName }}</el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="级别" prop="level" >
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.level | categoryLevelFilter }}</el-tag>
         </template>
       </el-table-column>
 
@@ -157,20 +157,23 @@
 </style>
 
 <script>
-import {
-  listCategory,
-  listCatL1,
-  createCategory,
-  updateCategory,
-  deleteCategory
-} from '@/api/category'
+import { listCategory, listCatL1, createCategory, updateCategory, deleteCategory } from '@/api/category'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
+const categoryLevelMap = [{ text: '一级类目', value: 0 }, { text: '二级类目', value: 1 }, { text: '三级类目', value: 2 }]
 export default {
   name: 'Category',
   components: { Pagination },
+  filters: {
+    categoryLevelFilter(code) {
+      if (code >= 0 && code < 3) {
+        return categoryLevelMap[code].text
+      }
+      return '错误级别'
+    }
+  },
   data() {
     return {
       uploadPath,
@@ -200,6 +203,7 @@ export default {
         title: [{ required: true, message: '类目名不能为空', trigger: 'blur' }]
       },
       downloadLoading: false
+
     }
   },
   computed: {
@@ -211,7 +215,6 @@ export default {
   },
   created() {
     this.getList()
-    this.getCatL1()
   },
   methods: {
     getList() {

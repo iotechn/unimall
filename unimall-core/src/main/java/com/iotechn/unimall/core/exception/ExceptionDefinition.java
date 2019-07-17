@@ -266,6 +266,13 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ADMIN_USER_NAME_REPEAT =
             new ServiceExceptionDefinition(50007, "管理员用户名重复");
 
+    public static final ServiceExceptionDefinition CATEGORY_OUGHT_TO_EMPTY =
+            new ServiceExceptionDefinition(60001, "该类目还有子类目或着商品");
+
+    public static final ServiceExceptionDefinition CATEGORY_EXCEPTION =
+            new ServiceExceptionDefinition(60002, "类目异常汇总，由下面方法传入提醒");
+
+
 
 
 

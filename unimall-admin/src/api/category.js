@@ -15,8 +15,8 @@ export function listCategory(query) {
   return request({
     method: 'get',
     params: {
-      _gp: 'category',
-      _mt: 'list',
+      _gp: 'admin.category',
+      _mt: 'queryCategory',
       ...query
     }
   })

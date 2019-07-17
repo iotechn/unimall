@@ -53,6 +53,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
      * @return
      * @throws ServiceException
      */
+    //TODO 做下优化
     @Override
     public List<SpuTreeNodeDTO> getSpuBigTree(Long adminId) throws ServiceException {
         List<CategoryDO> categoryDOS = categoryMapper.selectList(new EntityWrapper<>());
