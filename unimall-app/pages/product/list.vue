@@ -14,7 +14,6 @@
 					<text :class="{active: priceOrder === 2 && filterIndex === 2}" class="yticon icon-shang xia"></text>
 				</view>
 			</view>
-			<text class="cate-item yticon icon-fenlei1" @click="toggleCateMask('show')"></text>
 		</view>
 		<view class="goods-list">
 			<view v-for="(item, index) in goodsList" :key="index" class="goods-item" @click="navToDetailPage(item)">
@@ -29,20 +28,6 @@
 			</view>
 		</view>
 		<uni-load-more :status="loadingType"></uni-load-more>
-
-		<view class="cate-mask" :class="cateMaskState===0 ? 'none' : cateMaskState===1 ? 'show' : ''" @click="toggleCateMask">
-			<view class="cate-content" @click.stop.prevent="stopPrevent" @touchmove.stop.prevent="stopPrevent">
-				<scroll-view scroll-y class="cate-list">
-					<view v-for="item in cateList" :key="item.id">
-						<view class="cate-item b-b two">{{item.title}}</view>
-						<view v-for="tItem in item.childrenList" :key="tItem.id" class="cate-item b-b" :class="{active: tItem.id==cateId}"
-						 @click="changeCate(tItem)">
-							{{tItem.title}}
-						</view>
-					</view>
-				</scroll-view>
-			</view>
-		</view>
 
 	</view>
 </template>
@@ -60,10 +45,10 @@
 				headerTop: "0px",
 				loadingType: 'more', //加载更多状态
 				filterIndex: 0,
-				cateId: 0, //已选三级分类id
 				priceOrder: 0, //1 价格从低到高 2价格从高到低
-				cateList: [],
 				goodsList: [],
+				cateId: 0,
+				keywords: '',
 				pageNo: 1
 			};
 		},
@@ -73,7 +58,7 @@
 			this.headerTop = document.getElementsByTagName('uni-page-head')[0].offsetHeight + 'px';
 			// #endif
 			this.cateId = options.tid ? options.tid : 0;
-			this.loadCateList(options.fid, options.sid);
+			this.keywords = options.keywords ? options.keywords : ''
 			this.loadData();
 		},
 		onPageScroll(e) {
@@ -93,16 +78,6 @@
 			this.loadData();
 		},
 		methods: {
-			//加载分类
-			async loadCateList(fid, sid) {
-				this.$api.request('category', 'categoryList').then(res => {
-					res.data.forEach(item => {
-						if (item.id == fid) {
-							this.cateList = item.childrenList
-						}
-					})
-				})
-			},
 			//加载商品 ，带下拉刷新和上滑加载
 			async loadData(type = 'add', loading) {
 				//没有更多直接返回
@@ -127,6 +102,7 @@
 				}
 				this.$api.request('goods', 'getGoodsPage', {
 					categoryId: this.cateId,
+					title: this.keywords,
 					pageNo : this.pageNo
 				}).then(res => {
 					let tempList = res.data.items
