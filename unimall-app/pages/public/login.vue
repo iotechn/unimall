@@ -50,7 +50,7 @@
 			}
 		},
 		onShow() {
-			this.$store.commit('logout')
+			this.$api.logout()
 		},
 		onLoad() {
 			
@@ -87,8 +87,7 @@
 					});
 				}).then(res => {
 					that.logining = false
-					//将返回的用户信息设置到Store里面
-					that.$store.commit('login', res.data)
+					uni.setStorageSync('userInfo', res.data)
 					if (that.$api.prePage().lodaData) {
 						that.$api.prePage().loadData()
 					}
@@ -109,6 +108,7 @@
 								lang: 'zh_CN',
 								success: (e) => {
 									e.userInfo.nickname = e.userInfo.nickName
+									uni.setStorageSync('userInfo', res.data)
 									that.$api.request('user', 'syncUserInfo', e.userInfo).then(syncRes => {
 										//同步过后
 										res.nickname = e.userInfo.nickName
@@ -117,8 +117,6 @@
 									})
 								},
 								complete: (e) => {
-									//将返回的用户信息设置到Store里面
-									that.$store.commit('login', res.data)
 									if (that.$api.prePage().lodaData) {
 										that.$api.prePage().loadData()
 									}

@@ -51,7 +51,6 @@ public interface UserService {
             @NotNull @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "用户访问") String accessToken,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
-
     @HttpMethod(description = "第三方登录")
     public UserDTO thirdPartLogin(
             @NotNull @HttpParam(name = "platformCode", type = HttpParamType.COMMON, description = "平台代码") String platformCode,

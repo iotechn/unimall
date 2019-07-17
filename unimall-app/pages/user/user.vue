@@ -82,7 +82,7 @@
 				<list-cell icon="icon-pinglun-copy" iconColor="#ee883b" title="晒单" ></list-cell>
 				<list-cell icon="icon-shoucang_xuanzhongzhuangtai" iconColor="#54b4ef" title="我的收藏" @eventClick="navTo('/pages/product/favorite')"></list-cell>
 				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="个人资料" @eventClick="navTo('/pages/user/profile')"></list-cell>
-				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="关于" border="" @eventClick="navTo('/pages/user/profile')"></list-cell>
+				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="关于" border="" @eventClick="navTo('/pages/user/about')"></list-cell>
 			</view> 
 		</view>
 			

@@ -37,6 +37,13 @@ const json = type => {
 
 let userInfo = undefined
 
+const logout = () => {
+	userInfo = undefined
+	uni.removeStorage({
+		key: 'userInfo'
+	})
+}
+
 const request = (_gp, _mt, data = {}, failCallback) => {
 	//异步请求数据
 	return new Promise(resolve => {
@@ -186,7 +193,8 @@ Vue.prototype.$api = {
 	json,
 	prePage,
 	request,
-	uploadImg
+	uploadImg,
+	logout
 };
 
 App.mpType = 'app'

@@ -39,6 +39,12 @@
 			}
 		},
 		{
+			"path": "pages/product/search",
+			"style": {
+				"navigationBarTitleText": "搜索"
+			}
+		},
+		{
 			"path": "pages/product/product",
 			"style": {
 				"navigationBarTitleText": "详情展示",
@@ -114,6 +120,11 @@
 						]
 					}
 				}
+			}
+		}, {
+			"path":"pages/user/about",
+			"style": {
+				"navigationBarTitleText":"关于"
 			}
 		}, {
 			"path": "pages/detail/detail",
