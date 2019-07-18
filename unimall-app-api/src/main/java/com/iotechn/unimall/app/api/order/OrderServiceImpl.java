@@ -23,6 +23,7 @@ import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.UserLevelType;
+import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
@@ -86,6 +87,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Value("${com.iotechn.unimall.env}")
     private String ENV;
+
+    @Value("${com.iotechn.unimall.wx.mini.app-id}")
+    private String wxMiNiAppid;
+
+    @Value("${com.iotechn.unimall.wx.app.app-id}")
+    private String wxAppAppid;
+
 
     @Override
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
@@ -286,7 +294,8 @@ public class OrderServiceImpl implements OrderService {
         return orderBizService.getOrderDetail(orderId, userId);
     }
 
-
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public Object wxPrepay(String orderNo, String ip, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
         // 检测订单状态
@@ -295,12 +304,23 @@ public class OrderServiceImpl implements OrderService {
             throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
         }
 
-        String openid = SessionUtil.getUser().getMiniOpenId();
+        Integer loginType = SessionUtil.getUser().getLoginType();
+        String appId;
+
+        if (UserLoginType.MP_WEIXIN.getCode() == loginType) {
+            appId = wxMiNiAppid;
+        } else if (UserLoginType.APP_WEIXIN.getCode() == loginType) {
+            appId = wxAppAppid;
+        } else {
+            throw new AppServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
+        }
+
         WxPayMpOrderResult result = null;
         try {
             WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
+            orderRequest.setAppid(appId);
             orderRequest.setOutTradeNo(orderNo);
-            orderRequest.setOpenid(openid);
+            orderRequest.setOpenid(SessionUtil.getUser().getOpenId());
             orderRequest.setBody("订单：" + orderNo);
             orderRequest.setTotalFee(orderDO.getActualPrice());
             orderRequest.setSpbillCreateIp(ip);
@@ -311,7 +331,7 @@ public class OrderServiceImpl implements OrderService {
 //TODO 缓存支付Id            userBizService.setVaildFormIdFromSession(prepayId);
         } catch (WxPayException e) {
             logger.error("[微信支付] 异常", e);
-            throw new ThirdPartServiceException(e.getReturnMsg(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+            throw new ThirdPartServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
         } catch (Exception e) {
             logger.error("[预付款异常]", e);
             throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);

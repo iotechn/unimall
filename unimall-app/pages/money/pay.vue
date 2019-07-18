@@ -74,9 +74,11 @@
 				that.$api.request('order', 'wxPrepay', {
 					orderNo : that.orderNo
 				}).then(prepayRes => {
-					const payParam = prepayRes.data;
+					const payParam = prepayRes.data
 					uni.requestPayment({
-						timeStamp: payParam.timeStamp,
+						provider: 'wxpay',
+						appId: payParam.appId,
+						timeStamp: parseInt(payParam.timeStamp),
 						nonceStr: payParam.nonceStr,
 						package: payParam.packageValue,
 						signType: payParam.signType,
@@ -85,19 +87,18 @@
 							uni.navigateTo({
 								url: 'paySuccess'
 							})
+							
 						},
 						fail: function(res) {
 							console.log("支付过程失败");
-							console.log(res)
-							util.showToast('支付失败')
+							that.$api.msg(JSON.stringify(res))
 						},
 						complete: function(res) {
 							console.log("支付过程结束")
 						}
 					});
 				})
-
-			},
+			}
 		}
 	}
 </script>

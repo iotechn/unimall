@@ -1,5 +1,5 @@
 {
-    "name" : "电商模板 更新下单流程、分类、列表",
+    "name" : "unimall",
     "appid" : "__UNI__F5A85C4",
     "description" : "",
     "versionName" : "1.0.0",
@@ -14,7 +14,10 @@
             "autoclose" : true,
             "delay" : 0
         },
-        "modules" : {},
+        "modules" : {
+            "Payment" : {},
+            "OAuth" : {}
+        },
         /* 模块配置 */
         "distribute" : {
             /* 应用发布信息 */
@@ -33,6 +36,7 @@
                     "<uses-permission android:name=\"android.permission.CHANGE_WIFI_STATE\"/>",
                     "<uses-permission android:name=\"android.permission.FLASHLIGHT\"/>",
                     "<uses-permission android:name=\"android.permission.GET_ACCOUNTS\"/>",
+                    "<uses-permission android:name=\"android.permission.MODIFY_AUDIO_SETTINGS\"/>",
                     "<uses-permission android:name=\"android.permission.MOUNT_UNMOUNT_FILESYSTEMS\"/>",
                     "<uses-permission android:name=\"android.permission.READ_CONTACTS\"/>",
                     "<uses-permission android:name=\"android.permission.READ_LOGS\"/>",
@@ -47,8 +51,17 @@
             "ios" : {},
             /* ios打包配置 */
             "sdkConfigs" : {
-                "payment" : {},
-                "oauth" : {}
+                "payment" : {
+                    "weixin" : {
+                        "appid" : "wx6e1355f89b03fd2e"
+                    }
+                },
+                "oauth" : {
+                    "weixin" : {
+                        "appid" : "wx6e1355f89b03fd2e",
+                        "appsecret" : "013972cce59f480f6ac0890422f1aefd"
+                    }
+                }
             },
             "icons" : {
                 "ios" : {

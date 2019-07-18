@@ -12,6 +12,7 @@ import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.UserDTO;
+import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.UserMapper;
 import com.iotechn.unimall.data.util.SessionUtil;
 import okhttp3.OkHttpClient;
@@ -55,11 +56,17 @@ public class UserServiceImpl implements UserService {
 
     private OkHttpClient okHttpClient = new OkHttpClient();
 
-    @Value("${com.iotechn.unimall.wx.app-id}")
+    @Value("${com.iotechn.unimall.wx.mini.app-id}")
     private String wxMiNiAppid;
 
-    @Value("${com.iotechn.unimall.wx.app-secret}")
-    private String wxMiNisecret;
+    @Value("${com.iotechn.unimall.wx.mini.app-secret}")
+    private String wxMiNiSecret;
+
+    @Value("${com.iotechn.unimall.wx.app.app-id}")
+    private String wxAppAppid;
+
+    @Value("${com.iotechn.unimall.wx.app.app-secret}")
+    private String wxAppSecret;
 
     @Override
     public String sendVerifyCode(String phone) throws ServiceException {
@@ -197,54 +204,50 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO thirdPartLogin(String platformCode, String ip, String raw) throws ServiceException {
+    public UserDTO thirdPartLogin(Integer loginType, String ip, String raw) throws ServiceException {
         try {
-            if ("weixin".equals(platformCode)) {
-                //微信第三方登录
-                JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
-                String code = thirdPartJsonObject.getString("code");
-                String body = okHttpClient.newCall(new Request.Builder()
-                        .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + wxMiNiAppid +
-                                "&secret=" + wxMiNisecret +
-                                "&grant_type=authorization_code&js_code=" + code).get().build()).execute().body().string();
-                JSONObject jsonObject = JSONObject.parseObject(body);
-                Integer errcode = jsonObject.getInteger("errcode");
-                if (errcode == null || errcode == 0) {
-                    String miniOpenId = jsonObject.getString("openid");
-                    List<UserDO> userDOS = userMapper.selectList(new EntityWrapper<UserDO>().eq("mini_open_id", miniOpenId));
-                    UserDO userDO;
-                    if (CollectionUtils.isEmpty(userDOS)) {
-                        //若用户为空，则注册此用户
-                        Date now = new Date();
-                        UserDO newUserDO = new UserDO();
-                        newUserDO.setMiniOpenId(miniOpenId);
-                        newUserDO.setLastLoginIp(ip);
-                        newUserDO.setGmtLastLogin(now);
-                        newUserDO.setGmtUpdate(now);
-                        newUserDO.setGmtCreate(now);
-                        userMapper.insert(newUserDO);
-                        userDO = newUserDO;
-                    } else {
-                        userDO = userDOS.get(0);
-                        UserDO userUpdateDO = new UserDO();
-                        userUpdateDO.setId(userDO.getId());
-                        userUpdateDO.setGmtLastLogin(new Date());
-                        userUpdateDO.setLastLoginIp(ip);
-                        userMapper.updateById(userUpdateDO);
-                    }
-                    //检查帐号是否已经冻结
-                    if (userDO.getStatus() == 0) {
-                        throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
-                    }
-                    String accessToken = GeneratorUtil.genSessionId();
-                    UserDTO userDTO = new UserDTO();
-                    BeanUtils.copyProperties(userDO, userDTO);
-                    userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
-                    userDTO.setAccessToken(accessToken);
-                    return userDTO;
+            if (UserLoginType.MP_WEIXIN.getCode() == loginType) {
+                return wechatLogin(loginType, ip, raw);
+            } else if (UserLoginType.APP_WEIXIN.getCode() == loginType) {
+                //return wechatLogin(loginType, ip, raw);
+                //UNI-APP 的 微信APP登录 APPSecret是保存在前端的。这点非常不安全。但是用了他的框架，也没有办法
+                JSONObject jsonObject = JSONObject.parseObject(raw);
+                JSONObject authResult = jsonObject.getJSONObject("authResult");
+//                String openid = authResult.getString("openid");
+                String openid = "osTQe6L_JOoJkrMO1vAT_peMivjA";
+                List<UserDO> userDOS = userMapper.selectList(new EntityWrapper<UserDO>().eq("open_id", openid).eq("login_type", loginType));
+                UserDO userDO;
+                if (CollectionUtils.isEmpty(userDOS)) {
+                    //创建新用户
+                    Date now = new Date();
+                    UserDO newUserDO = new UserDO();
+                    newUserDO.setLoginType(loginType);
+                    newUserDO.setOpenId(openid);
+                    newUserDO.setLastLoginIp(ip);
+                    newUserDO.setGmtLastLogin(now);
+                    newUserDO.setGmtUpdate(now);
+                    newUserDO.setGmtCreate(now);
+                    userMapper.insert(newUserDO);
+                    //这一步是为了封装上数据库上配置的默认值
+                    userDO = userMapper.selectById(newUserDO.getId());
                 } else {
-                    throw new AppServiceException(ExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
+                    userDO = userDOS.get(0);
+                    UserDO userUpdateDO = new UserDO();
+                    userUpdateDO.setId(userDO.getId());
+                    userUpdateDO.setGmtLastLogin(new Date());
+                    userUpdateDO.setLastLoginIp(ip);
+                    userMapper.updateById(userUpdateDO);
                 }
+                //检查帐号是否已经冻结
+                if (userDO.getStatus() == 0) {
+                    throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
+                }
+                String accessToken = GeneratorUtil.genSessionId();
+                UserDTO userDTO = new UserDTO();
+                BeanUtils.copyProperties(userDO, userDTO);
+                userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
+                userDTO.setAccessToken(accessToken);
+                return userDTO;
             } else {
                 throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_NOT_SUPPORT);
             }
@@ -253,6 +256,64 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             logger.error("[用户第三方登录] 异常", e);
             throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
+        }
+    }
+
+    /**
+     * 微信第三方登录 抽取接口
+     * @param loginType
+     * @param ip
+     * @param raw
+     * @return
+     * @throws Exception
+     */
+    private UserDTO wechatLogin(Integer loginType, String ip, String raw) throws Exception {
+        //微信第三方登录
+        JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
+        String code = thirdPartJsonObject.getString("code");
+        String body = okHttpClient.newCall(new Request.Builder()
+                .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? wxMiNiAppid : wxAppAppid) +
+                        "&secret=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? wxMiNiSecret : wxAppSecret) +
+                        "&grant_type=authorization_code&js_code=" + code).get().build()).execute().body().string();
+        JSONObject jsonObject = JSONObject.parseObject(body);
+        Integer errcode = jsonObject.getInteger("errcode");
+        if (errcode == null || errcode == 0) {
+            String miniOpenId = jsonObject.getString("openid");
+            List<UserDO> userDOS = userMapper.selectList(new EntityWrapper<UserDO>().eq("open_id", miniOpenId).eq("login_type", loginType));
+            UserDO userDO;
+            if (CollectionUtils.isEmpty(userDOS)) {
+                //若用户为空，则注册此用户
+                Date now = new Date();
+                UserDO newUserDO = new UserDO();
+                newUserDO.setLoginType(loginType);
+                newUserDO.setOpenId(miniOpenId);
+                newUserDO.setLastLoginIp(ip);
+                newUserDO.setGmtLastLogin(now);
+                newUserDO.setGmtUpdate(now);
+                newUserDO.setGmtCreate(now);
+                userMapper.insert(newUserDO);
+                //这一步是为了封装上数据库上配置的默认值
+                userDO = userMapper.selectById(newUserDO.getId());
+            } else {
+                userDO = userDOS.get(0);
+                UserDO userUpdateDO = new UserDO();
+                userUpdateDO.setId(userDO.getId());
+                userUpdateDO.setGmtLastLogin(new Date());
+                userUpdateDO.setLastLoginIp(ip);
+                userMapper.updateById(userUpdateDO);
+            }
+            //检查帐号是否已经冻结
+            if (userDO.getStatus() == 0) {
+                throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
+            }
+            String accessToken = GeneratorUtil.genSessionId();
+            UserDTO userDTO = new UserDTO();
+            BeanUtils.copyProperties(userDO, userDTO);
+            userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
+            userDTO.setAccessToken(accessToken);
+            return userDTO;
+        } else {
+            throw new AppServiceException(ExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
         }
     }
 
@@ -269,8 +330,19 @@ public class UserServiceImpl implements UserService {
         if (userMapper.updateById(updateUserDO) > 0) {
             //更新SESSION缓存
             UserDTO user = SessionUtil.getUser();
-            BeanUtils.copyProperties(updateUserDO, user);
-            userRedisTemplate.opsForValue().set(accessToken, JSONObject.toJSONString(user));
+            if (!StringUtils.isEmpty(nickName)) {
+                user.setNickname(nickName);
+            }
+            if (!StringUtils.isEmpty(avatarUrl)) {
+                user.setAvatarUrl(avatarUrl);
+            }
+            if (birthday != null) {
+                user.setBirthday(new Date(birthday));
+            }
+            if (gender != null) {
+                user.setGender(gender);
+            }
+            userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(user));
             return "ok";
         }
         throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);

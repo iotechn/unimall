@@ -123,6 +123,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_DID_NOT_SET_SHIP =
             new ServiceExceptionDefinition(13018, "订单不需要物流公司");
 
+    public static final ServiceExceptionDefinition ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY =
+            new ServiceExceptionDefinition(13019, "当前平台不支持微信支付");
+
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
             new ServiceExceptionDefinition(14001, "优惠券已经领完～");
