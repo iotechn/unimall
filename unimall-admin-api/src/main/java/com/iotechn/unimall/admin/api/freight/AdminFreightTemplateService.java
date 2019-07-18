@@ -21,7 +21,7 @@ import java.util.List;
 @HttpOpenApi(group = "admin.freight",description = "运费模板")
 public interface AdminFreightTemplateService {
 
-    @HttpMethod(description = "增加运费模板")
+    @HttpMethod(description = "创建", permission = "operation:freight:create", permissionParentName = "运营管理", permissionName = "运费模板管理")
     public boolean addFreightTemplate(@NotNull @HttpParam(name = "templateName",type = HttpParamType.COMMON,description = "模板名称")String templateName
             ,@NotNull @HttpParam(name = "spuLocation",type = HttpParamType.COMMON,description = "宝贝地址")String spuLocation
             ,@NotNull @HttpParam(name = "deliveryDeadline",type = HttpParamType.COMMON,description = "发货期限")Integer deliveryDeadline
@@ -34,11 +34,11 @@ public interface AdminFreightTemplateService {
             ,@NotNull @HttpParam(name = "adminId",type = HttpParamType.ADMIN_ID,description = "管理员ID")Long adminId
     ) throws ServiceException;
 
-    @HttpMethod(description = "删除运费模板")
+    @HttpMethod(description = "删除", permission = "operation:freight:delete", permissionParentName = "运营管理", permissionName = "运费模板管理")
     public boolean deleteFreightTemplate(@NotNull @HttpParam(name="templateId",type = HttpParamType.COMMON,description = "模板ID")Long templateId
                                          ,@NotNull @HttpParam(name="adminId",type = HttpParamType.ADMIN_ID,description = "管理员ID")Long adminId)throws ServiceException;
 
-    @HttpMethod(description = "修改运费模板")
+    @HttpMethod(description = "更新", permission = "operation:freight:update", permissionParentName = "运营管理", permissionName = "运费模板管理")
     public boolean updateFreightTemplate(@NotNull @HttpParam(name = "templateId",type = HttpParamType.COMMON,description = "模板名称")Long templateId
             ,@NotNull @HttpParam(name = "templateName",type = HttpParamType.COMMON,description = "模板名称")String templateName
             ,@NotNull @HttpParam(name = "spuLocation",type = HttpParamType.COMMON,description = "宝贝地址")String spuLocation
@@ -51,7 +51,7 @@ public interface AdminFreightTemplateService {
             ,@HttpParam(name = "templateCarriageDOList",type = HttpParamType.COMMON,description = "特殊运费区")List<FreightTemplateCarriageDO> templateCarriageDOList
             ,@NotNull @HttpParam(name = "adminId",type = HttpParamType.ADMIN_ID,description = "管理员ID")Long adminId)throws ServiceException;
 
-    @HttpMethod(description = "查询所有运费模板")
+    @HttpMethod(description = "查询", permission = "operation:freight:query", permissionParentName = "运营管理", permissionName = "运费模板管理")
     public List<FreightTemplateDTO> getAllFreightTemplate(@NotNull @HttpParam(name="adminId",type = HttpParamType.ADMIN_ID,description = "管理员ID")Long adminId)throws ServiceException;
 
 }

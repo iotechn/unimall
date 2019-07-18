@@ -135,10 +135,20 @@ export const asyncRouterMap = [
       {
         path: 'appraise',
         component: () => import('@/views/operation/appraise'),
-        name: 'order',
+        name: 'appraise',
         meta: {
           perms: ['admin:order:list', 'admin:order:detail', 'admin:order:ship'],
           title: '评论管理',
+          noCache: true
+        }
+      },
+      {
+        path: 'freight',
+        component: () => import('@/views/operation/freight'),
+        name: 'freight',
+        meta: {
+          perms: ['admin:freight:list', 'admin:freight:detail', 'admin:freight:ship'],
+          title: '运费模板管理',
           noCache: true
         }
       }

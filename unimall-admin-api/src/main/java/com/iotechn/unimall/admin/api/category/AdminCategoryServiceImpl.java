@@ -14,10 +14,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
 /**
@@ -92,14 +90,16 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     @Transactional(rollbackFor = Exception.class)
     public CategoryDO addCategory(Long adminId, String title, Long parentId, String iconUrl, String picUrl, Integer level) throws ServiceException {
         CategoryDO parent = null;
-        if(parentId != 0){
+        CategoryDO categoryDO = new CategoryDO();
+        if(!parentId.equals(0l)){
             parent = categoryMapper.selectById(parentId);
             if(parent == null){
-                throw new AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.CATEGORY_EXCEPTION,"副节点信息不准确"));
+                throw new AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.CATEGORY_EXCEPTION,"父节点信息不准确"));
             }
+            categoryDO.setLevel(parent.getLevel() + 1);
+        }else{
+            categoryDO.setLevel(0);
         }
-        CategoryDO categoryDO = new CategoryDO();
-        categoryDO.setLevel(parent.getLevel() + 1);
         categoryDO.setParentId(parentId);
         categoryDO.setIconUrl(iconUrl);
         categoryDO.setPicUrl(picUrl);
@@ -139,16 +139,21 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         }
         categoryDO.setId(parentId);
         CategoryDO categoryParent = categoryMapper.selectOne(categoryDO);
-        if(categoryParent == null && parentId != 0){
+        if(categoryParent == null && !parentId.equals(0l)){
             throw  new  AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.CATEGORY_EXCEPTION,"数据库查找失败"));
+        }
+        if(parentId.equals(0l)){
+            categoryDO.setLevel(0);
+        }else{
+            categoryDO.setLevel(categoryParent.getLevel() + 1);
         }
         categoryDO.setId(id);
         categoryDO.setGmtUpdate(new Date());
+        categoryDO.setParentId(parentId);
         categoryDO.setTitle(title);
         categoryDO.setPicUrl(picUrl);
         categoryDO.setIconUrl(iconUrl);
-        categoryDO.setLevel(categoryParent.getLevel() + 1);
-        if(categoryMapper.insert(categoryDO) <= 0){
+        if(categoryMapper.updateById(categoryDO) <= 0){
             throw  new  AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.CATEGORY_EXCEPTION,"修改失败，可能是ID错误"));
         }
         CategoryTreeNodeDTO categoryTreeNodeDTO = new CategoryTreeNodeDTO();
@@ -166,7 +171,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
     //首先的到所有的类目的List<CategoryTreeNodeDTO>,在根据SQL查询得到的数据转化成传往前端的数据
     @Override
-    public Page<CategoryTreeNodeDTO> queryCategory(Long adminId, Long id, String title, Integer level,Integer pageNo,Integer limit) throws ServiceException {
+    public Page<CategoryTreeNodeDTO> queryCategory(Long adminId, Long id, String title, Integer level,Long parentId,Integer pageNo,Integer limit) throws ServiceException {
         EntityWrapper wrapper = new EntityWrapper();
         if(id != null){
             wrapper.eq("id",id );
@@ -177,6 +182,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if(level != null){
             wrapper.eq("level",level );
         }
+        if(parentId != null){
+            wrapper.eq("parent_id",parentId );
+        }
+        wrapper.orderBy("level");
         Integer count = categoryMapper.selectCount(wrapper);
 
         List<CategoryDO> categoryDOS = categoryMapper.selectPage(new RowBounds((pageNo-1)*limit,limit),wrapper);
@@ -200,7 +209,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     //TODO 可以做出父节点查询所有子节点
     //获得所有类目的list
     private List<CategoryTreeNodeDTO> getCategoryList(){
-        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(CA_CATEGORY_TREE, CategoryTreeNodeDTO.class);
+        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(CA_CATEGORY_LIST, CategoryTreeNodeDTO.class);
         if(objList != null){
             return objList;
         }
@@ -214,7 +223,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             dto.setValue(item.getId());
             dto.setParent(item.getParentId());
             dto.setIconUrl(item.getIconUrl());
-            dto.setPirUrl(item.getPicUrl());
+            dto.setPicUrl(item.getPicUrl());
             if(item.getLevel() == 0){
                 dto.setFullName(dto.getLabel());
             }
