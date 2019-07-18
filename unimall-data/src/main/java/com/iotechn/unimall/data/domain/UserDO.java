@@ -13,12 +13,15 @@ import java.util.Date;
 @TableName("unimall_user")
 public class UserDO extends SuperDO {
 
-    @TableField("mini_open_id")
-    private String miniOpenId;
-
     private String phone;
 
     private String password;
+
+    /**
+     * 使用某平台登录
+     */
+    @TableField("login_type")
+    private Integer loginType;
 
     @TableField("open_id")
     private String openId;

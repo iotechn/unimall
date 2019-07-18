@@ -9,10 +9,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "com.iotechn.unimall.wx")
 public class WxProperties {
 
-    private String appId;
-
-    private String appSecret;
-
     private String mchId;
 
     private String mchKey;

@@ -10,9 +10,9 @@ import java.util.Date;
 @Data
 public class UserDTO extends SuperDTO {
 
-    private String miniOpenId;
-
     private String phone;
+
+    private Integer loginType;
 
     private String openId;
 

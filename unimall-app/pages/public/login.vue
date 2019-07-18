@@ -87,6 +87,7 @@
 					});
 				}).then(res => {
 					that.logining = false
+					that.$store.commit('login', userInfo)
 					uni.setStorageSync('userInfo', res.data)
 					if (that.$api.prePage().lodaData) {
 						that.$api.prePage().loadData()
@@ -96,24 +97,35 @@
 			},
 			wechatLogin() {
 				const that = this
+				//#ifdef MP-WEIXIN
+				let loginType = 1
+				//#endif
+				//#ifdef APP-PLUS
+				let loginType = 2
+				//#endif
+				
 				uni.login({
 					provider: 'weixin',
 					success: (wxres => {
 						that.$api.request('user', 'thirdPartLogin', {
-							platformCode: 'weixin',
+							loginType: loginType,
 							raw: JSON.stringify(wxres)
 						}).then(res => {
 							that.logining = false
 							uni.getUserInfo({
 								lang: 'zh_CN',
 								success: (e) => {
-									e.userInfo.nickname = e.userInfo.nickName
+									// console.log(e)
 									uni.setStorageSync('userInfo', res.data)
-									that.$api.request('user', 'syncUserInfo', e.userInfo).then(syncRes => {
+									that.$store.commit('login', res.data)
+									e.userInfo.nickname = e.userInfo.nickName
+									that.$api.request('user', 'syncUserInfo', e.userInfo}).then(syncRes => {
 										//同步过后
-										res.nickname = e.userInfo.nickName
-										res.avatarUrl = e.userInfo.avatarUrl
-										res.gender = e.userInfo.gender
+										res.data.nickname = e.userInfo.nickName
+										res.data.avatarUrl = e.userInfo.avatarUrl
+										res.data.gender = e.userInfo.gender
+										uni.setStorageSync('userInfo', res.data)
+										that.$store.commit('login', res.data)
 									})
 								},
 								complete: (e) => {
@@ -123,7 +135,6 @@
 									uni.navigateBack()
 								}
 							})
-							
 						})
 					})
 				})

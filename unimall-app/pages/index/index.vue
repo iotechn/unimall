@@ -206,7 +206,7 @@
 		},
 
 		onLoad() {
-			this.loadData();
+			this.loadData()
 		},
 		methods: {
 			/**
