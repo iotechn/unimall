@@ -83,10 +83,8 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 										url: '/pages/public/login'
 									})
 								}
-
 							},
 							fail: () => {
-
 							}
 						})
 					} else {

@@ -63,7 +63,7 @@ public class DashboardServiceImpl implements DashboardService {
         for (int i = 0; i < days; i++) {
             Date date = new Date(System.currentTimeMillis() - 1000l * 60 * 60 * 24 * i);
             String key = sdfDay.format(date);
-            int i1 = orderCountKVList.indexOf(key);
+            int i1 = orderCountKVList.indexOf(new KVModel<>(key, null));
             if (i1 >= 0) {
                 orderCountNameArray[days - i - 1] = key;
                 orderCountValueArray[days - i - 1] = orderCountKVList.get(i1).getValue();
@@ -72,7 +72,7 @@ public class DashboardServiceImpl implements DashboardService {
                 orderCountValueArray[days - i - 1] = 0;
             }
 
-            int i2 = orderSumKVList.indexOf(key);
+            int i2 = orderSumKVList.indexOf(new KVModel<>(key, null));
             if (i2 >= 0) {
                 orderSumNameArray[days - i - 1] = key;
                 orderSumValueArray[days - i - 1] = orderSumKVList.get(i2).getValue();

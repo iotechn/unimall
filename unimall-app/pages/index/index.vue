@@ -27,25 +27,9 @@
 		</view>
 		<!-- 分类 -->
 		<view class="cate-section">
-			<view class="cate-item">
-				<image src="/static/temp/c3.png"></image>
+			<view v-for="(item, index) in categoryButtomList" :key="index" @click="naviageToPage(item.url)" class="cate-item">
+				<image :src="item.imgUrl"></image>
 				<text>环球美食</text>
-			</view>
-			<view class="cate-item">
-				<image src="/static/temp/c5.png"></image>
-				<text>个护美妆</text>
-			</view>
-			<view class="cate-item">
-				<image src="/static/temp/c6.png"></image>
-				<text>营养保健</text>
-			</view>
-			<view class="cate-item">
-				<image src="/static/temp/c7.png"></image>
-				<text>家居厨卫</text>
-			</view>
-			<view class="cate-item">
-				<image src="/static/temp/c8.png"></image>
-				<text>速食生鲜</text>
 			</view>
 		</view>
 		
@@ -95,7 +79,7 @@
 					@click="navToDetailPage(item.spuId)"
 				>
 					<view class="g-item left">
-						<image :src="item.spuImg" mode="aspectFill"></image>
+						<image :src="item.spuImg + '?x-oss-process=style/400px'" mode="aspectFill"></image>
 						<view class="t-box">
 							<text class="title clamp">{{item.spuTitle}}</text>
 							<view class="price-box">
@@ -140,7 +124,7 @@
 		</view>
 		<view v-for="(item, index) in categoryPickList" :key="index" class="hot-floor">
 			<view class="floor-img-box">
-				<image class="floor-img" :src="item.imgUrl" mode="scaleToFill"></image>
+				<image class="floor-img" :src="item.imgUrl + '?x-oss-process=style/200px'" mode="scaleToFill"></image>
 			</view>
 			<scroll-view class="floor-list" scroll-x>
 				<view class="scoll-wrapper">
@@ -200,6 +184,7 @@
 				carouselList: [],
 				windowSpuList: [],
 				categoryPickList: [],
+				categoryButtomList: [],
 				salesTop: [],
 				banner: undefined
 			};
@@ -245,6 +230,10 @@
 					//热销
 					if (data.salesTop) {
 						that.salesTop = data.salesTop
+					}
+					//分类5Buttom
+					if (data.advertisement.t4) {
+						that.categoryButtomList = data.advertisement.t4
 					}
 					uni.hideLoading()
 				})

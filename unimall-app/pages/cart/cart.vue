@@ -219,7 +219,7 @@
 			createOrder(){
 				//console.log(this.cartList)
 				uni.navigateTo({
-					url: `/pages/order/order?takeway=cart&data=${JSON.stringify(this.cartList)}`
+					url: `/pages/order/create?takeway=cart&data=${JSON.stringify(this.cartList)}`
 				})
 			}
 		}

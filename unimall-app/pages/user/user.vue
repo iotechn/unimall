@@ -78,7 +78,7 @@
 				<scroll-view v-if="footprintList.length > 0" scroll-x class="h-list">
 					<image v-for="(item, index ) in footprintList" :key="index" @longpress="deleteFootprint(item)" @click="navTo('/pages/product/detail?id=' + item.spuId)" :src="item.spuImg" mode="aspectFill"></image>
 				</scroll-view>
-				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/address')"></list-cell>
+				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/list')"></list-cell>
 				<list-cell icon="icon-pinglun-copy" iconColor="#ee883b" title="晒单" ></list-cell>
 				<list-cell icon="icon-shoucang_xuanzhongzhuangtai" iconColor="#54b4ef" title="我的收藏" @eventClick="navTo('/pages/product/favorite')"></list-cell>
 				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="个人资料" @eventClick="navTo('/pages/user/profile')"></list-cell>

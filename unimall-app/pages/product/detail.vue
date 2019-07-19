@@ -4,7 +4,7 @@
 			<swiper indicator-dots circular=true duration="400">
 				<swiper-item class="swiper-item" v-for="(item,index) in goods.imgList" :key="index">
 					<view class="image-wrapper">
-						<image :src="item" class="loaded" mode="aspectFill"></image>
+						<image :src="item + '?x-oss-process=style/600px'" class="loaded" mode="aspectFill"></image>
 					</view>
 				</swiper-item>
 			</swiper>
@@ -80,7 +80,7 @@
 			<view class="d-header">
 				<text>图文详情</text>
 			</view>
-			<rich-text :nodes="goods.detail"></rich-text>
+			<rich-text style="width: 750upx;" :nodes="goods.detail"></rich-text>
 		</view>
 
 		<!-- 底部操作菜单 -->
@@ -202,6 +202,7 @@
 				uni.hideLoading()
 			}).then(res => {
 				that.goods = res.data
+				that.goods.detail = that.goods.detail.replace(/\<img/gi, '<img class="rich-img" ')
 				uni.hideLoading()
 			})
 			that.$api.request('coupon', 'getObtainableCoupon').then(res => {
@@ -592,6 +593,7 @@
 	.detail-desc {
 		background: #fff;
 		margin-top: 16upx;
+		width: 750upx;
 
 		.d-header {
 			display: flex;
@@ -1004,5 +1006,10 @@
 				right: -6upx;
 			}
 		}
+	}
+	
+	rich-text .rich-img {
+		width: 100% ;
+		height: auto ;
 	}
 </style>
