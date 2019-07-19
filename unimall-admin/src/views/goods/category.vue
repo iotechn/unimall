@@ -2,22 +2,23 @@
   <div class="app-container">
     <!-- 查询和其他操作 -->
     <div class="filter-container">
-      <el-input
-        v-model="listQuery.id"
-        clearable
+      <el-input v-model="listQuery.id" clearable class="filter-item" style="width: 200px;" placeholder="请输入类目ID" />
+      <el-input v-model="listQuery.title" clearable class="filter-item" style="width: 200px;" placeholder="请输入类目名称" />
+      <el-select v-model="listQuery.level" clearable style="width: 200px" class="filter-item" placeholder="请选择类目级别" >
+        <el-option v-for="(item,index) in categoryLevelMap" :key="index" :label="item.text" :value="item.value" />
+      </el-select>
+      <el-cascader
+        :options="options"
+        :props="{ checkStrictly: true }"
+        style="width: 200px"
         class="filter-item"
-        style="width: 200px;"
-        placeholder="请输入类目ID"
-      />
-      <el-input
-        v-model="listQuery.title"
+        placeholder="请选择父类目"
+        filterable
         clearable
-        class="filter-item"
-        style="width: 200px;"
-        placeholder="请输入类目名称"
+        @change="handleQuery"
       />
       <el-button
-        v-permission="['admin:category:list']"
+        v-permission="['admin:category:query']"
         class="filter-item"
         type="primary"
         icon="el-icon-search"
@@ -55,6 +56,7 @@
           <el-tag>{{ scope.row.fullName }}</el-tag>
         </template>
       </el-table-column>
+      <el-table-column align="center" label="父类目ID" prop="parent" />
 
       <el-table-column align="center" label="级别" prop="level" >
         <template slot-scope="scope">
@@ -62,7 +64,16 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="父类目ID" prop="parentId" />
+      <el-table-column align="center" label="标志图片" prop="iconUrl">
+        <template slot-scope="scope">
+          <img v-if="scope.row.iconUrl" :src="scope.row.iconUrl" width="80" >
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="类目图片" prop="picUrl">
+        <template slot-scope="scope">
+          <img v-if="scope.row.picUrl" :src="scope.row.picUrl" width="80" >
+        </template>
+      </el-table-column>
 
       <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -85,7 +96,7 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.page"
+      :page.sync="listQuery.pageNo"
       :limit.sync="listQuery.limit"
       @pagination="getList"
     />
@@ -101,24 +112,51 @@
         label-width="100px"
         style="width: 400px; margin-left:50px;"
       >
+        <el-form-item label="类目ID" prop="id" hidden>
+          <el-input v-model="dataForm.id" />
+        </el-form-item>
         <el-form-item label="类目名称" prop="title">
-          <el-input v-model="dataForm.title" />
+          <el-input v-model="dataForm.title" @input="tlog" />
         </el-form-item>
-        <el-form-item label="级别" prop="level">
-          <el-select v-model="dataForm.level" @change="onLevelChange">
-            <el-option label="一级类目" value="L1" />
-            <el-option label="二级类目" value="L2" />
-          </el-select>
+        <el-form-item label="类目标签图片" prop="iconUrl">
+          <el-upload
+            :headers="headers"
+            :action="uploadPath"
+            :show-file-list="false"
+            :on-success="iconUploadSuccessHandle"
+            :before-upload="onBeforeUpload"
+            class="avatar-uploader"
+            accept=".jpg, .jpeg, .png, .gif"
+          >
+            <img v-if="dataForm.iconUrl" ref="adImg" :src="dataForm.iconUrl" class="avatar">
+            <i v-else class="el-icon-plus avatar-uploader-icon" />
+          </el-upload>
         </el-form-item>
-        <el-form-item v-if="dataForm.level === 'L2'" label="父类目" prop="parentId">
-          <el-select v-model="dataForm.parentId">
-            <el-option
-              v-for="item in catL1"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
+        <el-form-item label="类目图片" prop="picUrl">
+          <el-upload
+            :headers="headers"
+            :action="uploadPath"
+            :show-file-list="false"
+            :on-success="pirUploadSuccessHandle"
+            :before-upload="onBeforeUpload"
+            class="avatar-uploader"
+            accept=".jpg, .jpeg, .png, .gif"
+          >
+            <img v-if="dataForm.picUrl" ref="adImg" :src="dataForm.picUrl" class="avatar">
+            <i v-else class="el-icon-plus avatar-uploader-icon" />
+          </el-upload>
+        </el-form-item>
+
+        <el-form-item label="活动链接">
+          <el-cascader
+            :options="options"
+            :props="{ checkStrictly: true }"
+            v-model="wocao"
+            placeholder="关联类目、商品"
+            filterable
+            clearable
+            @change="handleLink"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -157,10 +195,11 @@
 </style>
 
 <script>
-import { listCategory, listCatL1, createCategory, updateCategory, deleteCategory } from '@/api/category'
+import { listCategory, createCategory, updateCategory, deleteCategory } from '@/api/category'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+import { categoryTree } from '@/api/category'
 
 const categoryLevelMap = [{ text: '一级类目', value: 0 }, { text: '二级类目', value: 1 }, { text: '三级类目', value: 2 }]
 export default {
@@ -176,22 +215,28 @@ export default {
   },
   data() {
     return {
+      options: [],
       uploadPath,
       list: undefined,
       total: 0,
       listLoading: true,
+      wocao: undefined,
       listQuery: {
-        page: 1,
+        pageNo: 1,
         limit: 20,
         id: undefined,
-        title: undefined
+        title: undefined,
+        level: undefined,
+        parentId: undefined
       },
       catL1: {},
       dataForm: {
         id: undefined,
-        title: '',
-        level: 'L2',
-        parentId: undefined
+        title: undefined,
+        level: undefined,
+        parentId: undefined,
+        iconUrl: undefined,
+        picUrl: undefined
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -202,7 +247,8 @@ export default {
       rules: {
         title: [{ required: true, message: '类目名不能为空', trigger: 'blur' }]
       },
-      downloadLoading: false
+      downloadLoading: false,
+      categoryLevelMap
 
     }
   },
@@ -215,8 +261,12 @@ export default {
   },
   created() {
     this.getList()
+    this.refreshOptions()
   },
   methods: {
+    tlog(e) {
+      console.log(e)
+    },
     getList() {
       this.listLoading = true
       listCategory(this.listQuery)
@@ -231,34 +281,32 @@ export default {
           this.listLoading = false
         })
     },
-    getCatL1() {
-      listCatL1().then(response => {
-        this.catL1 = response.data.data
-      })
-    },
     handleFilter() {
-      this.listQuery.page = 1
+      this.listQuery.pageNo = 1
+      if (this.listQuery.id != null && isNaN(Number(this.listQuery.id))) {
+        this.$notify.error({
+          title: '失败',
+          message: '请输入整数'
+        })
+        return false
+      }
       this.getList()
     },
     resetForm() {
       this.dataForm = {
         id: undefined,
-        title: '',
-        level: 'L2',
-        parentId: undefined
-      }
-    },
-    filterLevel: function(value, row) {
-      return row.level === value
-    },
-    onLevelChange: function(value) {
-      if (value === 'L1') {
-        this.parentId = undefined
+        title: undefined,
+        level: undefined,
+        parentId: 0,
+        iconUrl: undefined,
+        picUrl: undefined
       }
     },
     handleCreate() {
       this.resetForm()
       this.dialogStatus = 'create'
+      this.wocao = undefined
+      this.refreshOptions()
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
@@ -266,44 +314,34 @@ export default {
     },
     createData() {
       this.$refs['dataForm'].validate(valid => {
-        if (valid) {
-          if (
-            this.dataForm.level === 'L2' &&
-            (!this.dataForm.parentId || this.dataForm.parentId === 0)
-          ) {
+        createCategory(this.dataForm)
+          .then(response => {
+            this.listQuery.title = this.dataForm.title
+            this.getList()
+            this.dialogFormVisible = false
+            this.$notify.success({
+              title: '成功',
+              message: '创建成功'
+            })
+          })
+          .catch(response => {
             this.$notify.error({
               title: '失败',
-              message: '请选择父分类'
+              message: response.data.errmsg
             })
-          } else {
-            createCategory(this.dataForm)
-              .then(response => {
-                this.list.unshift(response.data.data)
-                // 更新L1目录
-                this.getCatL1()
-                this.dialogFormVisible = false
-                this.$notify.success({
-                  title: '成功',
-                  message: '创建成功'
-                })
-              })
-              .catch(response => {
-                this.$notify.error({
-                  title: '失败',
-                  message: response.data.errmsg
-                })
-              })
-          }
-        }
+          })
       })
     },
     handleUpdate(row) {
-      if (row.parentId === 0) {
-        row.level = 'L1'
-      } else {
-        row.level = 'L2'
-      }
-      this.dataForm = Object.assign({}, row)
+      this.dataForm = Object.assign({}, {
+        id: row.value,
+        title: row.label,
+        parentId: row.parent,
+        picUrl: row.picUrl,
+        iconUrl: row.iconUrl
+      })
+      this.wocao = undefined
+      this.refreshOptions()
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -315,15 +353,16 @@ export default {
         if (valid) {
           updateCategory(this.dataForm)
             .then(() => {
-              for (const v of this.list) {
-                if (v.id === this.dataForm.id) {
-                  const index = this.list.indexOf(v)
-                  this.list.splice(index, 1, this.dataForm)
-                  break
-                }
-              }
-              // 更新L1目录
-              this.getCatL1()
+              // 因为名字有点不一样，所以还是重新查询吧
+              // for (const v of this.list) {
+              //   if (v.id === this.dataForm.id) {
+              //     const index = this.list.indexOf(v)
+              //     this.list.splice(index, 1, this.dataForm)
+              //     break
+              //   }
+              // }
+              this.listQuery.id = this.dataForm.id
+              this.getList()
               this.dialogFormVisible = false
               this.$notify.success({
                 title: '成功',
@@ -339,11 +378,10 @@ export default {
         }
       })
     },
+    // 删除时使用
     handleDelete(row) {
-      deleteCategory(row.id)
+      deleteCategory(row.value)
         .then(response => {
-          // 更新L1目录
-          this.getCatL1()
           this.$notify.success({
             title: '成功',
             message: '删除成功'
@@ -357,6 +395,51 @@ export default {
             message: response.data.errmsg
           })
         })
+    },
+    // 上传图片前调用
+    onBeforeUpload(file) {
+      const isIMAGE = file.type === 'image/jpeg' || 'image/gif' || 'image/png' || 'image/jpg'
+      const isLt1M = file.size / 1024 / 1024 < 1
+
+      if (!isIMAGE) {
+        this.$message.error('上传文件只能是图片格式!')
+      }
+      if (!isLt1M) {
+        this.$message.error('上传文件大小不能超过 1MB!')
+      }
+      return isIMAGE && isLt1M
+    },
+    // icon上传图片了处理图片
+    iconUploadSuccessHandle(e) {
+      this.dataForm.iconUrl = e.url
+      this.dialogFormVisible = false
+      this.dialogFormVisible = true
+    },
+    // pir上传图片了处理图片
+    pirUploadSuccessHandle(e) {
+      this.dataForm.picUrl = e.url
+      this.dialogFormVisible = false
+      this.dialogFormVisible = true
+    },
+    // 填写弹框选择父类目时，获得父类目的id
+    handleLink(e) {
+      if (e == null) {
+        return false
+      }
+      const tag = e[e.length - 1]
+      this.dataForm.parentId = tag
+    },
+    // 查询框选择父类目时，获得父类目的id
+    handleQuery(e) {
+      this.refreshOptions()
+      const tag = e[e.length - 1]
+      this.listQuery.parentId = tag
+    },
+    // 刷新类目选择节点
+    refreshOptions() {
+      categoryTree().then(response => {
+        this.options = response.data.data
+      })
     }
   }
 }

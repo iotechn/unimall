@@ -23,7 +23,7 @@ public class CategoryTreeNodeDTO {
 
     private String iconUrl;
 
-    private String pirUrl;
+    private String picUrl;
 
     private List<CategoryTreeNodeDTO> children;
 
