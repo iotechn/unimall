@@ -97,16 +97,6 @@ export const asyncRouterMap = [
           title: '会员管理',
           noCache: true
         }
-      },
-      {
-        path: 'orgapply',
-        component: () => import('@/views/user/orgapply'),
-        name: 'orgapply',
-        meta: {
-          perms: ['admin:orgapply:list', 'admin:orgapply:onekey', 'admin:orgapply:audit'],
-          title: '用户表单',
-          noCache: true
-        }
       }
     ]
   },
@@ -230,79 +220,6 @@ export const asyncRouterMap = [
           noCache: true
         }
       }
-    ]
-  },
-  {
-    path: '/tenement',
-    component: Layout,
-    redirect: 'noredirect',
-    alwaysShow: true,
-    name: 'tenementManage',
-    meta: {
-      title: '校区管理',
-      icon: 'people'
-    },
-    children: [
-      {
-        path: 'ad',
-        component: () => import('@/views/tenement/ad'),
-        name: 'ad',
-        meta: {
-          perms: ['admin:ad:list', 'admin:ad:create', 'admin:ad:update', 'admin:ad:delete'],
-          title: '广告管理',
-          noCache: true
-        }
-      },
-      {
-        path: 'qq',
-        component: () => import('@/views/tenement/qq'),
-        name: 'qq',
-        meta: {
-          perms: ['admin:qq:list', 'admin:qq:create', 'admin:qq:delete', 'admin:qq:update'],
-          title: 'QQ群推广',
-          noCache: true
-        }
-      },
-      {
-        path: 'apply',
-        component: () => import('@/views/tenement/apply'),
-        name: 'apply',
-        meta: {
-          perms: ['admin:apply:list', 'admin:apply:handle'],
-          title: '联校申请',
-          noCache: true
-        }
-      },
-      {
-        path: 'topic',
-        component: () => import('@/views/tenement/topic'),
-        name: 'topic',
-        meta: {
-          perms: ['admin:article:list', 'admin:article:create', 'admin:article:update', 'admin:article:delete', 'admin:article:status'],
-          title: '文章管理',
-          noCache: true
-        }
-      },
-      {
-        path: 'life',
-        component: () => import('@/views/tenement/life'),
-        name: 'life',
-        meta: {
-          perms: ['admin:life:list'],
-          title: '大学生活',
-          noCache: true
-        }
-      }
-      // {
-      //   path: 'merch',
-      //   component: () => import('@/views/tenement/merch'),
-      //   name: 'merch',
-      //   meta: {
-      //     perms: ['admin:merch:list'],
-      //     title: '商户管理',
-      //     noCache: true
-      //   }
-      // },
     ]
   },
   {
