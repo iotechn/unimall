@@ -5,6 +5,7 @@ import com.iotechn.unimall.core.annotation.HttpOpenApi;
 import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
+import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
@@ -23,14 +24,14 @@ public interface AdminFreightTemplateService {
 
     @HttpMethod(description = "创建", permission = "operation:freight:create", permissionParentName = "运营管理", permissionName = "运费模板管理")
     public boolean addFreightTemplate(@NotNull @HttpParam(name = "templateName",type = HttpParamType.COMMON,description = "模板名称")String templateName
-            ,@NotNull @HttpParam(name = "spuLocation",type = HttpParamType.COMMON,description = "宝贝地址")String spuLocation
+            ,@HttpParam(name = "spuLocation",type = HttpParamType.COMMON,description = "宝贝地址")String spuLocation
             ,@NotNull @HttpParam(name = "deliveryDeadline",type = HttpParamType.COMMON,description = "发货期限")Integer deliveryDeadline
             ,@NotNull @HttpParam(name = "defaultFreePrice",type = HttpParamType.COMMON,description = "默认满价包邮系列")Integer defaultFreePrice
             ,@NotNull @HttpParam(name = "defaultFirstNum",type = HttpParamType.COMMON,description = "默认首费")Integer defaultFirstNum
-            ,@NotNull @HttpParam(name = "defaultFirstPrice",type = HttpParamType.COMMON,description = "默认首件数量")Integer defaultFirstPrice
+            ,@NotNull @Range(min = 1) @HttpParam(name = "defaultFirstPrice",type = HttpParamType.COMMON,description = "默认首件数量")Integer defaultFirstPrice
             ,@NotNull @HttpParam(name = "defaultContinueNum",type = HttpParamType.COMMON,description = "默认续费")Integer defaultContinueNum
-            ,@NotNull @HttpParam(name = "defaultContinuePrice",type = HttpParamType.COMMON,description = "默认续件数量")Integer defaultContinuePrice
-            ,@HttpParam(name = "templateCarriageDOList",type = HttpParamType.COMMON,description = "特殊运费区")List<FreightTemplateCarriageDO> freightTemplateCarriageDOList
+            ,@NotNull @Range(min = 1) @HttpParam(name = "defaultContinuePrice",type = HttpParamType.COMMON,description = "默认续件数量")Integer defaultContinuePrice
+            ,@HttpParam(name = "freightTemplateCarriageDOList",type = HttpParamType.COMMON,description = "特殊运费区")List freightTemplateCarriageDOList
             ,@NotNull @HttpParam(name = "adminId",type = HttpParamType.ADMIN_ID,description = "管理员ID")Long adminId
     ) throws ServiceException;
 
@@ -41,14 +42,14 @@ public interface AdminFreightTemplateService {
     @HttpMethod(description = "更新", permission = "operation:freight:update", permissionParentName = "运营管理", permissionName = "运费模板管理")
     public boolean updateFreightTemplate(@NotNull @HttpParam(name = "templateId",type = HttpParamType.COMMON,description = "模板名称")Long templateId
             ,@NotNull @HttpParam(name = "templateName",type = HttpParamType.COMMON,description = "模板名称")String templateName
-            ,@NotNull @HttpParam(name = "spuLocation",type = HttpParamType.COMMON,description = "宝贝地址")String spuLocation
+            , @HttpParam(name = "spuLocation",type = HttpParamType.COMMON,description = "宝贝地址")String spuLocation
             ,@NotNull @HttpParam(name = "deliveryDeadline",type = HttpParamType.COMMON,description = "发货期限")Integer deliveryDeadline
             ,@NotNull @HttpParam(name = "defaultFreePrice",type = HttpParamType.COMMON,description = "默认满价包邮系列")Integer defaultFreePrice
             ,@NotNull @HttpParam(name = "defaultFirstNum",type = HttpParamType.COMMON,description = "默认首费")Integer defaultFirstNum
-            ,@NotNull @HttpParam(name = "defaultFirstPrice",type = HttpParamType.COMMON,description = "默认首件数量")Integer defaultFirstPrice
+            ,@NotNull @Range(min = 1) @HttpParam(name = "defaultFirstPrice",type = HttpParamType.COMMON,description = "默认首件数量")Integer defaultFirstPrice
             ,@NotNull @HttpParam(name = "defaultContinueNum",type = HttpParamType.COMMON,description = "默认续费")Integer defaultContinueNum
-            ,@NotNull @HttpParam(name = "defaultContinuePrice",type = HttpParamType.COMMON,description = "默认续件数量")Integer defaultContinuePrice
-            ,@HttpParam(name = "templateCarriageDOList",type = HttpParamType.COMMON,description = "特殊运费区")List<FreightTemplateCarriageDO> templateCarriageDOList
+            ,@NotNull @Range(min = 1) @HttpParam(name = "defaultContinuePrice",type = HttpParamType.COMMON,description = "默认续件数量")Integer defaultContinuePrice
+            ,@HttpParam(name = "freightTemplateCarriageDOList",type = HttpParamType.COMMON,description = "特殊运费区")List templateCarriageDOList
             ,@NotNull @HttpParam(name = "adminId",type = HttpParamType.ADMIN_ID,description = "管理员ID")Long adminId)throws ServiceException;
 
     @HttpMethod(description = "查询", permission = "operation:freight:query", permissionParentName = "运营管理", permissionName = "运费模板管理")

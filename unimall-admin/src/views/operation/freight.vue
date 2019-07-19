@@ -45,26 +45,26 @@
       <el-table-column align="center" label="默认计费续件价格" prop="freightTemplateDO.defaultContinueMoney">
         <template slot-scope="scope">{{ scope.row.freightTemplateDO.defaultContinueMoney }}元</template>
       </el-table-column>
-      <!-- <el-table-column align="center" label="指定地区数量" prop="freightTemplateCarriageDOList.length"/> -->
+      <el-table-column align="center" label="指定地区数量" prop="freightTemplateCarriageDOList.length"/>
       <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            v-permission="['operation:appraise:delete']"
+          <!-- <el-button
+            v-permission="['operation:freight:query']"
             type="primary"
             size="mini"
             @click="(scope.row)"
-          >阅读</el-button>
+          >阅读</el-button> -->
           <el-button
-            v-permission="['operation:appraise:delete']"
+            v-permission="['operation:freight:update']"
             type="primary"
             size="mini"
-            @click="(scope.row)"
+            @click="updateBtn(scope.row)"
           >修改</el-button>
           <el-button
-            v-permission="['operation:appraise:delete']"
+            v-permission="['operation:freight:delete']"
             type="danger"
             size="mini"
-            @click="(scope.row)"
+            @click="deleteBtn(scope.row)"
           >删除</el-button>
         </template>
 
@@ -72,18 +72,18 @@
     </el-table>
 
     <!-- 添加或修改对话框 -->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" :fullscreen="true">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" :fullscreen="true" :close-on-press-escape="false">
       <el-form
         ref="dataForm"
         :rules="rules"
         :model="dataForm"
         status-icon
         label-position="left"
-        label-width="100px"
+        label-width="150px"
         style="width: 700px; margin-left:50px;"
       >
-        <el-form-item label="隐藏的用户id" prop="id" hidden>
-          <el-input v-model="dataForm.id" clearable placeholder=""/>
+        <el-form-item v-if="dialogStatus === 'update'" label="隐藏的用户id" prop="templateId" hidden>
+          <el-input v-model="dataForm.templateId" clearable placeholder=""/>
         </el-form-item>
         <el-form-item label="模板名称" prop="templateName">
           <el-input v-model="dataForm.templateName" clearable placeholder=""/>
@@ -120,19 +120,20 @@
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="计费续件数量" prop="defaultContinuePrice">
-          <el-input v-model="dataForm.defaultContinuePrice" clearable placeholder="">
+        <el-form-item label="计费续件数量" prop="defaultContinueNum">
+          <el-input v-model="dataForm.defaultContinueNum" clearable placeholder="">
             <template slot="append">件</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="计费续件价格" prop="defaultContinueNum">
+        <el-form-item label="计费续件价格" prop="defaultContinuePrice">
           <el-input v-model="dataForm.defaultContinuePrice" clearable placeholder="">
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="指定地区价格" prop="defaultContinueNum" style="width:150%">
+        <el-form-item label="指定地区价格" prop="freightTemplateCarriageDOList" style="width:150%">
           <el-button :plain="true" type="primary" @click="handleSpecified">添加</el-button>
           <el-table :data="dataForm.freightTemplateCarriageDOList">
+            <el-table-column v-if="dialogStatus==='update'" property="id" label="指定地区ID" />
             <el-table-column property="designatedArea" label="指定省份" />
             <el-table-column property="firstNum" label="首次数量" />
             <el-table-column property="firstMoney" label="首次价格" />
@@ -146,13 +147,13 @@
               class-name="small-padding fixed-width"
             >
               <template slot-scope="scope">
-                <el-button type="danger" size="mini" @click="handleSkuDelete(scope.row)">删除</el-button>
+                <el-button type="danger" size="mini" @click="handleSpecDelete(scope.row)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
 
           <!-- 添加指定地区的Dialog -->
-          <el-dialog :visible.sync="specVisiable" :modal="false" :append-to-body="true" title="添加指定地区">
+          <el-dialog :visible.sync="specVisiable" :modal="false" :append-to-body="true" top="10vh" width="70%" title="添加指定地区">
             <el-form
               ref="specForm"
               :model="specForm"
@@ -162,7 +163,6 @@
               label-width="100px"
               style="width: 400px; margin-left:50px;"
             >
-
               <el-form-item label="包邮门栏" prop="freePrice">
                 <el-input v-model="specForm.freePrice" clearable />
               </el-form-item>
@@ -206,7 +206,7 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
         <el-button v-if="dialogStatus=='create'" type="primary" @click="createData">确定</el-button>
-        <el-button v-else type="primary" @click="updateData">确定</el-button>
+        <el-button v-else type="primary" @click="updateDate">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -216,11 +216,11 @@
 </style>
 
 <script>
-import { listFreight } from '@/api/freight'
+import { listFreight, createFreight, deleteFreight, updateFreight } from '@/api/freight'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
-  name: 'Order',
+  name: 'Freight',
   components: { Pagination },
   filters: {
     defaultFreePriceFilter(code) {
@@ -247,16 +247,16 @@ export default {
       },
       textMap: { update: '编辑', create: '创建' },
       dataForm: {
-        id: undefined,
+        templateId: undefined,
         templateName: undefined,
         spuLocation: undefined,
         isFree: 1,
-        deliveryDeadline: 1,
-        defaultFreePrice: 1,
-        defaultFirstPrice: 0,
-        defaultFirstNum: 1,
-        defaultContinuePrice: 0,
-        defaultContinueNum: 1,
+        deliveryDeadline: undefined,
+        defaultFreePrice: undefined,
+        defaultFirstPrice: undefined,
+        defaultFirstNum: undefined,
+        defaultContinuePrice: undefined,
+        defaultContinueNum: undefined,
         freightTemplateCarriageDOList: []
       },
       specForm: {
@@ -270,16 +270,20 @@ export default {
       },
       provs: ['北京市', '天津市', '河北省', '山西省', '内蒙古自治区', '辽宁省', '吉林省', '黑龙江省', '上海市', '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省', '河南省', '湖北省', '湖南省', '广东省', '广西壮族自治区', '海南省', '重庆市', '四川省', '贵州省', '云南省', '西藏自治区', '陕西省', '甘肃省', '青海省', '宁夏回族自治区', '新疆维吾尔自治区', '台湾省', '香港特别行政区', '澳门特别行政区'],
       rules: {
-        id: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
-        templateName: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
-        spuLocation: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }]
+        templateName: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }],
+        deliveryDeadline: [{ required: true, message: '发货期限不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }],
+        defaultFreePrice: [{ required: true, message: '包邮门栏额度不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }], //, { min: 1, max: 9, message: '大于1,小于1亿' }
+        defaultFirstNum: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }],
+        defaultFirstPrice: [{ required: true, message: '首次计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }],
+        defaultContinueNum: [{ required: true, message: '续件计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }],
+        defaultContinuePrice: [{ required: true, message: '续件计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }]
       },
       specRules: {
-        freePrice: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
-        firstNum: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
-        firstMoney: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
-        continueNum: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
-        continueMoney: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }]
+        freePrice: [{ required: true, message: '包邮门栏额度不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
+        firstNum: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
+        firstMoney: [{ required: true, message: '首次计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
+        continueNum: [{ required: true, message: '续件计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
+        continueMoney: [{ required: true, message: '续件计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }]
       }
 
     }
@@ -301,7 +305,19 @@ export default {
         })
     },
     resetData() {
-
+      this.dataForm = {
+        templateId: undefined,
+        templateName: undefined,
+        spuLocation: undefined,
+        isFree: 1,
+        deliveryDeadline: undefined,
+        defaultFreePrice: undefined,
+        defaultFirstPrice: undefined,
+        defaultFirstNum: undefined,
+        defaultContinuePrice: undefined,
+        defaultContinueNum: undefined,
+        freightTemplateCarriageDOList: []
+      }
     },
     resetSpec() {
       this.specForm = {
@@ -314,31 +330,31 @@ export default {
         continueMoney: undefined
       }
     },
-    // handleDelete(row) {
-    //   this.$confirm('此操作将永久删除该评论' + row.id + ', 是否继续?', '提示', {
-    //     confirmButtonText: '确定',
-    //     cancelButtonText: '取消',
-    //     type: 'warning'
-    //   }).then(() => {
-    //     deleteAppraise(row)
-    //       .then(response => {
-    //         this.$notify.success({
-    //           title: '成功',
-    //           message: '删除优惠券成功'
-    //         })
-    //         const index = this.list.indexOf(row)
-    //         this.list.splice(index, 1)
-    //       })
-    //       .catch(response => {
-    //         this.$notify.error({
-    //           title: '失败',
-    //           message: response.data.errmsg
-    //         })
-    //       })
-    //   }).catch(() => {
-    //     return false
-    //   })
-    // },
+    deleteBtn(row) {
+      this.$confirm('此操作将永久删除该运费模板---' + row.freightTemplateDO.templateName + '---, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteFreight(row.freightTemplateDO.id)
+          .then(response => {
+            this.$notify.success({
+              title: '成功',
+              message: '删除运费模板成功'
+            })
+            const index = this.list.indexOf(row)
+            this.list.splice(index, 1)
+          })
+          .catch(response => {
+            this.$notify.error({
+              title: '失败',
+              message: response.data.errmsg
+            })
+          })
+      }).catch(() => {
+        return false
+      })
+    },
     createHandle() {
       this.resetData()
       this.dialogStatus = 'create'
@@ -348,22 +364,101 @@ export default {
       })
     },
     createData() {
-
+      if (this.dataForm.isFree <= 0) {
+        this.dataForm.defaultFreePrice = this.dataForm.isFree
+      }
+      this.$refs['dataForm'].validate(valid => {
+        if (valid) {
+          createFreight(this.dataForm)
+            .then(response => {
+              this.getList()
+              this.dialogFormVisible = false
+              this.$notify.success({
+                title: '成功',
+                message: '创建运费模板成功'
+              })
+            })
+            .catch(response => {
+              this.$notify.error({
+                title: '失败',
+                message: response.data.errmsg
+              })
+            })
+        }
+      })
     },
     handleSpecified() {
       this.specVisiable = true
+      this.resetSpec()
       this.$nextTick(() => {
         this.$refs['specForm'].clearValidate()
       })
     },
-    updateData() {
+    // 打开修改模态框
+    updateBtn(row) {
+      this.resetData()
+      this.dataForm = Object.assign({}, {
+        templateId: row.freightTemplateDO.id,
+        templateName: row.freightTemplateDO.templateName,
+        spuLocation: row.freightTemplateDO.spuLocation,
+        deliveryDeadline: row.freightTemplateDO.deliveryDeadline,
+        defaultFreePrice: row.freightTemplateDO.defaultFreePrice,
+        defaultFirstPrice: row.freightTemplateDO.defaultFirstMoney,
+        defaultFirstNum: row.freightTemplateDO.defaultFirstNum,
+        defaultContinuePrice: row.freightTemplateDO.defaultContinueMoney,
+        defaultContinueNum: row.freightTemplateDO.defaultContinueNum,
+        freightTemplateCarriageDOList: row.freightTemplateCarriageDOList,
+        isFree: row.freightTemplateDO.defaultFreePrice > 0 ? 1 : row.freightTemplateDO.defaultFreePrice
+      })
 
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    updateDate() {
+      if (this.dataForm.isFree <= 0) {
+        this.dataForm.defaultFreePrice = this.dataForm.isFree
+      }
+      this.$refs['dataForm'].validate(valid => {
+        if (valid) {
+          updateFreight(this.dataForm)
+            .then(response => {
+              this.getList()
+              this.dialogFormVisible = false
+              this.$notify.success({
+                title: '成功',
+                message: '修改运费模板成功'
+              })
+            })
+            .catch(response => {
+              this.$notify.error({
+                title: '失败',
+                message: response.data.errmsg
+              })
+            })
+        }
+      })
     },
     handleSpecAdd() {
       this.specForm.designatedArea = this.specForm.designatedAreaList.join(',')
       var temp = Object.assign({}, this.specForm)
       this.dataForm.freightTemplateCarriageDOList.unshift(temp)
       this.specVisiable = false
+    },
+    // 在模态框删除指定地区
+    handleSpecDelete(row) {
+      this.$confirm('此操作将删除该指定地区, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const index = this.dataForm.freightTemplateCarriageDOList.indexOf(row)
+        this.dataForm.freightTemplateCarriageDOList.splice(index, 1)
+      }).catch(() => {
+        return false
+      })
     }
   }
 }
