@@ -102,6 +102,7 @@ public class UserServiceImpl implements UserService {
         userDO.setGmtLastLogin(now);
         userDO.setGmtUpdate(now);
         userDO.setGmtCreate(now);
+        userDO.setLoginType(UserLoginType.REGISTER.getCode());
         userMapper.insert(userDO);
         //返回用户DTO
         cacheComponent.del(VERIFY_CODE_PREFIX + phone);
@@ -213,8 +214,8 @@ public class UserServiceImpl implements UserService {
                 //UNI-APP 的 微信APP登录 APPSecret是保存在前端的。这点非常不安全。但是用了他的框架，也没有办法
                 JSONObject jsonObject = JSONObject.parseObject(raw);
                 JSONObject authResult = jsonObject.getJSONObject("authResult");
-//                String openid = authResult.getString("openid");
-                String openid = "osTQe6L_JOoJkrMO1vAT_peMivjA";
+                String openid = authResult.getString("openid");
+//                String openid = "osTQe6L_JOoJkrMO1vAT_peMivjA";
                 List<UserDO> userDOS = userMapper.selectList(new EntityWrapper<UserDO>().eq("open_id", openid).eq("login_type", loginType));
                 UserDO userDO;
                 if (CollectionUtils.isEmpty(userDOS)) {

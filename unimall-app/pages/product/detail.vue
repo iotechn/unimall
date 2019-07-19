@@ -24,21 +24,6 @@
 			</view>
 		</view>
 
-		<!--  分享 -->
-		<!--<view class="share-section" @click="share">
-			<view class="share-icon">
-				<text class="yticon icon-xingxing"></text>
-				返
-			</view>
-			<text class="tit">该商品分享可领49减10红包</text>
-			<text class="yticon icon-bangzhu1"></text>
-			<view class="share-btn">
-				立即分享
-				<text class="yticon icon-you"></text>
-			</view> 
-
-		</view>-->
-
 		<view class="c-list">
 			<view class="c-row b-b" @click="toggleSpec">
 				<text class="tit">购买类型</text>
@@ -207,10 +192,17 @@
 		},
 		async onLoad(options) {
 			const that = this
+			uni.showLoading({
+				title: '正在加载'
+			})
 			that.$api.request('goods', 'getGoods', {
 				spuId: options.id
+			}, failres => {
+				that.$api.msg(failres.msg)
+				uni.hideLoading()
 			}).then(res => {
 				that.goods = res.data
+				uni.hideLoading()
 			})
 			that.$api.request('coupon', 'getObtainableCoupon').then(res => {
 				that.couponList = res.data
@@ -304,7 +296,7 @@
 			buy() {
 				//TODO 构建orderReqeust
 				uni.navigateTo({
-					url: `/pages/order/createOrder`
+					url: `/pages/order/create`
 				})
 			},
 			//查看所有评价

@@ -69,7 +69,7 @@
 			},
 			toRegist() {
 				uni.redirectTo({
-					url: './register'
+					url: '/pages/public/register'
 				})
 			},
 			async toLogin() {
@@ -87,7 +87,7 @@
 					});
 				}).then(res => {
 					that.logining = false
-					that.$store.commit('login', userInfo)
+					that.$store.commit('login', res.data)
 					uni.setStorageSync('userInfo', res.data)
 					if (that.$api.prePage().lodaData) {
 						that.$api.prePage().loadData()
@@ -103,23 +103,27 @@
 				//#ifdef APP-PLUS
 				let loginType = 2
 				//#endif
-				
+				uni.showLoading({
+					title: '正在同步消息'
+				})
 				uni.login({
 					provider: 'weixin',
 					success: (wxres => {
 						that.$api.request('user', 'thirdPartLogin', {
 							loginType: loginType,
 							raw: JSON.stringify(wxres)
+						}, failres => {
+							that.$api.msg(failres.msg)
+							uni.hideLoading()
 						}).then(res => {
 							that.logining = false
 							uni.getUserInfo({
 								lang: 'zh_CN',
 								success: (e) => {
-									// console.log(e)
 									uni.setStorageSync('userInfo', res.data)
 									that.$store.commit('login', res.data)
 									e.userInfo.nickname = e.userInfo.nickName
-									that.$api.request('user', 'syncUserInfo', e.userInfo}).then(syncRes => {
+									that.$api.request('user', 'syncUserInfo', e.userInfo).then(syncRes => {
 										//同步过后
 										res.data.nickname = e.userInfo.nickName
 										res.data.avatarUrl = e.userInfo.avatarUrl
@@ -132,6 +136,7 @@
 									if (that.$api.prePage().lodaData) {
 										that.$api.prePage().loadData()
 									}
+									uni.hideLoading()
 									uni.navigateBack()
 								}
 							})

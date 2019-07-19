@@ -1,7 +1,7 @@
 <template>
 	<view>
 		<!-- 地址 -->
-		<navigator url="/pages/address/address?source=1" class="address-section">
+		<navigator url="/pages/address/list?source=1" class="address-section">
 			<view class="order-content">
 				<text class="yticon icon-shouhuodizhi"></text>
 				<view class="cen">
@@ -208,7 +208,7 @@
 				}).then(res => {
 					//提交订单成功
 					uni.redirectTo({
-						url: '/pages/money/pay?orderno='+ res.data + '&price=' + that.orderReqeust.totalPrice
+						url: '/pages/pay/pay?orderno='+ res.data + '&price=' + that.orderReqeust.totalPrice
 					})
 				})
 				
