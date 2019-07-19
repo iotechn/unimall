@@ -1,10 +1,14 @@
 package com.iotechn.unimall.data.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Created by rize on 2019/7/5.
  */
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class KVModel<K,V> {
 
@@ -23,8 +27,9 @@ public class KVModel<K,V> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (!(o instanceof KVModel)) {
+            return false;
+        }
 
         KVModel<?, ?> kvModel = (KVModel<?, ?>) o;
 
@@ -37,4 +42,5 @@ public class KVModel<K,V> {
         result = 31 * result + (key != null ? key.hashCode() : 0);
         return result;
     }
+
 }
