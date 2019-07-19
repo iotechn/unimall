@@ -124,6 +124,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         spuDO.setGmtCreate(now);
         spuDO.setSales(0);
         spuMapper.insert(spuDO);
+        spuDTO.setId(spuDO.getId());
         //插入SKU表
         for (SkuDO skuDO : spuDTO.getSkuList()) {
             skuDO.setSpuId(spuDO.getId());

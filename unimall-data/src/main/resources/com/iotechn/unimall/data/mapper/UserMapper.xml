@@ -27,10 +27,10 @@
     <select id="getUserList" resultType="com.iotechn.unimall.data.domain.UserDO">
         SELECT
         id,
-        mini_open_id,
         phone,
         password,
-        open_id,
+        login_type as loginType,
+        open_id as openId,
         nickname,
         avatar_url AS avartarUrl,
         `level`,

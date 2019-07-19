@@ -286,9 +286,9 @@ export default {
           })
           return
         }
-        url = '/pages/product/list?fid=' + e[0].substring(2) + '&tid=' + e[2].substring(2)
+        url = '/pages/product/list?tid=' + e[2].substring(2)
       } else {
-        url = '/pages/product/product?id=' + (e[3].substring(2))
+        url = '/pages/product/detail?id=' + (e[3].substring(2))
       }
       this.dataForm.url = url
     },

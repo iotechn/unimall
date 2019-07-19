@@ -244,7 +244,7 @@ export default {
         gender: [{ required: true, message: '请选择用户性别类型', trigger: 'blur' }],
         level: [{ required: true, message: '请选择用户会员等级状态', trigger: 'blur' }],
         status: [{ required: true, message: '请选择用户状态', trigger: 'blur' }],
-        password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { pattern: /^[0-9a-zA-Z]{8}/, message: '至少八个数字和字母' }]
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { pattern: /^[0-9a-zA-Z$./]{8}/, message: '至少八个数字和字母' }]
       }
     }
   },

@@ -541,7 +541,8 @@ export default {
           this.skuForm.price = parseInt(this.skuForm.priceRaw * 100)
           this.skuForm.originalPrice = parseInt(this.skuForm.originalPriceRaw * 100)
           this.skuForm.vipPrice = parseInt(this.skuForm.vipPriceRaw * 100)
-          this.skuList.unshift(this.skuForm)
+          var temp = Object.assign({}, this.skuForm)
+          this.skuList.unshift(temp)
           this.skuVisiable = false
         }
       })

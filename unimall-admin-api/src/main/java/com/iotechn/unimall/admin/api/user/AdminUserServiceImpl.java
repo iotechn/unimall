@@ -71,6 +71,10 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
         Date now = new Date();
         user.setGmtUpdate(now);
+        UserDO userDO  = userMapper.selectById(user.getId());
+        if(userDO.getPassword().equals(user.getPassword())){
+            return userMapper.updateById(user) > 0;
+        }
         if(user.getPassword() != null) {
             user.setPassword(Md5Crypt.md5Crypt(user.getPassword().getBytes(), "$1$" + user.getPhone().substring(0, 7)));
         }
