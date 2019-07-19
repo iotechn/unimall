@@ -1,8 +1,10 @@
 package com.iotechn.unimall.app.api.order;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
+import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
@@ -268,6 +270,8 @@ public class OrderServiceImpl implements OrderService {
 
                 return orderDO.getOrderNo();
 
+            } catch (ServiceException e) {
+                throw e;
             } catch (Exception e) {
                 logger.error("[提交订单] 异常", e);
                 throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
@@ -306,16 +310,18 @@ public class OrderServiceImpl implements OrderService {
 
         Integer loginType = SessionUtil.getUser().getLoginType();
         String appId;
-
+        String tradeType;
         if (UserLoginType.MP_WEIXIN.getCode() == loginType) {
             appId = wxMiNiAppid;
+            tradeType = WxPayConstants.TradeType.JSAPI;
         } else if (UserLoginType.APP_WEIXIN.getCode() == loginType) {
             appId = wxAppAppid;
+            tradeType = WxPayConstants.TradeType.APP;
         } else {
             throw new AppServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
         }
 
-        WxPayMpOrderResult result = null;
+        Object result = null;
         try {
             WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
             orderRequest.setAppid(appId);
@@ -324,11 +330,15 @@ public class OrderServiceImpl implements OrderService {
             orderRequest.setBody("订单：" + orderNo);
             orderRequest.setTotalFee(orderDO.getActualPrice());
             orderRequest.setSpbillCreateIp(ip);
+            orderRequest.setTradeType(tradeType);
             result = wxPayService.createOrder(orderRequest);
+
             //缓存prepayID用于后续模版通知
-            String prepayId = result.getPackageValue();
-            prepayId = prepayId.replace("prepay_id=", "");
+            if (result instanceof  WxPayMpOrderResult) {
+                String prepayId = ((WxPayMpOrderResult)result).getPackageValue();
 //TODO 缓存支付Id            userBizService.setVaildFormIdFromSession(prepayId);
+                prepayId = prepayId.replace("prepay_id=", "");
+            }
         } catch (WxPayException e) {
             logger.error("[微信支付] 异常", e);
             throw new ThirdPartServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());

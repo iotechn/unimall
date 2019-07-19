@@ -35,8 +35,9 @@
 			this.loadData();
 		},
 		methods: {
-			async loadData(){
+			loadData(){
 				this.$api.request('category', 'categoryList').then( res => {
+					
 					res.data.forEach(item=>{
 						//item顶级类目 f一级 s二级 t三级
 						this.flist.push(item)

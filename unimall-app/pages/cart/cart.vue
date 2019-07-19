@@ -5,7 +5,7 @@
 			<image src="/static/emptyCart.jpg" mode="aspectFit"></image>
 			<view v-if="hasLogin" class="empty-tips">
 				空空如也
-				<navigator class="navigator" v-if="hasLogin" url="../index/index" open-type="switchTab">随便逛逛></navigator>
+				<navigator class="navigator" v-if="hasLogin" url="/pages/index/index" open-type="switchTab">随便逛逛></navigator>
 			</view>
 			<view v-else class="empty-tips">
 				空空如也
@@ -219,7 +219,7 @@
 			createOrder(){
 				//console.log(this.cartList)
 				uni.navigateTo({
-					url: `/pages/order/createOrder?takeway=cart&data=${JSON.stringify(this.cartList)}`
+					url: `/pages/order/order?takeway=cart&data=${JSON.stringify(this.cartList)}`
 				})
 			}
 		}

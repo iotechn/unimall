@@ -52,19 +52,19 @@
 			</view> -->
 			<!-- 订单 -->
 			<view class="order-section">
-				<view class="order-item" @click="navTo('/pages/order/order?state=0')" hover-class="common-hover"  :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/pages/order/list?state=0')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-shouye"></text>
 					<text>全部订单</text>
 				</view>
-				<view class="order-item" @click="navTo('/pages/order/order?state=1')"  hover-class="common-hover" :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/pages/order/list?state=10')"  hover-class="common-hover" :hover-stay-time="50">
 					<text class="yticon icon-daifukuan"></text>
 					<text>待付款</text>
 				</view>
-				<view class="order-item" @click="navTo('/pages/order/order?state=2')" hover-class="common-hover"  :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/pages/order/list?state=30')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-yishouhuo"></text>
 					<text>待收货</text>
 				</view>
-				<view class="order-item" @click="navTo('/pages/order/order?state=4')" hover-class="common-hover"  :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/pages/order/list?state=60')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-shouhoutuikuan"></text>
 					<text>退款/售后</text>
 				</view>
@@ -76,7 +76,7 @@
 					<text>浏览历史</text>
 				</view>
 				<scroll-view v-if="footprintList.length > 0" scroll-x class="h-list">
-					<image v-for="(item, index ) in footprintList" :key="index" @longpress="deleteFootprint(item)" @click="navTo('/pages/product/product?id=' + item.spuId)" :src="item.spuImg" mode="aspectFill"></image>
+					<image v-for="(item, index ) in footprintList" :key="index" @longpress="deleteFootprint(item)" @click="navTo('/pages/product/detail?id=' + item.spuId)" :src="item.spuImg" mode="aspectFill"></image>
 				</scroll-view>
 				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/address')"></list-cell>
 				<list-cell icon="icon-pinglun-copy" iconColor="#ee883b" title="晒单" ></list-cell>
@@ -136,8 +136,7 @@
 			...mapState(['hasLogin','userInfo'])
 		},
         methods: {
-
-			loadFootprint() {
+			async loadFootprint() {
 				const that = this
 				that.$api.request('footprint', 'getAllFootprint').then(res => {
 					that.footprintList = res.data
@@ -172,7 +171,7 @@
 				}
 				uni.navigateTo({  
 					url
-				})  
+				})
 			}, 
 	
 			/**

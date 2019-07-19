@@ -4,8 +4,7 @@
 			"path": "pages/index/index",
 			"style": {
 				// #ifdef MP 
-				"navigationBarTitleText": "Dloud商城",
-				//"navigationStyle": "custom",
+				"navigationBarTitleText": "unimall",
 				// #endif 
 				"app-plus": {
 					"titleNView": {
@@ -13,7 +12,7 @@
 						"searchInput": {
 							"backgroundColor": "rgba(231, 231, 231,.7)",
 							"borderRadius": "16px",
-							"placeholder": "请输入地址 如：大钟寺",
+							"placeholder": "请搜索宝贝名称",
 							"disabled": true,
 							"placeholderColor": "#606266"
 						},
@@ -37,15 +36,24 @@
 					}
 				}
 			}
-		},
-		{
+		}, {
+			"path": "pages/address/list",
+			"style": {
+				"navigationBarTitleText": "收货地址"
+			}
+		}, {
+			"path": "pages/address/create",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		}, {
 			"path": "pages/product/search",
 			"style": {
 				"navigationBarTitleText": "搜索"
 			}
 		},
 		{
-			"path": "pages/product/product",
+			"path": "pages/product/detail",
 			"style": {
 				"navigationBarTitleText": "详情展示",
 				"app-plus": {
@@ -61,6 +69,17 @@
 				"navigationBarTitleText": "商品收藏"
 			}
 		}, {
+            "path" : "pages/product/list",
+            "style" : {
+				"enablePullDownRefresh": true,
+				"navigationBarTitleText": "商品列表"
+			}
+        }, {
+            "path" : "pages/product/appraise",
+            "style" : {
+				"navigationBarTitleText": "全部评价"
+			}
+        }, {
 			"path": "pages/user/profile",
 			"style": {
 				"navigationBarTitleText": "修改资料"
@@ -127,17 +146,7 @@
 				"navigationBarTitleText":"关于"
 			}
 		}, {
-			"path": "pages/detail/detail",
-			"style": {
-				"navigationBarTitleText": "",
-				"app-plus": {
-					"titleNView": {
-						"type": "transparent"
-					}
-				}
-			}
-		}, {
-			"path": "pages/order/order",
+			"path": "pages/order/list",
 			"style": {
 				"navigationBarTitleText": "我的订单",
 				"app-plus": {
@@ -145,48 +154,36 @@
 				}
 			}
 		}, {
-			"path": "pages/order/createOrder",
+			"path": "pages/order/create",
 			"style": {
 				"navigationBarTitleText": "创建订单"
 			}
 		}, {
-			"path": "pages/order/orderDetail",
+			"path": "pages/order/detail",
 			"style": {
 				"navigationBarTitleText": "订单详情"
 			}
 		}, {
-			"path": "pages/address/address",
-			"style": {
-				"navigationBarTitleText": "收货地址"
+            "path" : "pages/order/appraise",
+            "style" : {
+				"navigationBarTitleText": "评价订单"
 			}
-		}, {
-			"path": "pages/address/addressManage",
-			"style": {
-				"navigationBarTitleText": ""
-			}
-		}, {
-			"path": "pages/money/pay",
+        }, {
+			"path": "pages/pay/pay",
 			"style": {
 				"navigationBarTitleText": "支付"
 			}
 		}, {
-			"path": "pages/money/money",
-			"style": {
-				
-			}
-		}, {
-			"path": "pages/money/paySuccess",
+			"path": "pages/pay/success",
 			"style": {
 				"navigationBarTitleText": "支付成功"
 			}
-		}
-	    ,{
+		}, {
             "path" : "pages/notice/notice",
             "style" : {
 				"navigationBarTitleText": "通知"
 			}
-        }
-        ,{
+        }, {
             "path" : "pages/category/category",
             "style" : {
 				"navigationBarTitleText": "分类",
@@ -195,25 +192,7 @@
 				}
 			}
         }
-        ,{
-            "path" : "pages/product/list",
-            "style" : {
-				"enablePullDownRefresh": true,
-				"navigationBarTitleText": "商品列表"
-			}
-        }
-        ,{
-            "path" : "pages/order/orderAppraise",
-            "style" : {
-				"navigationBarTitleText": "评价订单"
-			}
-        }
-        ,{
-            "path" : "pages/product/appraise",
-            "style" : {
-				"navigationBarTitleText": "全部评价"
-			}
-        }
+        
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

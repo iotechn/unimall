@@ -141,34 +141,12 @@
 					title: '正在加载'
 				})
 			},
-			//显示分类面板
-			toggleCateMask(type) {
-				let timer = type === 'show' ? 10 : 300;
-				let state = type === 'show' ? 1 : 0;
-				this.cateMaskState = 2;
-				setTimeout(() => {
-					this.cateMaskState = state;
-				}, timer)
-			},
-			//分类点击
-			changeCate(item) {
-				this.cateId = item.id;
-				this.toggleCateMask();
-				uni.pageScrollTo({
-					duration: 300,
-					scrollTop: 0
-				})
-				this.loadData('refresh', 1);
-				uni.showLoading({
-					title: '正在加载'
-				})
-			},
 			//详情
 			navToDetailPage(item) {
 				//测试数据没有写id，用title代替
 				let id = item.id;
 				uni.navigateTo({
-					url: `/pages/product/product?id=${id}`
+					url: `/pages/product/detail?id=${id}`
 				})
 			},
 			stopPrevent() {}

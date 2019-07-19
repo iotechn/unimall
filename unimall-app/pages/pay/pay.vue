@@ -74,20 +74,41 @@
 				that.$api.request('order', 'wxPrepay', {
 					orderNo : that.orderNo
 				}).then(prepayRes => {
-					const payParam = prepayRes.data
+					//#ifdef MP-WEIXIN
+					const payParam = {
+						appId: prepayRes.data.appId,
+						nonceStr: prepayRes.data.nonceStr,
+						package: prepayRes.data.packageValue,
+						timeStamp: parseInt(prepayRes.data.timeStamp),
+						signType: prepayRes.data.signType,
+						paySign: prepayRes.data.paySign,
+					}
+					//#endif
+					//#ifdef APP-PLUS
+					const payParam = {
+						appid: prepayRes.data.appId,
+						noncestr: prepayRes.data.nonceStr,
+						package: prepayRes.data.packageValue,
+						partnerid: prepayRes.data.partnerId,
+						prepayid: prepayRes.data.prepayId,
+						timestamp: parseInt(prepayRes.data.timeStamp),
+						sign: prepayRes.data.sign,
+						signType: 'MD5'
+					}
+					//#endif
+					console.log( payParam)
 					uni.requestPayment({
 						provider: 'wxpay',
-						appId: payParam.appId,
-						timeStamp: parseInt(payParam.timeStamp),
-						nonceStr: payParam.nonceStr,
-						package: payParam.packageValue,
-						signType: payParam.signType,
-						paySign: payParam.paySign,
+						//#ifdef MP-WEIXIN
+						...payParam,
+						//#endif
+						//#ifdef APP-PLUS
+						orderInfo: payParam,
+						//#endif
 						success: function(res) {
-							uni.navigateTo({
-								url: 'paySuccess'
+							uni.redirectTo({
+								url: '/pages/pay/success'
 							})
-							
 						},
 						fail: function(res) {
 							console.log("支付过程失败");

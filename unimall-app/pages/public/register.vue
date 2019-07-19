@@ -67,7 +67,7 @@
 			},
 			toLogin() {
 				uni.redirectTo({
-					url: "./login"
+					url: "/pages/public/login"
 				})
 			},
 			doGetVerify() {

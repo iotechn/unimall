@@ -215,7 +215,13 @@
 			 */
 			async loadData() {
 				const that = this
-				that.$api.request('integral', 'getIndexData').then(res => {
+				uni.showLoading({
+					title: '正在加载'
+				})
+				that.$api.request('integral', 'getIndexData', failres => {
+					that.$api.msg(failres.msg)
+					uni.hideLoading()
+				}).then(res => {
 					let data = res.data
 					//橱窗
 					that.windowSpuList = data.windowRecommend
@@ -240,6 +246,7 @@
 					if (data.salesTop) {
 						that.salesTop = data.salesTop
 					}
+					uni.hideLoading()
 				})
 			},
 			//轮播图切换修改背景色
@@ -251,7 +258,7 @@
 			//详情页
 			navToDetailPage(id) {
 				uni.navigateTo({
-					url: `/pages/product/product?id=${id}`
+					url: `/pages/product/detail?id=${id}`
 				})
 			},
 			naviageToPage(page) {

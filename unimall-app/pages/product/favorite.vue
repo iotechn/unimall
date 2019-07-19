@@ -191,9 +191,6 @@
 				line-height: 50upx;
 			}
 		}
-
-		
 	}
-	
 	
 </style>

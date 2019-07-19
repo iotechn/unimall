@@ -15,7 +15,7 @@
 
 					<!-- 订单列表 -->
 					<view v-for="(item,index) in tabItem.orderList" :key="index" class="order-item">
-						<navigator :url="'./orderDetail?orderid=' + item.id">
+						<navigator :url="'/pages/order/detail?orderid=' + item.id">
 							<view class="i-top b-b">
 								<text class="time">{{item.gmtCreate}}</text>
 								<text class="state">{{statusMap[item.status]}}</text>
@@ -127,6 +127,13 @@
 						loadingType: 'more',
 						pageNo: 1,
 						orderList: []
+					},
+					{
+						state: 60,
+						text: '退款中',
+						loadingType: 'more',
+						pageNo: 1,
+						orderList: []
 					}
 				],
 			};
@@ -137,7 +144,12 @@
 			 * 修复app端点击除全部订单外的按钮进入时不加载数据的问题
 			 * 替换onLoad下代码即可
 			 */
-			this.tabCurrentIndex = +options.state;
+			this.tabCurrentIndex = 0
+			for (let i = 0; i < this.navList.length; i++) {
+				if (this.navList[i].state === parseInt(options.state)) {
+					this.tabCurrentIndex = i
+				}
+			}
 			// #ifndef MP
 			this.loadData()
 			// #endif
@@ -198,7 +210,7 @@
 			},
 			payOrder(item) {
 				uni.redirectTo({
-					url: '/pages/money/pay?orderno='+ item.orderNo + '&price=' + item.actualPrice
+					url: '/pages/pay/pay?orderno='+ item.orderNo + '&price=' + item.actualPrice
 				})
 			},
 			//取消订单
@@ -246,7 +258,7 @@
 			//评价订单
 			appraiseOrder(item) {
 				uni.navigateTo({
-					url: './orderAppraise?orderid=' + item.id
+					url: '/pages/order/appraise?orderid=' + item.id
 				})
 			}
 		}
