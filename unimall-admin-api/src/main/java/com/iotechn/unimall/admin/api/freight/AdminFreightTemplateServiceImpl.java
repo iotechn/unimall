@@ -1,5 +1,7 @@
 package com.iotechn.unimall.admin.api.freight;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,20 +44,24 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean addFreightTemplate(String templateName, String spuLocation, Integer deliveryDeadline, Integer  defaultFreePrice, Integer  defaultFirstNum, Integer  defaultFirstPrice, Integer  defaultContinueNum, Integer  defaultContinuePrice, List<FreightTemplateCarriageDO> freightTemplateCarriageDOList, Long adminId) throws ServiceException {
+    public boolean addFreightTemplate(String templateName, String spuLocation, Integer deliveryDeadline, Integer  defaultFreePrice, Integer  defaultFirstNum, Integer  defaultFirstPrice, Integer  defaultContinueNum, Integer  defaultContinuePrice, List freightTemplateCarriageDOList, Long adminId) throws ServiceException {
         Date now = new Date();
         FreightTemplateDO freightTemplateDO = new FreightTemplateDO(templateName,spuLocation,deliveryDeadline,defaultFreePrice,defaultFirstNum,defaultFirstPrice,defaultContinueNum,defaultContinuePrice);
         freightTemplateDO.setGmtCreate(now);
         freightTemplateDO.setGmtUpdate(freightTemplateDO.getGmtCreate());
         Integer judgeSQL = 1;   //用于判断sql是否执行成功
         judgeSQL = freightTemplateMapper.insert(freightTemplateDO); //插入模板主表
-        if(!(judgeSQL > 0)){
+        if(judgeSQL <= 0){
             throw  new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_INSERT_FAILED);
         }
         if(freightTemplateCarriageDOList == null || freightTemplateCarriageDOList.size() == 0){
             return true;
         }
-        insertFreightTemplateCarriage(freightTemplateDO, freightTemplateCarriageDOList, now);
+        List<FreightTemplateCarriageDO> collect = (List<FreightTemplateCarriageDO>)freightTemplateCarriageDOList.stream().map(item -> {
+            FreightTemplateCarriageDO t = JSONObject.toJavaObject((JSON) item, FreightTemplateCarriageDO.class);
+            return t;
+        }).collect(Collectors.toList());
+        insertFreightTemplateCarriage(freightTemplateDO, collect, now);
         return true;
     }
 
@@ -84,13 +91,13 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateFreightTemplate(Long templateId,String templateName, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstNum, Integer defaultFirstPrice, Integer defaultContinueNum, Integer defaultContinuePrice, List<FreightTemplateCarriageDO> freightTemplateCarriageDOList, Long adminId) throws ServiceException {
+    public boolean updateFreightTemplate(Long templateId,String templateName, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstNum, Integer defaultFirstPrice, Integer defaultContinueNum, Integer defaultContinuePrice, List freightTemplateCarriageDOList, Long adminId) throws ServiceException {
         Date now = new Date();
         FreightTemplateDO freightTemplateDO = new FreightTemplateDO(templateName,spuLocation,deliveryDeadline,defaultFreePrice,defaultFirstNum,defaultFirstPrice,defaultContinueNum,defaultContinuePrice);
         freightTemplateDO.setId(templateId);
         freightTemplateDO.setGmtUpdate(now);
         Integer judgeSQL = freightTemplateMapper.updateById(freightTemplateDO);
-        if(!(judgeSQL > 0)){    //如果主表修改失败
+        if(judgeSQL <= 0){    //如果主表修改失败
             throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
         }
 
@@ -99,7 +106,11 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         if(freightTemplateCarriageDOList == null || freightTemplateCarriageDOList.size() == 0){
             return true;
         }
-        insertFreightTemplateCarriage(freightTemplateDO, freightTemplateCarriageDOList, now);
+        List<FreightTemplateCarriageDO> collect = (List<FreightTemplateCarriageDO>)freightTemplateCarriageDOList.stream().map(item -> {
+            FreightTemplateCarriageDO t = JSONObject.toJavaObject((JSON) item, FreightTemplateCarriageDO.class);
+            return t;
+        }).collect(Collectors.toList());
+        insertFreightTemplateCarriage(freightTemplateDO, collect, now);
         return true;
     }
 
