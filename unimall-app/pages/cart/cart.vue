@@ -21,7 +21,7 @@
 						:class="{'b-b': index!==cartList.length-1}"
 					>
 						<view class="image-wrapper">
-							<image :src="item.skuImg?item.skuImg:item.spuImg" 
+							<image :src="(item.skuImg?item.skuImg:item.spuImg) + '?x-oss-process=style/200px'" 
 								:class="[item.loaded]"
 								mode="aspectFill" 
 								lazy-load 

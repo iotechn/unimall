@@ -124,7 +124,7 @@
 		</view>
 		<view v-for="(item, index) in categoryPickList" :key="index" class="hot-floor">
 			<view class="floor-img-box">
-				<image class="floor-img" :src="item.imgUrl + '?x-oss-process=style/200px'" mode="scaleToFill"></image>
+				<image class="floor-img" :src="item.imgUrl" mode="scaleToFill"></image>
 			</view>
 			<scroll-view class="floor-list" scroll-x>
 				<view class="scoll-wrapper">
@@ -133,7 +133,7 @@
 						class="floor-item"
 						@click="navToDetailPage(spuItem.id)"
 					>
-						<image :src="spuItem.img" mode="aspectFill"></image>
+						<image :src="spuItem.img + '?x-oss-process=style/200px'" mode="aspectFill"></image>
 						<text class="title clamp">{{spuItem.title}}</text>
 						<text class="price">￥{{spuItem.price / 100}}</text>
 					</view>
@@ -161,7 +161,7 @@
 				@click="navToDetailPage(item.id)"
 			>
 				<view class="image-wrapper">
-					<image :src="item.img" mode="aspectFill"></image>
+					<image :src="item.img + '?x-oss-process=style/400px'" mode="aspectFill"></image>
 				</view>
 				<text class="title clamp">{{item.title}}</text>
 				<text class="price">￥{{item.price / 100}}</text>

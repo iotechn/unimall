@@ -21,7 +21,7 @@
 		<view class="goods-section">
 			<!-- 商品列表 -->
 			<view v-for="(item, index) in orderDetail.skuList" :key="index" class="g-item">
-				<image :src="item.img"></image>
+				<image :src="item.img + '?x-oss-process=style/200px'"></image>
 				<view class="right">
 					<text class="title clamp">{{item.spuTitle}}</text>
 					<text class="spec">{{item.title}}</text>
@@ -59,14 +59,14 @@
 		</view>
 
 		<!-- 底部 -->
-		<view class="footer">
+		<!-- <view class="footer">
 			<view class="price-content">
 				<text>实付款</text>
 				<text class="price-tip">￥</text>
 				<text class="price">{{orderDetail.actualPrice | priceFormat}}</text>
 			</view>
 			<text class="submit" @click="submit">提交订单</text>
-		</view>
+		</view> -->
 
 	</view>
 </template>

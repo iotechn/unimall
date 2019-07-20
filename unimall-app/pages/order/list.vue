@@ -17,17 +17,17 @@
 					<view v-for="(item,index) in tabItem.orderList" :key="index" class="order-item">
 						<navigator :url="'/pages/order/detail?orderid=' + item.id">
 							<view class="i-top b-b">
-								<text class="time">{{item.gmtCreate}}</text>
+								<text class="time">{{item.gmtCreate | dateFormat}}</text>
 								<text class="state">{{statusMap[item.status]}}</text>
 							</view>
 
 							<scroll-view v-if="item.skuList.length > 1" class="goods-box" scroll-x>
 								<view v-for="(skuItem, skuIndex) in item.skuList" :key="skuIndex" class="goods-item">
-									<image class="goods-img" :src="skuItem.img" mode="aspectFill"></image>
+									<image class="goods-img" :src="skuItem.img + '?x-oss-process=style/200px'" mode="aspectFill"></image>
 								</view>
 							</scroll-view>
 							<view v-if="item.skuList.length === 1" class="goods-box-single" v-for="(skuItem, skuIndex) in item.skuList" :key="skuIndex">
-								<image class="goods-img" :src="skuItem.img" mode="aspectFill"></image>
+								<image class="goods-img" :src="skuItem.img + '?x-oss-process=style/200px'" mode="aspectFill"></image>
 								<view class="right">
 									<text class="title clamp">{{skuItem.spuTitle}}</text>
 									<text class="attr-box">{{skuItem.title}} x {{skuItem.num}}</text>
@@ -138,7 +138,6 @@
 				],
 			};
 		},
-
 		onLoad(options) {
 			/**
 			 * 修复app端点击除全部订单外的按钮进入时不加载数据的问题
@@ -216,43 +215,68 @@
 			//取消订单
 			cancelOrder(item) {
 				const that = this
-				that.submiting = true
-				that.$api.request('order', 'cancel', {
-					orderNo: item.orderNo
-				}, failres => {
-					that.submiting = false
-					that.$api.msg(failres.errmsg)
-				}).then(res => {
-					that.submiting = false
-					item.status = 80
+				uni.showModal({
+					title: '取消？',
+					content: '您确定要取消此订单吗？',
+					success : (e) => {
+						if (e.confirm) {
+							that.submiting = true
+							that.$api.request('order', 'cancel', {
+								orderNo: item.orderNo
+							}, failres => {
+								that.submiting = false
+								that.$api.msg(failres.errmsg)
+							}).then(res => {
+								that.submiting = false
+								item.status = 80
+							})
+						}
+					}
 				})
+				
 			},
 			//订单退款
 			refundOrder(item) {
 				const that = this
-				that.submiting = true
-				that.$api.request('order', 'refund', {
-					orderNo: item.orderNo
-				}, failres => {
-					that.submiting = false
-					that.$api.msg(failres.errmsg)
-				}).then(res => {
-					that.submiting = false
-					item.status = 60
+				uni.showModal({
+					title: '退款？',
+					content: '您确定要退款吗？',
+					success : (e) => {
+						if (e.confirm) {
+							that.submiting = true
+							that.$api.request('order', 'refund', {
+								orderNo: item.orderNo
+							}, failres => {
+								that.submiting = false
+								that.$api.msg(failres.errmsg)
+							}).then(res => {
+								that.submiting = false
+								item.status = 60
+							})
+						}
+					}
 				})
 			},
 			//确认订单
 			confirmOrder(item) {
 				const that = this
-				that.submiting = true
-				that.$api.request('order', 'confirm', {
-					orderNo: item.orderNo
-				}, failres => {
-					that.submiting = false
-					that.$api.msg(failres.errmsg)
-				}).then(res => {
-					that.submiting = false
-					item.status = 40
+				uni.showModal({
+					title: '退款？',
+					content: '您确定要退款吗？',
+					success : (e) => {
+						if (e.confirm) {
+							that.submiting = true
+							that.$api.request('order', 'confirm', {
+								orderNo: item.orderNo
+							}, failres => {
+								that.submiting = false
+								that.$api.msg(failres.errmsg)
+							}).then(res => {
+								that.submiting = false
+								item.status = 40
+							})
+						}
+					}
 				})
 			},
 			//评价订单

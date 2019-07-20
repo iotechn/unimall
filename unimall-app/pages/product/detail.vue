@@ -132,7 +132,7 @@
 			<view class="mask"></view>
 			<view class="layer attr-content" @click.stop="stopPrevent">
 				<view class="a-t">
-					<image :src="selectedSku.img?selectedSku.img:goods.img"></image>
+					<image :src="(selectedSku.img?selectedSku.img:goods.img) + '?x-oss-process=style/200px'"></image>
 					<view class="right">
 						<text class="price">¥{{selectedSku.price | priceFormat}}</text>
 						<text class="stock">库存：{{selectedSku.stock}}件</text>

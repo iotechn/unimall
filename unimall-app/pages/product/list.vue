@@ -18,7 +18,7 @@
 		<view class="goods-list">
 			<view v-for="(item, index) in goodsList" :key="index" class="goods-item" @click="navToDetailPage(item)">
 				<view class="image-wrapper">
-					<image :src="item.img" mode="aspectFill"></image>
+					<image :src="item.img + '?x-oss-process=style/400px'" mode="aspectFill"></image>
 				</view>
 				<text class="title clamp">{{item.title}}</text>
 				<view class="price-box">

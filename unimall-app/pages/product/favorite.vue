@@ -1,10 +1,12 @@
 <template>
 	<view class="container">
+		<!-- 空白页 -->
+		<empty v-if="loadingType === 'nomore' && favoriteList.length === 0"></empty>
 		<view class="favorite-list">
 			<block v-for="(item, index) in favoriteList" :key="index">
 				<view class="favorite-item" :class="{'b-b': index!==favoriteList.length-1}">
 					<view class="image-wrapper">
-						<image :src="item.img" :class="[item.loaded]" mode="aspectFill" lazy-load @load="onImageLoad('favoriteList', index)"
+						<image :src="item.img + '?x-oss-process=style/200px'" :class="[item.loaded]" mode="aspectFill" lazy-load @load="onImageLoad('favoriteList', index)"
 						 @error="onImageError('favoriteList', index)"></image>
 					</view>
 					<view class="item-right">
@@ -67,7 +69,7 @@
 					pageNo: that.pageNo
 				}).then(res => {
 					that.pageNo = res.data.pageNo + 1
-					that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'noMore'
+					that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'nomore'
 					res.data.items.forEach(item => {
 						that.favoriteList.push(item);
 						if (type === 'refresh') {
