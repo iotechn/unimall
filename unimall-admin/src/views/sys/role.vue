@@ -237,21 +237,29 @@ export default {
       })
     },
     handleDelete(row) {
-      deleteRole(row.id)
-        .then(response => {
-          this.$notify.success({
-            title: '成功',
-            message: '删除管理员成功'
+      this.$confirm('此操作将永久删除该角色---' + row.name + '---, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteRole(row.id)
+          .then(response => {
+            this.$notify.success({
+              title: '成功',
+              message: '删除角色成功'
+            })
+            const index = this.list.indexOf(row)
+            this.list.splice(index, 1)
           })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
-        })
-        .catch(response => {
-          this.$notify.error({
-            title: '失败',
-            message: response.data.errmsg
+          .catch(response => {
+            this.$notify.error({
+              title: '失败',
+              message: response.data.errmsg
+            })
           })
-        })
+      }).catch(() => {
+        return false
+      })
     },
     handlePermission(row) {
       this.permissionDialogFormVisible = true

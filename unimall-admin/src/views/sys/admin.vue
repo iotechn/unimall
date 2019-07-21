@@ -11,12 +11,7 @@
       />
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
       <el-button class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">添加</el-button>
-      <el-button
-        class="filter-item"
-        type="primary"
-        icon="el-icon-circle-plus-outline"
-        @click="dialogTenementVisible = true"
-      >初始化租户</el-button>
+
     </div>
 
     <!-- 查询结果 -->
@@ -65,30 +60,6 @@
       :limit.sync="listQuery.limit"
       @pagination="getList"
     />
-
-    <!-- 创建租户对话框 -->
-    <el-dialog :visible.sync="dialogTenementVisible" title="创建">
-      <el-form
-        ref="tenementForm"
-        :rules="tenementRules"
-        :model="tenementForm"
-        status-icon
-        label-position="left"
-        label-width="100px"
-        style="width: 400px; margin-left:50px;"
-      >
-        <el-form-item label="租户名" prop="title">
-          <el-input v-model="tenementForm.title" />
-        </el-form-item>
-        <el-form-item label="租户Code" prop="tenementCode">
-          <el-input v-model="tenementForm.tenementCode" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogTenementVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleCreateTenement">确定</el-button>
-      </div>
-    </el-dialog>
 
     <!-- 添加或修改对话框 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
@@ -177,8 +148,7 @@ import {
   listAdmin,
   createAdmin,
   updateAdmin,
-  deleteAdmin,
-  initTenement
+  deleteAdmin
 } from '@/api/admin'
 import { roleOptions } from '@/api/role'
 import { uploadPath } from '@/api/storage'
@@ -206,7 +176,6 @@ export default {
         title: undefined,
         tenementCode: undefined
       },
-      dialogTenementVisible: false,
       dataForm: {
         id: undefined,
         username: undefined,
@@ -219,12 +188,6 @@ export default {
       textMap: {
         update: '编辑',
         create: '创建'
-      },
-      tenementRules: {
-        title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
-        tenementCode: [
-          { required: true, message: '租户Code不能为空', trigger: 'blur' }
-        ]
       },
       rules: {
         username: [
@@ -358,44 +321,28 @@ export default {
       })
     },
     handleDelete(row) {
-      deleteAdmin(row.id)
-        .then(response => {
-          this.$notify.success({
-            title: '成功',
-            message: '删除管理员成功'
-          })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
-        })
-        .catch(response => {
-          this.$notify.error({
-            title: '失败',
-            message: response.data.errmsg
-          })
-        })
-    },
-    handleCreateTenement() {
-      this.$refs['tenementForm'].validate(valid => {
-        if (valid) {
-          initTenement(this.tenementForm)
-            .then(response => {
-              this.$notify.success({
-                title: '成功',
-                message: '初始化租户成功'
-              })
-              this.dialogTenementVisible = false
-              this.tenementForm = {
-                title: undefined,
-                tenementCode: undefined
-              }
+      this.$confirm('此操作将永久删除该管理员---' + row.username + '---, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteAdmin(row.id)
+          .then(response => {
+            this.$notify.success({
+              title: '成功',
+              message: '删除管理员成功'
             })
-            .catch(response => {
-              this.$notify.error({
-                title: '失败',
-                message: response.data.errmsg
-              })
+            const index = this.list.indexOf(row)
+            this.list.splice(index, 1)
+          })
+          .catch(response => {
+            this.$notify.error({
+              title: '失败',
+              message: response.data.errmsg
             })
-        }
+          })
+      }).catch(() => {
+        return false
       })
     }
   }

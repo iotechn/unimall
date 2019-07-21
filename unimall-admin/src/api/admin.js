@@ -53,13 +53,3 @@ export function deleteAdmin(id) {
   })
 }
 
-export function initTenement(params) {
-  return request({
-    method: 'post',
-    params: {
-      _gp: 'tenement',
-      _mt: 'initTenement',
-      ...params
-    }
-  })
-}

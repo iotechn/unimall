@@ -2,49 +2,40 @@
   <div class="app-container">
     <el-card class="box-card">
       <h3>商铺信息</h3>
-      <el-form ref="dataForm" :rules="rules" :model="nearby" label-width="150px">
+      <el-form ref="dataForm" :rules="rules" :model="dataForm" label-width="150px">
         <el-form-item label="标题" prop="title">
-          <el-input v-model="nearby.title" />
+          <el-input v-model="dataForm.title" />
         </el-form-item>
-        <el-form-item label="商铺logo">
+        <el-form-item label="商铺logo" prop="logoUrl">
           <el-upload
             :action="uploadPath"
             :show-file-list="false"
-            :on-success="handleimgsUrl"
-            :on-remove="handleRemove"
+            :on-success="uploadSuccessHandle"
+            :before-upload="onBeforeUpload"
             class="avatar-uploader"
+            accept=".jpg, .jpeg, .png, .gif"
           >
-            <img v-if="nearby.logoUrl" :src="nearby.logoUrl" class="avatar" >
+            <img v-if="list.logoUrl" :src="dataForm.logoUrl" class="avatar" >
             <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
         </el-form-item>
+
         <el-form-item label="描述" prop="description">
-          <el-input v-model="nearby.description" />
+          <el-input v-model="dataForm.description" />
         </el-form-item>
         <el-form-item label="地址" prop="address">
-          <el-input v-model="nearby.address" />
+          <el-input v-model="dataForm.address" />
         </el-form-item>
-        <el-form-item label="H5链接" prop="h5url">
-          <el-input v-model="nearby.h5url" />
-        </el-form-item>
-        <el-form-item label="展示方式" prop="type">
-          <el-radio-group v-model="nearby.type">
+        <el-form-item label="展示方式" prop="showType">
+          <el-radio-group v-model="dataForm.showType">
             <el-radio :label="1">商品列表</el-radio>
             <el-radio :label="2">点餐列表</el-radio>
-            <el-radio :label="3">广告商户</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="nearby.status">
-            <el-radio :label="1">正在营业</el-radio>
-            <el-radio :label="2">暂停营业</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
     </el-card>
 
     <div class="op-container">
-      <!--<el-button @click="handleCancel">取消</el-button>-->
       <el-button type="primary" @click="handleEdit">保存更改</el-button>
     </div>
   </div>
@@ -84,11 +75,10 @@
 </style>
 
 <script>
-import { detail, upsert } from '@/api/nearby'
-import { createStorage, uploadPath } from '@/api/storage'
+import { uploadPath } from '@/api/storage'
 import Editor from '@tinymce/tinymce-vue'
-import { MessageBox } from 'element-ui'
 import { getToken } from '@/utils/auth'
+import { listMerchant, updateMerchant } from '@/api/merchant'
 
 export default {
   name: 'GoodsEdit',
@@ -96,46 +86,21 @@ export default {
   data() {
     return {
       uploadPath,
-      nearby: { title: undefined, status: undefined, logoUrl: undefined },
-      rules: {
-        type: [
-          { required: true, message: '商铺展示类型不能为空', trigger: 'blur' }
-        ],
-        address: [
-          { required: true, message: '商铺地址不能为空', trigger: 'blur' }
-        ],
-        title: [
-          { required: true, message: '商铺标题不能为空', trigger: 'blur' }
-        ],
-        description: [
-          { required: true, message: '商铺描述不能为空', trigger: 'blur' }
-        ],
-        status: [
-          { required: true, message: '商铺描述不能为空', trigger: 'blur' }
-        ]
+      list: [],
+      dataForm: {
+        title: undefined,
+        logoUrl: undefined,
+        description: undefined,
+        address: undefined,
+        showType: undefined
       },
-      editorInit: {
-        language: 'zh_CN',
-        convert_urls: false,
-        plugins: [
-          'advlist anchor autolink autosave code codesample colorpicker colorpicker contextmenu directionality emoticons fullscreen hr image imagetools importcss insertdatetime link lists media nonbreaking noneditable pagebreak paste preview print save searchreplace spellchecker tabfocus table template textcolor textpattern visualblocks visualchars wordcount'
-        ],
-        toolbar: [
-          'searchreplace bold italic underline strikethrough alignleft aligncenter alignright outdent indent  blockquote undo redo removeformat subscript superscript code codesample',
-          'hr bullist numlist link image charmap preview anchor pagebreak insertdatetime media table emoticons forecolor backcolor fullscreen'
-        ],
-        images_upload_handler: function(blobInfo, success, failure) {
-          const formData = new FormData()
-          formData.append('file', blobInfo.blob())
-          createStorage(formData)
-            .then(res => {
-              success(res.data.data.url)
-            })
-            .catch(() => {
-              failure('上传失败，请重新上传')
-            })
-        }
-      }
+      rules: {
+        showType: [{ required: true, message: '商铺展示类型不能为空', trigger: 'blur' }],
+        address: [{ required: true, message: '商铺地址不能为空', trigger: 'blur' }],
+        title: [{ required: true, message: '商铺标题不能为空', trigger: 'blur' }],
+        description: [{ required: true, message: '商铺描述不能为空', trigger: 'blur' }]
+      },
+      listLoading: false
     }
   },
   computed: {
@@ -146,33 +111,37 @@ export default {
     }
   },
   created() {
-    this.init()
+    this.getList()
   },
   methods: {
-    init: function() {
-      detail().then(response => {
-        debugger
-        this.nearby = response.data.data
-      })
+
+    getList: function() {
+      this.listLoading = true
+      listMerchant()
+        .then(response => {
+          this.list = response.data.data
+          this.dataForm = Object.assign({}, this.list)
+          this.listLoading = false
+        })
+        .catch(() => {
+          this.list = []
+          this.listLoading = false
+        })
     },
-    //    handleCancel: function() {
-    //      this.$router.push({ path: '/nearby/list' })
-    //    },
     handleEdit: function() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          upsert(this.nearby)
+          updateMerchant(this.dataForm)
             .then(response => {
               this.$notify.success({
                 title: '成功',
-                message: '保存成功'
+                message: '更改成功'
               })
-              this.$router.push({ path: '/promotion/merchant' })
             })
             .catch(response => {
-              MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
-                confirmButtonText: '确定',
-                type: 'error'
+              this.$notify.error({
+                title: '失败',
+                message: '更改失败'
               })
             })
         } else {
@@ -183,19 +152,24 @@ export default {
         }
       })
     },
-    uploadOverrun: function() {
-      this.$message({
-        type: 'error',
-        message: '上传文件个数超出限制!最多上传5张图片!'
-      })
+    // 上传图片了处理图片
+    uploadSuccessHandle(e) {
+      this.list.logoUrl = e.url
+      this.dataForm.logoUrl = e.url
+      this.dialogFormVisible = false
+      this.dialogFormVisible = true
     },
-    handleimgsUrl(response, file, fileList) {
-      if (response.errno === 200) {
-        this.nearby.logoUrl = response.url
+    onBeforeUpload(file) {
+      const isIMAGE = file.type === 'image/jpeg' || 'image/gif' || 'image/png' || 'image/jpg'
+      const isLt1M = file.size / 1024 / 1024 < 1
+
+      if (!isIMAGE) {
+        this.$message.error('上传文件只能是图片格式!')
       }
-    },
-    handleRemove: function(file, fileList) {
-      this.nearby.logoUrl = undefined
+      if (!isLt1M) {
+        this.$message.error('上传文件大小不能超过 1MB!')
+      }
+      return isIMAGE && isLt1M
     }
   }
 }

@@ -353,14 +353,6 @@ export default {
         if (valid) {
           updateCategory(this.dataForm)
             .then(() => {
-              // 因为名字有点不一样，所以还是重新查询吧
-              // for (const v of this.list) {
-              //   if (v.id === this.dataForm.id) {
-              //     const index = this.list.indexOf(v)
-              //     this.list.splice(index, 1, this.dataForm)
-              //     break
-              //   }
-              // }
               this.listQuery.id = this.dataForm.id
               this.getList()
               this.dialogFormVisible = false
@@ -380,21 +372,29 @@ export default {
     },
     // 删除时使用
     handleDelete(row) {
-      deleteCategory(row.value)
-        .then(response => {
-          this.$notify.success({
-            title: '成功',
-            message: '删除成功'
+      this.$confirm('此操作将永久删除该类目--' + row.label + '--, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteCategory(row.value)
+          .then(response => {
+            this.$notify.success({
+              title: '成功',
+              message: '删除成功'
+            })
+            const index = this.list.indexOf(row)
+            this.list.splice(index, 1)
           })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
-        })
-        .catch(response => {
-          this.$notify.error({
-            title: '失败',
-            message: response.data.errmsg
+          .catch(response => {
+            this.$notify.error({
+              title: '失败',
+              message: response.data.errmsg
+            })
           })
-        })
+      }).catch(() => {
+        return false
+      })
     },
     // 上传图片前调用
     onBeforeUpload(file) {

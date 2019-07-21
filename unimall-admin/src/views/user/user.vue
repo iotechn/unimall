@@ -48,13 +48,13 @@
         @click="handleFilter"
       >查找</el-button>
       <!--添加用户-->
-      <el-button
+      <!-- <el-button
         v-permission="['system:user:create']"
         class="filter-item"
         type="primary"
         icon="el-icon-edit"
         @click="handleCreate"
-      >添加用户</el-button>
+      >添加用户</el-button> -->
     </div>
 
     <!-- 查询结果 -->
@@ -366,21 +366,29 @@ export default {
       })
     },
     handleDelete(row) {
-      deleteUser(row.id, row.nickname)
-        .then(response => {
-          this.$notify.success({
-            title: '成功',
-            message: '删除成功'
+      this.$confirm('此操作将永久删除该用户---' + row.nickname + '---, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteUser(row.id, row.nickname)
+          .then(response => {
+            this.$notify.success({
+              title: '成功',
+              message: '删除成功'
+            })
+            const index = this.list.indexOf(row)
+            this.list.splice(index, 1)
           })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
-        })
-        .catch(response => {
-          this.$notify.error({
-            title: '失败',
-            message: response.data.errmsg
+          .catch(response => {
+            this.$notify.error({
+              title: '失败',
+              message: response.data.errmsg
+            })
           })
-        })
+      }).catch(() => {
+        return false
+      })
     }
   }
 }

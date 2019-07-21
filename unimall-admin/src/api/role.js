@@ -16,7 +16,7 @@ export function createRole(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
-      _gp: 'role',
+      _gp: 'admin.role',
       _mt: 'create',
       role: JSON.stringify(data)
     })

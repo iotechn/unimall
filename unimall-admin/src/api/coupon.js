@@ -56,10 +56,3 @@ export function deleteCoupon(data) {
   })
 }
 
-export function listCouponUser(query) {
-  return request({
-    url: '/coupon/listuser',
-    method: 'get',
-    params: query
-  })
-}

@@ -219,6 +219,16 @@ export const asyncRouterMap = [
           title: '优惠卷管理',
           noCache: true
         }
+      },
+      {
+        path: 'merchant',
+        component: () => import('@/views/promotion/merchant'),
+        name: 'merchant',
+        meta: {
+          perms: ['promote:coupon:create', 'promote:coupon:delete', 'promote:coupon:update', 'promote:coupon:query'],
+          title: '商铺信息',
+          noCache: true
+        }
       }
     ]
   },
