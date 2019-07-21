@@ -413,21 +413,29 @@ export default {
       })
     },
     handleDelete(row) {
-      deleteAd(row.id, row.adType)
-        .then(response => {
-          this.$notify.success({
-            title: '成功',
-            message: '删除成功'
+      this.$confirm('此操作将永久删除该广告--' + row.title + '--, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteAd(row.id, row.adType)
+          .then(response => {
+            this.$notify.success({
+              title: '成功',
+              message: '删除成功'
+            })
+            const index = this.list.indexOf(row)
+            this.list.splice(index, 1)
           })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
-        })
-        .catch(response => {
-          this.$notify.error({
-            title: '失败',
-            message: response.data.errmsg
+          .catch(response => {
+            this.$notify.error({
+              title: '失败',
+              message: response.data.errmsg
+            })
           })
-        })
+      }).catch(() => {
+        return false
+      })
     },
     // 上传图片了处理图片
     uploadSuccessHandle(e, file) {
