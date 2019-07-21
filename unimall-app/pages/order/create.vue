@@ -20,7 +20,7 @@
 		<view class="goods-section">
 			<!-- 商品列表 -->
 			<view v-for="(item, index) in orderReqeust.skuList" :key="index" class="g-item">
-				<image :src="item.skuImg?item.skuImg:item.spuImg"></image>
+				<image :src="(item.skuImg?item.skuImg:item.spuImg) + '?x-oss-process=style/200px'"></image>
 				<view class="right">
 					<text class="title clamp">{{item.title}}</text>
 					<text class="spec">{{item.skuTitle}}</text>

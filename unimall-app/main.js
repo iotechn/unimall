@@ -3,6 +3,11 @@ import store from './store'
 import App from './App'
 
 import Json from './Json' //测试用数据
+import * as filters from './filters'
+
+Object.keys(filters).forEach(key => {
+  Vue.filter(key, filters[key])
+})
 
 //TODO 放到配置文件
 // const baseUrl = 'http://127.0.0.1:8080'
