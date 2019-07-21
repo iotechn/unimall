@@ -266,6 +266,7 @@ public class OrderServiceImpl implements OrderService {
                         List<Long> skuIds = skuList.stream().map(item -> item.getSkuId()).collect(Collectors.toList());
                         cartMapper.delete(new EntityWrapper<CartDO>().in("sku_id", skuIds).eq("user_id", userId));
                     }
+                    //直接购买传值为 "buy"
                 }
 
                 return orderDO.getOrderNo();
@@ -395,10 +396,13 @@ public class OrderServiceImpl implements OrderService {
         if (orderDO.getStatus() < OrderStatusType.WAIT_CONFIRM.getCode()) {
             throw new AppServiceException(ExceptionDefinition.ORDER_HAS_NOT_SHIP);
         }
-        if (!StringUtils.isEmpty(orderDO.getShipCode()) && !StringUtils.isEmpty(orderDO.getShipNo())) {
+        if (StringUtils.isEmpty(orderDO.getShipCode()) || StringUtils.isEmpty(orderDO.getShipNo())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_DID_NOT_SET_SHIP);
         }
         ShipTraceDTO shipTraceList = freightBizService.getShipTraceList(orderDO.getShipNo(), orderDO.getShipCode());
+        if (CollectionUtils.isEmpty(shipTraceList.getTraces())) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_DO_NOT_EXIST_SHIP_TRACE);
+        }
         return shipTraceList;
     }
 

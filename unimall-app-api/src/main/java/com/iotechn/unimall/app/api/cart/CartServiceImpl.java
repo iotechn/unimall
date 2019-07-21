@@ -108,6 +108,14 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
+    public Boolean removeCartAll(Long userId) throws ServiceException {
+        return cartMapper.delete(
+                new EntityWrapper<CartDO>()
+                        .eq("user_id", userId)) > 0;
+    }
+
+    @Override
     public Integer updateCartItemNum(Long cartId, Integer num, Long userId) throws ServiceException {
         CartDO cartDO = new CartDO();
         cartDO.setNum(num);

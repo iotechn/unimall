@@ -20,6 +20,11 @@ public class ShipTraceDTO {
      */
     private String shipCode;
 
+    /**
+     * 承运商名称
+     */
+    private String shipName;
+
     private String errmsg;
 
     private Integer errcode;

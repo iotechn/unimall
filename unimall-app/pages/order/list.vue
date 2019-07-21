@@ -51,6 +51,7 @@
 						</view>
 						<view class="action-box b-t" v-if="item.status == 30">
 							<button :disabled="submiting" class="action-btn" @click="refundOrder(item)">申请退款</button>
+							<button :disabled="submiting" class="action-btn" @click="showShipTrace(item)">查看物流</button>
 							<button :disabled="submiting" class="action-btn recom" @click="confirmOrder(item)">确认收货</button>
 						</view>
 						<view class="action-box b-t" v-if="item.status == 40">
@@ -277,6 +278,11 @@
 							})
 						}
 					}
+				})
+			},
+			showShipTrace(item) {
+				uni.navigateTo({
+					url: "/pages/order/trace?orderno=" + item.orderNo
 				})
 			},
 			//评价订单

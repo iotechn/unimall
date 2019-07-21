@@ -113,7 +113,7 @@
 							loginType: loginType,
 							raw: JSON.stringify(wxres)
 						}, failres => {
-							that.$api.msg(failres.msg)
+							that.$api.msg(failres.errmsg)
 							uni.hideLoading()
 						}).then(res => {
 							that.logining = false

@@ -31,4 +31,6 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
 
     public List<KVModel<String, Long>> selectOrderSumStatistics(String gmtStart);
 
+    public List<String> selectExpireOrderNos(@Param("status") Integer status, @Param("time") Date time);
+
 }

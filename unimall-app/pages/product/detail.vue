@@ -147,8 +147,12 @@
 				<view class="attr-list">
 					<!-- <text>规格</text> -->
 					<view class="item-list">
-						<text v-for="(skuItem, skuIndex) in goods.skuList" :key="skuIndex" class="tit" :class="{selected: skuItem === selectedSku}"
-						 @click="selectSpec(skuItem)">
+						<text 
+							v-for="(skuItem, skuIndex) in goods.skuList" 
+							:key="skuIndex" 
+							class="tit"
+							:class="{selected: skuIndex === selectedSkuIndex}"
+							@click="selectSpec(skuItem, skuIndex)">
 							{{skuItem.title}}
 						</text>
 					</view>
@@ -184,6 +188,7 @@
 				specSelected: [],
 				shareList: [],
 				selectedSku: {},
+				selectedSkuIndex: -1,
 				toggleCallback: undefined,
 				maskState: 0, //优惠券面板显示状态
 				couponList: []
@@ -198,7 +203,7 @@
 			that.$api.request('goods', 'getGoods', {
 				spuId: options.id
 			}, failres => {
-				that.$api.msg(failres.msg)
+				that.$api.msg(failres.errmsg)
 				uni.hideLoading()
 			}).then(res => {
 				that.goods = res.data
@@ -245,12 +250,14 @@
 					this.specClass = 'show';
 					if (!this.selectedSku.title) {
 						this.selectedSku = this.goods.skuList[0]
+						this.selectedSkuIndex = 0
 					}
 				}
 			},
 			//选择规格
-			selectSpec(skuItem) {
+			selectSpec(skuItem, skuIndex) {
 				this.selectedSku = skuItem
+				this.selectedSkuIndex = skuIndex
 			},
 			//加入购物车
 			addCart(e) {
@@ -295,9 +302,32 @@
 				}
 			},
 			buy() {
-				//TODO 构建orderReqeust
+				const that = this
+				if (that.selectedSkuIndex < 0) {
+					that.$api.msg('请选择类型')
+					return
+				}
+				
+				let skuItem = {
+					skuId: that.selectedSku.id,
+					num: 1,
+					title: that.goods.title,
+					originalPrice: that.selectedSku.originalPrice,
+					price: that.selectedSku.price,
+					vipPrice: that.selectedSku.vipPrice,
+					skuTitle: that.selectedSku.title,
+					spuImg: that.goods.img,
+					skuImg: that.selectedSku.img,
+					stock: that.selectedSku.stock,
+					spuId: that.goods.id,
+					categoryId: that.goods.categoryId,
+					categoryIdList: that.goods.categoryIds
+				}
+				debugger
+				let skuList = [1]
+				skuList[0] = skuItem
 				uni.navigateTo({
-					url: `/pages/order/create`
+					url: `/pages/order/create?takeway=buy&data=${JSON.stringify(skuList)}`
 				})
 			},
 			//查看所有评价

@@ -7,6 +7,7 @@ import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceItemDTO;
+import com.iotechn.unimall.data.enums.ShipCodeType;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -50,16 +51,17 @@ public class KdniaoTrackQueryAPI implements ShipTraceQuery {
             shipTraceDTO.setErrcode(jsonObject.getInteger("State"));
             shipTraceDTO.setShipNo(shipNo);
             shipTraceDTO.setShipCode(shipCode);
+            shipTraceDTO.setShipName(ShipCodeType.getByCode(shipCode).getMsg());
             shipTraceDTO.setErrmsg(jsonObject.getString("Reason"));
             msg = shipTraceDTO.getErrmsg();
             List<ShipTraceItemDTO> traces = new LinkedList<>();
             JSONArray tracesFromJson = jsonObject.getJSONArray("Traces");
-            if (CollectionUtils.isEmpty(tracesFromJson)) {
+            if (!CollectionUtils.isEmpty(tracesFromJson)) {
                 for (int i = 0; i < tracesFromJson.size(); i++) {
                     ShipTraceItemDTO shipTraceItemDTO = new ShipTraceItemDTO();
                     shipTraceItemDTO.setStation(tracesFromJson.getJSONObject(i).getString("AcceptStation"));
                     shipTraceItemDTO.setTime(tracesFromJson.getJSONObject(i).getString("AcceptTime"));
-                    tracesFromJson.add(shipTraceItemDTO);
+                    traces.add(shipTraceItemDTO);
                 }
             }
             shipTraceDTO.setTraces(traces);
@@ -76,12 +78,12 @@ public class KdniaoTrackQueryAPI implements ShipTraceQuery {
      * @throws Exception
      */
     private String getOrderTracesByJson(String shipCode, String shipNo) throws Exception {
-        String requestData = "{'OrderCode':'','ShipperCode':'" + shipCode + "','LogisticCode':'" + shipNo + "'}";
+        String requestData = "{\"OrderCode\":\"\",\"ShipperCode\":\"" + shipCode + "\",\"LogisticCode\":\"" + shipNo + "\"}";
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
         StringBuilder sb = new StringBuilder();
         sb.append("RequestData=");
         sb.append(URLEncoder.encode(requestData, "UTF-8"));
-        sb.append("&businessID=");
+        sb.append("&EBusinessID=");
         sb.append(businessID);
         sb.append("&RequestType=1002");
         String dataSign = encrypt(requestData, appKey, "UTF-8");

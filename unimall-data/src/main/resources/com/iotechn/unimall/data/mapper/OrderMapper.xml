@@ -81,5 +81,15 @@
             `key`;
     </select>
 
+    <select id="selectExpireOrderNos" resultType="java.lang.String">
+        SELECT
+           order_no
+        FROM
+            unimall_order
+        WHERE
+            `status` = #{status}
+            AND gmt_update &lt; #{time}
+    </select>
+
 
 </mapper>

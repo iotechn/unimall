@@ -208,7 +208,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
 
     @Override
     public Page<SpuDTO> list(Integer page, Integer limit, Long categoryId, String title, Long adminId) throws ServiceException {
-        return goodsBizService.getGoodsPage(page, limit, categoryId, "id", title);
+        return goodsBizService.getGoodsPage(page, limit, categoryId, "id", false, title);
     }
 
     @Override

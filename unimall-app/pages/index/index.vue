@@ -204,7 +204,7 @@
 					title: '正在加载'
 				})
 				that.$api.request('integral', 'getIndexData', failres => {
-					that.$api.msg(failres.msg)
+					that.$api.msg(failres.errmsg)
 					uni.hideLoading()
 				}).then(res => {
 					let data = res.data
