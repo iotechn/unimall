@@ -83,8 +83,8 @@
 						<view class="t-box">
 							<text class="title clamp">{{item.spuTitle}}</text>
 							<view class="price-box">
-								<text class="price">￥{{item.spuPrice / 100.0}}</text> 
-								<text v-if="item.spuOriginalPrice > item.spuPrice" class="m-price">￥{{item.spuOriginalPrice / 100}}</text> 
+								<text class="price">￥{{isVip ? (item.spuVipPrice / 100.0 + ' [VIP]') : (item.spuPrice / 100.0)}}</text> 
+								<text v-if="item.spuOriginalPrice > (isVip ? item.spuVipPrice : item.spuPrice)" class="m-price">￥{{item.spuOriginalPrice / 100}}</text> 
 							</view>
 							
 							<view class="pro-box">
@@ -98,8 +98,8 @@
 						<view class="t-box">
 							<text class="title clamp">{{windowSpuList[index+1].spuTitle}}</text>
 							<view class="price-box">
-								<text class="price">￥{{windowSpuList[index+1].spuPrice / 100.0}}</text> 
-								<text v-if="windowSpuList[index+1].spuOriginalPrice > windowSpuList[index+1].spuPrice" class="m-price">￥{{windowSpuList[index+1].spuOriginalPrice / 100.0}}</text> 
+								<text class="price">￥{{isVip ? (windowSpuList[index+1].spuVipPrice / 100.0 + ' [VIP]') : (windowSpuList[index+1].spuPrice / 100.0)}}</text> 
+								<text v-if="windowSpuList[index+1].spuOriginalPrice > (isVip ? (windowSpuList[index+1].spuVipPrice) : (windowSpuList[index+1].spuPrice))" class="m-price">￥{{windowSpuList[index+1].spuOriginalPrice / 100.0}}</text> 
 							</view>
 							<view class="pro-box">
 								<text>累计销售:{{item.spuSales}}件</text>
@@ -135,7 +135,7 @@
 					>
 						<image :src="spuItem.img + '?x-oss-process=style/200px'" mode="aspectFill"></image>
 						<text class="title clamp">{{spuItem.title}}</text>
-						<text class="price">￥{{spuItem.price / 100}}</text>
+						<text class="price">￥{{(isVip ? spuItem.vipPrice : spuItem.price) / 100 }}</text>
 					</view>
 					<view class="more">
 						<text>查看全部</text>
@@ -186,10 +186,13 @@
 				categoryPickList: [],
 				categoryButtomList: [],
 				salesTop: [],
-				banner: undefined
+				banner: undefined,
+				isVip: false
 			};
 		},
-
+		onShow() {
+			this.isVip = this.$api.isVip()
+		},
 		onLoad() {
 			this.loadData()
 		},

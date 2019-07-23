@@ -187,7 +187,6 @@ public class OrderServiceImpl implements OrderService {
                     couponPrice = userCouponFromDB.getDiscount();
                 }
 
-                //TODO 运费
                 Integer freightPrice = freightBizService.getFreightMoney(orderRequest);
                 //参数强校验 END
                 //???是否校验actualPrice??强迫校验？
@@ -202,7 +201,6 @@ public class OrderServiceImpl implements OrderService {
                     orderDO.setCouponId(orderRequest.getCoupon().getCouponId());
                     orderDO.setCouponPrice(couponPrice);
                 }
-                //TODO 运费
                 orderDO.setFreightPrice(0);
                 orderDO.setOrderNo(GeneratorUtil.genOrderId(MACHINE_NO, ENV));
                 orderDO.setUserId(userId);

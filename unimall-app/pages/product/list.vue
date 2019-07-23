@@ -19,7 +19,7 @@
 				</view>
 				<text class="title clamp">{{item.title}}</text>
 				<view class="price-box">
-					<text class="price">{{item.price / 100.0}}</text>
+					<text class="price">{{isVip? (item.vipPrice / 100.0 + ' [VIP]') : (item.price / 100.0)}}</text>
 					<text>已售 {{item.sales?item.sales:0}}</text>
 				</view>
 			</view>
@@ -46,10 +46,13 @@
 				goodsList: [],
 				cateId: 0,
 				keywords: '',
-				pageNo: 1
+				pageNo: 1,
+				isVip: false
 			};
 		},
-
+		onShow() {
+			this.isVip = this.$api.isVip()
+		},
 		onLoad(options) {
 			// #ifdef H5
 			this.headerTop = document.getElementsByTagName('uni-page-head')[0].offsetHeight + 'px';

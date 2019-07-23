@@ -131,7 +131,7 @@
 				skuCategoryPriceMap: {},
 				maskState: 0, //优惠券面板显示状态
 				couponList: [],
-
+				isVip: false,
 				addressData: {
 					consignee: '',
 					phone: '',
@@ -142,6 +142,9 @@
 					defaultAddress: false,
 				}
 			}
+		},
+		onShow() {
+			this.isVip = this.$api.isVip()
 		},
 		onLoad(option) {
 			//商品数据

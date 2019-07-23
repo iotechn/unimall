@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.config;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.biz.service.config.ConfigBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.ConfigDO;
 import com.iotechn.unimall.data.dto.ConfigDTO;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,6 +24,9 @@ public class AdminMerchantConfigServiceImpl implements AdminMerchantConfigServic
 
     @Autowired
     private ConfigMapper configMapper;
+
+    @Autowired
+    private ConfigBizService configBizService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -45,14 +47,13 @@ public class AdminMerchantConfigServiceImpl implements AdminMerchantConfigServic
         configMapper.insert(descDO);
         configMapper.insert(addressDO);
         configMapper.insert(showTypeDO);
+        configBizService.clearMerchantConfigCache();
         return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateMerchant(Long adminId, String title, String logoUrl, String description, String address, Integer showType) throws ServiceException {
-        Date now = new Date();
-
         configMapper.update(new ConfigDO("title",title), new EntityWrapper<ConfigDO>().eq("key_word","title"));
 
         configMapper.update(new ConfigDO("logoUrl",logoUrl), new EntityWrapper<ConfigDO>().eq("key_word","logoUrl"));
@@ -63,29 +64,12 @@ public class AdminMerchantConfigServiceImpl implements AdminMerchantConfigServic
 
         configMapper.update(new ConfigDO("showType",String.valueOf(showType)), new EntityWrapper<ConfigDO>().eq("key_word","showType"));
 
-
+        configBizService.clearMerchantConfigCache();
         return true;
     }
 
     @Override
     public ConfigDTO getMerchant(Long adminId) throws ServiceException {
-
-        List<ConfigDO> list = configMapper.selectList(null);
-
-        ConfigDTO configDTO = new ConfigDTO();
-
-        for(ConfigDO configDO : list){
-            switch (configDO.getKeyWord()){
-                case "title": configDTO.setTitle(configDO.getValueWorth());break;
-                case "logoUrl":configDTO.setLogoUrl(configDO.getValueWorth());break;
-                case "description":configDTO.setDescription(configDO.getValueWorth());break;
-                case "address":configDTO.setAddress(configDO.getValueWorth());break;
-                case "h5url":configDTO.setH5url(configDO.getValueWorth());break;
-                case "showType":configDTO.setShowType(Integer.parseInt(configDO.getValueWorth()));break;
-                case "status":configDTO.setStatus(Integer.parseInt(configDO.getValueWorth()));break;
-            }
-        }
-
-        return configDTO;
+        return configBizService.getMerchantConfig();
     }
 }

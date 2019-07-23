@@ -14,9 +14,9 @@
 			<text class="title">{{goods.title}}</text>
 			<view class="price-box">
 				<text class="price-tip">¥</text>
-				<text class="price">{{goods.price | priceFormat}}</text>
-				<text v-if="goods.price < goods.originalPrice" class="m-price">¥{{goods.originalPrice | priceFormat}}</text>
-				<text v-if="goods.price < goods.originalPrice" class="coupon-tip">{{goods.price / goods.originalPrice * 10}}折</text>
+				<text class="price">{{isVip? (goods.vipPrice / 100.0 + ' [VIP]'): (goods.price / 100.0)}}</text>
+				<text v-if="(isVip? goods.vipPrice: goods.price) < goods.originalPrice" class="m-price">¥{{goods.originalPrice / 100}}</text>
+				<text v-if="(isVip? goods.vipPrice: goods.price) < goods.originalPrice" class="coupon-tip">{{(isVip? goods.vipPrice: goods.price) / goods.originalPrice * 10}}折</text>
 			</view>
 			<view class="bot-row">
 				<text>销量: {{goods.sales}}</text>
@@ -134,7 +134,7 @@
 				<view class="a-t">
 					<image :src="(selectedSku.img?selectedSku.img:goods.img) + '?x-oss-process=style/200px'"></image>
 					<view class="right">
-						<text class="price">¥{{selectedSku.price | priceFormat}}</text>
+						<text class="price">¥{{isVip ? (selectedSku.vipPrice / 100.0 + ' [VIP]') : selectedSku.price / 100.0}}</text>
 						<text class="stock">库存：{{selectedSku.stock}}件</text>
 						<view class="selected">
 							已选：
@@ -168,11 +168,6 @@
 <script>
 	import share from '@/components/share';
 	export default {
-		filters: {
-			priceFormat(price) {
-				return price / 100.0;
-			}
-		},
 		components: {
 			share
 		},

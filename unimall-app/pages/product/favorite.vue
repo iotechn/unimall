@@ -14,8 +14,8 @@
 						<text class="attr">{{item.description}}</text>
 						<text class="attr">累计销售{{item.sales}}件</text>
 						
-						<text class="price"><text v-if="item.originalPrice > item.price" style="text-decoration:line-through">¥{{item.originalPrice / 100.0}}</text>
-							¥{{item.price / 100.0}}</text>
+						<text class="price"><text v-if="item.originalPrice > (isVip?item.vipPrice:item.price)" style="text-decoration:line-through">¥{{item.originalPrice / 100.0}}</text>
+							¥{{(isVip?(item.vipPrice / 100.0 + ' [VIP]'):item.price / 100.0)}}</text>
 						
 					</view>
 					<text class="del-btn yticon icon-fork" @click="deleteFavorite(item)"></text>
@@ -41,10 +41,13 @@
 			return {
 				favoriteList: [],
 				pageNo: 1,
-				loadingType: 'more'
+				loadingType: 'more',
+				isVip: false
 			};
 		},
-
+		onShow() {
+			this.isVip = this.$api.isVip()
+		},
 		onLoad(options) {
 			this.loadData()
 		},

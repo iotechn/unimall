@@ -24,6 +24,6 @@ function padLeftZero (str) {
 };
 
  // 时间过滤
- export function dateFormat(time) {
+export function dateFormat(time) {
   return getformatDate(new Date(time), "yyyy-MM-dd hh:mm");
 }
