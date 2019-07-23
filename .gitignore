@@ -60,4 +60,4 @@ mvnw.cmd
 
 
 ###logs###
-unimall.log
+unimall.log*

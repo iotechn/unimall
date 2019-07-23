@@ -10,9 +10,9 @@ Object.keys(filters).forEach(key => {
 })
 
 //TODO 放到配置文件
-// const baseUrl = 'http://127.0.0.1:8080'
+const baseUrl = 'http://127.0.0.1:8080'
 // const baseUrl = 'https://fresh.easycampus.cn'
-const baseUrl = 'http://192.168.8.188:8080'
+// const baseUrl = 'http://192.168.8.188:8080'
 /**
  *  因工具函数属于公司资产, 所以直接在Vue实例挂载几个常用的函数
  *  所有测试用数据均存放于根目录json.js
@@ -48,6 +48,10 @@ const logout = () => {
 	uni.removeStorage({
 		key: 'userInfo'
 	})
+}
+
+const isVip = () => {
+	return userInfo && userInfo.level
 }
 
 const request = (_gp, _mt, data = {}, failCallback) => {
@@ -198,7 +202,8 @@ Vue.prototype.$api = {
 	prePage,
 	request,
 	uploadImg,
-	logout
+	logout,
+	isVip
 };
 
 App.mpType = 'app'

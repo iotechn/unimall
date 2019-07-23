@@ -17,7 +17,10 @@ public enum ShipCodeType {
     UC("UC", "优速快递"),
     DBL("DBL", "德邦快递"),
     ZJS("ZJS", "宅急送"),
-    TNT("TNT", "TNT快递");
+    TNT("TNT", "TNT快递"),
+
+
+    OTHERS("OTHERS", "其他快递");
 
 
     private String code;
@@ -38,5 +41,13 @@ public enum ShipCodeType {
         return msg;
     }
 
+    public static ShipCodeType getByCode(String code) {
+        for (ShipCodeType type : values()) {
+            if (type.getCode().equals(code)) {
+                return type;
+            }
+        }
+        return OTHERS;
+    }
 
 }

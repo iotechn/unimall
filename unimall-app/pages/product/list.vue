@@ -2,16 +2,13 @@
 	<view class="content">
 		<view class="navbar" :style="{position:headerPosition,top:headerTop}">
 			<view class="nav-item" :class="{current: filterIndex === 0}" @click="tabClick(0)">
-				综合排序
-			</view>
-			<view class="nav-item" :class="{current: filterIndex === 1}" @click="tabClick(1)">
 				销量优先
 			</view>
-			<view class="nav-item" :class="{current: filterIndex === 2}" @click="tabClick(2)">
+			<view class="nav-item" :class="{current: filterIndex === 1}" @click="tabClick(1)">
 				<text>价格</text>
 				<view class="p-box">
-					<text :class="{active: priceOrder === 1 && filterIndex === 2}" class="yticon icon-shang"></text>
-					<text :class="{active: priceOrder === 2 && filterIndex === 2}" class="yticon icon-shang xia"></text>
+					<text :class="{active: priceOrder === 1 && filterIndex === 1}" class="yticon icon-shang"></text>
+					<text :class="{active: priceOrder === 2 && filterIndex === 1}" class="yticon icon-shang xia"></text>
 				</view>
 			</view>
 		</view>
@@ -22,7 +19,7 @@
 				</view>
 				<text class="title clamp">{{item.title}}</text>
 				<view class="price-box">
-					<text class="price">{{item.price / 100.0}}</text>
+					<text class="price">{{isVip? (item.vipPrice / 100.0 + ' [VIP]') : (item.price / 100.0)}}</text>
 					<text>已售 {{item.sales?item.sales:0}}</text>
 				</view>
 			</view>
@@ -49,10 +46,13 @@
 				goodsList: [],
 				cateId: 0,
 				keywords: '',
-				pageNo: 1
+				pageNo: 1,
+				isVip: false
 			};
 		},
-
+		onShow() {
+			this.isVip = this.$api.isVip()
+		},
 		onLoad(options) {
 			// #ifdef H5
 			this.headerTop = document.getElementsByTagName('uni-page-head')[0].offsetHeight + 'px';
@@ -90,12 +90,20 @@
 					this.loadingType = 'more'
 				}
 
-				//TODO 传入排序信息
-				if (this.filterIndex === 1) {
+				let orderByInfo = {}
+				if (this.filterIndex === 0) {
 					//销量排序
+					orderByInfo = {
+						orderBy: 'sales',
+						isAsc: false
+					}
 				}
-				if (this.filterIndex === 2) {
+				if (this.filterIndex === 1) {
 					//价格排序 需要从新获取Page
+					orderByInfo = {
+						orderBy: 'price',
+						isAsc: this.priceOrder === 1
+					}
 				}
 				if (type === 'refresh') {
 					this.pageNo = 1
@@ -103,7 +111,8 @@
 				this.$api.request('goods', 'getGoodsPage', {
 					categoryId: this.cateId,
 					title: this.keywords,
-					pageNo : this.pageNo
+					pageNo : this.pageNo,
+					...orderByInfo
 				}).then(res => {
 					let tempList = res.data.items
 					if (type === 'refresh') {
@@ -123,11 +132,11 @@
 			},
 			//筛选点击
 			tabClick(index) {
-				if (this.filterIndex === index && index !== 2) {
+				if (this.filterIndex === index && index !== 1) {
 					return;
 				}
 				this.filterIndex = index;
-				if (index === 2) {
+				if (index === 1) {
 					this.priceOrder = this.priceOrder === 1 ? 2 : 1;
 				} else {
 					this.priceOrder = 0;

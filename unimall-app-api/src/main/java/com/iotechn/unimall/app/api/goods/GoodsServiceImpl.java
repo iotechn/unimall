@@ -18,8 +18,8 @@ public class GoodsServiceImpl implements GoodsService {
     private GoodsBizService goodsBizService;
 
     @Override
-    public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, String title) throws ServiceException {
-        return goodsBizService.getGoodsPage(pageNo, pageSize, categoryId, orderBy, title);
+    public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy,Boolean isAsc, String title) throws ServiceException {
+        return goodsBizService.getGoodsPage(pageNo, pageSize, categoryId, orderBy, isAsc, title);
     }
 
     @Override

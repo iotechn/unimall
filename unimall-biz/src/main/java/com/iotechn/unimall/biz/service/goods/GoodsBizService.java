@@ -94,19 +94,19 @@ public class GoodsBizService {
     @Autowired
     private AppraiseBizService appraiseBizService;
 
-    public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, String title) throws ServiceException {
+    public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         Wrapper<SpuDO> wrapper = new EntityWrapper<SpuDO>();
         if (!StringUtils.isEmpty(title)) {
             wrapper.like("title", title);
         } else {
             //若关键字为空，尝试从缓存取列表
-            Page objFromCache = cacheComponent.getObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize + "_" + orderBy, Page.class);
+            Page objFromCache = cacheComponent.getObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize + "_" + orderBy + "_" + isAsc, Page.class);
             if (objFromCache != null) {
                 return objFromCache;
             }
         }
         if (categoryId != null && categoryId != 0) {
-            wrapper.orderBy(orderBy, false);
+            wrapper.orderBy(orderBy, isAsc);
             List<CategoryDO> childrenList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", categoryId));
             if (CollectionUtils.isEmpty(childrenList)) {
                 //目标节点为叶子节点
@@ -155,7 +155,7 @@ public class GoodsBizService {
         Page<SpuDTO> page = new Page<>(spuDTOList, pageNo, pageSize, count);
         if (StringUtils.isEmpty(title)) {
             //若关键字为空，制作缓存
-            cacheComponent.putObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize + "_" + orderBy, page, Const.CACHE_ONE_DAY);
+            cacheComponent.putObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize + "_" + orderBy + "_" + isAsc, page, Const.CACHE_ONE_DAY);
         }
         return page;
     }

@@ -178,17 +178,18 @@
 					that.cartList.splice(index, 1);
 					that.calcTotal();
 					//uni.hideLoading();
-				})
-
-				
+				})				
 			},
 			//清空
 			clearCart(){
+				const that = this
 				uni.showModal({
 					content: '清空购物车？',
 					success: (e)=>{
 						if(e.confirm){
-							this.cartList = [];
+							that.$api.request('cart','removeCartAll').then(res => {
+								that.cartList = []
+							})
 						}
 					}
 				})
@@ -217,9 +218,19 @@
 			},
 			//创建订单
 			createOrder(){
-				//console.log(this.cartList)
+				//滤除未被选择的item
+				let selectedItems = []
+				this.cartList.forEach(item => {
+					if (item.checked) {
+						selectedItems.push(item)
+					}
+				})
+				if (selectedItems.length === 0) {
+					this.$api.msg('您没有选中任何商品')
+					return
+				}
 				uni.navigateTo({
-					url: `/pages/order/create?takeway=cart&data=${JSON.stringify(this.cartList)}`
+					url: `/pages/order/create?takeway=cart&data=${JSON.stringify(selectedItems)}`
 				})
 			}
 		}

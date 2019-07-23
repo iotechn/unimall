@@ -169,6 +169,11 @@
 				"navigationBarTitleText": "评价订单"
 			}
         }, {
+            "path" : "pages/order/trace",
+            "style" : {
+				"navigationBarTitleText": "查看物流"
+			}
+        }, {
 			"path": "pages/pay/pay",
 			"style": {
 				"navigationBarTitleText": "支付"

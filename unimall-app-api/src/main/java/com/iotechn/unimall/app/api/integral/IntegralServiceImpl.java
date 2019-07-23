@@ -49,7 +49,7 @@ public class IntegralServiceImpl implements IntegralService {
         List<AdvertisementDTO> categoryPickAd = adDTOMap.get("t" + AdvertisementType.CATEGORY_PICK.getCode());
         //封装 分类精选 商品
         for (AdvertisementDTO item : categoryPickAd) {
-            Page<SpuDTO> pickPage = goodsBizService.getGoodsPage(1, 10, new Long(item.getUrl().substring(item.getUrl().lastIndexOf("=") + 1)), "sales", null);
+            Page<SpuDTO> pickPage = goodsBizService.getGoodsPage(1, 10, new Long(item.getUrl().substring(item.getUrl().lastIndexOf("=") + 1)), "sales", false,null);
             item.setData(pickPage.getItems());
         }
         IntegralIndexDataDTO integralIndexDataDTO = new IntegralIndexDataDTO();
@@ -64,13 +64,13 @@ public class IntegralServiceImpl implements IntegralService {
         /**
          * 销量冠军
          */
-        List<SpuDTO> salesTop = goodsBizService.getGoodsPage(1, 8, null, "sales", null).getItems();
+        List<SpuDTO> salesTop = goodsBizService.getGoodsPage(1, 8, null, "sales", false, null).getItems();
         integralIndexDataDTO.setSalesTop(salesTop);
 
         /**
          * 最近上新
          */
-        List<SpuDTO> newTop = goodsBizService.getGoodsPage(1, 8, null, "id", null).getItems();
+        List<SpuDTO> newTop = goodsBizService.getGoodsPage(1, 8, null, "id", false, null).getItems();
         integralIndexDataDTO.setNewTop(newTop);
         return integralIndexDataDTO;
     }

@@ -14,9 +14,9 @@
 			<text class="title">{{goods.title}}</text>
 			<view class="price-box">
 				<text class="price-tip">¥</text>
-				<text class="price">{{goods.price | priceFormat}}</text>
-				<text v-if="goods.price < goods.originalPrice" class="m-price">¥{{goods.originalPrice | priceFormat}}</text>
-				<text v-if="goods.price < goods.originalPrice" class="coupon-tip">{{goods.price / goods.originalPrice * 10}}折</text>
+				<text class="price">{{isVip ? (goods.vipPrice / 100.0 + ' [VIP]'): (goods.price / 100.0)}}</text>
+				<text v-if="(isVip ? goods.vipPrice: goods.price) < goods.originalPrice" class="m-price">¥{{goods.originalPrice / 100}}</text>
+				<text v-if="(isVip ? goods.vipPrice: goods.price) < goods.originalPrice" class="coupon-tip">{{parseInt((isVip? goods.vipPrice: goods.price) / goods.originalPrice * 100) / 10}}折</text>
 			</view>
 			<view class="bot-row">
 				<text>销量: {{goods.sales}}</text>
@@ -134,7 +134,7 @@
 				<view class="a-t">
 					<image :src="(selectedSku.img?selectedSku.img:goods.img) + '?x-oss-process=style/200px'"></image>
 					<view class="right">
-						<text class="price">¥{{selectedSku.price | priceFormat}}</text>
+						<text class="price">¥{{isVip ? (selectedSku.vipPrice / 100.0 + ' [VIP]') : selectedSku.price / 100.0}}</text>
 						<text class="stock">库存：{{selectedSku.stock}}件</text>
 						<view class="selected">
 							已选：
@@ -147,8 +147,12 @@
 				<view class="attr-list">
 					<!-- <text>规格</text> -->
 					<view class="item-list">
-						<text v-for="(skuItem, skuIndex) in goods.skuList" :key="skuIndex" class="tit" :class="{selected: skuItem === selectedSku}"
-						 @click="selectSpec(skuItem)">
+						<text 
+							v-for="(skuItem, skuIndex) in goods.skuList" 
+							:key="skuIndex" 
+							class="tit"
+							:class="{selected: skuIndex === selectedSkuIndex}"
+							@click="selectSpec(skuItem, skuIndex)">
 							{{skuItem.title}}
 						</text>
 					</view>
@@ -164,11 +168,6 @@
 <script>
 	import share from '@/components/share';
 	export default {
-		filters: {
-			priceFormat(price) {
-				return price / 100.0;
-			}
-		},
 		components: {
 			share
 		},
@@ -180,15 +179,20 @@
 					categoryList: [],
 					appraisePage: undefined
 				},
+				isVip: false,
 				specClass: 'none',
 				specSelected: [],
 				shareList: [],
 				selectedSku: {},
+				selectedSkuIndex: -1,
 				toggleCallback: undefined,
 				maskState: 0, //优惠券面板显示状态
 				couponList: []
 
 			};
+		},
+		onShow() {
+			this.isVip = this.$api.isVip()
 		},
 		async onLoad(options) {
 			const that = this
@@ -198,7 +202,7 @@
 			that.$api.request('goods', 'getGoods', {
 				spuId: options.id
 			}, failres => {
-				that.$api.msg(failres.msg)
+				that.$api.msg(failres.errmsg)
 				uni.hideLoading()
 			}).then(res => {
 				that.goods = res.data
@@ -245,12 +249,14 @@
 					this.specClass = 'show';
 					if (!this.selectedSku.title) {
 						this.selectedSku = this.goods.skuList[0]
+						this.selectedSkuIndex = 0
 					}
 				}
 			},
 			//选择规格
-			selectSpec(skuItem) {
+			selectSpec(skuItem, skuIndex) {
 				this.selectedSku = skuItem
+				this.selectedSkuIndex = skuIndex
 			},
 			//加入购物车
 			addCart(e) {
@@ -295,9 +301,32 @@
 				}
 			},
 			buy() {
-				//TODO 构建orderReqeust
+				const that = this
+				if (that.selectedSkuIndex < 0) {
+					that.$api.msg('请选择类型')
+					return
+				}
+				
+				let skuItem = {
+					skuId: that.selectedSku.id,
+					num: 1,
+					title: that.goods.title,
+					originalPrice: that.selectedSku.originalPrice,
+					price: that.selectedSku.price,
+					vipPrice: that.selectedSku.vipPrice,
+					skuTitle: that.selectedSku.title,
+					spuImg: that.goods.img,
+					skuImg: that.selectedSku.img,
+					stock: that.selectedSku.stock,
+					spuId: that.goods.id,
+					categoryId: that.goods.categoryId,
+					categoryIdList: that.goods.categoryIds
+				}
+				debugger
+				let skuList = [1]
+				skuList[0] = skuItem
 				uni.navigateTo({
-					url: `/pages/order/create`
+					url: `/pages/order/create?takeway=buy&data=${JSON.stringify(skuList)}`
 				})
 			},
 			//查看所有评价

@@ -40,6 +40,10 @@ public interface CartService {
             @NotNull @HttpParam(name = "cartIdList", type = HttpParamType.COMMON, description = "购物车id列表用,隔开") String cartIdList,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
 
+    @HttpMethod(description = "清空购物车")
+    public Boolean removeCartAll(
+            @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
+
     @HttpMethod(description = "调整购物车商品数量")
     public Integer updateCartItemNum(
             @NotNull @HttpParam(name = "cartId", type = HttpParamType.COMMON, description = "购物车ID") Long cartId,
@@ -53,5 +57,6 @@ public interface CartService {
     @HttpMethod(description = "获取用户购物车列表")
     public List<CartDTO> getCartList(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
+
 
 }

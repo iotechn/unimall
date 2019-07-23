@@ -9,8 +9,12 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.OrderDO;
+import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
+import com.iotechn.unimall.data.mapper.OrderSkuMapper;
+import com.iotechn.unimall.data.mapper.SkuMapper;
+import com.iotechn.unimall.data.mapper.SpuMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +40,12 @@ public class CallbackController {
     private OrderBizService orderBizService;
 
     @Autowired
+    private SpuMapper spuMapper;
+
+    @Autowired
+    private OrderSkuMapper orderSkuMapper;
+
+    @Autowired
     private WxPayService wxPayService;
 
     @Autowired
@@ -43,7 +53,7 @@ public class CallbackController {
 
     @RequestMapping("/wxpay")
     @Transactional(rollbackFor = Exception.class)
-    public Object wxpay(@RequestBody String body) {
+    public Object wxpay(@RequestBody String body) throws Exception {
         WxPayOrderNotifyResult result = null;
         try {
             result = wxPayService.parseOrderNotifyResult(body);
@@ -80,6 +90,8 @@ public class CallbackController {
             return WxPayNotifyResponse.fail(order.getOrderNo() + " : 支付金额不符合 totalFee=" + totalFee);
         }
 
+        //**************** 在此之前都没有 数据库修改 操作 所以前面是直接返回错误的 **********************//
+
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setPayId(payId);
         updateOrderDO.setPayChannel("WX");
@@ -87,11 +99,16 @@ public class CallbackController {
         updateOrderDO.setGmtPay(new Date());
         updateOrderDO.setGmtUpdate(order.getGmtPay());
         updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+        orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
         try {
-            //这里使用redis和mysql乐观锁，若未获取到锁，则会抛出服务异常
-            orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
-        } catch (ServiceException e) {
-            return WxPayNotifyResponse.fail("更新数据已失效");
+            List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(
+                    new EntityWrapper<OrderSkuDO>()
+                            .eq("order_no", orderNo));
+            orderSkuDOList.forEach(item -> {
+                spuMapper.incSales(item.getSpuId(), item.getNum());
+            });
+        } catch (Exception e) {
+            logger.error("[订单更新销量] 异常", e);
         }
         //TODO 模版消息
         return WxPayNotifyResponse.success("支付成功");

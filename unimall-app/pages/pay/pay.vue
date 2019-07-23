@@ -79,7 +79,7 @@
 						appId: prepayRes.data.appId,
 						nonceStr: prepayRes.data.nonceStr,
 						package: prepayRes.data.packageValue,
-						timeStamp: parseInt(prepayRes.data.timeStamp),
+						timeStamp: prepayRes.data.timeStamp,
 						signType: prepayRes.data.signType,
 						paySign: prepayRes.data.paySign,
 					}
@@ -96,7 +96,6 @@
 						signType: 'MD5'
 					}
 					//#endif
-					console.log( payParam)
 					uni.requestPayment({
 						provider: 'wxpay',
 						//#ifdef MP-WEIXIN
