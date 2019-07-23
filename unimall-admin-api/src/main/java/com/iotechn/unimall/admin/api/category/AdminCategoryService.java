@@ -25,7 +25,7 @@ public interface AdminCategoryService {
 
     @HttpMethod(description = "创建", permission = "operation:category:create", permissionParentName = "运营管理", permissionName = "类目管理")
     public CategoryDO addCategory(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
-                                  @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,
+                                      @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,
                                   @HttpParam(name = "parentId", type = HttpParamType.COMMON, description = "类目父节点",valueDef = "0") Long parentId,
                                   @HttpParam(name = "iconUrl", type = HttpParamType.COMMON, description = "类目图标") String iconUrl,
                                   @HttpParam(name = "picUrl", type = HttpParamType.COMMON, description = "类目图片") String picUrl,
