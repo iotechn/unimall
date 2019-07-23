@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.integral;
 
-import com.iotechn.unimall.app.api.advertisement.AppAdvertisementService;
-import com.iotechn.unimall.biz.service.biz.RecommendBizService;
+import com.iotechn.unimall.app.api.advertisement.AdvertisementService;
+import com.iotechn.unimall.biz.service.recommend.RecommendBizService;
 import com.iotechn.unimall.biz.service.goods.GoodsBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AdvertisementDO;
@@ -11,13 +11,11 @@ import com.iotechn.unimall.data.dto.RecommendDTO;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.enums.AdvertisementType;
 import com.iotechn.unimall.data.enums.RecommendType;
-import com.iotechn.unimall.data.mapper.AdvertisementMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +27,7 @@ import java.util.stream.Collectors;
 public class IntegralServiceImpl implements IntegralService {
 
     @Autowired
-    private AppAdvertisementService advertisementService;
+    private AdvertisementService advertisementService;
 
     @Autowired
     private GoodsBizService goodsBizService;

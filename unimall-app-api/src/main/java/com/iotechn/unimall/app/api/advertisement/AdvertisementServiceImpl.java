@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AdvertisementDO;
-import com.iotechn.unimall.data.enums.AdvertisementType;
 import com.iotechn.unimall.data.enums.StatusType;
 import com.iotechn.unimall.data.mapper.AdvertisementMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ import java.util.List;
  * Time: 下午8:36
  */
 @Service
-public class AppAdvertisementServiceImpl implements AppAdvertisementService {
+public class AdvertisementServiceImpl implements AdvertisementService {
 
     @Autowired
     private AdvertisementMapper advertisementMapper;

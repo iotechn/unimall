@@ -19,7 +19,7 @@ import java.util.List;
  */
 
 @HttpOpenApi(group = "recommend",description = "推荐商品接口")
-public interface AppRecommendService {
+public interface RecommendService {
     @HttpMethod(description = "根据传入推荐类型获得对应类型推荐商品")
     public List<RecommendDTO> getRecommendByType(@NotNull @HttpParam(name = "recommendType",type = HttpParamType.COMMON,description = "所需推荐类型")Integer recommedType,
                                                  @HttpParam(name = "pageNo",type = HttpParamType.COMMON,description = "页码",valueDef = "1")Integer pageNo,

@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.recommend;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.biz.service.biz.RecommendBizService;
+import com.iotechn.unimall.biz.service.recommend.RecommendBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -9,7 +9,6 @@ import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.RecommendDO;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.RecommendDTO;
-import com.iotechn.unimall.data.enums.RecommendType;
 import com.iotechn.unimall.data.mapper.RecommendMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
