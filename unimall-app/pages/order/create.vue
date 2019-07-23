@@ -25,7 +25,8 @@
 					<text class="title clamp">{{item.title}}</text>
 					<text class="spec">{{item.skuTitle}}</text>
 					<view class="price-box">
-						<text class="price"><text v-if="item.price < item.originalPrice" style="text-decoration:line-through">￥{{item.originalPrice / 100.0}}</text>￥{{item.price / 100.0}}</text>
+						<text class="price"><text v-if="item.price < (isVip ? item.vipPrice : item.originalPrice)" 
+						style="text-decoration:line-through">￥{{item.originalPrice / 100.0}}</text>￥{{(isVip ? item.vipPrice : item.originalPrice) / 100.0}}</text>
 						<text class="number">x {{item.num}}</text>
 					</view>
 				</view>
@@ -148,6 +149,7 @@
 		},
 		onLoad(option) {
 			//商品数据
+			this.isVip = this.$api.isVip()
 			const that = this
 			if (option.takeway) {
 				that.orderReqeust.takeWay = option.takeway
@@ -158,14 +160,13 @@
 			let skuCategoryPriceMap = {}
 			that.orderReqeust.skuList.forEach(item => {
 				totalOriginalPrice += item.originalPrice*item.num
-				//TODO 判断用户VIP状态   .. 若是VIP使用VIP价格
-				totalPrice += item.price*item.num
+				totalPrice += that.isVip ? (item.vipPrice*item.num) :  (item.price*item.num)
 				//构建category价格Map
 				item.categoryIdList.forEach(catItem => {
 					if (skuCategoryPriceMap[catItem]) {
-						skuCategoryPriceMap[catItem] += item.price*item.num
+						skuCategoryPriceMap[catItem] += that.isVip ? (item.vipPrice*item.num) :  (item.price*item.num)
 					} else {
-						skuCategoryPriceMap[catItem] = item.price
+						skuCategoryPriceMap[catItem] = that.isVip ? (item.vipPrice) :  (item.price)
 					}
 				})
 			})

@@ -164,7 +164,7 @@
 					<image :src="item.img + '?x-oss-process=style/400px'" mode="aspectFill"></image>
 				</view>
 				<text class="title clamp">{{item.title}}</text>
-				<text class="price">￥{{item.price / 100}}</text>
+				<text class="price">￥{{isVip ? (item.vipPrice / 100 + ' [VIP]') : item.price / 100}}</text>
 			</view>
 		</view>
 		

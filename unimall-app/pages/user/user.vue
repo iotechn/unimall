@@ -17,10 +17,10 @@
 				</view> -->
 				<view class="tit">
 					<text class="yticon icon-iLinkapp-"></text>
-					Unimall会员
+					{{isVip ? 'VIP会员' : '普通会员'}}
 				</view>
-				<text class="e-m">Unimall Union</text>
-				<text class="e-b">开通会员开发无bug 一测就上线</text>
+				<text class="e-m">VIP权益</text>
+				<text class="e-b">{{isVip ? '会员专享VIP价' : '请联系管理员开通会员'}}</text>
 			</view>
 		</view>
 		
@@ -104,10 +104,12 @@
 				coverTransform: 'translateY(0px)',
 				coverTransition: '0s',
 				moving: false,
-				footprintList: []
+				footprintList: [],
+				isVip: false,
 			}
 		},
 		onShow() {
+			this.isVip = this.$api.isVip()
 			this.loadFootprint()
 		},
 		onLoad(){

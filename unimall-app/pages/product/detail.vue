@@ -14,9 +14,9 @@
 			<text class="title">{{goods.title}}</text>
 			<view class="price-box">
 				<text class="price-tip">¥</text>
-				<text class="price">{{isVip? (goods.vipPrice / 100.0 + ' [VIP]'): (goods.price / 100.0)}}</text>
-				<text v-if="(isVip? goods.vipPrice: goods.price) < goods.originalPrice" class="m-price">¥{{goods.originalPrice / 100}}</text>
-				<text v-if="(isVip? goods.vipPrice: goods.price) < goods.originalPrice" class="coupon-tip">{{(isVip? goods.vipPrice: goods.price) / goods.originalPrice * 10}}折</text>
+				<text class="price">{{isVip ? (goods.vipPrice / 100.0 + ' [VIP]'): (goods.price / 100.0)}}</text>
+				<text v-if="(isVip ? goods.vipPrice: goods.price) < goods.originalPrice" class="m-price">¥{{goods.originalPrice / 100}}</text>
+				<text v-if="(isVip ? goods.vipPrice: goods.price) < goods.originalPrice" class="coupon-tip">{{parseInt((isVip? goods.vipPrice: goods.price) / goods.originalPrice * 100) / 10}}折</text>
 			</view>
 			<view class="bot-row">
 				<text>销量: {{goods.sales}}</text>
@@ -179,6 +179,7 @@
 					categoryList: [],
 					appraisePage: undefined
 				},
+				isVip: false,
 				specClass: 'none',
 				specSelected: [],
 				shareList: [],
@@ -189,6 +190,9 @@
 				couponList: []
 
 			};
+		},
+		onShow() {
+			this.isVip = this.$api.isVip()
 		},
 		async onLoad(options) {
 			const that = this
