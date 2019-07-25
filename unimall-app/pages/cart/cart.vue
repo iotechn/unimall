@@ -22,10 +22,10 @@
 					>
 						<view class="image-wrapper">
 							<image :src="(item.skuImg?item.skuImg:item.spuImg) + '?x-oss-process=style/200px'" 
-								:class="[item.loaded]"
+								:class="loadedItemIds.has(item.id) ? 'loaded': ''"
 								mode="aspectFill" 
 								lazy-load 
-								@load="onImageLoad('cartList', index)" 
+								@load="onImageLoad(item)" 
 								@error="onImageError('cartList', index)"
 							></image>
 							<view 
@@ -93,6 +93,7 @@
 				allChecked: false, //全选状态  true|false
 				empty: false, //空白页现实  true|false
 				cartList: [],
+				loadedItemIds: new Set()
 			};
 		},
 		onLoad(){
@@ -122,16 +123,17 @@
 						item.checked = true
 					})
 					that.cartList = res.data
-					this.calcTotal();  //计算总价
+					that.calcTotal();  //计算总价
 				})
 			},
 			//监听image加载完成
-			onImageLoad(key, index) {
-				this.$set(this[key][index], 'loaded', 'loaded');
+			onImageLoad(item) {
+				this.loadedItemIds.add(item.id)
+				this.$forceUpdate()
 			},
 			//监听image加载失败
 			onImageError(key, index) {
-				this[key][index].image = '/static/errorImage.jpg';
+				this[key][index].skuImg = '/static/errorImage.jpg';
 			},
 			navToLogin(){
 				uni.navigateTo({
@@ -196,9 +198,10 @@
 			},
 			//计算总价
 			calcTotal(){
-				let list = this.cartList;
+				const that = this
+				let list = that.cartList;
 				if(list.length === 0){
-					this.empty = true;
+					that.empty = true;
 					return;
 				}
 				let total = 0;
@@ -207,7 +210,7 @@
 				list.forEach(item=>{
 					if(item.checked === true){
 						totalItems += item.num
-						total += item.price * item.num;
+						total += (that.isVip ? item.price : item.vipPrice) * item.num;
 					}else if(checked === true){
 						checked = false;
 					}

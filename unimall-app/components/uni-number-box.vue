@@ -9,7 +9,7 @@
 			class="uni-numbox-value" 
 			type="number" 
 			:disabled="disabled"
-			:value="inputValue" 
+			v-model="value" 
 			
 			@blur="_onBlur"
 		>

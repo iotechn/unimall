@@ -25,7 +25,7 @@
 					<text class="title clamp">{{item.title}}</text>
 					<text class="spec">{{item.skuTitle}}</text>
 					<view class="price-box">
-						<text class="price"><text v-if="item.price < (isVip ? item.vipPrice : item.originalPrice)" 
+						<text class="price"><text v-if="(isVip ? item.vipPrice : item.originalPrice) < item.originalPrice" 
 						style="text-decoration:line-through">￥{{item.originalPrice / 100.0}}</text>￥{{(isVip ? item.vipPrice : item.originalPrice) / 100.0}}</text>
 						<text class="number">x {{item.num}}</text>
 					</view>
