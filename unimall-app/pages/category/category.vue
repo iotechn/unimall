@@ -9,7 +9,7 @@
 			<view v-for="item in slist" :key="item.id" class="s-list" :id="'main-'+item.id">
 				<text class="s-item">{{item.title}}</text>
 				<view class="t-list">
-					<view @click="navToList(titem.id)" v-if="titem.parentId === item.id" class="t-item" v-for="titem in tlist" :key="titem.id">
+					<view @click="navToList(titem.id)" v-if="titem.parentId === item.id" class="t-item" v-for="titem in slist.childrenList" :key="titem.id">
 						<image :src="titem.picUrl"></image>
 						<text>{{titem.title}}</text>
 					</view>
@@ -36,20 +36,23 @@
 		},
 		methods: {
 			loadData(){
+				const that = this
 				this.$api.request('category', 'categoryList').then( res => {
+					// res.data.forEach(item=>{
+					// 	//item顶级类目 f一级 s二级 t三级
+					// 	this.flist.push(item)
+					// 	if (item.childrenList && item.childrenList.length > 0) {
+					// 		item.childrenList.forEach(childItem => {
+					// 			this.slist.push(childItem)
+					// 			childItem.childrenList.forEach(leafItem => {
+					// 				this.tlist.push(leafItem)
+					// 			})
+					// 		})
+					// 	}
+					// })
+					that.flist = res.data
+					that.slist = res.data.childrenList
 					
-					res.data.forEach(item=>{
-						//item顶级类目 f一级 s二级 t三级
-						this.flist.push(item)
-						if (item.childrenList) {
-							item.childrenList.forEach(childItem => {
-								this.slist.push(childItem)
-								childItem.childrenList.forEach(leafItem => {
-									this.tlist.push(leafItem)
-								})
-							})
-						}
-					}) 
 				})
 				
 			},
@@ -73,21 +76,6 @@
 				if(tabs.length > 0){
 					this.currentId = tabs[0].parentId;
 				}
-			},
-			//计算右侧栏每个tab的高度等信息
-			calcSize(){
-				let h = 0;
-				this.slist.forEach(item=>{
-					let view = uni.createSelectorQuery().select("#main-" + item.id);
-					view.fields({
-						size: true
-					}, data => {
-						item.top = h;
-						h += data.height;
-						item.bottom = h;
-					}).exec();
-				})
-				this.sizeCalcState = true;
 			},
 			navToList(tid){
 				uni.navigateTo({

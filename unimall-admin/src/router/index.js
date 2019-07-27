@@ -78,30 +78,6 @@ export default new Router({
 
 export const asyncRouterMap = [
   {
-    path: '/user',
-    component: Layout,
-    redirect: 'noredirect',
-    alwaysShow: true,
-    name: 'userManage',
-    meta: {
-      title: '用户管理',
-      icon: 'user'
-    },
-    children: [
-      {
-        path: 'user',
-        component: () => import('@/views/user/user'),
-        name: 'user',
-        meta: {
-          perms: ['admin:user:list', 'admin:user:create'],
-          title: '会员管理',
-          noCache: true
-        }
-      }
-    ]
-  },
-
-  {
     path: '/mall',
     component: Layout,
     redirect: 'noredirect',
@@ -254,6 +230,15 @@ export const asyncRouterMap = [
     },
     children: [
       {
+        path: 'user',
+        component: () => import('@/views/user/user'),
+        name: 'user',
+        meta: {
+          perms: ['system:user:query', 'system:user:delete', 'system:user:create', 'system:user:update', ''],
+          title: '会员管理',
+          noCache: true
+        }
+      }, {
         path: 'admin',
         component: () => import('@/views/sys/admin'),
         name: 'admin',
