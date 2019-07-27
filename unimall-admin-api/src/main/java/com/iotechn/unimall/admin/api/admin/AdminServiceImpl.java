@@ -7,7 +7,10 @@ import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.core.notify.SMSClient;
+import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.core.util.MD5Util;
+import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
 import com.iotechn.unimall.data.domain.RolePermissionDO;
@@ -48,8 +51,16 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private RolePermissionMapper rolePermissionMapper;
 
+    @Autowired
+    private CacheComponent cacheComponent;
+
+
+    @Autowired
+    private SMSClient smsClient;
+
+    private final static String ADMIN_MSG_CODE = "admin_msg_code_";
     @Override
-    public String login(String username, String password) throws ServiceException {
+    public String login(String username, String password,String verifyCode) throws ServiceException {
         String accessToken = generateAccessToken();
         //数据库查管理员
         List<AdminDO> adminDOS = adminMapper.selectList(
@@ -59,6 +70,12 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_NOT_EXIST);
         }
         AdminDO adminDO = adminDOS.get(0);
+        //短信验证码
+        String code = cacheComponent.getObj(ADMIN_MSG_CODE+adminDO.getPhone(),String.class );
+        if(!code.equals(verifyCode)){
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
+        }
+
         if (!MD5Util.verify(password, username, adminDO.getPassword())) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
         }
@@ -192,6 +209,21 @@ public class AdminServiceImpl implements AdminService {
             return "ok";
         }
         throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+    }
+
+    @Override
+    public Boolean sendLoginMsg(String username,String password) throws ServiceException {
+        AdminDO adminDO = new AdminDO();
+        adminDO.setUsername(username);
+        adminDO.setPassword(MD5Util.md5(password,username));
+        AdminDO admin = adminMapper.selectOne(adminDO);
+        if(admin == null){
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXITS);
+        }
+        String code = GeneratorUtil.genSixVerifyCode();
+        cacheComponent.putRaw(ADMIN_MSG_CODE+admin.getPhone(), code,300 );
+        smsClient.sendAdminLoginVerify(admin.getPhone(), code);
+        return true;
     }
 
     private String generateAccessToken() {

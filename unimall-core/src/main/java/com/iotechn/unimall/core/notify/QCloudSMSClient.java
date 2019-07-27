@@ -27,6 +27,8 @@ public class QCloudSMSClient implements SMSClient,InitializingBean {
     private Integer bindPhoneTemplateId;
     @Value("${sms.qcloud.reset-password-template-id}")
     private Integer resetPasswordTemplateId;
+    @Value("381839")
+    private Integer adminLoginTemplateId;
 
     private static final Logger logger = LoggerFactory.getLogger(QCloudSMSClient.class);
 
@@ -69,5 +71,10 @@ public class QCloudSMSClient implements SMSClient,InitializingBean {
     @Override
     public SMSResult sendResetPasswordVerify(String phone, String verifyCode) throws ServiceException {
         return sendMsg(phone, registerTemplateId, verifyCode);
+    }
+
+    @Override
+    public SMSResult sendAdminLoginVerify(String phone, String verifyCode) throws ServiceException {
+        return sendMsg(phone, adminLoginTemplateId,verifyCode);
     }
 }

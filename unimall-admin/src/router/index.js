@@ -117,7 +117,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/operation/order'),
         name: 'order',
         meta: {
-          perms: ['admin:order:list', 'admin:order:detail', 'admin:order:ship'],
+          perms: ['operation:order:list', 'operation:order:detail', 'operation:order:ship'],
           title: '订单管理',
           noCache: true
         }
@@ -127,7 +127,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/operation/appraise'),
         name: 'appraise',
         meta: {
-          perms: ['admin:order:list', 'admin:order:detail', 'admin:order:ship'],
+          perms: ['operation:appraise:delete', 'operation:appraise:query'],
           title: '评论管理',
           noCache: true
         }
@@ -137,7 +137,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/operation/freight'),
         name: 'freight',
         meta: {
-          perms: ['admin:freight:list', 'admin:freight:detail', 'admin:freight:ship'],
+          perms: ['operation:freight:query', 'operation:freight:update', 'operation:freight:create'],
           title: '运费模板管理',
           noCache: true
         }
@@ -161,7 +161,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/goods/list'),
         name: 'goodsList',
         meta: {
-          perms: ['admin:goods:list', 'admin:goods:delete'],
+          perms: ['operation:goods:list', 'operation:goods:create'],
           title: '商品列表',
           noCache: true
         }
@@ -171,7 +171,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/goods/category'),
         name: 'goodsCategory',
         meta: {
-          perms: ['admin:category:create', 'admin:category:list', 'admin:category:update', 'admin:category:delete'],
+          perms: ['operation:category:create', 'operation:category:query', 'admin:category:update', 'operation:category:delete'],
           title: '商品类目',
           noCache: true
         }
@@ -211,6 +211,16 @@ export const asyncRouterMap = [
         }
       },
       {
+        path: 'recommend',
+        component: () => import('@/views/promotion/recommend'),
+        name: 'recommend',
+        meta: {
+          perms: ['promote:advertisement:create', 'promote:advertisement:delete', 'promote:advertisement:update', 'promote:advertisement:query'],
+          title: '商铺广告',
+          noCache: true
+        }
+      },
+      {
         path: 'coupon',
         component: () => import('@/views/promotion/coupon'),
         name: 'coupon',
@@ -225,7 +235,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/promotion/merchant'),
         name: 'merchant',
         meta: {
-          perms: ['promote:coupon:create', 'promote:coupon:delete', 'promote:coupon:update', 'promote:coupon:query'],
+          perms: ['promote:merchant:create', 'promote:merchant:update', 'promote:merchant:query'],
           title: '商铺信息',
           noCache: true
         }

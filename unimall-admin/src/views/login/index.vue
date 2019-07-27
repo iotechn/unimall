@@ -41,6 +41,28 @@
         </span>
       </el-form-item>
 
+      <el-form-item prop="verifyCode" >
+        <span class="svg-container">
+          <svg-icon icon-class="password" />
+        </span>
+        <el-input
+          v-model="loginForm.verifyCode"
+          name="verifyCode"
+          placeholder="验证码"
+          style="width:92.5%;"
+        >
+          <el-button
+            v-show="show"
+            slot="append"
+            :loading="verifyLoading"
+            type="text"
+            style="color:#FFF;background-color: #409EFF;border-color: #409EFF;height: 100%; border: none; "
+            @click.native.prevent="sendMsg"
+          >发送验证码</el-button>
+          <span v-show="!show" slot="append" class="count">{{ count }} s</span>
+        </el-input>
+      </el-form-item>
+
       <el-button
         :loading="loading"
         type="primary"
@@ -52,6 +74,8 @@
 </template>
 
 <script>
+import { sendMsg } from '@/api/login.js'
+
 export default {
   name: 'Login',
   data() {
@@ -72,7 +96,8 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: '1234567'
+        password: '1234567',
+        verifyCode: undefined
       },
       loginRules: {
         username: [
@@ -80,10 +105,17 @@ export default {
         ],
         password: [
           { required: true, trigger: 'blur', validator: validatePassword }
+        ],
+        verifyCode: [
+          { required: true, trigger: 'blur', message: '验证码不能为空' }
         ]
       },
       passwordType: 'password',
-      loading: false
+      loading: false,
+      verifyLoading: false,
+      show: true,
+      count: '',
+      timer: null
     }
   },
   watch: {
@@ -101,6 +133,45 @@ export default {
     // window.removeEventListener('hashchange', this.afterQRScan)
   },
   methods: {
+    sendMsg() {
+      const TIME_COUNT = 60
+      if (!this.timer) {
+        this.count = TIME_COUNT
+        this.show = false
+        this.timer = setInterval(() => {
+          if (this.count > 0 && this.count <= TIME_COUNT) {
+            this.count--
+          } else {
+            this.show = true
+            clearInterval(this.timer)
+            this.timer = null
+          }
+        }, 1000)
+      }
+      if (this.loginForm.username == null || this.loginForm.username === '' || this.loginForm.password == null || this.loginForm.password === '') {
+        this.$notify.error({
+          title: '失败',
+          message: '请先填写用户名和密码'
+        })
+        return false
+      }
+      this.verifyLoading = true
+      sendMsg(this.loginForm).then(response => {
+        this.verifyLoading = false
+        this.$notify.success({
+          title: '成功',
+          message: '信息发送成功'
+        })
+      })
+        .catch(response => {
+          this.verifyLoading = false
+          this.$notify.error({
+            title: '失败',
+            message: response.data.errmsg
+          })
+          this.verifyLoading = false
+        })
+    },
     showPwd() {
       if (this.passwordType === 'password') {
         this.passwordType = ''
@@ -141,7 +212,7 @@ $light_gray: #eee;
 /* reset element-ui css */
 .login-container {
   .el-input {
-    display: inline-block;
+ //   display: inline-block;
     height: 47px;
     width: 85%;
     input {
@@ -226,5 +297,6 @@ $light_gray: #eee;
     cursor: pointer;
     user-select: none;
   }
+
 }
 </style>

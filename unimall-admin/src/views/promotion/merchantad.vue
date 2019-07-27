@@ -3,7 +3,7 @@
     <!-- 查询和其他操作 -->
     <div class="filter-container">
       <el-button
-        v-permission="['admin:nearby:adcreate']"
+        v-permission="['promote:advertisement:create']"
         class="filter-item"
         type="primary"
         icon="el-icon-edit"

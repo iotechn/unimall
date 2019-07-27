@@ -272,6 +272,12 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ADMIN_USER_NAME_REPEAT =
             new ServiceExceptionDefinition(50007, "管理员用户名重复");
 
+    public static final ServiceExceptionDefinition ADMIN_VERIFYCODE_ERROR =
+            new ServiceExceptionDefinition(50008, "登陆验证码错误");
+
+    public static final ServiceExceptionDefinition ADMIN_USER_NOT_EXITS =
+            new ServiceExceptionDefinition(50009, "管理员不存在，请输入正确账号密码");
+
     public static final ServiceExceptionDefinition CATEGORY_OUGHT_TO_EMPTY =
             new ServiceExceptionDefinition(60001, "该类目还有子类目或着商品");
 

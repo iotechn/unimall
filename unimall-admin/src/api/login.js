@@ -1,9 +1,11 @@
 import request from '@/utils/request'
+import Qs from 'qs'
 
-export function loginByUsername(username, password) {
+export function loginByUsername(username, password, verifyCode) {
   const data = {
     username,
-    password
+    password,
+    verifyCode
   }
   return request({
     method: 'post',
@@ -12,6 +14,17 @@ export function loginByUsername(username, password) {
       _mt: 'login',
       ...data
     }
+  })
+}
+
+export function sendMsg(data) {
+  return request({
+    method: 'post',
+    data: Qs.stringify({
+      _gp: 'admin',
+      _mt: 'sendLoginMsg',
+      ...data
+    })
   })
 }
 

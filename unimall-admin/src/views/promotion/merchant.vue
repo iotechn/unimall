@@ -36,7 +36,7 @@
     </el-card>
 
     <div class="op-container">
-      <el-button type="primary" @click="handleEdit">保存更改</el-button>
+      <el-button v-permission="['promote:merchant:create']" type="primary" @click="handleEdit">保存更改</el-button>
     </div>
   </div>
 </template>
