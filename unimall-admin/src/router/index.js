@@ -215,8 +215,8 @@ export const asyncRouterMap = [
         component: () => import('@/views/promotion/recommend'),
         name: 'recommend',
         meta: {
-          perms: ['promote:advertisement:create', 'promote:advertisement:delete', 'promote:advertisement:update', 'promote:advertisement:query'],
-          title: '商铺广告',
+          perms: ['promote:recommend:create', 'promote:recommend:delete', 'promote:recommend:update', 'promote:recommend:query'],
+          title: '推荐管理',
           noCache: true
         }
       },

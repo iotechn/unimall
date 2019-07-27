@@ -66,17 +66,17 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean deleteRecommend(Long adminId, Long spuId, Integer recommendType) throws ServiceException {
+    public Boolean deleteRecommend(Long adminId, Long id, Integer recommendType) throws ServiceException {
 
         Integer judgeSQL = recommendMapper.delete(new EntityWrapper<RecommendDO>()
-                .eq("spu_id", spuId)
+                .eq("id", id)
                 .eq("recommend_type",recommendType));
 
         if(judgeSQL > 0){
+            cacheComponent.del(RECOMMEND_NAME + recommendType);
             return true;
         }
 
-        cacheComponent.del(RECOMMEND_NAME + recommendType);
         throw new AdminServiceException(ExceptionDefinition.RECOMMEND_SQL_DELETE_FAILED);
     }
 
