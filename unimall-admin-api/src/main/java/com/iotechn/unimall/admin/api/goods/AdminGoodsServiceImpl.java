@@ -215,4 +215,17 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
     public SpuDTO detail(Long spuId, Long adminId) throws ServiceException {
         return goodsBizService.getGoods(spuId, null);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String delete(Long spuId, Long adminId) throws ServiceException {
+        if (spuMapper.deleteById(spuId) <= 0) {
+            throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+        }
+        imgMapper.delete(new EntityWrapper<ImgDO>().eq("biz_id", spuId).eq("biz_type", BizType.GOODS.getCode()));
+        skuMapper.delete(new EntityWrapper<SkuDO>().eq("spu_id", spuId));
+        spuAttributeMapper.delete(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));
+        goodsBizService.clearGoodsCache(spuId);
+        return "ok";
+    }
 }
