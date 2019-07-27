@@ -1,9 +1,8 @@
-package com.iotechn.unimall.biz.service.biz;
+package com.iotechn.unimall.biz.service.recommend;
 
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.dto.RecommendDTO;
-import com.iotechn.unimall.data.enums.RecommendType;
 import com.iotechn.unimall.data.mapper.RecommendMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
