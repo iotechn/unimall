@@ -118,7 +118,7 @@
         <el-form-item label="类目名称" prop="title">
           <el-input v-model="dataForm.title" @input="tlog" />
         </el-form-item>
-        <el-form-item label="类目标签图片" prop="iconUrl">
+        <!-- <el-form-item label="类目标签图片" prop="iconUrl">
           <el-upload
             :headers="headers"
             :action="uploadPath"
@@ -131,7 +131,7 @@
             <img v-if="dataForm.iconUrl" ref="adImg" :src="dataForm.iconUrl" class="avatar">
             <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="类目图片" prop="picUrl">
           <el-upload
             :headers="headers"
@@ -147,12 +147,12 @@
           </el-upload>
         </el-form-item>
 
-        <el-form-item label="活动链接">
+        <el-form-item label="父类目">
           <el-cascader
             :options="options"
             :props="{ checkStrictly: true }"
             v-model="wocao"
-            placeholder="关联类目、商品"
+            placeholder="请选择父类目，不选为一级类目"
             filterable
             clearable
             @change="handleLink"
@@ -302,6 +302,16 @@ export default {
         picUrl: undefined
       }
     },
+    resetQuery() {
+      this.listQuery = {
+        pageNo: 1,
+        limit: 20,
+        id: undefined,
+        title: undefined,
+        level: undefined,
+        parentId: undefined
+      }
+    },
     handleCreate() {
       this.resetForm()
       this.dialogStatus = 'create'
@@ -316,6 +326,7 @@ export default {
       this.$refs['dataForm'].validate(valid => {
         createCategory(this.dataForm)
           .then(response => {
+            this.resetQuery()
             this.listQuery.title = this.dataForm.title
             this.getList()
             this.dialogFormVisible = false
@@ -323,6 +334,7 @@ export default {
               title: '成功',
               message: '创建成功'
             })
+            this.refreshOptions()
           })
           .catch(response => {
             this.$notify.error({
@@ -360,6 +372,7 @@ export default {
                 title: '成功',
                 message: '更新成功'
               })
+              this.refreshOptions()
             })
             .catch(response => {
               this.$notify.error({
@@ -385,6 +398,7 @@ export default {
             })
             const index = this.list.indexOf(row)
             this.list.splice(index, 1)
+            this.refreshOptions()
           })
           .catch(response => {
             this.$notify.error({

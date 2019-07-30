@@ -235,6 +235,7 @@ public class OrderServiceImpl implements OrderService {
                     OrderSkuDO orderSkuDO = new OrderSkuDO();
                     orderSkuDO.setBarCode(skuDTO.getBarCode());
                     orderSkuDO.setTitle(skuDTO.getTitle());
+                    orderSkuDO.setUnit(skuDTO.getUnit());
                     orderSkuDO.setSpuTitle(skuDTO.getSpuTitle());
                     orderSkuDO.setImg(skuDTO.getImg() == null ? skuDTO.getSpuImg() : skuDTO.getImg());
                     orderSkuDO.setNum(item.getNum());

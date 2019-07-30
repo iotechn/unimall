@@ -6,6 +6,7 @@ import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
+import com.iotechn.unimall.data.dto.CategoryTreeNodeDTO;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by rize on 2019/7/12.
@@ -31,10 +33,41 @@ public class CategoryBizService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    private static final String CA_CATEGORY_LIST = "CA_CATEGORY_LIST";
+    public static final String CA_CATEGORY_LIST = "CA_CATEGORY_LIST";
 
-    private static final String CA_CATEGORY_ID_HASH = "CA_CATEGORY_ID_HASH";
+    public static final String CA_CATEGORY_ID_HASH = "CA_CATEGORY_ID_HASH";
 
+
+    /*获取一棵两级目录树*/
+    public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException {
+        List<CategoryDO> categoryDOS = categoryMapper.selectList(new EntityWrapper<CategoryDO>().le("level",1 ).orderBy("level"));
+        List<CategoryTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
+            CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
+            dto.setLabel(item.getTitle());
+            dto.setLevel(0);
+            dto.setFullName(dto.getLabel());
+            dto.setValue(item.getId());
+            dto.setChildren(new LinkedList<>());
+            return dto;
+        }).collect(Collectors.toList());
+        list.forEach(item -> {
+            categoryDOS.forEach(categoryDO -> {
+                if (categoryDO.getParentId().equals(item.getValue())) {
+                    CategoryTreeNodeDTO categoryTreeNodeDTO = new CategoryTreeNodeDTO();
+                    categoryTreeNodeDTO.setChildren(new LinkedList<>());
+                    categoryTreeNodeDTO.setValue(categoryDO.getId());
+                    categoryTreeNodeDTO.setLabel(categoryDO.getTitle());
+                    categoryTreeNodeDTO.setLevel(1);
+                    categoryTreeNodeDTO.setParent(item.getValue());
+                    categoryTreeNodeDTO.setFullName(item.getFullName() +"/"+ categoryDO.getTitle());
+                    item.getChildren().add(categoryTreeNodeDTO);
+                }
+            });
+        });
+        return list;
+    }
+
+    /*kbq think 还是获取一棵数啊*/
     public List<CategoryDTO> categoryList() throws ServiceException {
         List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CA_CATEGORY_LIST, CategoryDTO.class);
         if (categoryDTOListFormCache != null) {

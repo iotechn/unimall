@@ -43,3 +43,14 @@ export function refundOrder(refundForm) {
     }
   })
 }
+
+export function getExcelInfo(data) {
+  return request({
+    method: 'post',
+    params: {
+      _gp: 'admin.order',
+      _mt: 'queryToExcel',
+      ...data
+    }
+  })
+}

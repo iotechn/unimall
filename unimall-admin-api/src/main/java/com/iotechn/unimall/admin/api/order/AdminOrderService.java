@@ -11,6 +11,8 @@ import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.model.Page;
 
+import java.util.List;
+
 /**
  * Created by rize on 2019/7/10.
  */
@@ -46,4 +48,9 @@ public interface AdminOrderService {
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
 
+    @HttpMethod(description = "根据传入时间和订单状态查询订单信息")
+    public List<OrderDTO> queryToExcel( @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "查询开始时间") Long gmtStart,
+                                        @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "查询结束时间") Long gmtEnd,
+                                        @HttpParam(name = "status", type = HttpParamType.COMMON, description = "订单状态") Long status,
+                                        @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 }

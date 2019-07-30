@@ -11,18 +11,22 @@ import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.OrderDO;
+import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
+import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +46,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Autowired
     private OrderMapper orderMapper;
+
+    @Autowired
+    private OrderSkuMapper orderSkuMapper;
 
     @Autowired
     private LockComponent lockComponent;
@@ -141,5 +148,34 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     public OrderDTO detail(Long orderId, Long adminId) throws ServiceException {
         return orderBizService.getOrderDetail(orderId, null);
+    }
+
+    @Override
+    public List<OrderDTO> queryToExcel(Long gmtStart, Long gmtEnd, Long status, Long adminId) throws ServiceException {
+        EntityWrapper wrapper = new EntityWrapper();
+        if(gmtStart != null && gmtEnd != null){
+            if(gmtStart > gmtStart){
+                throw new AdminServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
+            }
+            wrapper.between("gmt_create",new Date(gmtStart) ,new Date(gmtEnd));
+        }
+        if(status != null){
+            wrapper.eq("status", status);
+        }
+        List<OrderDO> orderDOS = orderMapper.selectList(wrapper);
+        if(orderDOS == null || orderDOS.size() == 0){
+            return null;
+        }
+        List<OrderDTO> orderDTOList = new ArrayList<>();
+        for (OrderDO temp: orderDOS ) {
+            OrderDTO orderDTO = new OrderDTO();
+            BeanUtils.copyProperties(temp, orderDTO);
+            orderDTOList.add(orderDTO);
+        }
+        for (OrderDTO orderDTO:orderDTOList) {
+                List<OrderSkuDO> orderSkuDOList =  orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_no",orderDTO.getOrderNo() ));
+                orderDTO.setSkuList(orderSkuDOList);
+        }
+        return orderDTOList;
     }
 }

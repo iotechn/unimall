@@ -6,7 +6,7 @@ export function categoryTree() {
     method: 'get',
     params: {
       _gp: 'admin.category',
-      _mt: 'categoryTree'
+      _mt: 'categorySecondLevelTree'
     }
   })
 }

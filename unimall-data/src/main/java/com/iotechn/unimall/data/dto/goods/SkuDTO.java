@@ -36,4 +36,6 @@ public class SkuDTO extends SuperDTO {
 
     private Integer freezeStock;
 
+    private String unit;
+
 }

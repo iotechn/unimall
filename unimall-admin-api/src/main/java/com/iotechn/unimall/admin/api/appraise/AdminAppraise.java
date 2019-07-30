@@ -19,14 +19,14 @@ import com.iotechn.unimall.data.model.Page;
 @HttpOpenApi(group = "admin.appraise",description = "评论")
 public interface AdminAppraise {
 
-    @HttpMethod(description = "删除", permission = "operation:appraise:delete", permissionParentName = "推广管理", permissionName = "评论管理")
+    @HttpMethod(description = "删除", permission = "operation:appraise:delete", permissionParentName = "运营管理", permissionName = "评论管理")
     public boolean deleteAppraise(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
                                   @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "评论id") Long id) throws ServiceException;
 
 
 
 
-    @HttpMethod(description = "查询", permission = "operation:appraise:query", permissionParentName = "推广管理", permissionName = "评论管理")
+    @HttpMethod(description = "查询", permission = "operation:appraise:query", permissionParentName = "运营管理", permissionName = "评论管理")
     public Page<AppraiseResponseDTO> getAppraiseList(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
                                                      @HttpParam(name = "id", type = HttpParamType.COMMON, description = "评论id") Long id,
                                                      @HttpParam(name = "userName", type = HttpParamType.COMMON, description = "用户姓名") String userName,

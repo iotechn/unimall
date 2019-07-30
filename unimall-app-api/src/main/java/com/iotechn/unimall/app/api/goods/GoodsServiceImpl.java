@@ -7,6 +7,8 @@ import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+
 
 /**
  * Created by rize on 2019/7/2.
@@ -26,5 +28,4 @@ public class GoodsServiceImpl implements GoodsService {
     public SpuDTO getGoods(Long spuId, Long userId) throws ServiceException {
         return goodsBizService.getGoods(spuId, userId);
     }
-
 }

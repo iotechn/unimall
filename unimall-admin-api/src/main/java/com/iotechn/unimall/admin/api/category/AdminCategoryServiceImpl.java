@@ -1,6 +1,7 @@
 package com.iotechn.unimall.admin.api.category;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.core.exception.*;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CategoryDO;
@@ -31,15 +32,35 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     private SpuMapper spuMapper;
 
     @Autowired
+    private CategoryBizService categoryBizService;
+
+    @Autowired
     private CacheComponent cacheComponent;
 
     private static final String CA_CATEGORY_TREE = "CA_CATEGORY_TREE";
 
-    private static final String CA_CATEGORY_LIST = "CA_CATEGORY_LIST";
+    private static final String ADMIN_QUERY_CATEGORY_LIST = "ADMIN_QUERY_CATEGORY_LIST";
+
+    private static final String CA_CATEGORY_SECOND_LEVEL_TREE = "CA_CATEGORY_SECOND_LEVEL_TREE";
     /**
      * @return
      * @throws ServiceException
      */
+
+
+    /*获取两级目录树*/
+    public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException{
+        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(CA_CATEGORY_SECOND_LEVEL_TREE, CategoryTreeNodeDTO.class);
+        if (objList != null) {
+            return objList;
+        }
+        List<CategoryTreeNodeDTO> list = categoryBizService.categorySecondLevelTree();
+        cacheComponent.putObj(CA_CATEGORY_SECOND_LEVEL_TREE, list, 60 * 60);
+        return list;
+    }
+
+
+    /*获取三级目录树。*/
     //TODO 做下优化
     @Override
     public List<CategoryTreeNodeDTO> categoryTree() throws ServiceException {
@@ -112,7 +133,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             throw new AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.CATEGORY_EXCEPTION,"数据库类目插入失败"));
         }
         cacheComponent.del(CA_CATEGORY_TREE);
-        cacheComponent.del(CA_CATEGORY_LIST);
+        cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
+        cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
+        cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
+        cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
         return categoryDO;
     }
 
@@ -126,7 +150,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             throw new AppServiceException(ExceptionDefinition.CATEGORY_OUGHT_TO_EMPTY);
         }
         cacheComponent.del(CA_CATEGORY_TREE);
-        cacheComponent.del(CA_CATEGORY_LIST);
+        cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
+        cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
+        cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
+        cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
         return categoryMapper.deleteById(id) > 0;
     }
 
@@ -165,7 +192,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             }
         }
         cacheComponent.del(CA_CATEGORY_TREE);
-        cacheComponent.del(CA_CATEGORY_LIST);
+        cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
+        cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
+        cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
+        cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
         return categoryTreeNodeDTO;
     }
 
@@ -207,9 +237,9 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
 
     //TODO 可以做出父节点查询所有子节点
-    //获得所有类目的list
+    //获得所有类目按类目等级排序的类目list,
     private List<CategoryTreeNodeDTO> getCategoryList(){
-        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(CA_CATEGORY_LIST, CategoryTreeNodeDTO.class);
+        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(ADMIN_QUERY_CATEGORY_LIST, CategoryTreeNodeDTO.class);
         if(objList != null){
             return objList;
         }
@@ -240,7 +270,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             }
 
         }
-        cacheComponent.putObj(CA_CATEGORY_LIST, list, 60 * 60);
+        cacheComponent.putObj(ADMIN_QUERY_CATEGORY_LIST, list, 60 * 60);
         return list;
     }
 

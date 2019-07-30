@@ -20,10 +20,13 @@ import java.util.List;
 @HttpOpenApi(group = "admin.category", description = "类目管理服务")
 public interface AdminCategoryService {
 
+    @HttpMethod(description = "获取二级类目树")
+    public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException;
+
     @HttpMethod(description = "获取类目树")
     public List<CategoryTreeNodeDTO> categoryTree() throws ServiceException;
 
-    @HttpMethod(description = "创建", permission = "operation:category:create", permissionParentName = "运营管理", permissionName = "类目管理")
+    @HttpMethod(description = "创建", permission = "operation:category:create", permissionParentName = "商品管理", permissionName = "类目管理")
     public CategoryDO addCategory(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
                                       @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,
                                   @HttpParam(name = "parentId", type = HttpParamType.COMMON, description = "类目父节点",valueDef = "0") Long parentId,
@@ -32,11 +35,11 @@ public interface AdminCategoryService {
                                   @HttpParam(name = "level", type = HttpParamType.COMMON, description = "类目等级") Integer level
     ) throws ServiceException;
 
-    @HttpMethod(description = "删除", permission = "operation:category:delete", permissionParentName = "运营管理", permissionName = "类目管理")
+    @HttpMethod(description = "删除", permission = "operation:category:delete", permissionParentName = "商品管理", permissionName = "类目管理")
     public boolean deleteCategory(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
                                   @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "类目ID") Long id) throws ServiceException;
 
-    @HttpMethod(description = "修改", permission = "operation:category:update", permissionParentName = "运营管理", permissionName = "类目管理")
+    @HttpMethod(description = "修改", permission = "operation:category:update", permissionParentName = "商品管理", permissionName = "类目管理")
     public CategoryTreeNodeDTO updateCategory(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
                                               @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "类目ID") Long id,
                                               @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,
@@ -46,7 +49,7 @@ public interface AdminCategoryService {
                                               @HttpParam(name = "level", type = HttpParamType.COMMON, description = "类目等级") Integer level
     ) throws ServiceException;
 
-    @HttpMethod(description = "查询", permission = "operation:category:query", permissionParentName = "运营管理", permissionName = "类目管理")
+    @HttpMethod(description = "查询", permission = "operation:category:query", permissionParentName = "商品管理", permissionName = "类目管理")
     public Page<CategoryTreeNodeDTO> queryCategory(@NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
                                                    @HttpParam(name = "id", type = HttpParamType.COMMON, description = "类目ID") Long id,
                                                    @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,

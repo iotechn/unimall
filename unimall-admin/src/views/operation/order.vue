@@ -25,7 +25,33 @@
         icon="el-icon-search"
         @click="handleFilter"
       >查找</el-button>
-      <!--<el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">导出</el-button>-->
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <el-date-picker
+        v-model="downData.gmtStart"
+        type="datetime"
+        style="width: 200px"
+        class="filter-item"
+        default-time="00:00:00"
+        placeholder="选择开始日期"
+      />
+      至
+      <el-date-picker
+        v-model="downData.gmtEnd"
+        type="datetime"
+        style="width: 200px"
+        class="filter-item"
+        default-time="00:00:00"
+        placeholder="选择结束日期"
+      />
+      <el-select
+        v-model="downData.status"
+        style="width: 200px"
+        class="filter-item"
+        placeholder="请选择订单状态"
+      >
+        <el-option v-for="(key, value) in statusMap" :key="key" :label="key" :value="value" />
+      </el-select>
+      <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="downExcelBtn">导出</el-button>
     </div>
 
     <!-- 查询结果 -->
@@ -62,7 +88,7 @@
 
       <!--<el-table-column align="center" label="物流渠道" prop="shipChannel"/>-->
 
-      <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
+      <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             v-permission="['operation:order:detail']"
@@ -70,6 +96,12 @@
             size="mini"
             @click="handleDetail(scope.row)"
           >详情</el-button>
+          <el-button
+            v-permission="['operation:order:detail']"
+            type="primary"
+            size="mini"
+            @click="downOrderExcelBtn(scope.row)"
+          >配送单</el-button>
           <el-button
             v-permission="['operation:order:ship']"
             v-if="scope.row.status===20"
@@ -193,7 +225,7 @@
 </style>
 
 <script>
-import { listOrder, shipOrder, refundOrder, detailOrder } from '@/api/order'
+import { listOrder, shipOrder, refundOrder, detailOrder, getExcelInfo } from '@/api/order'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import checkPermission from '@/utils/permission' // 权限判断函数
 
@@ -237,6 +269,20 @@ export default {
   },
   data() {
     return {
+      excelData: {
+        barcode: undefined,
+        name: undefined,
+        specifications: undefined,
+        unit: undefined,
+        num: undefined,
+        address: undefined
+      },
+      excelDataList: [],
+      downData: {
+        status: undefined,
+        gmtStart: undefined,
+        gmtEnd: undefined
+      },
       shipCodeMap,
       list: undefined,
       total: 0,
@@ -378,31 +424,82 @@ export default {
         }
       })
     },
-    handleDownload() {
+    // 订单表格中下载
+    downOrderExcelBtn(row) {
+      detailOrder(row.id).then(response => {
+        var temp = response.data.data
+        this.downData.address = temp.province + temp.city + temp.county + temp.address
+        for (var j = 0; j < temp.skuList.length; j++) {
+          var sku = temp.skuList[j]
+          this.downData.unit = sku.unit
+          this.downData.num = sku.num
+          this.downData.specifications = sku.title
+          this.downData.barcode = sku.barCode
+          this.downData.name = sku.spuTitle
+          var copy = Object.assign({}, this.downData)
+          this.excelDataList.push(copy)
+        }
+        this.handleDownload(this.excelDataList)
+        this.excelDataList = []
+      })
+    },
+    // 选择条件下载
+    downExcelBtn() {
       this.downloadLoading = true
+      getExcelInfo(this.downData).then(response => {
+        if (response.data.data == null) {
+          this.$notify.error({
+            title: '失败',
+            message: '没有信息可以打印'
+          })
+        }
+
+        var data = response.data.data
+        for (var i = 0; i < data.length; i++) {
+          var temp = data[i]
+          this.downData.address = temp.province + temp.city + temp.county + temp.address
+          for (var j = 0; j < temp.skuList.length; j++) {
+            var sku = temp.skuList[j]
+            this.downData.unit = sku.unit
+            this.downData.num = sku.num
+            this.downData.specifications = sku.title
+            this.downData.barcode = sku.barCode
+            this.downData.name = sku.spuTitle
+            var copy = Object.assign({}, this.downData)
+            this.excelDataList.push(copy)
+          }
+        }
+        this.handleDownload(this.excelDataList)
+        this.excelDataList = []
+        this.downloadLoading = false
+      })
+        .catch(response => {
+          this.downloadLoading = false
+          this.$notify.error({
+            title: '失败',
+            message: response.data.errmsg
+          })
+        })
+    },
+    handleDownload(data) {
       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = [
-          '订单ID',
-          '订单编号',
-          '用户ID',
-          '订单状态',
-          '是否删除',
-          '收货人',
-          '收货联系电话',
-          '收货地址'
+          '商品编号',
+          '商品名称',
+          '规格',
+          '单位',
+          '配送数量',
+          '配送地址'
         ]
         const filterVal = [
-          'id',
-          'orderSn',
-          'userId',
-          'orderStatus',
-          'isDelete',
-          'consignee',
-          'mobile',
+          'barcode',
+          'name',
+          'specifications',
+          'unit',
+          'num',
           'address'
         ]
-        excel.export_json_to_excel2(tHeader, this.list, filterVal, '订单信息')
-        this.downloadLoading = false
+        excel.export_json_to_excel2(tHeader, data, filterVal, '订单信息')
       })
     }
   }

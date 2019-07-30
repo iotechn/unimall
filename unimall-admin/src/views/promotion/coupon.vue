@@ -601,7 +601,7 @@ export default {
     // 到处excl表
     handleDownload() {
       var temp = new Date()
-      var date = temp.getFullYear + '-' + temp.getMonth + '-' + temp.getDate
+      var date = temp.getFullYear() + '-' + temp.getMonth() + '-' + temp.getDate()
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = [

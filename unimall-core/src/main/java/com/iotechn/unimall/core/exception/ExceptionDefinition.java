@@ -285,6 +285,9 @@ public class ExceptionDefinition {
             new ServiceExceptionDefinition(60002, "类目异常汇总，由下面方法传入提醒");
 
 
+    public static final ServiceExceptionDefinition ORDER_EXCEL_PARAM_ERROR=
+            new ServiceExceptionDefinition(61001, "生成excel查询参数错误");
+
 
 
 

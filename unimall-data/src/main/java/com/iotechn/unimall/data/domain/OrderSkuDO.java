@@ -58,5 +58,7 @@ public class OrderSkuDO extends SuperDO {
      */
     private String img;
 
+    //单位
+    private String unit;
 
 }

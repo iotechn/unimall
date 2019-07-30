@@ -78,19 +78,6 @@
         <el-form-item label="密码" prop="password">
           <el-input v-model="dataForm.password" type="password" auto-complete="off" />
         </el-form-item>
-        <el-form-item label="头像" prop="avatar">
-          <el-upload
-            :headers="headers"
-            :action="uploadPath"
-            :show-file-list="false"
-            :on-success="uploadAvatar"
-            class="avatar-uploader"
-            accept=".jpg, .jpeg, .png, .gif"
-          >
-            <img v-if="dataForm.avatar" :src="dataForm.avatar" class="avatar" >
-            <i v-else class="el-icon-plus avatar-uploader-icon" />
-          </el-upload>
-        </el-form-item>
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="dataForm.phone" />
         </el-form-item>
