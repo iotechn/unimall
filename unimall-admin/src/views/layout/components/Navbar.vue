@@ -18,7 +18,7 @@
           <size-select class="international right-menu-item" />
         </el-tooltip>
 
-        <lang-select class="international right-menu-item" />
+        <!-- <lang-select class="international right-menu-item" /> -->
 
         <el-tooltip :content="$t('navbar.theme')" effect="dark" placement="bottom">
           <theme-picker class="theme-switch right-menu-item" />
@@ -27,7 +27,7 @@
 
       <el-dropdown class="avatar-container right-menu-item" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar" >
+          <img :src="avatar" class="user-avatar" > <!--avatar+'?imageView2/1/w/80/h/80'-->
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown">
@@ -54,6 +54,7 @@ import Screenfull from '@/components/Screenfull'
 import SizeSelect from '@/components/SizeSelect'
 import LangSelect from '@/components/LangSelect'
 import ThemePicker from '@/components/ThemePicker'
+import avatar from '@/assets/avatar.png'
 
 export default {
   components: {
@@ -63,6 +64,11 @@ export default {
     SizeSelect,
     LangSelect,
     ThemePicker
+  },
+  data() {
+    return {
+      avatar: avatar
+    }
   },
   computed: {
     ...mapGetters(['sidebar', 'name', 'avatar', 'device'])

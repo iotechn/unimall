@@ -19,6 +19,14 @@
 
 	<dependencies>
 
+
+		<!-- https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-core -->
+		<dependency>
+			<groupId>com.aliyun</groupId>
+			<artifactId>aliyun-java-sdk-core</artifactId>
+			<version>4.1.1</version>
+		</dependency>
+
 		<!-- 阿里云对象存储 -->
 		<dependency>
 			<groupId>com.aliyun.oss</groupId>

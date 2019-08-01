@@ -26,6 +26,7 @@
         @click="handleFilter"
       >查找</el-button>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <br>
       <el-date-picker
         v-model="downData.gmtStart"
         type="datetime"
@@ -47,7 +48,7 @@
         v-model="downData.status"
         style="width: 200px"
         class="filter-item"
-        placeholder="请选择订单状态"
+        placeholder="待出库"
       >
         <el-option v-for="(key, value) in statusMap" :key="key" :label="key" :value="value" />
       </el-select>
@@ -98,6 +99,7 @@
           >详情</el-button>
           <el-button
             v-permission="['operation:order:detail']"
+            v-if="scope.row.status===20"
             type="primary"
             size="mini"
             @click="downOrderExcelBtn(scope.row)"
@@ -279,7 +281,7 @@ export default {
       },
       excelDataList: [],
       downData: {
-        status: undefined,
+        status: '',
         gmtStart: undefined,
         gmtEnd: undefined
       },
@@ -484,20 +486,32 @@ export default {
     handleDownload(data) {
       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = [
-          '商品编号',
+          '商品编码',
+          '国际条码',
           '商品名称',
           '规格',
           '单位',
+          '包装系数',
           '配送数量',
-          '配送地址'
+          '件数',
+          '配送机构',
+          '备注',
+          '配送规格',
+          '零售价'
         ]
         const filterVal = [
+          'productCode',
           'barcode',
           'name',
           'specifications',
           'unit',
+          'coefficient',
           'num',
-          'address'
+          'num',
+          'address',
+          'note',
+          'deliveryLine',
+          'retailPrice'
         ]
         excel.export_json_to_excel2(tHeader, data, filterVal, '订单信息')
       })

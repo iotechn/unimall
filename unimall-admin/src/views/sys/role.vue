@@ -86,7 +86,7 @@
       </el-tree>
       <div slot="footer" class="dialog-footer">
         <el-button @click="permissionDialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="updatePermission">确定</el-button>
+        <el-button :loading="permissionLoading" type="primary" @click="updatePermission">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -123,6 +123,7 @@ export default {
         desc: undefined
       },
       dialogFormVisible: false,
+      permissionLoading: false,
       dialogStatus: '',
       textMap: {
         update: '编辑',
@@ -270,6 +271,9 @@ export default {
       })
     },
     updatePermission() {
+      this.permissionLoading = true
+      this.permissionDialogFormVisible = false // 因为dialog在打开状态不会更新dom中的内容
+      this.permissionDialogFormVisible = true
       this.permissionForm.permissions = this.$refs.tree.getCheckedKeys(true)
       updatePermission(this.permissionForm)
         .then(response => {
@@ -278,12 +282,14 @@ export default {
             title: '成功',
             message: '授权成功'
           })
+          this.permissionLoading = false
         })
         .catch(response => {
           this.$notify.error({
             title: '失败',
             message: response.data.errmsg
           })
+          this.permissionLoading = false
         })
     }
   }

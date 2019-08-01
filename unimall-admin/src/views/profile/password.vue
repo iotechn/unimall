@@ -85,12 +85,14 @@ export default {
         if (!valid) {
           return
         }
+        // this.$router.push({ path: '/#/login?redirect=%2Fdashboard' })
         changePassword(this.dataForm)
           .then(response => {
             this.$notify.success({
               title: '成功',
               message: '修改密码成功'
             })
+            location.reload()
           })
           .catch(response => {
             this.$notify.error({

@@ -151,7 +151,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     @Override
-    public List<OrderDTO> queryToExcel(Long gmtStart, Long gmtEnd, Long status, Long adminId) throws ServiceException {
+    public List<OrderDTO> queryToExcel(Long gmtStart, Long gmtEnd, Integer status, Long adminId) throws ServiceException {
         EntityWrapper wrapper = new EntityWrapper();
         if(gmtStart != null && gmtEnd != null){
             if(gmtStart > gmtStart){

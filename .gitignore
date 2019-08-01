@@ -65,5 +65,5 @@ unimall.log*
 
 
 ###properties###
-*application-ops.properties*
-*application-prd.properties*
+*.properties
+!application.properties
