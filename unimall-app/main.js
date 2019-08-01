@@ -2,7 +2,6 @@ import Vue from 'vue'
 import store from './store'
 import App from './App'
 
-import Json from './Json' //测试用数据
 import * as filters from './filters'
 
 Object.keys(filters).forEach(key => {
@@ -13,13 +12,8 @@ Object.keys(filters).forEach(key => {
 // const baseUrl = 'http://127.0.0.1:8080'
 const baseUrl = 'https://fresh.easycampus.cn'
 // const baseUrl = 'http://192.168.8.188:8080'
-/**
- *  因工具函数属于公司资产, 所以直接在Vue实例挂载几个常用的函数
- *  所有测试用数据均存放于根目录json.js
- *  
- *  css部分使用了App.vue下的全局样式和iconfont图标，有需要图标库的可以留言。
- *  示例使用了uni.scss下的变量, 除变量外已尽量移除特有语法,可直接替换为其他预处理器使用
- */
+
+
 const msg = (title, duration = 1500, mask = false, icon = 'none') => {
 	//统一提示方便全局修改
 	if (Boolean(title) === false) {
@@ -32,14 +26,6 @@ const msg = (title, duration = 1500, mask = false, icon = 'none') => {
 		icon
 	});
 }
-const json = type => {
-	//模拟异步请求数据
-	return new Promise(resolve => {
-		setTimeout(() => {
-			resolve(Json[type]);
-		}, 500)
-	})
-}
 
 let userInfo = undefined
 
@@ -50,6 +36,10 @@ const logout = () => {
 	})
 }
 
+const setUserInfo = (i) => {
+	userInfo = i
+}
+
 const isVip = () => {
 	return userInfo && userInfo.level
 }
@@ -57,7 +47,7 @@ const isVip = () => {
 const request = (_gp, _mt, data = {}, failCallback) => {
 	//异步请求数据
 	return new Promise(resolve => {
-		if (!userInfo) {
+		if (!userInfo || !userInfo.accessToken) {
 			userInfo = uni.getStorageSync('userInfo')
 		}
 		let accessToken = userInfo ? userInfo.accessToken : ''
@@ -198,12 +188,12 @@ Vue.prototype.$fire = new Vue();
 Vue.prototype.$store = store;
 Vue.prototype.$api = {
 	msg,
-	json,
 	prePage,
 	request,
 	uploadImg,
 	logout,
-	isVip
+	isVip,
+	setUserInfo
 };
 
 App.mpType = 'app'
