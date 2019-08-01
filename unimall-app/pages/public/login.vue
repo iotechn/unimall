@@ -22,7 +22,13 @@
 			</view>
 			<button v-if="!loginType" class="confirm-btn" @click="chooseLoginType('wechat')" :disabled="logining">微信快速登录（推荐）</button>
 			<button v-if="!loginType" class="confirm-btn" @click="chooseLoginType('phone')" :disabled="logining">手机注册登录</button>
+			<!-- #ifdef MP-WEIXIN -->
+			<button v-if="loginType === 'wechat'" class="confirm-btn" open-type="getUserInfo" @getuserinfo="miniWechatLogin"
+			 :disabled="logining">微信授权登录</button>
+			<!-- #endif -->
+			<!-- #ifdef APP-PLUS -->
 			<button v-if="loginType === 'wechat'" class="confirm-btn" @click="wechatLogin" :disabled="logining">微信授权登录</button>
+			<!-- #endif -->
 			<button v-if="loginType === 'phone'" class="confirm-btn" @click="toLogin" :disabled="logining">登录</button>
 			<view v-if="loginType === 'phone'" class="forget-section">
 				忘记密码?
@@ -53,7 +59,7 @@
 			this.$api.logout()
 		},
 		onLoad() {
-			
+
 		},
 		methods: {
 			...mapMutations(['login']),
@@ -95,14 +101,49 @@
 					uni.navigateBack()
 				})
 			},
+			miniWechatLogin(e) {
+				const that = this
+				that.logining = true
+				let loginType = 1
+				let userInfo = e.detail.userInfo
+				uni.login({
+					provider: 'weixin',
+					success: (wxres => {
+						that.logining = false
+						that.$api.request('user', 'thirdPartLogin', {
+							loginType: loginType,
+							raw: JSON.stringify(wxres)
+						}, failres => {
+							that.$api.msg(failres.errmsg)
+							uni.hideLoading()
+						}).then(res => {
+							that.$api.setUserInfo(res.data)
+							that.$api.request('user', 'syncUserInfo', userInfo).then(syncRes => {
+								//同步过后
+								res.data.nickname = userInfo.nickName
+								res.data.avatarUrl = userInfo.avatarUrl
+								res.data.gender = userInfo.gender
+								uni.setStorageSync('userInfo', res.data)
+								that.$store.commit('login', res.data)
+								that.$api.setUserInfo(res.data)
+
+								if (that.$api.prePage().lodaData) {
+									that.$api.prePage().loadData()
+								}
+								uni.hideLoading()
+								uni.navigateBack()
+							})
+						})
+					})
+				})
+
+
+
+			},
 			wechatLogin() {
 				const that = this
-				//#ifdef MP-WEIXIN
-				let loginType = 1
-				//#endif
-				//#ifdef APP-PLUS
+				that.logining = true
 				let loginType = 2
-				//#endif
 				uni.showLoading({
 					title: '正在同步消息'
 				})
