@@ -35,6 +35,10 @@ target/
 mvnw
 mvnw.cmd
 
+###properties###
+/unimall-launcher/src/main/resources/application-ops.properties
+/unimall-launcher/src/main/resources/application-prd.properties
+
 ### target ###
 /target/
 /unimall-admin-api/target/
@@ -48,22 +52,12 @@ mvnw.cmd
 /unimall-app/unpackage/debug/
 /unimall-admin/dist.zip
 
-
-
-###password###
-/unimall-launcher/src/main/resources/application.properties
-
-
-
 ###node_modules###
 /unimall-admin/node_modules/
 /unimall-app/node_modules/
 
 
 ###logs###
-unimall.log*
-
-
-###properties###
-*.properties
-!application.properties
+unimall.log
+unimall.log.*.gz
+unimall.log.*.tmp

@@ -24,6 +24,7 @@ public class UnimallLauncherApplication {
 			logger.info("[IOC] Bean存在：" + bean);
 		}
 
+
 		logger.info("[系统初始化完毕]");
 	}
 

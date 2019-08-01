@@ -11,17 +11,17 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OSSClientConfig {
 
-    @Value("${cn.easycampus.aliyun.oss.accessId}")
+    @Value("${oss.aliyun.oss.accessId}")
     private String accessId;
-    @Value("${cn.easycampus.aliyun.oss.accessKey}")
+    @Value("${oss.aliyun.oss.accessKey}")
     private String accessKey;
-    @Value("${cn.easycampus.aliyun.oss.endpoint}")
+    @Value("${oss.aliyun.oss.endpoint}")
     private String endpoint;
-    @Value("${cn.easycampus.aliyun.oss.bucket}")
+    @Value("${oss.aliyun.oss.bucket}")
     private String bucket;
-    @Value("${cn.easycampus.aliyun.oss.dir}")
+    @Value("${oss.aliyun.oss.dir}")
     private String dir;
-    @Value("${cn.easycampus.aliyun.oss.callbackUrl}")
+    @Value("${oss.aliyun.oss.callbackUrl}")
     private String callbackUrl;
 
     @Bean
