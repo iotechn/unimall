@@ -23,13 +23,13 @@
         icon="el-icon-edit"
         @click="handleCreate"
       >添加</el-button>
-      <el-button
+      <!-- <el-button
         :loading="downloadLoading"
         class="filter-item"
         type="primary"
         icon="el-icon-download"
         @click="handleDownload"
-      >当前页导出</el-button>
+      >当前页导出</el-button> -->
     </div>
 
     <!-- 查询结果 -->
@@ -221,10 +221,12 @@
           <el-cascader
             :options="options"
             :props="{ checkStrictly: true }"
+            :value="categoryTitle"
             placeholder="关联类目、商品"
             filterable
             @change="handleLink"
           />
+
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -411,11 +413,9 @@ export default {
       }
     },
     refreshOptions() {
-      if (this.options.length === 0) {
-        categoryTree().then(response => {
-          this.options = response.data.data
-        })
-      }
+      categoryTree().then(response => {
+        this.options = response.data.data
+      })
     },
     handleLink(e) {
       const tag = e[e.length - 1]
@@ -576,7 +576,7 @@ export default {
       if (row.status < 0) {
         this.$notify.error({
           title: '失败',
-          message: '过期优惠卷，请编辑后使用'
+          message: '过期优惠卷，建议删除'
         })
         return false
       }

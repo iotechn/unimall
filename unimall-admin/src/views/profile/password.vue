@@ -60,10 +60,12 @@ export default {
         ],
         newPassword: [
           { required: true, message: '新密码不能为空', trigger: 'blur' },
+          { min: 6, message: '新密码必须大于6', trigger: 'blur' },
           { validator: validatePass, trigger: 'blur' }
         ],
         newPassword2: [
           { required: true, message: '确认密码不能为空', trigger: 'blur' },
+          { min: 6, message: '新密码必须大于6', trigger: 'blur' },
           { validator: validatePass2, trigger: 'blur' }
         ]
       }
@@ -85,14 +87,15 @@ export default {
         if (!valid) {
           return
         }
-        // this.$router.push({ path: '/#/login?redirect=%2Fdashboard' })
         changePassword(this.dataForm)
           .then(response => {
             this.$notify.success({
               title: '成功',
               message: '修改密码成功'
             })
-            location.reload()
+            this.$store.dispatch('LogOut').then(() => {
+              location.reload()
+            })
           })
           .catch(response => {
             this.$notify.error({

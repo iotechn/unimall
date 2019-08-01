@@ -1,12 +1,22 @@
 import request from '@/utils/request'
 import Qs from 'qs'
 
-export function categoryTree() {
+export function categorySecondLevelTree() {
   return request({
     method: 'get',
     params: {
       _gp: 'admin.category',
       _mt: 'categorySecondLevelTree'
+    }
+  })
+}
+
+export function categoryTree() {
+  return request({
+    method: 'get',
+    params: {
+      _gp: 'admin.category',
+      _mt: 'categoryTree'
     }
   })
 }

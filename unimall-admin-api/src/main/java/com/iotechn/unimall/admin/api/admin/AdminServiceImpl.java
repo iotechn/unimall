@@ -205,7 +205,7 @@ public class AdminServiceImpl implements AdminService {
         adminDO.setId(adminId);
         adminDO.setPassword(MD5Util.md5(newPassword, adminDOExist.getUsername()));
         if (adminMapper.updateById(adminDO) > 0) {
-            logout(accessToken, adminId);
+            //logout(accessToken, adminId);
             return "ok";
         }
         throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);

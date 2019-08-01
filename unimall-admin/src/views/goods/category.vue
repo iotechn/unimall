@@ -199,7 +199,7 @@ import { listCategory, createCategory, updateCategory, deleteCategory } from '@/
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-import { categoryTree } from '@/api/category'
+import { categorySecondLevelTree } from '@/api/category'
 
 const categoryLevelMap = [{ text: '一级类目', value: 0 }, { text: '二级类目', value: 1 }, { text: '三级类目', value: 2 }]
 export default {
@@ -451,7 +451,7 @@ export default {
     },
     // 刷新类目选择节点
     refreshOptions() {
-      categoryTree().then(response => {
+      categorySecondLevelTree().then(response => {
         this.options = response.data.data
       })
     }

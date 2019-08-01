@@ -27,7 +27,7 @@
         </el-form-item>
 
         <el-form-item label="运费模板">
-          <el-select v-model="goods.freightTemplateId" placeholder="请关联商品运费模板">
+          <el-select v-model="goods.freightTemplateId" placeholder="选择商品运费模板,默认包邮">
             <el-option v-for="(item, index) in freightList" :key="index" :label="item.freightTemplateDO.templateName" :value="item.freightTemplateDO.id"/>
           </el-select>
         </el-form-item>
@@ -245,7 +245,7 @@
 import { detailGoods, editGoods, createGoods } from '@/api/goods'
 import { categoryTree } from '@/api/category'
 import { listFreight } from '@/api/freight'
-import { uploadPath } from '@/api/storage'
+import { uploadPath, createStorage } from '@/api/storage'
 import Editor from '@tinymce/tinymce-vue'
 import { MessageBox } from 'element-ui'
 import { getToken } from '@/utils/auth'
@@ -274,9 +274,9 @@ export default {
         title: [
           { required: true, message: '商品名称不能为空', trigger: 'blur' }
         ],
-        description: [
-          { required: true, message: '商品描述不能为空', trigger: 'blur' }
-        ],
+        // description: [
+        //   { required: true, message: '商品描述不能为空', trigger: 'blur' }
+        // ],
         priceRaw: [
           { required: true, message: '商品现价不能为空', trigger: 'blur' }
         ],
@@ -289,7 +289,6 @@ export default {
         unit: [
           { required: true, message: '物件单位不能为空', trigger: 'blur' }
         ],
-        //        category :[{ required: true, message: '商品分类不能为空', trigger: 'blur' }],
         detail: [{ required: true, message: '请填写商品详情', trigger: 'blur' }]
       },
       skuRules: {
@@ -323,14 +322,19 @@ export default {
       editorInit: {
         language: 'zh_CN',
         convert_urls: false,
-        plugins: [
-          'advlist anchor autolink autosave code codesample colorpicker colorpicker contextmenu directionality emoticons fullscreen hr image imagetools importcss insertdatetime link lists media nonbreaking noneditable pagebreak paste preview print save searchreplace spellchecker tabfocus table template textcolor textpattern visualblocks visualchars wordcount'
-        ],
-        toolbar: [
-          'searchreplace bold italic underline strikethrough alignleft aligncenter alignright outdent indent  blockquote undo redo removeformat subscript superscript code codesample',
-          'hr bullist numlist link image charmap preview anchor pagebreak insertdatetime media table emoticons forecolor backcolor fullscreen'
-        ]
+        plugins: ['advlist anchor autolink autosave code codesample colorpicker colorpicker contextmenu directionality emoticons fullscreen hr image imagetools importcss insertdatetime link lists media nonbreaking noneditable pagebreak paste preview print save searchreplace spellchecker tabfocus table template textcolor textpattern visualblocks visualchars wordcount'],
+        toolbar: ['searchreplace bold italic underline strikethrough alignleft aligncenter alignright outdent indent  blockquote undo redo removeformat subscript superscript code codesample', 'hr bullist numlist link image charmap preview anchor pagebreak insertdatetime media table emoticons forecolor backcolor fullscreen'],
+        images_upload_handler: function(blobInfo, success, failure) {
+          const formData = new FormData()
+          formData.append('file', blobInfo.blob())
+          createStorage(formData).then(res => {
+            success(res.data.url)
+          }).catch(() => {
+            failure('上传失败，请重新上传')
+          })
+        }
       }
+
     }
   },
   computed: {
@@ -398,6 +402,11 @@ export default {
               title: '失败',
               message: '请选择类目'
             })
+          } else if (this.goods.imgList.length === 0) {
+            this.$notify.error({
+              title: '失败',
+              message: '请上传至少一张图片'
+            })
           } else {
             this.goods.categoryId = this.categoryIds[2]
             this.goods.price = parseInt(this.goods.priceRaw * 100)
@@ -443,6 +452,11 @@ export default {
             this.$notify.error({
               title: '失败',
               message: '请选择类目'
+            })
+          } else if (this.goods.imgList.length === 0) {
+            this.$notify.error({
+              title: '失败',
+              message: '请上传至少一张图片'
             })
           } else {
             this.goods.categoryId = this.categoryIds[2]

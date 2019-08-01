@@ -26,12 +26,12 @@
         <el-form-item label="地址" prop="address">
           <el-input v-model="dataForm.address" />
         </el-form-item>
-        <el-form-item label="展示方式" prop="showType">
+        <!-- <el-form-item label="展示方式" prop="showType">
           <el-radio-group v-model="dataForm.showType">
             <el-radio :label="1">商品列表</el-radio>
             <el-radio :label="2">点餐列表</el-radio>
           </el-radio-group>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
     </el-card>
 
@@ -92,10 +92,10 @@ export default {
         logoUrl: undefined,
         description: undefined,
         address: undefined,
-        showType: undefined
+        showType: 1
       },
       rules: {
-        showType: [{ required: true, message: '商铺展示类型不能为空', trigger: 'blur' }],
+        //     showType: [{ required: true, message: '商铺展示类型不能为空', trigger: 'blur' }],
         address: [{ required: true, message: '商铺地址不能为空', trigger: 'blur' }],
         title: [{ required: true, message: '商铺标题不能为空', trigger: 'blur' }],
         description: [{ required: true, message: '商铺描述不能为空', trigger: 'blur' }]

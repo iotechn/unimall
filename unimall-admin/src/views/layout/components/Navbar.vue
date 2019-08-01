@@ -71,7 +71,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['sidebar', 'name', 'avatar', 'device'])
+    ...mapGetters(['sidebar', 'name', 'device']) //, 'avatar'
   },
   methods: {
     toggleSideBar() {
