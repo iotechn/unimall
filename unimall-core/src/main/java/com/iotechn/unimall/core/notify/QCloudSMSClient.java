@@ -27,7 +27,7 @@ public class QCloudSMSClient implements SMSClient,InitializingBean {
     private Integer bindPhoneTemplateId;
     @Value("${sms.qcloud.reset-password-template-id}")
     private Integer resetPasswordTemplateId;
-    @Value("381839")
+    @Value("${sms.qcloud.admin-login-template-id}")
     private Integer adminLoginTemplateId;
 
     private static final Logger logger = LoggerFactory.getLogger(QCloudSMSClient.class);

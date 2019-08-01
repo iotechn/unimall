@@ -225,6 +225,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition GOODS_CREATE_BARCODE_REPEAT =
             new ServiceExceptionDefinition(20004, "商品条码已经存在了 商品Id:${0} 重复Sku:${1}");
 
+    public static final ServiceExceptionDefinition GOODS_PRICE_CHECKED_FAILED =
+            new ServiceExceptionDefinition(20004, "必须 vip价格 <= 现价 <= 原价");
+
 
     public static final ServiceExceptionDefinition RECOMMEND_SPU_NO_HAS =
             new ServiceExceptionDefinition(21001, "你要加入推荐的商品不存在");

@@ -46,6 +46,7 @@ mvnw.cmd
 /unimall-app/unpackage/dist/
 /unimall-app/unpackage/resources/
 /unimall-app/unpackage/debug/
+/unimall-admin/dist.zip
 
 
 
@@ -61,3 +62,8 @@ mvnw.cmd
 
 ###logs###
 unimall.log*
+
+
+###properties###
+*application-ops.properties*
+*application-prd.properties*

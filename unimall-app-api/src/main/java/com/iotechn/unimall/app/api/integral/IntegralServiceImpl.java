@@ -15,6 +15,7 @@ import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -46,9 +47,11 @@ public class IntegralServiceImpl implements IntegralService {
         }).collect(Collectors.groupingBy(item -> "t" + item.getAdType()));
         List<AdvertisementDTO> categoryPickAd = adDTOMap.get("t" + AdvertisementType.CATEGORY_PICK.getCode());
         //封装 分类精选 商品
-        for (AdvertisementDTO item : categoryPickAd) {
-            Page<SpuDTO> pickPage = goodsBizService.getGoodsPage(1, 10, new Long(item.getUrl().substring(item.getUrl().lastIndexOf("=") + 1)), "sales", false,null);
-            item.setData(pickPage.getItems());
+        if (!CollectionUtils.isEmpty(categoryPickAd)) {
+            for (AdvertisementDTO item : categoryPickAd) {
+                Page<SpuDTO> pickPage = goodsBizService.getGoodsPage(1, 10, new Long(item.getUrl().substring(item.getUrl().lastIndexOf("=") + 1)), "sales", false,null);
+                item.setData(pickPage.getItems());
+            }
         }
         IntegralIndexDataDTO integralIndexDataDTO = new IntegralIndexDataDTO();
         integralIndexDataDTO.setAdvertisement(adDTOMap);

@@ -25,4 +25,11 @@ public interface SpuMapper extends BaseMapper<SpuDO> {
      * @return
      */
     public Integer incSales(@Param("spuId") Long spuId,@Param("delta") Integer delta);
+
+    /**
+     * 删除SPUID
+     * @param spuId
+     * @return
+     */
+    public List<Long> getSkuIds(@Param("spuId") Long spuId);
 }

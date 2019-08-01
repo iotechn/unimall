@@ -6,8 +6,11 @@
         UPDATE unimall_spu SET sales = sales + #{delta} WHERE id = #{spuId}
     </update>
 
-
     <select id="getSpuTitleByCategoryId" resultType="com.iotechn.unimall.data.domain.SpuDO">
         SELECT id,title FROM unimall_spu WHERE category_id = #{categroyId}
+    </select>
+
+    <select id="getSkuIds" resultType="java.lang.Long">
+        SELECT sku_id FROM unimall_spu WHERE id = #{spuId}
     </select>
 </mapper>

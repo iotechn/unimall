@@ -9,7 +9,7 @@
 			<view v-for="item in slist" :key="item.id" class="s-list" :id="'main-'+item.id">
 				<text class="s-item">{{item.title}}</text>
 				<view class="t-list">
-					<view @click="navToList(titem.id)" v-if="titem.parentId === item.id" class="t-item" v-for="titem in slist.childrenList" :key="titem.id">
+					<view @click="navToList(titem.id)" v-if="titem.parentId === item.id" class="t-item" v-for="titem in item.childrenList" :key="titem.id">
 						<image :src="titem.picUrl"></image>
 						<text>{{titem.title}}</text>
 					</view>
@@ -29,6 +29,7 @@
 				flist: [],
 				slist: [],
 				tlist: [],
+				rawData: []
 			}
 		},
 		onLoad(){
@@ -38,44 +39,20 @@
 			loadData(){
 				const that = this
 				this.$api.request('category', 'categoryList').then( res => {
-					// res.data.forEach(item=>{
-					// 	//item顶级类目 f一级 s二级 t三级
-					// 	this.flist.push(item)
-					// 	if (item.childrenList && item.childrenList.length > 0) {
-					// 		item.childrenList.forEach(childItem => {
-					// 			this.slist.push(childItem)
-					// 			childItem.childrenList.forEach(leafItem => {
-					// 				this.tlist.push(leafItem)
-					// 			})
-					// 		})
-					// 	}
-					// })
+					that.rawData = res.data
 					that.flist = res.data
-					that.slist = res.data.childrenList
+					that.currentId = res.data[0].id
+					that.slist = res.data[0].childrenList
 					
 				})
 				
 			},
 			//一级分类点击
 			tabtap(item){
-				if(!this.sizeCalcState){
-					this.calcSize();
-				}
-				
 				this.currentId = item.id;
-				let index = this.slist.findIndex(sitem=>sitem.parentId === item.id);
-				this.tabScrollTop = this.slist[index].top;
-			},
-			//右侧栏滚动
-			asideScroll(e){
-				if(!this.sizeCalcState){
-					this.calcSize();
-				}
-				let scrollTop = e.detail.scrollTop;
-				let tabs = this.slist.filter(item=>item.top <= scrollTop).reverse();
-				if(tabs.length > 0){
-					this.currentId = tabs[0].parentId;
-				}
+				this.currentId = item.id
+				this.slist = item.childrenList
+				this.tabScrollTop = this.tabScrollTop === 0 ? 1 : 0
 			},
 			navToList(tid){
 				uni.navigateTo({

@@ -44,7 +44,8 @@
 		}, {
 			"path": "pages/address/create",
 			"style": {
-				"navigationBarTitleText": ""
+				"navigationBarTitleText": "",
+				"disableScroll" : true
 			}
 		}, {
 			"path": "pages/product/search",

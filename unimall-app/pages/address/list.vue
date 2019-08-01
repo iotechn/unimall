@@ -8,7 +8,7 @@
 				</view>
 				<view class="address-box">
 					<text v-if="item.default" class="tag">默认</text>
-					<text class="address">{{item.province}} {{item.city}} {{item.county}} {{item.street}} {{item.address}}</text>
+					<text class="address">{{item.province}} {{item.city}} {{item.county}} {{item.address}}</text>
 				</view>
 			</view>
 			<text class="yticon icon-bianji" @click.stop="addAddress('edit', item)"></text>

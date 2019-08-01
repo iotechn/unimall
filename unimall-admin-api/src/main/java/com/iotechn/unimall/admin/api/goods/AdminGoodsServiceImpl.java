@@ -1,7 +1,6 @@
 package com.iotechn.unimall.admin.api.goods;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.admin.api.admin.AdminService;
 import com.iotechn.unimall.biz.service.goods.GoodsBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -10,7 +9,6 @@ import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.dto.goods.SpuTreeNodeDTO;
 import com.iotechn.unimall.data.enums.BizType;
-import com.iotechn.unimall.data.enums.SpuStatusType;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
@@ -44,6 +42,9 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
 
     @Autowired
     private ImgMapper imgMapper;
+
+    @Autowired
+    private CartMapper cartMapper;
 
     @Autowired
     private GoodsBizService goodsBizService;
@@ -108,6 +109,9 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         if (spuDTO.getId() != null) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_CREATE_HAS_ID);
         }
+        if (spuDTO.getOriginalPrice() < spuDTO.getPrice() || spuDTO.getPrice() < spuDTO.getVipPrice() || spuDTO.getOriginalPrice() < spuDTO.getVipPrice()) {
+            throw new AdminServiceException(ExceptionDefinition.GOODS_PRICE_CHECKED_FAILED);
+        }
         //校验Sku是否重复
         List<String> barCodes = spuDTO.getSkuList().stream().map(item -> item.getBarCode()).collect(Collectors.toList());
         List<SkuDO> existSkuDO = skuMapper.selectList(new EntityWrapper<SkuDO>().in("bar_code", barCodes));
@@ -127,6 +131,9 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         spuDTO.setId(spuDO.getId());
         //插入SKU表
         for (SkuDO skuDO : spuDTO.getSkuList()) {
+            if (skuDO.getOriginalPrice() < skuDO.getPrice() || skuDO.getPrice() < skuDO.getVipPrice() || skuDO.getOriginalPrice() < skuDO.getVipPrice()) {
+                throw new AdminServiceException(ExceptionDefinition.GOODS_PRICE_CHECKED_FAILED);
+            }
             skuDO.setSpuId(spuDO.getId());
             skuDO.setGmtUpdate(now);
             skuDO.setGmtCreate(now);
@@ -150,6 +157,9 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         if (CollectionUtils.isEmpty(spuDTO.getSkuList())) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_SKU_LIST_EMPTY);
         }
+        if (spuDTO.getOriginalPrice() < spuDTO.getPrice() || spuDTO.getPrice() < spuDTO.getVipPrice() || spuDTO.getOriginalPrice() < spuDTO.getVipPrice()) {
+            throw new AdminServiceException(ExceptionDefinition.GOODS_PRICE_CHECKED_FAILED);
+        }
         Date now = new Date();
         SpuDO spuDO = new SpuDO();
         BeanUtils.copyProperties(spuDTO, spuDO);
@@ -157,6 +167,9 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         spuMapper.updateById(spuDO);
         List<String> barCodes = new LinkedList<>();
         for (SkuDO skuDO : spuDTO.getSkuList()) {
+            if (skuDO.getOriginalPrice() < skuDO.getPrice() || skuDO.getPrice() < skuDO.getVipPrice() || skuDO.getOriginalPrice() < skuDO.getVipPrice()) {
+                throw new AdminServiceException(ExceptionDefinition.GOODS_PRICE_CHECKED_FAILED);
+            }
             skuDO.setId(null);
             skuDO.setSpuId(spuDO.getId());
             skuDO.setGmtUpdate(now);
@@ -222,8 +235,9 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         if (spuMapper.deleteById(spuId) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
         }
-        imgMapper.delete(new EntityWrapper<ImgDO>().eq("biz_id", spuId).eq("biz_type", BizType.GOODS.getCode()));
+        cartMapper.delete(new EntityWrapper<CartDO>().in("sku_id", spuMapper.getSkuIds(spuId)));
         skuMapper.delete(new EntityWrapper<SkuDO>().eq("spu_id", spuId));
+        imgMapper.delete(new EntityWrapper<ImgDO>().eq("biz_id", spuId).eq("biz_type", BizType.GOODS.getCode()));
         spuAttributeMapper.delete(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));
         goodsBizService.clearGoodsCache(spuId);
         return "ok";
