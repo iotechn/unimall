@@ -219,10 +219,10 @@
         </el-form-item>
         <el-form-item v-if="dialogStatus === 'create'" v-show="dataForm.goodsType === 1" label="优惠类目">
           <el-cascader
+            v-model="dataForm.categoryTitle"
             :options="options"
             :props="{ checkStrictly: true }"
-            :value="categoryTitle"
-            placeholder="关联类目、商品"
+            placeholder="优惠类目"
             filterable
             @change="handleLink"
           />
@@ -413,13 +413,17 @@ export default {
       }
     },
     refreshOptions() {
-      categoryTree().then(response => {
-        this.options = response.data.data
-      })
+      if (this.options.length === 0) {
+        categoryTree().then(response => {
+          this.options = response.data.data
+        })
+      }
     },
     handleLink(e) {
-      const tag = e[e.length - 1]
-      this.dataForm.categoryId = tag // 回调指定分类
+      if (e !== undefined) {
+        const tag = e[e.length - 1]
+        this.dataForm.categoryId = tag // 回调指定分类
+      }
     },
     handleCreate() {
       this.resetForm()

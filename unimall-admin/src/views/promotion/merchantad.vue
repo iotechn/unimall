@@ -342,7 +342,7 @@ export default {
         if (valid && this.checkAdType()) {
           createAd(this.dataForm)
             .then(response => {
-              this.list.unshift(response.data.data)
+              this.getList()
               this.dialogFormVisible = false
               this.$notify.success({
                 title: '成功',

@@ -106,7 +106,7 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
         <el-button v-if="dialogStatus=='create'" type="primary" @click="createRecommendBtn">确定</el-button>
-        <el-button v-else type="primary" @click="updateRecommendBtn">确定</el-button>
+        <!-- <el-button v-else type="primary" @click="updateRecommendBtn">确定</el-button> -->
       </div>
     </el-dialog>
 
@@ -223,8 +223,10 @@ export default {
     },
     // 选择时赋值spuId
     handleLink(e) {
-      const tag = e[e.length - 1]
-      this.dataForm.spuId = tag.substring(2)
+      if (e !== undefined) {
+        const tag = e[e.length - 1]
+        this.dataForm.spuId = tag.substring(2)
+      }
     },
     queryRecommendBtn() {
       this.listQuery.page = 1

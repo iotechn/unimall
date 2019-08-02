@@ -13,4 +13,8 @@
     <select id="getSkuIds" resultType="java.lang.Long">
         SELECT sku_id FROM unimall_spu WHERE id = #{spuId}
     </select>
+
+    <select id="getSpuTitleAll" resultType="com.iotechn.unimall.data.domain.SpuDO">
+        SELECT id,title,category_id as categoryId FROM unimall_spu ORDER BY category_id
+    </select>
 </mapper>
