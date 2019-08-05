@@ -1,5 +1,6 @@
 package com.iotechn.unimall.core.notify;
 
+import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.CommonRequest;
 import com.aliyuncs.CommonResponse;
 import com.aliyuncs.DefaultAcsClient;
@@ -69,18 +70,20 @@ public class AliyunSMSClient implements SMSClient, InitializingBean {
             CommonRequest request = new CommonRequest();
             request.setMethod(MethodType.POST);
             request.setDomain("dysmsapi.aliyuncs.com");
-            request.setVersion(System.currentTimeMillis() + "");
+            request.setVersion("2017-05-25");
             request.setAction("SendSms");
             request.putQueryParameter("RegionId", "default");
             request.putQueryParameter("PhoneNumbers", phone);
             request.putQueryParameter("SignName", signature);
             request.putQueryParameter("TemplateCode", templateId);
-            request.putQueryParameter("TemplateParam", verifyCode);
+            request.putQueryParameter("TemplateParam", "{\"code\":\"" + verifyCode + "\"}");
             CommonResponse commonResponse = client.getCommonResponse(request);
             String data = commonResponse.getData();
+            JSONObject jsonObject = JSONObject.parseObject(data);
+            String message = jsonObject.getString("Message");
             SMSResult smsResult = new SMSResult();
-            smsResult.setSucc(true);
-            smsResult.setMsg("成功");
+            smsResult.setSucc("OK".equalsIgnoreCase(message));
+            smsResult.setMsg(message);
             return smsResult;
         } catch (ClientException e) {
             throw new ThirdPartServiceException(e.getMessage(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());

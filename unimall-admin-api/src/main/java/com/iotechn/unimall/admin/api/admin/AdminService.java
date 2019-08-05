@@ -67,6 +67,7 @@ public interface AdminService {
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "发送登陆短信")
-    public Boolean sendLoginMsg(        @NotNull @HttpParam(name = "username", type = HttpParamType.COMMON, description = "用户名") String username,
-                                       @NotNull @HttpParam(name = "password", type = HttpParamType.COMMON, description = "密码") String password) throws ServiceException;
+    public Boolean sendLoginMsg(
+            @NotNull @HttpParam(name = "username", type = HttpParamType.COMMON, description = "用户名") String username,
+            @NotNull @HttpParam(name = "password", type = HttpParamType.COMMON, description = "密码") String password) throws ServiceException;
 }

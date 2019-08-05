@@ -81,25 +81,30 @@
 			async toLogin() {
 				const that = this
 				that.logining = true;
-
-				that.$api.request('user', 'login', {
-					phone: that.phone,
-					password: that.password
-				}, failres => {
-					that.logining = false
-					uni.showToast({
-						title: failres.errmsg,
-						icon: "none"
-					});
-				}).then(res => {
-					that.logining = false
-					that.$store.commit('login', res.data)
-					uni.setStorageSync('userInfo', res.data)
-					if (that.$api.prePage().lodaData) {
-						that.$api.prePage().loadData()
-					}
-					uni.navigateBack()
-				})
+				if (that.phone.length !== 11) {
+					that.$api.msg('请输入11位中国手机号')
+				} else if (that.password.length < 8) {
+					that.$api.msg('密码至少8位')
+				} else {
+					that.$api.request('user', 'login', {
+						phone: that.phone,
+						password: that.password
+					}, failres => {
+						that.logining = false
+						uni.showToast({
+							title: failres.errmsg,
+							icon: "none"
+						});
+					}).then(res => {
+						that.logining = false
+						that.$store.commit('login', res.data)
+						uni.setStorageSync('userInfo', res.data)
+						if (that.$api.prePage().lodaData) {
+							that.$api.prePage().loadData()
+						}
+						uni.navigateBack()
+					})
+				}
 			},
 			miniWechatLogin(e) {
 				const that = this

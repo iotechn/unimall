@@ -73,6 +73,7 @@
 				<input class="desc" type="text" v-model="orderReqeust.mono" placeholder="请填写备注信息" placeholder-class="placeholder" />
 			</view>
 		</view>
+		
 
 		<!-- 底部 -->
 		<view class="footer">
@@ -92,7 +93,7 @@
 					<view class="con">
 						<view class="left">
 							<text class="title">{{item.title}}</text>
-							<text class="time">有效期至{{item.gmtEnd / 100.0}}</text>
+							<text class="time">有效期至{{item.gmtEnd | dateFormat}}</text>
 						</view>
 						<view class="right">
 							<text class="price">{{item.discount / 100.0}}</text>
@@ -112,12 +113,6 @@
 
 <script>
 	export default {
-		filters: {
-			dateFormat(time) {
-				return 'temp'
-				//return formatDate(new Date(time),'yyyy-MM-dd HH:mm')
-			}
-		},
 		data() {
 			return {
 				orderReqeust: {
@@ -158,6 +153,7 @@
 			let totalOriginalPrice = 0
 			let totalPrice = 0
 			let skuCategoryPriceMap = {}
+			debugger
 			that.orderReqeust.skuList.forEach(item => {
 				totalOriginalPrice += item.originalPrice*item.num
 				totalPrice += that.isVip ? (item.vipPrice*item.num) :  (item.price*item.num)

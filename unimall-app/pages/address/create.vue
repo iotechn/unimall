@@ -42,7 +42,7 @@
 					city: '',
 					county: '',
 					address: '',
-					defaultAddress: undefined,
+					defaultAddress: 0,
 					def: false
 				},
 				lotusAddressData:{

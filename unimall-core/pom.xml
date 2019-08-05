@@ -20,6 +20,12 @@
 
 	<dependencies>
 
+		<!-- 阿里巴巴 json 解析 -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.github.qcloudsms</groupId>
 			<artifactId>qcloudsms</artifactId>

@@ -26,8 +26,6 @@ public class FootprintServiceImpl implements  FootprintService {
     @Autowired
     private FootprintMapper footprintMapper;
 
-
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteFootprint(Long userId, Long footprintId) throws ServiceException {
@@ -42,7 +40,6 @@ public class FootprintServiceImpl implements  FootprintService {
 
     @Override
     public List<FootprintDTO> getAllFootprint(Long userId) throws ServiceException {
-
         List<FootprintDTO> footprintDTOList = footprintMapper.getAllFootprint(userId,0,30);
         return footprintDTOList;
     }

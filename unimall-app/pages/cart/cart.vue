@@ -37,7 +37,7 @@
 						<view class="item-right">
 							<text class="clamp title">{{item.title}}</text>
 							<text class="attr">{{item.skuTitle}}{{item.num > item.stock?(' (库存不足 剩余:' + item.stock + ')') : ''}}</text>
-							<text class="price"><text v-if="item.originalPrice > item.price" style="text-decoration:line-through">¥{{item.originalPrice / 100.0}}</text> ¥{{item.price / 100.0}}</text>
+							<text class="price"><text v-if="item.originalPrice > item.price" style="text-decoration:line-through">¥{{isVip ? (item.vipPrice / 100 + '[VIP]') : item.originalPrice / 100.0}}</text> ¥{{item.price / 100.0}}</text>
 							<uni-number-box 
 								class="step"
 								:min="1" 
@@ -210,7 +210,7 @@
 				list.forEach(item=>{
 					if(item.checked === true){
 						totalItems += item.num
-						total += (that.isVip ? item.price : item.vipPrice) * item.num;
+						total += (that.isVip ? item.vipPrice : item.price) * item.num;
 					}else if(checked === true){
 						checked = false;
 					}

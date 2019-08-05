@@ -13,7 +13,7 @@
 			<view class="titleNview-placing"></view>
 			<!-- 背景色区域 -->
 			<view class="titleNview-background" :style="{backgroundColor:titleNViewBackground}"></view>
-			<swiper class="carousel" circular @change="swiperChange">
+			<swiper autoplay="true" interval="3000" duration="500" class="carousel" circular @change="swiperChange">
 				<swiper-item v-for="(item, index) in carouselList" :key="index" class="carousel-item" @click="naviageToPage(item.url)">
 					<image :src="item.imgUrl" />
 				</swiper-item>
@@ -29,7 +29,7 @@
 		<view class="cate-section">
 			<view v-for="(item, index) in categoryButtomList" :key="index" @click="naviageToPage(item.url)" class="cate-item">
 				<image :src="item.imgUrl"></image>
-				<text>环球美食</text>
+				<text>{{item.title}}</text>
 			</view>
 		</view>
 		
@@ -62,7 +62,7 @@
 			</scroll-view>
 		</view> -->
 		
-		<!-- 团购楼层 -->
+		<!-- 橱窗推荐 -->
 		<view class="f-header m-t">
 			<image src="/static/temp/h1.png"></image>
 			<view class="tit-box">
@@ -76,9 +76,8 @@
 					class="g-swiper-item"
 					v-if="index % 2 === 0"
 					v-for="(item, index) in windowSpuList" :key="index"
-					@click="navToDetailPage(item.spuId)"
 				>
-					<view class="g-item left">
+					<view @click="navToWindowSuggestSpu(index)" class="g-item left">
 						<image :src="item.spuImg + '?x-oss-process=style/400px'" mode="aspectFill"></image>
 						<view class="t-box">
 							<text class="title clamp">{{item.spuTitle}}</text>
@@ -93,7 +92,7 @@
 						</view>
 						            
 					</view>
-					<view v-if="index + 1 < windowSpuList.length" class="g-item right">
+					<view v-if="index + 1 < windowSpuList.length" @click="navToWindowSuggestSpu(index + 1)" class="g-item right">
 						<image :src="windowSpuList[index+1].spuImg" mode="aspectFill"></image>
 						<view class="t-box">
 							<text class="title clamp">{{windowSpuList[index+1].spuTitle}}</text>
@@ -111,8 +110,6 @@
 
 			</swiper>
 		</view>
-		
-		
 		
 		<!-- 分类推荐楼层 -->
 		<view class="f-header m-t">
@@ -137,7 +134,7 @@
 						<text class="title clamp">{{spuItem.title}}</text>
 						<text class="price">￥{{(isVip ? spuItem.vipPrice : spuItem.price) / 100 }}</text>
 					</view>
-					<view class="more">
+					<view @click="naviageToPage(item.url)" class="more">
 						<text>查看全部</text>
 						<text>More+</text>
 					</view>
@@ -251,6 +248,12 @@
 			navToDetailPage(id) {
 				uni.navigateTo({
 					url: `/pages/product/detail?id=${id}`
+				})
+			},
+			navToWindowSuggestSpu(index) {
+				const that = this
+				uni.navigateTo({
+					url: '/pages/product/detail?id=' + that.windowSpuList[index].spuId
 				})
 			},
 			naviageToPage(page) {
