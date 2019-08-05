@@ -10,6 +10,7 @@
       <el-cascader
         :options="options"
         :props="{ checkStrictly: true }"
+        v-model="queryOptions"
         style="width: 200px"
         class="filter-item"
         placeholder="请选择父类目"
@@ -151,8 +152,8 @@
           <el-cascader
             :options="options"
             :props="{ checkStrictly: true }"
-            v-model="wocao"
-            placeholder="请选择父类目，不选为一级类目"
+            v-model="dialogOptions"
+            placeholder="选择父类目，默认一级类目"
             filterable
             clearable
             @change="handleLink"
@@ -220,7 +221,8 @@ export default {
       list: undefined,
       total: 0,
       listLoading: true,
-      wocao: undefined,
+      dialogOptions: undefined,
+      queryOptions: undefined,
       listQuery: {
         pageNo: 1,
         limit: 20,
@@ -315,7 +317,9 @@ export default {
     handleCreate() {
       this.resetForm()
       this.dialogStatus = 'create'
-      this.wocao = undefined
+      this.dialogOptions = undefined
+      this.queryOptions = undefined
+      this.resetQuery()
       this.refreshOptions()
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -352,7 +356,9 @@ export default {
         picUrl: row.picUrl,
         iconUrl: row.iconUrl
       })
-      this.wocao = undefined
+      this.dialogOptions = row.parent
+      // this.queryOptions = undefined
+      // this.resetQuery()
       this.refreshOptions()
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
@@ -365,7 +371,8 @@ export default {
         if (valid) {
           updateCategory(this.dataForm)
             .then(() => {
-              this.listQuery.id = this.dataForm.id
+            // this.resetQuery()
+            // this.listQuery.id = this.dataForm.id
               this.getList()
               this.dialogFormVisible = false
               this.$notify.success({
@@ -437,7 +444,7 @@ export default {
     },
     // 填写弹框选择父类目时，获得父类目的id
     handleLink(e) {
-      if (e == null) {
+      if (e == null || e === undefined) {
         return false
       }
       const tag = e[e.length - 1]
@@ -445,6 +452,9 @@ export default {
     },
     // 查询框选择父类目时，获得父类目的id
     handleQuery(e) {
+      if (e == null || e === undefined) {
+        return false
+      }
       this.refreshOptions()
       const tag = e[e.length - 1]
       this.listQuery.parentId = tag

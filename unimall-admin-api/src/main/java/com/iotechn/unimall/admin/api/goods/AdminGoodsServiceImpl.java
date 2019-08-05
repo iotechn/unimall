@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -54,50 +55,119 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
      * @return
      * @throws ServiceException
      */
-    //TODO 做下优化
-    @Override
-    public List<SpuTreeNodeDTO> getSpuBigTree(Long adminId) throws ServiceException {
-        List<CategoryDO> categoryDOS = categoryMapper.selectList(new EntityWrapper<>());
-        List<SpuTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
-            SpuTreeNodeDTO dto = new SpuTreeNodeDTO();
-            dto.setLabel(item.getTitle());
-            dto.setValue("C_" + item.getId());
-            dto.setId(item.getId());
-            dto.setChildren(new LinkedList<>());
-            return dto;
-        }).collect(Collectors.toList());
-        list.forEach(item -> {
-            categoryDOS.forEach(categoryDO -> {
-                if (categoryDO.getParentId().equals(item.getId())) {
-                    SpuTreeNodeDTO spuTreeNodeDTO = new SpuTreeNodeDTO();
-                    spuTreeNodeDTO.setChildren(new LinkedList<>());
-                    spuTreeNodeDTO.setValue("C_" + categoryDO.getId());
-                    spuTreeNodeDTO.setId(categoryDO.getId());
-                    spuTreeNodeDTO.setLabel(categoryDO.getTitle());
-                    item.getChildren().add(spuTreeNodeDTO);
-                    categoryDOS.forEach(subCategoryDO -> {
-                        if (subCategoryDO.getParentId().equals(spuTreeNodeDTO.getId())) {
-                            SpuTreeNodeDTO childSpuNodeDTO = new SpuTreeNodeDTO();
-                            childSpuNodeDTO.setId(subCategoryDO.getId());
-                            childSpuNodeDTO.setLabel(subCategoryDO.getTitle());
-                            childSpuNodeDTO.setValue("C_" + subCategoryDO.getId());
-                            spuTreeNodeDTO.getChildren().add(childSpuNodeDTO);
-                            List<SpuDO> spuList = spuMapper.getSpuTitleByCategoryId(subCategoryDO.getId());
-                            List<SpuTreeNodeDTO> spuTreeNodeList = spuList.stream().map(spuItem -> {
-                                SpuTreeNodeDTO goodsNode = new SpuTreeNodeDTO();
-                                goodsNode.setValue("G_" + spuItem.getId());
-                                goodsNode.setLabel(spuItem.getTitle());
-                                goodsNode.setId(spuItem.getId());
-                                return goodsNode;
-                            }).collect(Collectors.toList());
-                            childSpuNodeDTO.setChildren(spuTreeNodeList);
-                        }
-                    });
+    public List<SpuTreeNodeDTO> getSpuBigTree(Long adminId) throws  ServiceException{
+        List<CategoryDO> categoryDOS = categoryMapper.selectList(new EntityWrapper<CategoryDO>().orderBy("level"));
+        List<SpuDO> spuDOS = spuMapper.getSpuTitleAll();
+        List<SpuTreeNodeDTO> list = new ArrayList<>();
+        Integer recordLevelOne = 0;
+        Integer recordLevelTwo = 0;
+        for (int i = 0; i < categoryDOS.size(); i++) {
+            if(i != 0 && categoryDOS.get(i-1).getLevel().equals(0) && categoryDOS.get(i).getLevel().equals(1)){
+                recordLevelOne = i;
+            }
+            if(i != 0 && categoryDOS.get(i-1).getLevel().equals(1) && categoryDOS.get(i).getLevel().equals(2)){
+                recordLevelTwo = i;
+                break;
+            }
+        }
+
+        for (int i = 0; i < recordLevelOne; i++) {
+            CategoryDO categoryOnI = categoryDOS.get(i);    //一级类目
+            SpuTreeNodeDTO dtoOnI = new SpuTreeNodeDTO();
+            dtoOnI.setLabel(categoryOnI.getTitle());
+            dtoOnI.setValue("C_" + categoryOnI.getId());
+            dtoOnI.setId(categoryOnI.getId());
+            dtoOnI.setChildren(new LinkedList<>());
+            for (int j = recordLevelOne; j < recordLevelTwo; j++) {
+                CategoryDO categoryOnJ = categoryDOS.get(j);    //二级类目
+                if(!categoryOnJ.getParentId().equals(dtoOnI.getId())){
+                    continue;
                 }
-            });
-        });
+
+                SpuTreeNodeDTO dtoOnJ = new SpuTreeNodeDTO();
+                dtoOnJ.setLabel(categoryOnJ.getTitle());
+                dtoOnJ.setValue("C_" + categoryOnJ.getId());
+                dtoOnJ.setId(categoryOnJ.getId());
+                dtoOnJ.setChildren(new LinkedList<>());
+                
+                for (int p = recordLevelTwo; p <categoryDOS.size() ; p++) {
+                    CategoryDO categoryOnP = categoryDOS.get(p);    //三级类目
+                    if(!categoryOnP.getParentId().equals(dtoOnJ.getId())){
+                        continue;
+                    }
+
+                    SpuTreeNodeDTO dtoOnP = new SpuTreeNodeDTO();
+                    dtoOnP.setLabel(categoryOnP.getTitle());
+                    dtoOnP.setValue("C_" + categoryOnP.getId());
+                    dtoOnP.setId(categoryOnP.getId());
+                    dtoOnP.setChildren(new LinkedList<>());
+
+                    for (int k = 0; k < spuDOS.size(); k++) {
+                        if(k != 0 && spuDOS.get(k-1).getCategoryId().equals(dtoOnP.getId()) && !spuDOS.get(k).getCategoryId().equals(dtoOnP.getId())){
+                            break;
+                        }
+                        SpuDO spuDO = spuDOS.get(k);        //商品
+                        if(spuDO.getCategoryId().equals(dtoOnP.getId())){
+                            SpuTreeNodeDTO dtoOnK = new SpuTreeNodeDTO();
+                            dtoOnK.setLabel(spuDO.getTitle());
+                            dtoOnK.setValue("G_" + spuDO.getId());
+                            dtoOnK.setId(spuDO.getId());
+                            dtoOnK.setChildren(new LinkedList<>());
+                            dtoOnP.getChildren().add(dtoOnK);
+                        }
+                    }
+                    dtoOnJ.getChildren().add(dtoOnP);
+                }
+                dtoOnI.getChildren().add(dtoOnJ);
+            }
+            list.add(dtoOnI);
+        }
         return list;
     }
+
+//    @Override
+//    public List<SpuTreeNodeDTO> getSpuBigTree(Long adminId) throws ServiceException {
+//        List<CategoryDO> categoryDOS = categoryMapper.selectList(new EntityWrapper<>());
+//        List<SpuTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
+//            SpuTreeNodeDTO dto = new SpuTreeNodeDTO();
+//            dto.setLabel(item.getTitle());
+//            dto.setValue("C_" + item.getId());
+//            dto.setId(item.getId());
+//            dto.setChildren(new LinkedList<>());
+//            return dto;
+//        }).collect(Collectors.toList());
+//        list.forEach(item -> {
+//            categoryDOS.forEach(categoryDO -> {
+//                if (categoryDO.getParentId().equals(item.getId())) {
+//                    SpuTreeNodeDTO spuTreeNodeDTO = new SpuTreeNodeDTO();
+//                    spuTreeNodeDTO.setChildren(new LinkedList<>());
+//                    spuTreeNodeDTO.setValue("C_" + categoryDO.getId());
+//                    spuTreeNodeDTO.setId(categoryDO.getId());
+//                    spuTreeNodeDTO.setLabel(categoryDO.getTitle());
+//                    item.getChildren().add(spuTreeNodeDTO);
+//                    categoryDOS.forEach(subCategoryDO -> {
+//                        if (subCategoryDO.getParentId().equals(spuTreeNodeDTO.getId())) {
+//                            SpuTreeNodeDTO childSpuNodeDTO = new SpuTreeNodeDTO();
+//                            childSpuNodeDTO.setId(subCategoryDO.getId());
+//                            childSpuNodeDTO.setLabel(subCategoryDO.getTitle());
+//                            childSpuNodeDTO.setValue("C_" + subCategoryDO.getId());
+//                            spuTreeNodeDTO.getChildren().add(childSpuNodeDTO);
+//                            List<SpuDO> spuList = spuMapper.getSpuTitleByCategoryId(subCategoryDO.getId());
+//                            List<SpuTreeNodeDTO> spuTreeNodeList = spuList.stream().map(spuItem -> {
+//                                SpuTreeNodeDTO goodsNode = new SpuTreeNodeDTO();
+//                                goodsNode.setValue("G_" + spuItem.getId());
+//                                goodsNode.setLabel(spuItem.getTitle());
+//                                goodsNode.setId(spuItem.getId());
+//                                return goodsNode;
+//                            }).collect(Collectors.toList());
+//                            childSpuNodeDTO.setChildren(spuTreeNodeList);
+//                        }
+//                    });
+//                }
+//            });
+//        });
+//        return list;
+//    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

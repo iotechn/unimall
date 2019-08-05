@@ -283,7 +283,8 @@ export default {
         firstNum: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
         firstMoney: [{ required: true, message: '首次计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
         continueNum: [{ required: true, message: '续件计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
-        continueMoney: [{ required: true, message: '续件计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }]
+        continueMoney: [{ required: true, message: '续件计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
+        designatedAreaList: [{ required: true, message: '至少选择一个地区', trigger: 'blur' }]
       }
 
     }
@@ -442,10 +443,14 @@ export default {
       })
     },
     handleSpecAdd() {
-      this.specForm.designatedArea = this.specForm.designatedAreaList.join(',')
-      var temp = Object.assign({}, this.specForm)
-      this.dataForm.freightTemplateCarriageDOList.unshift(temp)
-      this.specVisiable = false
+      this.$refs['specForm'].validate(valid => {
+        if (valid) {
+          this.specForm.designatedArea = this.specForm.designatedAreaList.join(',')
+          var temp = Object.assign({}, this.specForm)
+          this.dataForm.freightTemplateCarriageDOList.unshift(temp)
+          this.specVisiable = false
+        }
+      })
     },
     // 在模态框删除指定地区
     handleSpecDelete(row) {
