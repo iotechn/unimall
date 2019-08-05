@@ -9,6 +9,7 @@
             u.coupon_id AS couponId,
             u.gmt_update AS gmtUpdate,
             u.gmt_create AS gmtCreate,
+            u.gmt_end AS gmtEnd,
             c.title,
             c.category_id AS categoryId,
             y.title AS categoryTitle,
