@@ -1,9 +1,9 @@
 {
-  "name": "litemall-admin",
+  "name": "unimall-admin",
   "version": "0.1.0",
-  "description": "litemall-admin basing on vue-element-admin 3.9.3",
+  "description": "unimall-admin basing on vue-element-admin 3.9.3",
   "author": "linlinjava <linlinjava@163.com>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "private": true,
   "scripts": {
     "dev": "cross-env BABEL_ENV=development webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",

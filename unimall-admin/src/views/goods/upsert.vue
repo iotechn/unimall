@@ -26,8 +26,8 @@
           <el-input v-model="goods.stock" :disabled="true" placeholder="0"/>
         </el-form-item>
 
-        <el-form-item label="运费模板">
-          <el-select v-model="goods.freightTemplateId" placeholder="选择商品运费模板,默认包邮">
+        <el-form-item label="运费模板" prop="freightTemplate">
+          <el-select v-model="goods.freightTemplateId" placeholder="选择商品运费模板">
             <el-option v-for="(item, index) in freightList" :key="index" :label="item.freightTemplateDO.templateName" :value="item.freightTemplateDO.id"/>
           </el-select>
         </el-form-item>
@@ -124,7 +124,7 @@
               :show-file-list="false"
               :on-success="handleSkuImgSuccess"
               class="avatar-uploader">
-              <img v-if="skuForm.img" :src="img" class="avatar">
+              <img v-if="skuForm.img" :src="skuForm.img" class="avatar">
               <i v-else class="el-icon-plus avatar-uploader-icon"/>
             </el-upload>
           </el-form-item>
@@ -177,6 +177,7 @@
           ref="attributeForm"
           :model="attributeForm"
           :rules="attrRules"
+          :data = "attributes"
           status-icon
           label-position="left"
           label-width="100px"
@@ -265,7 +266,7 @@ export default {
       attributeForm: { attribute: '', value: '' },
       attributes: [],
       skuVisiable: false,
-      skuForm: {},
+      skuForm: { img: undefined },
       skuList: [],
       rules: {
         status: [
@@ -356,7 +357,7 @@ export default {
           this.goods.priceRaw = this.goods.price / 100
           this.goods.originalPriceRaw = this.goods.originalPrice / 100
           this.goods.vipPriceRaw = this.goods.vipPrice / 100
-          this.attributes = response.data.data.attributes ? response.data.data.attributes : []
+          this.attributes = response.data.data.attributeList ? response.data.data.attributeList : []
           this.categoryIds = response.data.data.categoryIds.reverse()
           this.skuList = response.data.data.skuList
           this.imgsFileList = []
@@ -392,7 +393,12 @@ export default {
     handleCreate: function() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          if (this.skuList.length === 0) {
+          if (this.goods.freightTemplateId === undefined || this.goods.freightTemplateId === null) {
+            this.$notify.error({
+              title: '失败',
+              message: '请添加运费模板'
+            })
+          } else if (this.skuList.length === 0) {
             this.$notify.error({
               title: '失败',
               message: '请添加类型（Sku）'

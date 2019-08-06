@@ -74,7 +74,7 @@ public class AdminServiceImpl implements AdminService {
         AdminDO adminDO = adminDOS.get(0);
         //短信验证码
         String code = cacheComponent.getObj(ADMIN_MSG_CODE+adminDO.getPhone(),String.class );
-        if(verifyCode==null || !code.equals(verifyCode)){
+        if(code == null || verifyCode==null || !code.equals(verifyCode)){
             throw new AdminServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
         }
 
@@ -127,7 +127,7 @@ public class AdminServiceImpl implements AdminService {
     public Page<AdminDTO> list(String name, Integer page, Integer limit, Long adminId) throws ServiceException {
         Wrapper<AdminDO> wrapper = new EntityWrapper<AdminDO>();
         if (!StringUtils.isEmpty(name)) {
-            wrapper.like("realname", name);
+            wrapper.like("username", name);
         }
         wrapper.orderBy("id", false);
         Integer count = adminMapper.selectCount(wrapper);

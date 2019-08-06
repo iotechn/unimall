@@ -35,7 +35,7 @@ public interface AdminService {
 
     @HttpMethod(description = "列表", permission = "admin:admin:list", permissionParentName = "系统管理", permissionName = "管理员")
     public Page<AdminDTO> list(
-            @HttpParam(name = "name", type = HttpParamType.COMMON, description = "管理员名称搜索") String name,
+            @HttpParam(name = "username", type = HttpParamType.COMMON, description = "管理员名称搜索") String name,
             @HttpParam(name = "page", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer page,
             @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页长度", valueDef = "20") Integer limit,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
