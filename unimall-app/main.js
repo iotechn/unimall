@@ -44,6 +44,8 @@ const isVip = () => {
 	return userInfo && userInfo.level
 }
 
+let loginLock = false
+
 const request = (_gp, _mt, data = {}, failCallback) => {
 	//异步请求数据
 	return new Promise(resolve => {
@@ -71,21 +73,28 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 						if (failCallback) {
 							failCallback(res.data)
 						}
-						uni.showModal({
-							title: '登录提示',
-							content: '您尚未登录，是否立即登录？',
-							showCancel: true,
-							confirmText: '登录',
-							success: (e) => {
-								if (e.confirm) {
-									uni.navigateTo({
-										url: '/pages/public/login'
-									})
+						if (!loginLock) {
+							loginLock = true
+							uni.showModal({
+								title: '登录提示',
+								content: '您尚未登录，是否立即登录？',
+								showCancel: true,
+								confirmText: '登录',
+								success: (e) => {
+									if (e.confirm) {
+										uni.navigateTo({
+											url: '/pages/public/login'
+										})
+									}
+								},
+								fail: () => {
+								},
+								complete: () =>  {
+									loginLock = false
 								}
-							},
-							fail: () => {
-							}
-						})
+							})
+						}
+						
 					} else {
 						if (failCallback) {
 							failCallback(res.data)

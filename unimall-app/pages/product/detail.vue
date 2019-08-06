@@ -302,32 +302,34 @@
 			},
 			buy() {
 				const that = this
-				if (that.selectedSkuIndex < 0) {
-					that.$api.msg('请选择类型')
-					return
+				if (!that.selectedSku.id) {
+					that.specClass = 'none'
+					that.toggleSpec()
+					that.toggleCallback = that.buy
+				} else {
+					let skuItem = {
+						skuId: that.selectedSku.id,
+						num: 1,
+						title: that.goods.title,
+						originalPrice: that.selectedSku.originalPrice,
+						price: that.selectedSku.price,
+						vipPrice: that.selectedSku.vipPrice,
+						skuTitle: that.selectedSku.title,
+						spuImg: that.goods.img,
+						skuImg: that.selectedSku.img,
+						stock: that.selectedSku.stock,
+						spuId: that.goods.id,
+						categoryId: that.goods.categoryId,
+						categoryIdList: that.goods.categoryIds
+					}
+					let skuList = [1]
+					skuList[0] = skuItem
+					uni.navigateTo({
+						url: `/pages/order/create?takeway=buy&data=${JSON.stringify(skuList)}`
+					})
 				}
 				
-				let skuItem = {
-					skuId: that.selectedSku.id,
-					num: 1,
-					title: that.goods.title,
-					originalPrice: that.selectedSku.originalPrice,
-					price: that.selectedSku.price,
-					vipPrice: that.selectedSku.vipPrice,
-					skuTitle: that.selectedSku.title,
-					spuImg: that.goods.img,
-					skuImg: that.selectedSku.img,
-					stock: that.selectedSku.stock,
-					spuId: that.goods.id,
-					categoryId: that.goods.categoryId,
-					categoryIdList: that.goods.categoryIds
-				}
-				debugger
-				let skuList = [1]
-				skuList[0] = skuItem
-				uni.navigateTo({
-					url: `/pages/order/create?takeway=buy&data=${JSON.stringify(skuList)}`
-				})
+				
 			},
 			//查看所有评价
 			navAllAppraise() {
