@@ -1,5 +1,6 @@
 package com.iotechn.unimall.biz.service.goods;
 
+import com.baomidou.mybatisplus.entity.Column;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
@@ -94,6 +95,20 @@ public class GoodsBizService {
     @Autowired
     private AppraiseBizService appraiseBizService;
 
+    private static final Column[] baseColumns = {
+            Column.create().column("id"),
+            Column.create().column("original_price").as("originalPrice"),
+            Column.create().column("price"),
+            Column.create().column("vip_price").as("vipPrice"),
+            Column.create().column("title"),
+            Column.create().column("sales"),
+            Column.create().column("img"),
+            Column.create().column("description"),
+            Column.create().column("category_id").as("categoryId"),
+            Column.create().column("freight_template_id").as("freightTemplateId"),
+            Column.create().column("unit"),
+            Column.create().column("status")};
+
     public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         Wrapper<SpuDO> wrapper = new EntityWrapper<SpuDO>();
         if (!StringUtils.isEmpty(title)) {
@@ -135,6 +150,7 @@ public class GoodsBizService {
             }
         }
         wrapper.eq("status", SpuStatusType.SELLING.getCode());
+        wrapper.setSqlSelect(baseColumns);
         List<SpuDO> spuDOS = spuMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
         //组装SPU
         List<SpuDTO> spuDTOList = new ArrayList<>();

@@ -34,4 +34,5 @@ public interface SpuMapper extends BaseMapper<SpuDO> {
     public List<Long> getSkuIds(@Param("spuId") Long spuId);
 
     public List<SpuDO> getSpuTitleAll();
+
 }
