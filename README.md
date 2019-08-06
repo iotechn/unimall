@@ -4,17 +4,17 @@
 
 下面分别是微信小程序包和Android安装Apk。因为苹果开发者ID太贵，所以这里没有打包，实际也可同时支持苹果的。
 
-![前端演示](snapshoot/unimall/front.jpg)
+![前端演示](snapshoot/front.jpg)
 
 #### 后台端系统演示
 
-![后端演示](snapshoot/unimall/backend1.png)
+![后端演示](snapshoot/backend1.png)
 
 #### Unimall 基本框架
 
 Unimall使用前后分离的设计、后端采用Java编写，前端均适用vuejs编写。
 
-![架构图](snapshoot/unimall/framework.png)
+![架构图](snapshoot/framework.png)
 
 #### 项目部署方式
 
