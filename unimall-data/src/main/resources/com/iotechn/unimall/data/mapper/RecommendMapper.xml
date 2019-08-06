@@ -21,7 +21,7 @@
         WHERE
           re.spu_id = sp.id
           and re.recommend_type = #{recommendType}
-        limit #{pageNo},#{pageSize}
+        limit #{offset},#{pageSize}
     </select>
 
     <select id="getAllRecommend" resultType="com.iotechn.unimall.data.dto.RecommendDTO">
@@ -42,7 +42,7 @@
         unimall_spu sp
         WHERE
         re.spu_id = sp.id
-        limit #{pageNo},#{pageSize}
+        limit #{offset},#{pageSize}
     </select>
 
 </mapper>

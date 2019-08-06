@@ -199,6 +199,7 @@
 import { listCategory, createCategory, updateCategory, deleteCategory } from '@/api/category'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
+import { clearTreeEmptyChildren } from '@/utils/index'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { categorySecondLevelTree } from '@/api/category'
 
@@ -462,7 +463,7 @@ export default {
     // 刷新类目选择节点
     refreshOptions() {
       categorySecondLevelTree().then(response => {
-        this.options = response.data.data
+        this.options = clearTreeEmptyChildren(response.data.data)
       })
     }
   }

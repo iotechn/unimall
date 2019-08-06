@@ -7,7 +7,9 @@ import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.notify.SMSClient;
+import com.iotechn.unimall.core.notify.SMSResult;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.core.util.MD5Util;
 import com.iotechn.unimall.data.component.CacheComponent;
@@ -222,7 +224,10 @@ public class AdminServiceImpl implements AdminService {
         }
         String code = GeneratorUtil.genSixVerifyCode();
         cacheComponent.putRaw(ADMIN_MSG_CODE+admin.getPhone(), code,300 );
-        smsClient.sendAdminLoginVerify(admin.getPhone(), code);
+        SMSResult smsResult = smsClient.sendAdminLoginVerify(admin.getPhone(), code);
+        if(!smsResult.isSucc()){
+            throw new ThirdPartServiceException(smsResult.getMsg(), ExceptionDefinition.ADMIN_VERIFY_CODE_SEND_FAIL.getCode());
+        }
         return true;
     }
 

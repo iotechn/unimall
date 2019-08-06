@@ -17,7 +17,7 @@ import java.util.List;
 public interface RecommendMapper extends BaseMapper<RecommendDO> {
 
     //根据推荐类型，查找商品信息
-    public List<RecommendDTO> getRecommendByType(@Param("recommendType") Integer recommendType,@Param("pageNo") Integer pageNo,@Param("pageSize") Integer pageSize);
+    public List<RecommendDTO> getRecommendByType(@Param("recommendType") Integer recommendType,@Param("offset") Integer offset,@Param("pageSize") Integer pageSize);
 
-    public List<RecommendDTO> getAllRecommend(@Param("pageNo") Integer pageNo,@Param("pageSize") Integer pageSize);
+    public List<RecommendDTO> getAllRecommend(@Param("offset") Integer offset,@Param("pageSize") Integer pageSize);
 }

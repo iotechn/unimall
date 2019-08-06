@@ -109,9 +109,9 @@ public class FreightBizService {
                 Integer open = freightTemplateCarriageDO.getFirstMoney();
                 num = num - freightTemplateCarriageDO.getFirstNum();
                 if (num % freightTemplateCarriageDO.getContinueNum() != 0) {
-                    open = open + freightTemplateCarriageDO.getConntinueMoney() * ((num / freightTemplateCarriageDO.getContinueNum()) + 1);
+                    open = open + freightTemplateCarriageDO.getContinueMoney() * ((num / freightTemplateCarriageDO.getContinueNum()) + 1);
                 } else {
-                    open = open + freightTemplateCarriageDO.getConntinueMoney() * (num / freightTemplateCarriageDO.getContinueNum());
+                    open = open + freightTemplateCarriageDO.getContinueMoney() * (num / freightTemplateCarriageDO.getContinueNum());
                 }
                 return open;
             }

@@ -92,7 +92,7 @@
           <el-input v-model="dataForm.spuLocation" clearable placeholder=""/>
         </el-form-item>
         <el-form-item label="发货期限" prop="deliveryDeadline">
-          <el-input v-model="dataForm.deliveryDeadline" clearable placeholder="">
+          <el-input v-model.number="dataForm.deliveryDeadline" clearable placeholder="">
             <template slot="append">天</template>
           </el-input>
         </el-form-item>
@@ -106,27 +106,27 @@
           </template>
         </el-form-item>
         <el-form-item v-if="dataForm.isFree === 1" label="默认包邮额度" prop="defaultFreePrice">
-          <el-input v-model="dataForm.defaultFreePrice" placeholder="默认包邮额度">
+          <el-input v-model.number="dataForm.defaultFreePrice" placeholder="默认包邮额度">
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
         <el-form-item label="计费首次数量" prop="defaultFirstNum">
-          <el-input v-model="dataForm.defaultFirstNum" clearable placeholder="">
+          <el-input v-model.number="dataForm.defaultFirstNum" clearable placeholder="">
             <template slot="append">件</template>
           </el-input>
         </el-form-item>
         <el-form-item label="计费首次价格" prop="defaultFirstPrice">
-          <el-input v-model="dataForm.defaultFirstPrice" clearable placeholder="">
+          <el-input v-model.number="dataForm.defaultFirstPrice" clearable placeholder="">
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
         <el-form-item label="计费续件数量" prop="defaultContinueNum">
-          <el-input v-model="dataForm.defaultContinueNum" clearable placeholder="">
+          <el-input v-model.number="dataForm.defaultContinueNum" clearable placeholder="">
             <template slot="append">件</template>
           </el-input>
         </el-form-item>
         <el-form-item label="计费续件价格" prop="defaultContinuePrice">
-          <el-input v-model="dataForm.defaultContinuePrice" clearable placeholder="">
+          <el-input v-model.number="dataForm.defaultContinuePrice" clearable placeholder="">
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
@@ -164,25 +164,27 @@
               style="width: 400px; margin-left:50px;"
             >
               <el-form-item label="包邮门栏" prop="freePrice">
-                <el-input v-model="specForm.freePrice" clearable />
+                <el-input v-model.number="specForm.freePrice" clearable >
+                  <template slot="append">元</template>
+                </el-input>
               </el-form-item>
               <el-form-item label="首次数量" prop="firstNum">
-                <el-input v-model="specForm.firstNum" clearable >
+                <el-input v-model.number="specForm.firstNum" clearable >
                   <template slot="append">件</template>
                 </el-input>
               </el-form-item>
               <el-form-item label="首次价格" prop="firstMoney">
-                <el-input v-model="specForm.firstMoney" placeholder="" clearable>
+                <el-input v-model.number="specForm.firstMoney" placeholder="" clearable>
                   <template slot="append">元</template>
                 </el-input>
               </el-form-item>
               <el-form-item label="续件数量" prop="continueNum">
-                <el-input v-model="specForm.continueNum" placeholder="" clearable>
+                <el-input v-model.number="specForm.continueNum" placeholder="" clearable>
                   <template slot="append">件</template>
                 </el-input>
               </el-form-item>
               <el-form-item label="续件价格" prop="continueMoney">
-                <el-input v-model="specForm.continueMoney" placeholder="" clearable>
+                <el-input v-model.number="specForm.continueMoney" placeholder="" clearable>
                   <template slot="append">元</template>
                 </el-input>
               </el-form-item>
@@ -234,6 +236,26 @@ export default {
     }
   },
   data() {
+    // 校验是否大于零小于10亿
+    var isNum = (rule, value, callback) => {
+      if (parseInt(value) <= 0) {
+        callback(new Error('需要大于零'))
+      }
+      if (parseInt(value) > 10000000) {
+        callback(new Error('需要小于1千万'))
+      }
+      callback()
+    }
+    // 校验是否大于等于零小于10亿
+    var isPrice = (rule, value, callback) => {
+      if (parseInt(value) < 0) {
+        callback(new Error('需要大于等于零'))
+      }
+      if (parseInt(value) > 10000000) {
+        callback(new Error('需要小于1千万'))
+      }
+      callback()
+    }
     return {
       list: undefined,
       total: 0,
@@ -271,19 +293,19 @@ export default {
       provs: ['北京市', '天津市', '河北省', '山西省', '内蒙古自治区', '辽宁省', '吉林省', '黑龙江省', '上海市', '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省', '河南省', '湖北省', '湖南省', '广东省', '广西壮族自治区', '海南省', '重庆市', '四川省', '贵州省', '云南省', '西藏自治区', '陕西省', '甘肃省', '青海省', '宁夏回族自治区', '新疆维吾尔自治区', '台湾省', '香港特别行政区', '澳门特别行政区'],
       rules: {
         templateName: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }],
-        deliveryDeadline: [{ required: true, message: '发货期限不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }],
-        defaultFreePrice: [{ required: true, message: '包邮门栏额度不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }], //, { min: 1, max: 9, message: '大于1,小于1亿' }
-        defaultFirstNum: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }],
-        defaultFirstPrice: [{ required: true, message: '首次计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }],
-        defaultContinueNum: [{ required: true, message: '续件计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }],
-        defaultContinuePrice: [{ required: true, message: '续件计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }]
+        deliveryDeadline: [{ required: true, message: '发货期限不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
+        defaultFreePrice: [{ required: true, message: '包邮门栏额度不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
+        defaultFirstNum: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
+        defaultFirstPrice: [{ required: true, message: '首次计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
+        defaultContinueNum: [{ required: true, message: '续件计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
+        defaultContinuePrice: [{ required: true, message: '续件计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }]
       },
       specRules: {
-        freePrice: [{ required: true, message: '包邮门栏额度不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
-        firstNum: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
-        firstMoney: [{ required: true, message: '首次计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
-        continueNum: [{ required: true, message: '续件计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
-        continueMoney: [{ required: true, message: '续件计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
+        freePrice: [{ required: true, message: '包邮门栏额度不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
+        firstNum: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
+        firstMoney: [{ required: true, message: '首次计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
+        continueNum: [{ required: true, message: '续件计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
+        continueMoney: [{ required: true, message: '续件计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
         designatedAreaList: [{ required: true, message: '至少选择一个地区', trigger: 'blur' }]
       }
 
@@ -297,6 +319,17 @@ export default {
       this.listLoading = true
       listFreight(this.listQuery)
         .then(response => {
+          response.data.data.forEach(item => {
+            item.freightTemplateDO.defaultContinueMoney = item.freightTemplateDO.defaultContinueMoney / 100
+            item.freightTemplateDO.defaultFirstMoney = item.freightTemplateDO.defaultFirstMoney / 100
+            item.freightTemplateDO.defaultFreePrice = item.freightTemplateDO.defaultFreePrice / 100
+
+            item.freightTemplateCarriageDOList.forEach(carriageItem => {
+              carriageItem.freePrice = carriageItem.freePrice / 100
+              carriageItem.firstMoney = carriageItem.firstMoney / 100
+              carriageItem.continueMoney = carriageItem.continueMoney / 100
+            })
+          })
           this.list = response.data.data
           this.listLoading = false
         })
@@ -370,6 +403,7 @@ export default {
       }
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
+          this.multiplyHundred(this.dataForm)
           createFreight(this.dataForm)
             .then(response => {
               this.getList()
@@ -424,6 +458,7 @@ export default {
       }
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
+          this.multiplyHundred(this.dataForm)
           updateFreight(this.dataForm)
             .then(response => {
               this.getList()
@@ -464,7 +499,20 @@ export default {
       }).catch(() => {
         return false
       })
+    },
+    // 用于配合后台数据需要将提交数据乘以100
+    multiplyHundred(data) {
+      data.defaultFreePrice = data.defaultFreePrice * 100
+      data.defaultFirstPrice = data.defaultFirstPrice * 100
+      data.defaultContinuePrice = data.defaultContinuePrice * 100
+      for (let i = 0; i < data.freightTemplateCarriageDOList.length; i++) {
+        data.freightTemplateCarriageDOList[i].freePrice = data.freightTemplateCarriageDOList[i].freePrice * 100
+        data.freightTemplateCarriageDOList[i].firstMoney = data.freightTemplateCarriageDOList[i].firstMoney * 100
+        data.freightTemplateCarriageDOList[i].continueMoney = data.freightTemplateCarriageDOList[i].continueMoney * 100
+      }
+      return data
     }
   }
+
 }
 </script>

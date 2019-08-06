@@ -45,7 +45,7 @@ public class FreightTemplateCarriageDO extends SuperDO{
 
     //续件一次的价格
     @TableField("continue_money")
-    private Integer conntinueMoney;
+    private Integer continueMoney;
 
 
 }

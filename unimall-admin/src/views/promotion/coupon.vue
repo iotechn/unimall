@@ -375,6 +375,8 @@ export default {
             if (item.gmtEnd < now) {
               item.status = -1
             }
+            item.discount = item.discount / 100
+            item.min = item.min / 100
           })
           this.list = response.data.data.items
           this.total = response.data.data.total
@@ -474,7 +476,7 @@ export default {
       }
 
       // 判定满减门栏与折扣金额，如果折扣金额高于满减门栏，返回错误
-      if (this.dataForm.discount > this.dataForm.min) {
+      if (parseInt(this.dataForm.discount) > parseInt(this.dataForm.min)) {
         this.$notify.error({
           title: '失败',
           message: '满减门栏不能低于折扣金额，但是可以等于'
@@ -483,6 +485,8 @@ export default {
       }
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
+          this.dataForm.discount = this.dataForm.discount * 100
+          this.dataForm.min = this.dataForm.min * 100
           createCoupon(this.dataForm)
             .then(response => {
               this.getList()

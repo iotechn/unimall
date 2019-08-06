@@ -146,6 +146,7 @@ import { listRecommend, createRecommend, deleteRecommend } from '@/api/recommend
 import { spuTree } from '@/api/goods'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
+import { clearTreeEmptyChildren } from '@/utils/index'
 import Pagination from '@/components/Pagination'
 import ElOption from '../../../node_modules/element-ui/packages/select/src/option' // Secondary package based on el-pagination
 
@@ -242,7 +243,7 @@ export default {
     refreshOptions() {
       if (this.options.length === 0) {
         spuTree().then(response => {
-          this.options = response.data.data
+          this.options = clearTreeEmptyChildren(response.data.data)
         })
       }
     },
@@ -258,24 +259,36 @@ export default {
     },
     createRecommendBtn() {
       this.$refs['dataForm'].validate(valid => {
-        createRecommend(this.dataForm)
-          .then(response => {
+        if (valid && this.checkGoods()) {
+          createRecommend(this.dataForm)
+            .then(response => {
             // 需要后台返回值
             // this.list.unshift(response.data.data)
-            this.getList()
-            this.dialogFormVisible = false
-            this.$notify.success({
-              title: '成功',
-              message: '创建成功'
+              this.getList()
+              this.dialogFormVisible = false
+              this.$notify.success({
+                title: '成功',
+                message: '创建成功'
+              })
             })
-          })
-          .catch(response => {
-            this.$notify.error({
-              title: '失败',
-              message: response.data.errmsg
+            .catch(response => {
+              this.$notify.error({
+                title: '失败',
+                message: response.data.errmsg
+              })
             })
-          })
+        }
       })
+    },
+    checkGoods() {
+      if (this.linkunio === undefined || this.linkunio === null || this.linkunio.length <= 3) {
+        this.$notify.error({
+          title: '提示',
+          message: '请选择商品'
+        })
+        return false
+      }
+      return true
     },
     // // 点击编辑按钮时的处理
     // updateRecommend(row) {

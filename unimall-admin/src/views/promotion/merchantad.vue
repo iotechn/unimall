@@ -191,6 +191,7 @@ import { listAd, createAd, updateAd, deleteAd, getImageColor } from '@/api/merch
 import { spuTree } from '@/api/goods'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
+import { clearTreeEmptyChildren } from '@/utils/index'
 import Pagination from '@/components/Pagination'
 import ElOption from '../../../node_modules/element-ui/packages/select/src/option' // Secondary package based on el-pagination
 
@@ -278,21 +279,16 @@ export default {
         })
     },
     handleLink(e) {
-      if (!this.dataForm.adType) {
-        this.$notify.error({
-          title: '失败',
-          message: '请先选择广告类型'
-        })
+      if (e === undefined || e === null) {
         return
       }
-
       const tag = e[e.length - 1]
       let url = ''
       if (tag.startsWith('C')) {
         if (e.length < 3) {
           this.$notify.error({
-            title: '失败',
-            message: '请关联第三级类目'
+            title: '提示',
+            message: '请关联第三级类目或者商品'
           })
           return
         }
@@ -321,7 +317,7 @@ export default {
     refreshOptions() {
       if (this.options.length === 0) {
         spuTree().then(response => {
-          this.options = response.data.data
+          this.options = clearTreeEmptyChildren(response.data.data)
         })
       }
     },
@@ -359,17 +355,30 @@ export default {
       })
     },
     checkAdType() {
-      if (this.dataForm.url.indexOf('product/detail') >= 0) {
-        for (let i = 0; i < this.adTypeMap.length; i++) {
-          const item = this.adTypeMap[i]
-          if (item.value === this.dataForm.adType) {
-            if (item.unionType === 1) {
-              this.$notify.error({
-                title: '失败',
-                message: '此类广告只能关联'
-              })
-              return false
-            }
+      // 检测关联选项是否是三级目录或商品
+      if (this.linkUnion === undefined || this.linkUnion === null || this.linkUnion.length < 3) {
+        this.$notify.error({
+          title: '失败',
+          message: '请关联三级目录或者商品'
+        })
+        return false
+      }
+
+      for (let i = 0; i < this.adTypeMap.length; i++) {
+        const item = this.adTypeMap[i]
+        if (item.value === this.dataForm.adType) {
+          if (item.unionType === 1 && this.linkUnion.length === 4) {
+            this.$notify.error({
+              title: '失败',
+              message: '此类广告只能关联三级类目'
+            })
+            return false
+          } else if (this.unionType === 2 && this.linkUnion.length === 3) {
+            this.$notify.error({
+              title: '失败',
+              message: '此类广告只能关联商品'
+            })
+            return false
           }
         }
       }
@@ -380,6 +389,9 @@ export default {
       this.dataForm = Object.assign({}, row)
       this.refreshOptions()
       this.dialogStatus = 'update'
+      if (this.dataForm.url.indexOf('tid') >= 0) {
+        this.linkUnion = 'C_' + this.dataForm.url.replace(/[^0-9]/ig, '')
+      } else { this.linkUnion = 'G_' + this.dataForm.url.replace(/[^0-9]/ig, '') }
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()

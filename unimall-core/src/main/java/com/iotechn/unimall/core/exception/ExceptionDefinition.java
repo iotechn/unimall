@@ -291,6 +291,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_EXCEL_PARAM_ERROR=
             new ServiceExceptionDefinition(61001, "生成excel查询参数错误");
 
+    public static final ServiceExceptionDefinition ADMIN_VERIFY_CODE_SEND_FAIL=
+            new ServiceExceptionDefinition(61002, "登陆验证码发送失败");
+
 
 
 

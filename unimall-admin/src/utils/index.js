@@ -304,3 +304,18 @@ export function uniqueArr(arr) {
 export function isExternal(path) {
   return /^(https?:|mailto:|tel:)/.test(path)
 }
+
+// 递归清除冗余的数据
+export function clearTreeEmptyChildren(data) {
+  if (data === null || data === undefined) {
+    return data
+  }
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].children.length === 0) {
+      data[i].children = undefined
+    } else {
+      clearTreeEmptyChildren(data[i].children)
+    }
+  }
+  return data
+}

@@ -60,7 +60,7 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
         if (!(recommendMapper.insert(recommendDO) > 0)) {
             throw new AdminServiceException(ExceptionDefinition.RECOMMEND_SQL_ADD_FAILED);
         }
-        cacheComponent.del(RECOMMEND_NAME + recommendType);
+        cacheComponent.delPrefixKey(RECOMMEND_NAME+recommendType);
         return true;
     }
 
@@ -73,7 +73,7 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
                 .eq("recommend_type",recommendType));
 
         if(judgeSQL > 0){
-            cacheComponent.del(RECOMMEND_NAME + recommendType);
+            cacheComponent.delPrefixKey(RECOMMEND_NAME + recommendType);
             return true;
         }
 
@@ -82,9 +82,12 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
 
     @Override
     public Page<RecommendDTO> queryRecommendByType(Long adminId, Integer recommendType, Integer pageNo, Integer pageSize) throws ServiceException {
+        if(recommendType == null){
+            return recommendBizService.queryAllRecommend(pageNo, pageSize);
+        }
 
         Integer count = recommendMapper.selectCount(new EntityWrapper<RecommendDO>().eq("recommend_type",recommendType));
-        List<RecommendDTO> recommendDTOList = recommendMapper.getRecommendByType(recommendType,pageNo,pageSize);
+        List<RecommendDTO> recommendDTOList = recommendMapper.getRecommendByType(recommendType,(pageNo-1)*pageSize,pageSize);
         Page<RecommendDTO> page = new Page<>(recommendDTOList,pageNo,pageSize,count);
         return page;
     }

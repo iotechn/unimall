@@ -6,7 +6,7 @@ export function listRecommend(query) {
     method: 'get',
     params: {
       _gp: 'admin.recommend',
-      _mt: 'queryAllRecommend',
+      _mt: 'queryRecommendByType',
       ...query
     }
   })
