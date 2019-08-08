@@ -27,7 +27,7 @@
 			 :disabled="logining">微信授权登录</button>
 			<!-- #endif -->
 			<!-- #ifdef APP-PLUS -->
-			<button v-if="loginType === 'wechat'" class="confirm-btn" @click="wechatLogin" :disabled="logining">微信授权登录</button>
+			<button v-if="loginType === 'wechat'" class="confirm-btn" @click="wechatLogin" :disabled="logining">微信App授权登录</button>
 			<!-- #endif -->
 			<button v-if="loginType === 'phone'" class="confirm-btn" @click="toLogin" :disabled="logining">登录</button>
 			<view v-if="loginType === 'phone'" class="forget-section">
@@ -162,6 +162,7 @@
 							that.$api.msg(failres.errmsg)
 							uni.hideLoading()
 						}).then(res => {
+							console.log(res)
 							that.logining = false
 							uni.getUserInfo({
 								lang: 'zh_CN',
@@ -187,6 +188,11 @@
 								}
 							})
 						})
+					}),
+					fail: (failres => {
+						uni.hideLoading()
+						that.$api.msg('微信App登录失败')
+						console.log(failres)
 					})
 				})
 			}

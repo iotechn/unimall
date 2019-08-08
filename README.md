@@ -4,6 +4,11 @@
 
 下面分别是微信小程序包和Android安装Apk。因为苹果开发者ID太贵，所以这里没有打包，实际也可同时支持苹果的。
 
+![二维码](snapshoot/qr.jpg)
+
+---
+
+
 ![前端演示](snapshoot/front.jpg)
 
 #### 后台端系统演示
