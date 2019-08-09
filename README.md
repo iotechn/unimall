@@ -1,5 +1,9 @@
 > unimall 针对中小商户、企业和个人学习者开发。使用Java编码，采用SpringBoot、Mybatis-Plus等易用框架，适合个人学习研究。同时支持单机部署、集群部署，中小商户企业可根据业务动态扩容。unimall使用uniapp前端框架，可同时编译到 微信小程序、H5、Android App、iOS App等几个平台，可为中小商户企业节约大量维护成本。也可支撑中小商户企业前期平台横扩需求。
 
+---
+QQ讨论群：656676341
+---
+
 #### 用户端系统演示
 
 下面分别是微信小程序包和Android安装Apk。因为苹果开发者ID太贵，所以这里没有打包，实际也可同时支持苹果的。
@@ -51,8 +55,8 @@ Redis安装可直接使用yum安装
 
 项目部署分为 Server 、 App 、 Admin 三个部分
 
-[Java后台编译&部署](doc/server.md)
+[部署Step1:Java后台编译&部署](doc/server.md)
 
-[App编译打包](doc/app.md)
+[部署Step2:App编译打包](doc/app.md)
 
-[Admin编译打包](doc/admin.md)
+[部署Step3:Admin编译打包](doc/admin.md)
