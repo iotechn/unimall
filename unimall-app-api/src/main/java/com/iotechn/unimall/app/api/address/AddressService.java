@@ -23,7 +23,6 @@ public interface AddressService {
     public Boolean addAddress(@NotNull @HttpParam(name = "province", type = HttpParamType.COMMON, description = "省份")String province,
                               @NotNull @HttpParam(name = "city", type = HttpParamType.COMMON, description = "城市")String city,
                               @NotNull @HttpParam(name = "county", type = HttpParamType.COMMON, description = "区县")String county,
-                              @NotNull @HttpParam(name = "street", type = HttpParamType.COMMON, description = "街道")String street,
                               @NotNull @HttpParam(name = "address", type = HttpParamType.COMMON, description = "详细地址")String address,
                               @NotNull @HttpParam(name = "defaultAddress", type = HttpParamType.COMMON, description = "默认地址")Integer defaultAddress,
                               @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID")Long userId,
@@ -44,7 +43,6 @@ public interface AddressService {
                                  @NotNull @HttpParam(name = "province", type = HttpParamType.COMMON, description = "省份")String province,
                                  @NotNull @HttpParam(name = "city", type = HttpParamType.COMMON, description = "城市")String city,
                                  @NotNull @HttpParam(name = "county", type = HttpParamType.COMMON, description = "区县")String county,
-                                 @NotNull @HttpParam(name = "street", type = HttpParamType.COMMON, description = "街道")String street,
                                  @NotNull @HttpParam(name = "address", type = HttpParamType.COMMON, description = "详细地址")String address,
                                  @NotNull @HttpParam(name = "defaultAddress", type = HttpParamType.COMMON, description = "默认地址")Integer defaultAddress,
                                  @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID")Long userId,
@@ -61,4 +59,9 @@ public interface AddressService {
     @HttpMethod(description = "根据地址ID，查询收货地址")
     public AddressDO getAddressById(@NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId,
                                     @NotNull @HttpParam(name = "addressId", type = HttpParamType.COMMON, description = "地址Id") Long addressId) throws ServiceException;
+
+
+    @HttpMethod(description = "获取用户默认地址")
+    public AddressDO getDefAddress(
+            @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户id") Long userId) throws ServiceException;
 }

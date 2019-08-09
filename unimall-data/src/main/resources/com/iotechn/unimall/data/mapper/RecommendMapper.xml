@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.RecommendMapper">
+
+    <select id="getRecommendByType" resultType="com.iotechn.unimall.data.dto.RecommendDTO">
+
+        SELECT
+          re.id as id,
+          re.recommend_type as recommendType,
+          re.spu_id as spuId,
+          sp.original_price  as spuOriginalPrice,
+          sp.price as spuPrice,
+          sp.vip_price as spuVipPrice,
+          sp.sales as spuSales,
+          sp.img as spuImg,
+          sp.title as spuTitle,
+          sp.category_id as spuCategoryId
+        FROM
+          unimall_recommend re,
+          unimall_spu sp
+        WHERE
+          re.spu_id = sp.id
+          and re.recommend_type = #{recommendType}
+        limit #{offset},#{pageSize}
+    </select>
+
+    <select id="getAllRecommend" resultType="com.iotechn.unimall.data.dto.RecommendDTO">
+
+        SELECT
+        re.id as id,
+        re.recommend_type as recommendType,
+        re.spu_id as spuId,
+        sp.original_price  as spuOriginalPrice,
+        sp.price as spuPrice,
+        sp.vip_price as spuVipPrice,
+        sp.sales as spuSales,
+        sp.img as spuImg,
+        sp.title as spuTitle,
+        sp.category_id as spuCategoryId
+        FROM
+        unimall_recommend re,
+        unimall_spu sp
+        WHERE
+        re.spu_id = sp.id
+        limit #{offset},#{pageSize}
+    </select>
+
+</mapper>

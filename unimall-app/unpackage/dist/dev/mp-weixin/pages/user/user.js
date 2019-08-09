@@ -98,7 +98,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _regenerator = _interopRequireDefault(__webpack_require__(/*! ./node_modules/@babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));
 
 
 
@@ -192,13 +192,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-
-
-
-var _vuex = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};var ownKeys = Object.keys(source);if (typeof Object.getOwnPropertySymbols === 'function') {ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {return Object.getOwnPropertyDescriptor(source, sym).enumerable;}));}ownKeys.forEach(function (key) {_defineProperty(target, key, source[key]);});}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var listCell = function listCell() {return __webpack_require__.e(/*! import() | components/mix-list-cell */ "components/mix-list-cell").then(__webpack_require__.bind(null, /*! @/components/mix-list-cell */ "../../../../../../ideawork/unimall/unimall-app/components/mix-list-cell.vue"));};
+var _vuex = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {try {var info = gen[key](arg);var value = info.value;} catch (error) {reject(error);return;}if (info.done) {resolve(value);} else {Promise.resolve(value).then(_next, _throw);}}function _asyncToGenerator(fn) {return function () {var self = this,args = arguments;return new Promise(function (resolve, reject) {var gen = fn.apply(self, args);function _next(value) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);}function _throw(err) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);}_next(undefined);});};}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};var ownKeys = Object.keys(source);if (typeof Object.getOwnPropertySymbols === 'function') {ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {return Object.getOwnPropertyDescriptor(source, sym).enumerable;}));}ownKeys.forEach(function (key) {_defineProperty(target, key, source[key]);});}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var listCell = function listCell() {return __webpack_require__.e(/*! import() | components/mix-list-cell */ "components/mix-list-cell").then(__webpack_require__.bind(null, /*! @/components/mix-list-cell */ "../../../../../../ideawork/unimall/unimall-app/components/mix-list-cell.vue"));};
 
 
 var startY = 0,moveY = 0,pageAtTop = true;var _default =
@@ -210,8 +204,14 @@ var startY = 0,moveY = 0,pageAtTop = true;var _default =
     return {
       coverTransform: 'translateY(0px)',
       coverTransition: '0s',
-      moving: false };
+      moving: false,
+      footprintList: [],
+      isVip: false };
 
+  },
+  onShow: function onShow() {
+    this.isVip = this.$api.isVip();
+    this.loadFootprint();
   },
   onLoad: function onLoad() {
   },
@@ -239,11 +239,50 @@ var startY = 0,moveY = 0,pageAtTop = true;var _default =
   (0, _vuex.mapState)(['hasLogin', 'userInfo'])),
 
   methods: {
+    loadFootprint: function () {var _loadFootprint = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee() {var that;return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:
+                that = this;
+                that.$api.request('footprint', 'getAllFootprint').then(function (res) {
+                  that.footprintList = res.data;
+                });case 2:case "end":return _context.stop();}}}, _callee, this);}));function loadFootprint() {return _loadFootprint.apply(this, arguments);}return loadFootprint;}(),
+
+
+    deleteFootprint: function deleteFootprint(item) {
+      var that = this;
+      uni.showModal({
+        title: '删除？',
+        content: '您确定要删除此足迹吗？',
+        success: function success(e) {
+          if (e.confirm) {
+            that.$api.request('footprint', 'deleteFootprint', {
+              footprintId: item.id }).
+            then(function (res) {
+              that.loadFootprint();
+            });
+          }
+        } });
+
+    },
+
+    logout: function logout() {
+      var that = this;
+      uni.showModal({
+        title: '询问',
+        content: '您确定要退出吗？',
+        cancelText: '取消',
+        confirmText: '确定',
+        success: function success(e) {
+          if (e.confirm) {
+            that.$store.commit('logout');
+            that.$api.logout();
+          }
+        } });
+
+    },
 
     /**
-              * 统一跳转接口,拦截未登录路由
-              * navigator标签现在默认没有转场动画，所以用view
-              */
+        * 统一跳转接口,拦截未登录路由
+        * navigator标签现在默认没有转场动画，所以用view
+        */
     navTo: function navTo(url) {
       if (!this.hasLogin) {
         url = '/pages/public/login';

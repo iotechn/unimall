@@ -1,0 +1,67 @@
+package com.iotechn.unimall.biz.service.appriaise;
+
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.iotechn.unimall.core.Const;
+import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.domain.AppraiseDO;
+import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
+import com.iotechn.unimall.data.enums.BizType;
+import com.iotechn.unimall.data.mapper.AppraiseMapper;
+import com.iotechn.unimall.data.mapper.ImgMapper;
+import com.iotechn.unimall.data.mapper.OrderMapper;
+import com.iotechn.unimall.data.mapper.OrderSkuMapper;
+import com.iotechn.unimall.data.model.Page;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+/**
+ * Created by rize on 2019/7/13.
+ */
+@Service
+public class AppraiseBizService {
+
+    @Autowired
+    private AppraiseMapper appraiseMapper;
+    @Autowired
+    private CacheComponent cacheComponent;
+    @Autowired
+    private ImgMapper imgMapper;
+
+    public static final String CA_APPRAISE_KEY = "CA_APPRAISE_";
+
+    public Page<AppraiseResponseDTO> getSpuAllAppraise(Long spuId, Integer pageNo, Integer pageSize) throws ServiceException {
+        //TODO count条件和查询条件不一致，AppraiseServiceImpl里面还有冗余代码
+        String cacheKey = CA_APPRAISE_KEY + spuId + "_" + pageNo + "_" + pageSize;
+        Page obj = cacheComponent.getObj(cacheKey, Page.class);
+        if (obj != null) {
+            return obj;
+        }
+        Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("spu_id",spuId));
+        Integer totalPage = 1;
+        if(pageSize <= 0 || pageNo <= 0){
+            throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
+        }
+        if(count % pageSize == 0 && count != 0){
+            totalPage = count / pageSize;
+        }else {
+            totalPage = count / pageSize + 1;
+        }
+        if(pageNo > totalPage){
+            pageNo = totalPage;
+        }
+        Integer offset = pageSize * (pageNo-1);
+        List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectSpuAllAppraise(spuId,offset,pageSize);
+        for (AppraiseResponseDTO appraiseResponseDTO : appraiseResponseDTOS){
+            appraiseResponseDTO.setImgList(imgMapper.getImgs(BizType.COMMENT.getCode(), appraiseResponseDTO.getId()));
+        }
+        Page<AppraiseResponseDTO> pageination = new Page<>(appraiseResponseDTOS,pageNo,pageSize,count);
+        cacheComponent.putObj(cacheKey, pageination, Const.CACHE_ONE_DAY);
+        return pageination;
+    }
+
+}

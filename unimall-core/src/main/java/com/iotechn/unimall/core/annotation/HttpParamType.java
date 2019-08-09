@@ -9,7 +9,7 @@ package com.iotechn.unimall.core.annotation;
  */
 
 public enum HttpParamType {
-    COOKIE,
+    HEADER,
     COMMON,
     USER_ID,
     ADMIN_ID,

@@ -25,7 +25,7 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
+#/build/
 
 ### VS Code ###
 .vscode/
@@ -35,13 +35,29 @@ build/
 mvnw
 mvnw.cmd
 
+###properties###
+/unimall-launcher/src/main/resources/application-dev.properties
+/unimall-launcher/src/main/resources/application-prd.properties
+
 ### target ###
 /target/
 /unimall-admin-api/target/
 /unimall-app-api/target/
+/unimall-biz/target/
 /unimall-data/target/
 /unimall-core/target/
 /unimall-launcher/target/
+/unimall-app/unpackage/dist/
+/unimall-app/unpackage/resources/
+/unimall-app/unpackage/debug/
+/unimall-admin/dist.zip
 
-###password###
-/unimall-launcher/src/main/resources/application.properties
+###node_modules###
+/unimall-admin/node_modules/
+/unimall-app/node_modules/
+
+
+###logs###
+unimall.log
+unimall.log.*.gz
+unimall.log.*.tmp

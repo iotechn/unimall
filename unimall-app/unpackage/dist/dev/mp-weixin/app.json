@@ -1,23 +1,28 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/product/product",
-    "pages/set/set",
-    "pages/userinfo/userinfo",
+    "pages/address/list",
+    "pages/address/create",
+    "pages/product/search",
+    "pages/product/detail",
+    "pages/product/favorite",
+    "pages/product/list",
+    "pages/product/appraise",
+    "pages/user/profile",
     "pages/cart/cart",
     "pages/public/login",
+    "pages/public/register",
     "pages/user/user",
-    "pages/detail/detail",
-    "pages/order/order",
-    "pages/money/money",
-    "pages/order/createOrder",
-    "pages/address/address",
-    "pages/address/addressManage",
-    "pages/money/pay",
-    "pages/money/paySuccess",
+    "pages/user/about",
+    "pages/order/list",
+    "pages/order/create",
+    "pages/order/detail",
+    "pages/order/appraise",
+    "pages/order/trace",
+    "pages/pay/pay",
+    "pages/pay/success",
     "pages/notice/notice",
-    "pages/category/category",
-    "pages/product/list"
+    "pages/category/category"
   ],
   "subPackages": [],
   "window": {
@@ -59,5 +64,5 @@
     ]
   },
   "usingComponents": {},
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap15.json"
 }

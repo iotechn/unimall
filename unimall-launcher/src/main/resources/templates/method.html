@@ -187,16 +187,29 @@
                         <#list model.parameters as param>
                             <#if param.type == "USER_ID">
                                 <tr>
-                                    <td>accessToken<span class="text-important">*</span></td>
+                                    <td>accessToken<span class="text-important">
+                                        <#if param.required>
+                                            <span class="text-important">*</span>
+                                        </#if>
+                                    </span></td>
                                     <td><input id="access_token" name="access_token" type="text"></td>
                                     <td>需要用户登录的接口</td>
                                 </tr>
+                            <#elseif param.type == "ADMIN_ID">
+                                <tr>
+                                    <td>AdminToken<span class="text-important">
+                                        <#if param.required>
+                                            <span class="text-important">*</span>
+                                        </#if>
+                                    </span></td>
+                                    <td><input id="admin_access_token" name="admin_access_token" type="text"></td>
+                                    <td>需要管理员登录的接口</td>
                             <#else>
                                 <tr>
                                     <td>${param.name}
                                         <#if param.required>
-                                        <span class="text-important">*</span>
-                                    </#if>
+                                            <span class="text-important">*</span>
+                                        </#if>
                                     </td>
                                     <td><input id="${param.name}" name="${param.name}" type="text"></td>
                                     <td>${param.description}</td>
@@ -297,6 +310,7 @@
     $('#submitId').click(function(){
         var data = getParamData();
         var accessToken = $("#access_token").val();
+        var adminAccessToken = $("#admin_access_token").val();
         $.ajax({
             type:"POST",
             url:'/m.api',
@@ -305,6 +319,9 @@
             beforeSend: function (request) {
                 if (accessToken) {
                     request.setRequestHeader("ACCESSTOKEN", accessToken);
+                }
+                if (adminAccessToken) {
+                    request.setRequestHeader("ADMINTOKEN", adminAccessToken);
                 }
             },
             cache:true,

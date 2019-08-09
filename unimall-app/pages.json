@@ -1,12 +1,10 @@
 {
 	"pages": [
-
 		{
 			"path": "pages/index/index",
 			"style": {
 				// #ifdef MP 
-				"navigationBarTitleText": "Dloud商城",
-				//"navigationStyle": "custom",
+				"navigationBarTitleText": "unimall",
 				// #endif 
 				"app-plus": {
 					"titleNView": {
@@ -14,7 +12,7 @@
 						"searchInput": {
 							"backgroundColor": "rgba(231, 231, 231,.7)",
 							"borderRadius": "16px",
-							"placeholder": "请输入地址 如：大钟寺",
+							"placeholder": "请搜索宝贝名称",
 							"disabled": true,
 							"placeholderColor": "#606266"
 						},
@@ -38,9 +36,25 @@
 					}
 				}
 			}
+		}, {
+			"path": "pages/address/list",
+			"style": {
+				"navigationBarTitleText": "收货地址"
+			}
+		}, {
+			"path": "pages/address/create",
+			"style": {
+				"navigationBarTitleText": "",
+				"disableScroll" : true
+			}
+		}, {
+			"path": "pages/product/search",
+			"style": {
+				"navigationBarTitleText": "搜索"
+			}
 		},
 		{
-			"path": "pages/product/product",
+			"path": "pages/product/detail",
 			"style": {
 				"navigationBarTitleText": "详情展示",
 				"app-plus": {
@@ -50,14 +64,24 @@
 				}
 			}
 		}, {
-			"path": "pages/set/set",
+			"path": "pages/product/favorite",
 			"style": {
-				"navigationBarTitleText": "设置"
+				"enablePullDownRefresh": true,
+				"navigationBarTitleText": "商品收藏"
 			}
-		},
-
-		{
-			"path": "pages/userinfo/userinfo",
+		}, {
+            "path" : "pages/product/list",
+            "style" : {
+				"enablePullDownRefresh": true,
+				"navigationBarTitleText": "商品列表"
+			}
+        }, {
+            "path" : "pages/product/appraise",
+            "style" : {
+				"navigationBarTitleText": "全部评价"
+			}
+        }, {
+			"path": "pages/user/profile",
 			"style": {
 				"navigationBarTitleText": "修改资料"
 			}
@@ -118,17 +142,12 @@
 				}
 			}
 		}, {
-			"path": "pages/detail/detail",
+			"path":"pages/user/about",
 			"style": {
-				"navigationBarTitleText": "",
-				"app-plus": {
-					"titleNView": {
-						"type": "transparent"
-					}
-				}
+				"navigationBarTitleText":"关于"
 			}
 		}, {
-			"path": "pages/order/order",
+			"path": "pages/order/list",
 			"style": {
 				"navigationBarTitleText": "我的订单",
 				"app-plus": {
@@ -136,42 +155,41 @@
 				}
 			}
 		}, {
-			"path": "pages/money/money",
-			"style": {}
-		}, {
-			"path": "pages/order/createOrder",
+			"path": "pages/order/create",
 			"style": {
 				"navigationBarTitleText": "创建订单"
 			}
 		}, {
-			"path": "pages/address/address",
+			"path": "pages/order/detail",
 			"style": {
-				"navigationBarTitleText": "收货地址"
+				"navigationBarTitleText": "订单详情"
 			}
 		}, {
-			"path": "pages/address/addressManage",
-			"style": {
-				"navigationBarTitleText": ""
+            "path" : "pages/order/appraise",
+            "style" : {
+				"navigationBarTitleText": "评价订单"
 			}
-		}, {
-			"path": "pages/money/pay",
+        }, {
+            "path" : "pages/order/trace",
+            "style" : {
+				"navigationBarTitleText": "查看物流"
+			}
+        }, {
+			"path": "pages/pay/pay",
 			"style": {
 				"navigationBarTitleText": "支付"
 			}
-		},
-		{
-			"path": "pages/money/paySuccess",
+		}, {
+			"path": "pages/pay/success",
 			"style": {
 				"navigationBarTitleText": "支付成功"
 			}
-		}
-	    ,{
+		}, {
             "path" : "pages/notice/notice",
             "style" : {
 				"navigationBarTitleText": "通知"
 			}
-        }
-        ,{
+        }, {
             "path" : "pages/category/category",
             "style" : {
 				"navigationBarTitleText": "分类",
@@ -180,13 +198,7 @@
 				}
 			}
         }
-        ,{
-            "path" : "pages/product/list",
-            "style" : {
-				"enablePullDownRefresh": true,
-				"navigationBarTitleText": "商品列表"
-			}
-        }
+        
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
@@ -222,6 +234,16 @@
 				"iconPath": "static/tab-my.png",
 				"selectedIconPath": "static/tab-my-current.png",
 				"text": "我的"
+			}
+		]
+	},
+	"condition" : { //模式配置，仅开发期间生效
+		"current": 0, //当前激活的模式(list 的索引项)
+		"list": [
+			{
+				"name": "", //模式名称
+				"path": "", //启动页面，必选
+				"query": "" //启动参数，在页面的onLoad函数里面得到
 			}
 		]
 	}

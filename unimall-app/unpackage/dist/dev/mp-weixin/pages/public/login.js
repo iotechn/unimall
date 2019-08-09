@@ -142,13 +142,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-
-
-
-
 var _vuex = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {try {var info = gen[key](arg);var value = info.value;} catch (error) {reject(error);return;}if (info.done) {resolve(value);} else {Promise.resolve(value).then(_next, _throw);}}function _asyncToGenerator(fn) {return function () {var self = this,args = arguments;return new Promise(function (resolve, reject) {var gen = fn.apply(self, args);function _next(value) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);}function _throw(err) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);}_next(undefined);});};}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};var ownKeys = Object.keys(source);if (typeof Object.getOwnPropertySymbols === 'function') {ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {return Object.getOwnPropertyDescriptor(source, sym).enumerable;}));}ownKeys.forEach(function (key) {_defineProperty(target, key, source[key]);});}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var _default =
 
 
@@ -156,10 +149,14 @@ var _vuex = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.j
 {
   data: function data() {
     return {
-      mobile: '',
+      loginType: '',
+      phone: '',
       password: '',
       logining: false };
 
+  },
+  onShow: function onShow() {
+    this.$api.logout();
   },
   onLoad: function onLoad() {
 
@@ -170,36 +167,129 @@ var _vuex = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.j
       var key = e.currentTarget.dataset.key;
       this[key] = e.detail.value;
     },
+    chooseLoginType: function chooseLoginType(type) {
+      this.loginType = type;
+    },
     navBack: function navBack() {
       uni.navigateBack();
     },
     toRegist: function toRegist() {
-      this.$api.msg('去注册');
-    },
-    toLogin: function () {var _toLogin = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee() {var mobile, password, sendData, result;return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:
-                this.logining = true;
-                mobile = this.mobile, password = this.password;
-                /* 数据验证模块
-                                                                if(!this.$api.match({
-                                                                	mobile,
-                                                                	password
-                                                                })){
-                                                                	this.logining = false;
-                                                                	return;
-                                                                }
-                                                                */
-                sendData = {
-                  mobile: mobile,
-                  password: password };_context.next = 5;return (
+      uni.redirectTo({
+        url: '/pages/public/register' });
 
-                  this.$api.json('userInfo'));case 5:result = _context.sent;
-                if (result.status === 1) {
-                  this.login(result.data);
-                  uni.navigateBack();
+    },
+    toLogin: function () {var _toLogin = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee() {var that;return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:
+                that = this;
+                that.logining = true;
+                if (that.phone.length !== 11) {
+                  that.$api.msg('请输入11位中国手机号');
+                } else if (that.password.length < 8) {
+                  that.$api.msg('密码至少8位');
                 } else {
-                  this.$api.msg(result.msg);
-                  this.logining = false;
-                }case 7:case "end":return _context.stop();}}}, _callee, this);}));function toLogin() {return _toLogin.apply(this, arguments);}return toLogin;}() }) };exports.default = _default;
+                  that.$api.request('user', 'login', {
+                    phone: that.phone,
+                    password: that.password },
+                  function (failres) {
+                    that.logining = false;
+                    uni.showToast({
+                      title: failres.errmsg,
+                      icon: "none" });
+
+                  }).then(function (res) {
+                    that.logining = false;
+                    that.$store.commit('login', res.data);
+                    uni.setStorageSync('userInfo', res.data);
+                    if (that.$api.prePage().lodaData) {
+                      that.$api.prePage().loadData();
+                    }
+                    uni.navigateBack();
+                  });
+                }case 3:case "end":return _context.stop();}}}, _callee, this);}));function toLogin() {return _toLogin.apply(this, arguments);}return toLogin;}(),
+
+    miniWechatLogin: function miniWechatLogin(e) {
+      var that = this;
+      that.logining = true;
+      var loginType = 1;
+      var userInfo = e.detail.userInfo;
+      uni.login({
+        provider: 'weixin',
+        success: function success(wxres) {
+          that.logining = false;
+          that.$api.request('user', 'thirdPartLogin', {
+            loginType: loginType,
+            raw: JSON.stringify(wxres) },
+          function (failres) {
+            that.$api.msg(failres.errmsg);
+            uni.hideLoading();
+          }).then(function (res) {
+            that.$api.setUserInfo(res.data);
+            that.$api.request('user', 'syncUserInfo', userInfo).then(function (syncRes) {
+              //同步过后
+              res.data.nickname = userInfo.nickName;
+              res.data.avatarUrl = userInfo.avatarUrl;
+              res.data.gender = userInfo.gender;
+              uni.setStorageSync('userInfo', res.data);
+              that.$store.commit('login', res.data);
+              that.$api.setUserInfo(res.data);
+
+              if (that.$api.prePage().lodaData) {
+                that.$api.prePage().loadData();
+              }
+              uni.hideLoading();
+              uni.navigateBack();
+            });
+          });
+        } });
+
+
+
+
+    },
+    wechatLogin: function wechatLogin() {
+      var that = this;
+      that.logining = true;
+      var loginType = 2;
+      uni.showLoading({
+        title: '正在同步消息' });
+
+      uni.login({
+        provider: 'weixin',
+        success: function success(wxres) {
+          that.$api.request('user', 'thirdPartLogin', {
+            loginType: loginType,
+            raw: JSON.stringify(wxres) },
+          function (failres) {
+            that.$api.msg(failres.errmsg);
+            uni.hideLoading();
+          }).then(function (res) {
+            that.logining = false;
+            uni.getUserInfo({
+              lang: 'zh_CN',
+              success: function success(e) {
+                uni.setStorageSync('userInfo', res.data);
+                that.$store.commit('login', res.data);
+                e.userInfo.nickname = e.userInfo.nickName;
+                that.$api.request('user', 'syncUserInfo', e.userInfo).then(function (syncRes) {
+                  //同步过后
+                  res.data.nickname = e.userInfo.nickName;
+                  res.data.avatarUrl = e.userInfo.avatarUrl;
+                  res.data.gender = e.userInfo.gender;
+                  uni.setStorageSync('userInfo', res.data);
+                  that.$store.commit('login', res.data);
+                });
+              },
+              complete: function complete(e) {
+                if (that.$api.prePage().lodaData) {
+                  that.$api.prePage().loadData();
+                }
+                uni.hideLoading();
+                uni.navigateBack();
+              } });
+
+          });
+        } });
+
+    } }) };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ "./node_modules/@dcloudio/uni-mp-weixin/dist/index.js")["default"]))
 
 /***/ }),

@@ -43,15 +43,27 @@ public interface UserService {
     @HttpMethod(description = "用户登录")
     public UserDTO login(
             @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
-            @NotNull @TextFormat(lengthMin = 8,lengthMax = 18,notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password) throws ServiceException;
+            @NotNull @TextFormat(lengthMin = 8,lengthMax = 18,notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
+            @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "登录IP") String ip) throws ServiceException;
 
     @HttpMethod(description = "用户注销")
     public String logout(
-            @NotNull @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.COOKIE, description = "用户访问Cookie") String accessToken,
+            @NotNull @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "用户访问") String accessToken,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
-    @HttpMethod(description = "微信小程序登录")
-    public String wechatLogin(
-            @NotNull @HttpParam(name = "code", type = HttpParamType.COMMON, description = "wx返回的开放Api") String code) throws ServiceException;
+    @HttpMethod(description = "第三方登录")
+    public UserDTO thirdPartLogin(
+            @NotNull @HttpParam(name = "loginType", type = HttpParamType.COMMON, description = "第三方代号") Integer loginType,
+            @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "用户Ip") String ip,
+            @NotNull @HttpParam(name = "raw", type = HttpParamType.COMMON, description = "第三方平台返回的数据") String raw) throws ServiceException;
+
+    @HttpMethod(description = "同步用户信息")
+    public String syncUserInfo(
+            @HttpParam(name = "nickname", type = HttpParamType.COMMON, description = "用户昵称") String nickName,
+            @HttpParam(name = "avatarUrl", type = HttpParamType.COMMON, description = "用户头像url") String avatarUrl,
+            @HttpParam(name = "gender", type = HttpParamType.COMMON, description = "性别0未知1男2女") Integer gender,
+            @HttpParam(name = "birthday", type = HttpParamType.COMMON, description = "用户生日") Long birthday,
+            @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "访问令牌") String accessToken,
+            @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
 
 }

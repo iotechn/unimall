@@ -45,7 +45,6 @@ public class RedisAutoConfig {
 
     /**** 用户SESSION专用数据源 ****/
     @Bean
-    @ConditionalOnBean(name = "userRedisConfig")
     public LettuceConnectionFactory userLettuceConnectionFactory(
             RedisStandaloneConfiguration userRedisConfig,GenericObjectPoolConfig userPoolConfig) {
         LettuceClientConfiguration clientConfig =
@@ -56,7 +55,6 @@ public class RedisAutoConfig {
 
 
     @Bean
-    @ConditionalOnBean(name = "userLettuceConnectionFactory")
     public StringRedisTemplate userRedisTemplate(LettuceConnectionFactory userLettuceConnectionFactory) {
         StringRedisTemplate redisTemplate = new StringRedisTemplate();
         redisTemplate.setConnectionFactory(userLettuceConnectionFactory);
@@ -67,7 +65,6 @@ public class RedisAutoConfig {
 
     /**** 锁专用数据源 ****/
     @Bean
-    @ConditionalOnBean(name = "lockRedisConfig")
     public LettuceConnectionFactory lockLettuceConnectionFactory(
             RedisStandaloneConfiguration lockRedisConfig,GenericObjectPoolConfig lockPoolConfig) {
         LettuceClientConfiguration clientConfig =
@@ -77,7 +74,6 @@ public class RedisAutoConfig {
     }
 
     @Bean
-    @ConditionalOnBean(name = "lockLettuceConnectionFactory")
     public StringRedisTemplate lockRedisTemplate(LettuceConnectionFactory lockLettuceConnectionFactory) {
         StringRedisTemplate redisTemplate = new StringRedisTemplate();
         redisTemplate.setConnectionFactory(lockLettuceConnectionFactory);

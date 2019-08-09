@@ -35,8 +35,10 @@
 .uni-load-more__img>view view {
 	width: 6px;
 	height: 2px;
-	border-top-left-radius: 1px;
-	border-bottom-left-radius: 1px;
+	-webkit-border-top-left-radius: 1px;
+	        border-top-left-radius: 1px;
+	-webkit-border-bottom-left-radius: 1px;
+	        border-bottom-left-radius: 1px;
 	background: #999;
 	position: absolute;
 	opacity: .2;

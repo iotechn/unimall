@@ -13,4 +13,6 @@ public interface ImgMapper extends BaseMapper<ImgDO> {
 
     public List<String> getImgs(@Param("bizType") Integer bizType, @Param("bizId") Long bizId);
 
+    public Integer insertImgs(List<ImgDO> imgs);
+
 }

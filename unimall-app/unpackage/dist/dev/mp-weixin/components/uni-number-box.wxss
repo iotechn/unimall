@@ -36,13 +36,17 @@
 }
 .uni-numbox-minus {
 	border-right: none;
-	border-top-left-radius: 6rpx;
-	border-bottom-left-radius: 6rpx;
+	-webkit-border-top-left-radius: 6rpx;
+	        border-top-left-radius: 6rpx;
+	-webkit-border-bottom-left-radius: 6rpx;
+	        border-bottom-left-radius: 6rpx;
 }
 .uni-numbox-plus {
 	border-left: none;
-	border-top-right-radius: 6rpx;
-	border-bottom-right-radius: 6rpx;
+	-webkit-border-top-right-radius: 6rpx;
+	        border-top-right-radius: 6rpx;
+	-webkit-border-bottom-right-radius: 6rpx;
+	        border-bottom-right-radius: 6rpx;
 }
 .uni-numbox-value {
 	position: relative;

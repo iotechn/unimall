@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.FreightTemplateMapper">
+
+    <select id="selectFreightBySkuId" resultType="com.iotechn.unimall.data.domain.FreightTemplateDO">
+        SELECT
+          fr.id as id,
+          fr.template_name as templateName,
+          fr.spu_location as spuLocation,
+          fr.default_free_price as defaultFreePrice,
+          fr.delivery_deadline as deliveryDeadline,
+          fr.default_first_num as defaultFirstNum,
+          fr.default_first_money as defaultFirstMoney,
+          fr.default_continue_num as defaultContinueNum,
+          fr.default_continue_money as defaultContinueMoney,
+          fr.gmt_create as gmtCreate,
+          fr.gmt_update as gmtUpdate
+        FROM
+          unimall_freight_template fr,
+          unimall_sku sk,
+          unimall_spu sp
+        WHERE
+          sp.freight_template_id = fr.id
+          and sk.spu_id = sp.id
+          and sk.id = #{skuId}
+    </select>
+
+</mapper>

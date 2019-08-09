@@ -28,4 +28,6 @@ public class CategoryDO extends SuperDO {
     @TableField("pic_url")
     private String picUrl;
 
+    private Integer level;
+
 }

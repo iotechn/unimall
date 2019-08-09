@@ -5,7 +5,7 @@
 			<image src="/static/emptyCart.jpg" mode="aspectFit"></image>
 			<view v-if="hasLogin" class="empty-tips">
 				空空如也
-				<navigator class="navigator" v-if="hasLogin" url="../index/index" open-type="switchTab">随便逛逛></navigator>
+				<navigator class="navigator" v-if="hasLogin" url="/pages/index/index" open-type="switchTab">随便逛逛></navigator>
 			</view>
 			<view v-else class="empty-tips">
 				空空如也
@@ -21,11 +21,11 @@
 						:class="{'b-b': index!==cartList.length-1}"
 					>
 						<view class="image-wrapper">
-							<image :src="item.skuImg?item.skuImg:item.spuImg" 
-								:class="[item.loaded]"
+							<image :src="(item.skuImg?item.skuImg:item.spuImg) + '?x-oss-process=style/200px'" 
+								:class="loadedItemIds.has(item.id) ? 'loaded': ''"
 								mode="aspectFill" 
 								lazy-load 
-								@load="onImageLoad('cartList', index)" 
+								@load="onImageLoad(item)" 
 								@error="onImageError('cartList', index)"
 							></image>
 							<view 
@@ -37,7 +37,7 @@
 						<view class="item-right">
 							<text class="clamp title">{{item.title}}</text>
 							<text class="attr">{{item.skuTitle}}{{item.num > item.stock?(' (库存不足 剩余:' + item.stock + ')') : ''}}</text>
-							<text class="price">¥{{item.price | priceFormat}}</text>
+							<text class="price"><text v-if="item.originalPrice > item.price" style="text-decoration:line-through">¥{{isVip ? (item.vipPrice / 100 + '[VIP]') : item.originalPrice / 100.0}}</text> ¥{{item.price / 100.0}}</text>
 							<uni-number-box 
 								class="step"
 								:min="1" 
@@ -64,7 +64,7 @@
 					</view>
 				</view>
 				<view class="total-box">
-					<text class="price">¥{{total | priceFormat}}</text>
+					<text class="price">¥{{total / 100.0}}</text>
 					<text class="coupon">
 						总共
 						<text>{{totalItems}}</text>
@@ -83,11 +83,6 @@
 	} from 'vuex';
 	import uniNumberBox from '@/components/uni-number-box.vue'
 	export default {
-		filters: {
-			priceFormat(price) {
-				return price / 100.0
-			}
-		},
 		components: {
 			uniNumberBox
 		},
@@ -98,6 +93,7 @@
 				allChecked: false, //全选状态  true|false
 				empty: false, //空白页现实  true|false
 				cartList: [],
+				loadedItemIds: new Set()
 			};
 		},
 		onLoad(){
@@ -127,16 +123,17 @@
 						item.checked = true
 					})
 					that.cartList = res.data
-					this.calcTotal();  //计算总价
+					that.calcTotal();  //计算总价
 				})
 			},
 			//监听image加载完成
-			onImageLoad(key, index) {
-				this.$set(this[key][index], 'loaded', 'loaded');
+			onImageLoad(item) {
+				this.loadedItemIds.add(item.id)
+				this.$forceUpdate()
 			},
 			//监听image加载失败
 			onImageError(key, index) {
-				this[key][index].image = '/static/errorImage.jpg';
+				this[key][index].skuImg = '/static/errorImage.jpg';
 			},
 			navToLogin(){
 				uni.navigateTo({
@@ -183,26 +180,28 @@
 					that.cartList.splice(index, 1);
 					that.calcTotal();
 					//uni.hideLoading();
-				})
-
-				
+				})				
 			},
 			//清空
 			clearCart(){
+				const that = this
 				uni.showModal({
 					content: '清空购物车？',
 					success: (e)=>{
 						if(e.confirm){
-							this.cartList = [];
+							that.$api.request('cart','removeCartAll').then(res => {
+								that.cartList = []
+							})
 						}
 					}
 				})
 			},
 			//计算总价
 			calcTotal(){
-				let list = this.cartList;
+				const that = this
+				let list = that.cartList;
 				if(list.length === 0){
-					this.empty = true;
+					that.empty = true;
 					return;
 				}
 				let total = 0;
@@ -211,7 +210,7 @@
 				list.forEach(item=>{
 					if(item.checked === true){
 						totalItems += item.num
-						total += item.price * item.num;
+						total += (that.isVip ? item.vipPrice : item.price) * item.num;
 					}else if(checked === true){
 						checked = false;
 					}
@@ -222,11 +221,20 @@
 			},
 			//创建订单
 			createOrder(){
-				//console.log(this.cartList)
-				uni.navigateTo({
-					url: `/pages/order/createOrder?data=${JSON.stringify(this.cartList)}`
+				//滤除未被选择的item
+				let selectedItems = []
+				this.cartList.forEach(item => {
+					if (item.checked) {
+						selectedItems.push(item)
+					}
 				})
-				this.$api.msg('跳转下一页 sendData');
+				if (selectedItems.length === 0) {
+					this.$api.msg('您没有选中任何商品')
+					return
+				}
+				uni.navigateTo({
+					url: `/pages/order/create?takeway=cart&data=${JSON.stringify(selectedItems)}`
+				})
 			}
 		}
 	}

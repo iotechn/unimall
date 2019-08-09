@@ -269,77 +269,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 var _default =
 
 {
@@ -350,10 +279,17 @@ var _default =
       swiperCurrent: 0,
       swiperLength: 0,
       carouselList: [],
-      goodsList: [] };
+      windowSpuList: [],
+      categoryPickList: [],
+      categoryButtomList: [],
+      salesTop: [],
+      banner: undefined,
+      isVip: false };
 
   },
-
+  onShow: function onShow() {
+    this.isVip = this.$api.isVip();
+  },
   onLoad: function onLoad() {
     this.loadData();
   },
@@ -362,14 +298,45 @@ var _default =
               * 请求静态数据只是为了代码不那么乱
               * 分次请求未作整合
               */
-    loadData: function () {var _loadData = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee() {var carouselList, goodsList;return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:_context.next = 2;return (
-                  this.$api.json('carouselList'));case 2:carouselList = _context.sent;
-                this.titleNViewBackground = carouselList[0].background;
-                this.swiperLength = carouselList.length;
-                this.carouselList = carouselList;_context.next = 8;return (
+    loadData: function () {var _loadData = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee() {var that;return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:
+                that = this;
+                uni.showLoading({
+                  title: '正在加载' });
 
-                  this.$api.json('goodsList'));case 8:goodsList = _context.sent;
-                this.goodsList = goodsList || [];case 10:case "end":return _context.stop();}}}, _callee, this);}));function loadData() {return _loadData.apply(this, arguments);}return loadData;}(),
+                that.$api.request('integral', 'getIndexData', function (failres) {
+                  that.$api.msg(failres.errmsg);
+                  uni.hideLoading();
+                }).then(function (res) {
+                  var data = res.data;
+                  //橱窗
+                  that.windowSpuList = data.windowRecommend;
+                  //轮播
+                  data.advertisement.t1.forEach(function (item) {
+                    if (!item.color) {
+                      item.color = 'rgb(205, 215, 218)';
+                    }
+                  });
+                  that.carouselList = data.advertisement.t1;
+                  that.swiperLength = data.advertisement.t1.length;
+                  that.titleNViewBackground = data.advertisement.t1[0].background;
+                  //分类精选
+                  if (data.advertisement.t2) {
+                    that.categoryPickList = data.advertisement.t2;
+                  }
+                  //横幅
+                  if (data.advertisement.t3 && data.advertisement.t3.length > 0) {
+                    that.banner = data.advertisement.t3[0];
+                  }
+                  //热销
+                  if (data.salesTop) {
+                    that.salesTop = data.salesTop;
+                  }
+                  //分类5Buttom
+                  if (data.advertisement.t4) {
+                    that.categoryButtomList = data.advertisement.t4;
+                  }
+                  uni.hideLoading();
+                });case 3:case "end":return _context.stop();}}}, _callee, this);}));function loadData() {return _loadData.apply(this, arguments);}return loadData;}(),
 
     //轮播图切换修改背景色
     swiperChange: function swiperChange(e) {
@@ -378,11 +345,20 @@ var _default =
       this.titleNViewBackground = this.carouselList[index].background;
     },
     //详情页
-    navToDetailPage: function navToDetailPage(item) {
-      //测试数据没有写id，用title代替
-      var id = item.title;
+    navToDetailPage: function navToDetailPage(id) {
       uni.navigateTo({
-        url: "/pages/product/product?id=".concat(id) });
+        url: "/pages/product/detail?id=".concat(id) });
+
+    },
+    navToWindowSuggestSpu: function navToWindowSuggestSpu(index) {
+      var that = this;
+      uni.navigateTo({
+        url: '/pages/product/detail?id=' + that.windowSpuList[index].spuId });
+
+    },
+    naviageToPage: function naviageToPage(page) {
+      uni.navigateTo({
+        url: page });
 
     } } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ "./node_modules/@dcloudio/uni-mp-weixin/dist/index.js")["default"]))

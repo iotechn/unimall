@@ -25,6 +25,7 @@ public class SpuDO extends SuperDO {
     /**
      * 会员价格
      */
+    @TableField("vip_price")
     private Integer vipPrice;
 
     /**
@@ -57,6 +58,10 @@ public class SpuDO extends SuperDO {
      */
     @TableField("category_id")
     private Long categoryId;
+
+    //运费模板
+    @TableField("freight_template_id")
+    private Long freightTemplateId;
 
     /**
      * 单位

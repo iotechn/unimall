@@ -26,6 +26,9 @@ public class OrderDO extends SuperDO {
 
     private Integer status;
 
+    @TableField("sku_original_total_price")
+    private Integer skuOriginalTotalPrice;
+
     /**
      * 商品总价
      */
@@ -73,6 +76,20 @@ public class OrderDO extends SuperDO {
      */
     @TableField("ship_code")
     private String shipCode;
+
+    private String province;
+
+    private String city;
+
+    private String county;
+
+    private String address;
+
+    private String phone;
+
+    private String consignee;
+
+    private String mono;
 
     @TableField("gmt_ship")
     private Date gmtShip;

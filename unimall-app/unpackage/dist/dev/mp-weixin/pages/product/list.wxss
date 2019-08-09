@@ -5,7 +5,8 @@
 /* 边框颜色 */
 /* 图片加载中颜色 */
 /* 行为相关颜色 */
-page, .content {
+page,
+.content {
   background: #f8f8f8;
 }
 .content {
@@ -235,7 +236,8 @@ page, .content {
 .goods-list .image-wrapper {
     width: 100%;
     height: 330rpx;
-    border-radius: 3px;
+    -webkit-border-radius: 3px;
+            border-radius: 3px;
     overflow: hidden;
 }
 .goods-list .image-wrapper image {

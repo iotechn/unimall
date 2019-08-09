@@ -1,10 +1,13 @@
 package com.iotechn.unimall.launcher.manager;
 
+import com.iotechn.unimall.admin.api.role.RoleServiceImpl;
 import com.iotechn.unimall.core.annotation.HttpMethod;
 import com.iotechn.unimall.core.annotation.HttpOpenApi;
 import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.param.NotNull;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.dto.PermissionPointDTO;
 import com.iotechn.unimall.launcher.exception.LauncherExceptionDefinition;
 import com.iotechn.unimall.launcher.exception.LauncherServiceException;
 import org.slf4j.Logger;
@@ -15,6 +18,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -73,6 +78,33 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
             }
             for (Method method : methods) {
                 HttpMethod httpMethod = method.getAnnotation(HttpMethod.class);
+                String permission = httpMethod.permission();
+                if (!StringUtils.isEmpty(permission)) {
+                    //若此接口需要权限
+                    if (StringUtils.isEmpty(httpMethod.permissionParentName()) || StringUtils.isEmpty(httpMethod.permissionName())) {
+                        throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_API_REGISTER_FAILED);
+                    }
+                    //迭代已有接口
+                    boolean hasParent = false;
+                    permDTOLoop: for (PermissionPointDTO pointDTO : RoleServiceImpl.permDTOs) {
+                        if (pointDTO.getLabel().equals(httpMethod.permissionParentName())) {
+                            //若已经存在父分组，则将其追加在后面即可
+                            hasParent = true;
+                            addChildPermissionPointDTO(pointDTO, httpMethod, httpOpenApiAnnotation, method);
+                            break permDTOLoop;
+                        }
+                    }
+                    if (!hasParent) {
+                        //若不存在父分组，则新建父分组
+                        PermissionPointDTO parentDTO = new PermissionPointDTO();
+                        parentDTO.setLabel(httpMethod.permissionParentName());
+                        parentDTO.setId(httpMethod.permissionParentName());
+                        parentDTO.setChildren(new LinkedList<>());
+                        RoleServiceImpl.permDTOs.add(parentDTO);
+                        //然后在parentDTO后面添加子类目，以及孙类目
+                        addChildPermissionPointDTO(parentDTO, httpMethod, httpOpenApiAnnotation, method);
+                    }
+                }
                 if(httpMethod != null){
                     String key = method.getName();
                     Method methodQuery = tempMap.get(key);
@@ -91,6 +123,50 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
         }
     }
 
+    private void addChildPermissionPointDTO(PermissionPointDTO parentDTO, HttpMethod httpMethod, HttpOpenApi httpOpenApi, Method method) throws ServiceException {
+        if (CollectionUtils.isEmpty(parentDTO.getChildren())) {
+            parentDTO.setChildren(new LinkedList<>());
+        }
+
+        boolean hasChild = false;
+
+        for (PermissionPointDTO childDTO : parentDTO.getChildren()) {
+            if (childDTO.getLabel().equals(httpMethod.permissionName())) {
+                //若存在
+                hasChild = true;
+                addGrandChildPermissionPointDTO(childDTO, httpMethod, httpOpenApi, method);
+            }
+        }
+        if (!hasChild) {
+            //添加child
+            PermissionPointDTO childDTO = new PermissionPointDTO();
+            childDTO.setId(httpMethod.permissionName());
+            childDTO.setLabel(httpMethod.permissionName());
+            childDTO.setChildren(new LinkedList<>());
+            parentDTO.getChildren().add(childDTO);
+            addGrandChildPermissionPointDTO(childDTO, httpMethod, httpOpenApi, method);
+        }
+
+
+    }
+
+    private void addGrandChildPermissionPointDTO(PermissionPointDTO childDTO, HttpMethod httpMethod, HttpOpenApi httpOpenApi, Method method) throws ServiceException {
+        //遍历权限点是否有重复
+        for (PermissionPointDTO pointDTO : childDTO.getChildren()) {
+            if (pointDTO.getId().equals(httpMethod.permission())) {
+                //不允许重复权限点
+//                throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_API_REGISTER_FAILED);
+                return;
+            }
+        }
+        //若无重复权限点
+        PermissionPointDTO pointDTO = new PermissionPointDTO();
+        RoleServiceImpl.allPermPoint.add(httpMethod.permission());
+        pointDTO.setId(httpMethod.permission());
+        pointDTO.setLabel(httpMethod.description());
+        pointDTO.setApi(httpOpenApi.group() + "." + method.getName());
+        childDTO.getChildren().add(pointDTO);
+    }
 
     public Method getMethod(String group, String name) {
         Map<String, Method> tempMap = methodCacheMap.get(group);
@@ -133,6 +209,9 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
                         ApiDocumentModel.Parameter docParameter = new ApiDocumentModel.Parameter();
                         if (docParameter == null) {
                             logger.info("[Api] 参数未注解:" + method.getName());
+                        }
+                        if (httpParam == null) {
+                            logger.info("[Api] 参数未注解");
                         }
                         docParameter.setName(httpParam.name());
                         docParameter.setDescription(httpParam.description());

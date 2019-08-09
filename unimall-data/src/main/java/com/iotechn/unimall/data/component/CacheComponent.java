@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -112,8 +113,6 @@ public class CacheComponent {
     }
 
 
-
-
     public void putRaw(String key, String value) {
         putRaw(key, value, null);
     }
@@ -132,6 +131,44 @@ public class CacheComponent {
 
     public void del(String key) {
         stringRedisTemplate.delete(key);
+    }
+
+    public boolean hasKey(String key) {
+        return stringRedisTemplate.hasKey(key);
+    }
+
+    public void putSetRaw(String key, String member, Integer expireSec) {
+        stringRedisTemplate.opsForSet().add(key, member);
+        stringRedisTemplate.expire(key, expireSec, TimeUnit.SECONDS);
+    }
+
+    public void putSetRawAll(String key, String[] set, Integer expireSec) {
+        stringRedisTemplate.opsForSet().add(key, set);
+        stringRedisTemplate.expire(key, expireSec, TimeUnit.SECONDS);
+    }
+
+    public void removeSetRaw(String key, String member) {
+        stringRedisTemplate.opsForSet().remove(key, member);
+    }
+
+    public boolean isSetMember(String key, String member) {
+        return stringRedisTemplate.opsForSet().isMember(key, member);
+    }
+
+    /**
+     * 获取指定前缀的Key
+     * @param prefix
+     * @return
+     */
+    public Set<String> getPrefixKeySet(String prefix) {
+        return stringRedisTemplate.keys(prefix + "*");
+    }
+
+    public void delPrefixKey(String prefix) {
+        Set<String> prefixKeySet = getPrefixKeySet(prefix);
+        for (String key : prefixKeySet) {
+            stringRedisTemplate.delete(key);
+        }
     }
 
 

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.AppraiseMapper">
+
+
+    <select id="selectUserAllAppraise" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
+        select
+            a.id as id,
+            a.gmt_create as gmtCreate,
+            a.gmt_update as gmtUpdate,
+            a.content as content,
+            a.score as score,
+            a.user_id as userId,
+            u.nickname as userNickName,
+            u.avatar_url as userAvatarUrl,
+            a.order_id as orderId,
+            a.spu_id as spuId,
+            a.sku_id as skuId,
+            sk.title as skuTitle,
+            sp.title as spuTitle
+        from
+            unimall_appraise a,
+            unimall_user u,
+            unimall_sku sk,
+            unimall_spu sp
+        where
+            a.user_id = u.id
+            and a.spu_id = sp.id
+            and a.sku_id = sk.id
+            and a.user_id = #{userId}
+        order by a.id desc
+            limit #{offset},#{size}
+    </select>
+
+    <select id="selectSpuAllAppraise" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
+        select
+            a.id as id,
+            a.gmt_create as gmtCreate,
+            a.gmt_update as gmtUpdate,
+            a.content as content,
+            a.score as score,
+            a.user_id as userId,
+            u.nickname as userNickName,
+            u.avatar_url as userAvatarUrl,
+            a.order_id as orderId,
+            a.spu_id as spuId,
+            a.sku_id as skuId,
+            sk.title as skuTitle,
+            sp.title as spuTitle
+        from
+            unimall_appraise a,
+            unimall_user u,
+            unimall_sku sk,
+            unimall_spu sp
+        where
+            a.user_id = u.id
+            and a.spu_id = sp.id
+            and a.sku_id = sk.id
+            and a.spu_id = #{spuId}
+        order by a.id desc
+            limit #{offset},#{size}
+    </select>
+
+    <select id="selectOneById" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
+        select
+            a.id as id,
+            a.gmt_create as gmtCreate,
+            a.gmt_update as gmtUpdate,
+            a.content as content,
+            a.score as score,
+            a.user_id as userId,
+            u.nickname as userNickName,
+            u.avatar_url as userAvatarUrl,
+            a.order_id as orderId,
+            a.spu_id as spuId,
+            a.sku_id as skuId,
+            sk.title as skuTitle,
+            sp.title as spuTitle
+        from
+            unimall_appraise a,
+            unimall_user u,
+            unimall_sku sk,
+            unimall_spu sp
+        where
+            a.user_id = u.id
+            and a.spu_id = sp.id
+            and a.sku_id = sk.id
+            and a.id = #{appraiseId}
+    </select>
+
+    <select id="selectAppraiseCondition" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
+        select
+        a.id as id,
+        a.gmt_create as gmtCreate,
+        a.gmt_update as gmtUpdate,
+        a.content as content,
+        a.score as score,
+        a.user_id as userId,
+        u.nickname as userNickName,
+        u.avatar_url as userAvatarUrl,
+        a.order_id as orderId,
+        a.spu_id as spuId,
+        a.sku_id as skuId,
+        sk.title as skuTitle,
+        sp.title as spuTitle
+        from
+        unimall_appraise a
+        LEFT JOIN unimall_user u ON a.user_id = u.id
+        LEFT JOIN unimall_sku sk ON a.sku_id = sk.id
+        LEFT JOIN unimall_spu sp ON a.spu_id = sp.id
+        where
+        1 = 1
+        <if test="id != null">
+          AND  a.id = #{id}
+        </if>
+        <if test="userName != null">
+          AND u.nickname LIKE concat("%",#{userName},"%")
+        </if>
+        <if test="spuName != null">
+          AND  sp.title LIKE concat("%",#{spuName},"%")
+        </if>
+        <if test="orderId != null">
+          AND  a.order_id = #{orderId}
+        </if>
+        <if test="score != null">
+          AND  a.score = #{score}
+        </if>
+        <if test="content != null">
+          AND  a.content LIKE concat("%",#{content},"%")
+        </if>
+        order by a.id desc
+        limit #{offset},#{limit}
+    </select>
+
+    <select id="countAppraiseCondition" resultType="java.lang.Integer">
+        select
+        count(1)
+        from
+        unimall_appraise a
+        LEFT JOIN unimall_user u ON a.user_id = u.id
+        LEFT JOIN unimall_sku sk ON a.sku_id = sk.id
+        LEFT JOIN unimall_spu sp ON a.spu_id = sp.id
+        where
+        1 = 1
+        <if test="id != null">
+          AND  a.id = #{id}
+        </if>
+        <if test="userName != null">
+          AND  u.nickname LIKE concat("%",#{userName},"%")
+        </if>
+        <if test="spuName != null">
+          AND  sp.title LIKE concat("%",#{spuName},"%")
+        </if>
+        <if test="orderId != null">
+          AND  a.order_id = #{orderId}
+        </if>
+        <if test="score != null">
+          AND  a.score = #{score}
+        </if>
+        <if test="content != null">
+          AND  a.content LIKE concat("%",#{content},"%")
+        </if>
+    </select>
+</mapper>

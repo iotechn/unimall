@@ -1,11 +1,6 @@
 package com.iotechn.unimall.data.dto;
 
-import com.iotechn.unimall.data.domain.SpuDO;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /*
 @author kbq
@@ -13,7 +8,17 @@ import java.util.List;
 */
 @Data
 public class CollectDTO extends SuperDTO {
+
     private Long userId;
-    private SpuDO spuDO;
+    private Long spuId;
+    private Integer originalPrice;
+    private Integer price;
+    private Integer vipPirce;
+    private String title;
+    private Integer sales;
+    private String img;
+    private String description;
+    private String unit;
+    private Integer status;
 
 }

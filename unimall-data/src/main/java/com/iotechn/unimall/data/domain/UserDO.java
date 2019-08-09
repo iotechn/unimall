@@ -17,6 +17,12 @@ public class UserDO extends SuperDO {
 
     private String password;
 
+    /**
+     * 使用某平台登录
+     */
+    @TableField("login_type")
+    private Integer loginType;
+
     @TableField("open_id")
     private String openId;
 

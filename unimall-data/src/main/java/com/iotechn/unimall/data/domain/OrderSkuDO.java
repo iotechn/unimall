@@ -11,6 +11,15 @@ import lombok.Data;
 @TableName("unimall_order_sku")
 public class OrderSkuDO extends SuperDO {
 
+    @TableField("sku_id")
+    private Long skuId;
+
+    /**
+     * 冗余SPUID方便评论
+     */
+    @TableField("spu_id")
+    private Long spuId;
+
     @TableField("order_id")
     private Long orderId;
 
@@ -21,7 +30,13 @@ public class OrderSkuDO extends SuperDO {
     private String orderNo;
 
     /**
-     * SKU 标题
+     * SPU 标题
+     */
+    @TableField("spu_title")
+    private String spuTitle;
+
+    /**
+     * SKU 标题， 即小规格名称
      */
     private String title;
 
@@ -29,6 +44,9 @@ public class OrderSkuDO extends SuperDO {
     private String barCode;
 
     private Integer num;
+
+    @TableField("original_price")
+    private Integer originalPrice;
 
     /**
      * 单价
@@ -40,5 +58,7 @@ public class OrderSkuDO extends SuperDO {
      */
     private String img;
 
+    //单位
+    private String unit;
 
 }

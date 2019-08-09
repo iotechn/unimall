@@ -1,5 +1,6 @@
 package com.iotechn.unimall.core.config.sms;
 
+import com.iotechn.unimall.core.notify.AliyunSMSClient;
 import com.iotechn.unimall.core.notify.QCloudSMSClient;
 import com.iotechn.unimall.core.notify.SMSClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +20,9 @@ public class SMSConfig {
     public SMSClient smsClient() {
         if ("qcloud".equals(enable)) {
             return new QCloudSMSClient();
+        } else if ("aliyun".equals(enable)) {
+            return new AliyunSMSClient();
         }
         return null;
     }
-
 }

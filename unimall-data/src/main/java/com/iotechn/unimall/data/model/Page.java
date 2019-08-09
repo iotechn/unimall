@@ -54,4 +54,12 @@ public class Page<T> implements Serializable {
     public int getCode() {
         return 0;
     }
+
+    public long getCount() {
+        return this.count;
+    }
+
+    public long getTotal() {
+        return this.count;
+    }
 }

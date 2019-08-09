@@ -12,6 +12,8 @@ public class UserDTO extends SuperDTO {
 
     private String phone;
 
+    private Integer loginType;
+
     private String openId;
 
     private String nickname;

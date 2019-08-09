@@ -18,6 +18,9 @@ public class UserCouponDTO extends SuperDTO {
 
     private Integer min;
 
+    /**
+     * 优惠券价格
+     */
     private Integer discount;
 
     private Long userId;

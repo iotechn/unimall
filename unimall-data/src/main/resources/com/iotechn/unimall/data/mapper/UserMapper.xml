@@ -19,6 +19,72 @@
         FROM
             unimall_user
         WHERE
+
             phone = #{phone} AND `password` = #{cryptPassword}
+    </select>
+
+
+    <select id="getUserList" resultType="com.iotechn.unimall.data.domain.UserDO">
+        SELECT
+        id,
+        phone,
+        password,
+        login_type as loginType,
+        open_id as openId,
+        nickname,
+        avatar_url AS avartarUrl,
+        `level`,
+        birthday,
+        gender,
+        gmt_last_login AS gmtLastLogin,
+        last_login_ip AS lastLoginIp,
+        `status`,
+        gmt_update AS gmtUpdate,
+        gmt_create AS gmtCreate
+        FROM
+        unimall_user
+        WHERE
+        1 = 1
+        <if test="id != null">
+            AND id = #{id}
+        </if>
+        <if test="nickname != null">
+            AND nickname like concat(concat("%",#{nickname}),"%")
+        </if>
+        <if test="level != null">
+            AND `level` = #{level}
+        </if>
+        <if test="gender != null">
+            AND gender = #{gender}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        limit #{offset},#{limit}
+    </select>
+
+
+    <select id="countUser" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM
+        unimall_user
+        WHERE
+        1 = 1
+        <if test="id != null">
+            AND id = #{id}
+        </if>
+        <if test="nickname != null">
+            AND nickname like concat(concat("%",#{nickname}),"%")
+        </if>
+        <if test="level != null">
+            AND `level` = #{level}
+        </if>
+        <if test="gender != null">
+            AND gender = #{gender}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
     </select>
 </mapper>

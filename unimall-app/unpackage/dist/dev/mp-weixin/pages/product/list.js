@@ -98,32 +98,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _regenerator = _interopRequireDefault(__webpack_require__(/*! ./node_modules/@babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {try {var info = gen[key](arg);var value = info.value;} catch (error) {reject(error);return;}if (info.done) {resolve(value);} else {Promise.resolve(value).then(_next, _throw);}}function _asyncToGenerator(fn) {return function () {var self = this,args = arguments;return new Promise(function (resolve, reject) {var gen = fn.apply(self, args);function _next(value) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);}function _throw(err) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);}_next(undefined);});};}var uniLoadMore = function uniLoadMore() {return __webpack_require__.e(/*! import() | components/uni-load-more/uni-load-more */ "components/uni-load-more/uni-load-more").then(__webpack_require__.bind(null, /*! @/components/uni-load-more/uni-load-more.vue */ "../../../../../../ideawork/unimall/unimall-app/components/uni-load-more/uni-load-more.vue"));};var _default =
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _regenerator = _interopRequireDefault(__webpack_require__(/*! ./node_modules/@babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};var ownKeys = Object.keys(source);if (typeof Object.getOwnPropertySymbols === 'function') {ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {return Object.getOwnPropertyDescriptor(source, sym).enumerable;}));}ownKeys.forEach(function (key) {_defineProperty(target, key, source[key]);});}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {try {var info = gen[key](arg);var value = info.value;} catch (error) {reject(error);return;}if (info.done) {resolve(value);} else {Promise.resolve(value).then(_next, _throw);}}function _asyncToGenerator(fn) {return function () {var self = this,args = arguments;return new Promise(function (resolve, reject) {var gen = fn.apply(self, args);function _next(value) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);}function _throw(err) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);}_next(undefined);});};}var uniLoadMore = function uniLoadMore() {return __webpack_require__.e(/*! import() | components/uni-load-more/uni-load-more */ "components/uni-load-more/uni-load-more").then(__webpack_require__.bind(null, /*! @/components/uni-load-more/uni-load-more.vue */ "../../../../../../ideawork/unimall/unimall-app/components/uni-load-more/uni-load-more.vue"));};var _default =
 
 
 
@@ -167,19 +142,23 @@ __webpack_require__.r(__webpack_exports__);
       headerTop: "0px",
       loadingType: 'more', //加载更多状态
       filterIndex: 0,
-      cateId: 0, //已选三级分类id
       priceOrder: 0, //1 价格从低到高 2价格从高到低
-      cateList: [],
-      goodsList: [] };
+      goodsList: [],
+      cateId: 0,
+      keywords: '',
+      pageNo: 1,
+      isVip: false };
 
   },
-
+  onShow: function onShow() {
+    this.isVip = this.$api.isVip();
+  },
   onLoad: function onLoad(options) {
 
 
 
-    this.cateId = options.tid;
-    this.loadCateList(options.fid, options.sid);
+    this.cateId = options.tid ? options.tid : 0;
+    this.keywords = options.keywords ? options.keywords : '';
     this.loadData();
   },
   onPageScroll: function onPageScroll(e) {
@@ -199,72 +178,65 @@ __webpack_require__.r(__webpack_exports__);
     this.loadData();
   },
   methods: {
-    //加载分类
-    loadCateList: function () {var _loadCateList = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee(fid, sid) {var _this = this;return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:
-                this.$api.request('category', 'categoryList').then(function (res) {
-                  res.data.forEach(function (item) {
-                    if (item.id == fid) {
-                      _this.cateList = item.childrenList;
-                    }
-                  });
-                });
-                // let list = await this.$api.json('cateList');
-                // let cateList = list.filter(item=>item.parentId == fid);
-                // 
-                // cateList.forEach(item=>{
-                // 	let tempList = list.filter(val=>val.parentId == item.id);
-                // 	item.childrenList = tempList;
-                // })
-                // this.cateList = cateList;
-              case 1:case "end":return _context.stop();}}}, _callee, this);}));function loadCateList(_x, _x2) {return _loadCateList.apply(this, arguments);}return loadCateList;}(),
     //加载商品 ，带下拉刷新和上滑加载
-    loadData: function () {var _loadData = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee2() {var _this2 = this;var type,loading,goodsList,_args2 = arguments;return _regenerator.default.wrap(function _callee2$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:type = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : 'add';loading = _args2.length > 1 ? _args2[1] : undefined;if (!(
+    loadData: function () {var _loadData = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee() {var _this = this;var type,loading,orderByInfo,_args = arguments;return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:type = _args.length > 0 && _args[0] !== undefined ? _args[0] : 'add';loading = _args.length > 1 ? _args[1] : undefined;if (!(
 
-                type === 'add')) {_context2.next = 8;break;}if (!(
-                this.loadingType === 'nomore')) {_context2.next = 5;break;}return _context2.abrupt("return");case 5:
-
-
-                this.loadingType = 'loading';_context2.next = 9;break;case 8:
-
-                this.loadingType = 'more';case 9:_context2.next = 11;return (
+                type === 'add')) {_context.next = 8;break;}if (!(
+                this.loadingType === 'nomore')) {_context.next = 5;break;}return _context.abrupt("return");case 5:
 
 
-                  this.$api.json('goodsList'));case 11:goodsList = _context2.sent;
-                if (type === 'refresh') {
-                  this.goodsList = [];
+                this.loadingType = 'loading';_context.next = 9;break;case 8:
+
+                this.loadingType = 'more';case 9:
+
+
+                orderByInfo = {};
+                if (this.filterIndex === 0) {
+                  //销量排序
+                  orderByInfo = {
+                    orderBy: 'sales',
+                    isAsc: false };
+
                 }
-                //筛选，测试数据直接前端筛选了
                 if (this.filterIndex === 1) {
-                  goodsList.sort(function (a, b) {return b.sales - a.sales;});
-                }
-                if (this.filterIndex === 2) {
-                  goodsList.sort(function (a, b) {
-                    if (_this2.priceOrder == 1) {
-                      return a.price - b.price;
-                    }
-                    return b.price - a.price;
-                  });
-                }
+                  //价格排序 需要从新获取Page
+                  orderByInfo = {
+                    orderBy: 'price',
+                    isAsc: this.priceOrder === 1 };
 
-                this.goodsList = this.goodsList.concat(goodsList);
-
-                //判断是否还有下一页，有是more  没有是nomore(测试数据判断大于20就没有了)
-                this.loadingType = this.goodsList.length > 20 ? 'nomore' : 'more';
+                }
                 if (type === 'refresh') {
-                  if (loading == 1) {
-                    uni.hideLoading();
-                  } else {
-                    uni.stopPullDownRefresh();
+                  this.pageNo = 1;
+                }
+                this.$api.request('goods', 'getGoodsPage', _objectSpread({
+                  categoryId: this.cateId,
+                  title: this.keywords,
+                  pageNo: this.pageNo },
+                orderByInfo)).
+                then(function (res) {
+                  var tempList = res.data.items;
+                  if (type === 'refresh') {
+                    _this.goodsList = [];
                   }
-                }case 18:case "end":return _context2.stop();}}}, _callee2, this);}));function loadData() {return _loadData.apply(this, arguments);}return loadData;}(),
+                  _this.goodsList = _this.goodsList.concat(tempList);
+                  _this.pageNo = res.data.pageNo + 1;
+                  _this.loadingType = res.data.totalPageNo > res.data.pageNo ? 'more' : 'nomore';
+                  if (type === 'refresh') {
+                    if (loading == 1) {
+                      uni.hideLoading();
+                    } else {
+                      uni.stopPullDownRefresh();
+                    }
+                  }
+                });case 14:case "end":return _context.stop();}}}, _callee, this);}));function loadData() {return _loadData.apply(this, arguments);}return loadData;}(),
 
     //筛选点击
     tabClick: function tabClick(index) {
-      if (this.filterIndex === index && index !== 2) {
+      if (this.filterIndex === index && index !== 1) {
         return;
       }
       this.filterIndex = index;
-      if (index === 2) {
+      if (index === 1) {
         this.priceOrder = this.priceOrder === 1 ? 2 : 1;
       } else {
         this.priceOrder = 0;
@@ -278,34 +250,12 @@ __webpack_require__.r(__webpack_exports__);
         title: '正在加载' });
 
     },
-    //显示分类面板
-    toggleCateMask: function toggleCateMask(type) {var _this3 = this;
-      var timer = type === 'show' ? 10 : 300;
-      var state = type === 'show' ? 1 : 0;
-      this.cateMaskState = 2;
-      setTimeout(function () {
-        _this3.cateMaskState = state;
-      }, timer);
-    },
-    //分类点击
-    changeCate: function changeCate(item) {
-      this.cateId = item.id;
-      this.toggleCateMask();
-      uni.pageScrollTo({
-        duration: 300,
-        scrollTop: 0 });
-
-      this.loadData('refresh', 1);
-      uni.showLoading({
-        title: '正在加载' });
-
-    },
     //详情
     navToDetailPage: function navToDetailPage(item) {
       //测试数据没有写id，用title代替
-      var id = item.title;
+      var id = item.id;
       uni.navigateTo({
-        url: "/pages/product/product?id=".concat(id) });
+        url: "/pages/product/detail?id=".concat(id) });
 
     },
     stopPrevent: function stopPrevent() {} } };exports.default = _default;

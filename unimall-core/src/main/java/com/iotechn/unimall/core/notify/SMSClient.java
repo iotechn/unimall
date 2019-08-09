@@ -13,5 +13,7 @@ public interface SMSClient {
 
     public SMSResult sendResetPasswordVerify(String phone, String verifyCode) throws ServiceException;
 
+    public SMSResult sendAdminLoginVerify(String phone,String verifyCode) throws ServiceException;
+
 
 }

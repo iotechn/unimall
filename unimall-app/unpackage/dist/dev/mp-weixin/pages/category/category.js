@@ -98,7 +98,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _regenerator = _interopRequireDefault(__webpack_require__(/*! ./node_modules/@babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js"));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {try {var info = gen[key](arg);var value = info.value;} catch (error) {reject(error);return;}if (info.done) {resolve(value);} else {Promise.resolve(value).then(_next, _throw);}}function _asyncToGenerator(fn) {return function () {var self = this,args = arguments;return new Promise(function (resolve, reject) {var gen = fn.apply(self, args);function _next(value) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);}function _throw(err) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);}_next(undefined);});};} //
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0; //
 //
 //
 //
@@ -128,70 +128,35 @@ var _default =
       currentId: 1,
       flist: [],
       slist: [],
-      tlist: [] };
+      tlist: [],
+      rawData: [] };
 
   },
   onLoad: function onLoad() {
     this.loadData();
   },
   methods: {
-    loadData: function () {var _loadData = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee() {var _this = this;return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:
-                this.$api.request('category', 'categoryList').then(function (res) {
-                  res.data.forEach(function (item) {
-                    //item顶级类目 f一级 s二级 t三级
-                    _this.flist.push(item);
-                    if (item.childrenList) {
-                      item.childrenList.forEach(function (childItem) {
-                        _this.slist.push(childItem);
-                        childItem.childrenList.forEach(function (leafItem) {
-                          _this.tlist.push(leafItem);
-                        });
-                      });
-                    }
-                  });
-                });case 1:case "end":return _context.stop();}}}, _callee, this);}));function loadData() {return _loadData.apply(this, arguments);}return loadData;}(),
+    loadData: function loadData() {
+      var that = this;
+      this.$api.request('category', 'categoryList').then(function (res) {
+        that.rawData = res.data;
+        that.flist = res.data;
+        that.currentId = res.data[0].id;
+        that.slist = res.data[0].childrenList;
 
+      });
 
+    },
     //一级分类点击
     tabtap: function tabtap(item) {
-      if (!this.sizeCalcState) {
-        this.calcSize();
-      }
-
       this.currentId = item.id;
-      var index = this.slist.findIndex(function (sitem) {return sitem.parentId === item.id;});
-      this.tabScrollTop = this.slist[index].top;
+      this.currentId = item.id;
+      this.slist = item.childrenList;
+      this.tabScrollTop = this.tabScrollTop === 0 ? 1 : 0;
     },
-    //右侧栏滚动
-    asideScroll: function asideScroll(e) {
-      if (!this.sizeCalcState) {
-        this.calcSize();
-      }
-      var scrollTop = e.detail.scrollTop;
-      var tabs = this.slist.filter(function (item) {return item.top <= scrollTop;}).reverse();
-      if (tabs.length > 0) {
-        this.currentId = tabs[0].parentId;
-      }
-    },
-    //计算右侧栏每个tab的高度等信息
-    calcSize: function calcSize() {
-      var h = 0;
-      this.slist.forEach(function (item) {
-        var view = uni.createSelectorQuery().select("#main-" + item.id);
-        view.fields({
-          size: true },
-        function (data) {
-          item.top = h;
-          h += data.height;
-          item.bottom = h;
-        }).exec();
-      });
-      this.sizeCalcState = true;
-    },
-    navToList: function navToList(fid, tid) {
-      debugger;
+    navToList: function navToList(tid) {
       uni.navigateTo({
-        url: "/pages/product/list?fid=".concat(sid, "&tid=").concat(tid) });
+        url: "/pages/product/list?tid=".concat(tid) });
 
     } } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ "./node_modules/@dcloudio/uni-mp-weixin/dist/index.js")["default"]))

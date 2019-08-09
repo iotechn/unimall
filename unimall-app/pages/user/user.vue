@@ -4,7 +4,7 @@
 			<image class="bg" src="/static/user-bg.jpg"></image>
 			<view class="user-info-box">
 				<view class="portrait-box">
-					<image class="portrait" :src="userInfo.portrait || '/static/missing-face.png'"></image>
+					<image class="portrait" :src="userInfo.avatarUrl || '/static/missing-face.png'"></image>
 				</view>
 				<view class="info-box">
 					<text class="username">{{ hasLogin? (userInfo.nickname || '未设置昵称') : '立即登录' }}</text>
@@ -17,10 +17,10 @@
 				</view> -->
 				<view class="tit">
 					<text class="yticon icon-iLinkapp-"></text>
-					Unimall会员
+					{{isVip ? 'VIP会员' : '普通会员'}}
 				</view>
-				<text class="e-m">Unimall Union</text>
-				<text class="e-b">开通会员开发无bug 一测就上线</text>
+				<text class="e-m">VIP权益</text>
+				<text class="e-b">{{isVip ? '会员专享VIP价' : '请联系管理员开通会员'}}</text>
 			</view>
 		</view>
 		
@@ -52,42 +52,38 @@
 			</view> -->
 			<!-- 订单 -->
 			<view class="order-section">
-				<view class="order-item" @click="navTo('/pages/order/order?state=0')" hover-class="common-hover"  :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/pages/order/list?state=0')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-shouye"></text>
 					<text>全部订单</text>
 				</view>
-				<view class="order-item" @click="navTo('/pages/order/order?state=1')"  hover-class="common-hover" :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/pages/order/list?state=10')"  hover-class="common-hover" :hover-stay-time="50">
 					<text class="yticon icon-daifukuan"></text>
 					<text>待付款</text>
 				</view>
-				<view class="order-item" @click="navTo('/pages/order/order?state=2')" hover-class="common-hover"  :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/pages/order/list?state=30')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-yishouhuo"></text>
 					<text>待收货</text>
 				</view>
-				<view class="order-item" @click="navTo('/pages/order/order?state=4')" hover-class="common-hover"  :hover-stay-time="50">
+				<view class="order-item" @click="navTo('/pages/order/list?state=60')" hover-class="common-hover"  :hover-stay-time="50">
 					<text class="yticon icon-shouhoutuikuan"></text>
 					<text>退款/售后</text>
 				</view>
 			</view>
 			
 			 <view class="history-section icon">
-				<view class="sec-header">
+				<view v-if="footprintList.length > 0" class="sec-header">
 					<text class="yticon icon-lishijilu"></text>
 					<text>浏览历史</text>
 				</view>
-				<scroll-view scroll-x class="h-list">
-					<image @click="navTo('/pages/product/product')" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1553105186633&di=c121a29beece4e14269948d990f9e720&imgtype=0&src=http%3A%2F%2Fimg004.hc360.cn%2Fm8%2FM04%2FDE%2FDE%2FwKhQplZ-QteEBvsbAAAAADUkobU751.jpg" mode="aspectFill"></image>
-					<image @click="navTo('/pages/product/product')" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1553105231218&di=09534b9833b5243296630e6d5b728eff&imgtype=0&src=http%3A%2F%2Fimg002.hc360.cn%2Fm1%2FM05%2FD1%2FAC%2FwKhQcFQ3iN2EQTo8AAAAAHQU6_8355.jpg" mode="aspectFill"></image>
-					<image @click="navTo('/pages/product/product')" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1553105320890&di=c743386be51f2c4c0fd4b75754d14f3c&imgtype=0&src=http%3A%2F%2Fimg007.hc360.cn%2Fhb%2FMTQ1OTg4ODY0MDA3Ny05OTQ4ODY1NDQ%3D.jpg" mode="aspectFill"></image>
-					<image @click="navTo('/pages/product/product')" src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2691146630,2165926318&fm=26&gp=0.jpg" mode="aspectFill"></image>
-					<image @click="navTo('/pages/product/product')" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1553105443324&di=8141bf13f3f208c61524d67f9bb83942&imgtype=0&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01ac9a5548d29b0000019ae98e6d98.jpg" mode="aspectFill"></image>
-					<image @click="navTo('/pages/product/product')" src="https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=191678693,2701202375&fm=26&gp=0.jpg" mode="aspectFill"></image>
+				<scroll-view v-if="footprintList.length > 0" scroll-x class="h-list">
+					<image v-for="(item, index ) in footprintList" :key="index" @longpress="deleteFootprint(item)" @click="navTo('/pages/product/detail?id=' + item.spuId)" :src="item.spuImg + '?x-oss-process=style/200px'" mode="aspectFill"></image>
 				</scroll-view>
-				<list-cell icon="icon-iconfontweixin" iconColor="#e07472" title="我的钱包" ></list-cell>
-				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/address')"></list-cell>
-				<list-cell icon="icon-pinglun-copy" iconColor="#ee883b" title="晒单" ></list-cell>
-				<list-cell icon="icon-shoucang_xuanzhongzhuangtai" iconColor="#54b4ef" title="我的收藏"></list-cell>
-				<list-cell icon="icon-shezhi1" iconColor="#e07472" title="设置" border="" @eventClick="navTo('/pages/set/set')"></list-cell>
+				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/list')"></list-cell>
+				<list-cell icon="icon-shoucang_xuanzhongzhuangtai" iconColor="#54b4ef" title="我的收藏" @eventClick="navTo('/pages/product/favorite')"></list-cell>
+				<list-cell icon="icon-tuandui" iconColor="#EE82EE" title="个人资料" @eventClick="navTo('/pages/user/profile')"></list-cell>
+				<!-- <list-cell icon="icon-iconfontweixin" iconColor="#EEEE00" title="我的优惠券" @eventClick="navTo('/pages/coupon/listTODO')"></list-cell> -->
+				<list-cell icon="icon-pinglun-copy" iconColor="#ee883b" title="关于" @eventClick="navTo('/pages/user/about')"></list-cell>
+				<list-cell icon="icon-shanchu4" iconColor="#e07472" title="退出登录" border="" @eventClick="logout()"></list-cell>
 			</view> 
 		</view>
 			
@@ -109,7 +105,13 @@
 				coverTransform: 'translateY(0px)',
 				coverTransition: '0s',
 				moving: false,
+				footprintList: [],
+				isVip: false,
 			}
+		},
+		onShow() {
+			this.isVip = this.$api.isVip()
+			this.loadFootprint()
 		},
 		onLoad(){
 		},
@@ -137,6 +139,45 @@
 			...mapState(['hasLogin','userInfo'])
 		},
         methods: {
+			async loadFootprint() {
+				const that = this
+				that.$api.request('footprint', 'getAllFootprint').then(res => {
+					that.footprintList = res.data
+				})
+			},
+			
+			deleteFootprint(item) {
+				const that = this
+				uni.showModal({
+					title: '删除？',
+					content: '您确定要删除此足迹吗？',
+					success : (e) => {
+						if (e.confirm) {
+							that.$api.request('footprint', 'deleteFootprint', {
+								footprintId: item.id
+							}).then(res => {
+								that.loadFootprint()
+							})
+						}
+					}
+				})
+			},
+			
+			logout() {
+				const that = this
+				uni.showModal({
+					title: '询问',
+					content: '您确定要退出吗？',
+					cancelText: '取消',
+					confirmText: '确定',
+					success: (e) => {
+						if (e.confirm) {
+							that.$store.commit('logout')
+							that.$api.logout()
+						}
+					}
+				})
+			},
 
 			/**
 			 * 统一跳转接口,拦截未登录路由
@@ -148,7 +189,7 @@
 				}
 				uni.navigateTo({  
 					url
-				})  
+				})
 			}, 
 	
 			/**

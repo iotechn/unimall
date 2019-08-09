@@ -1,37 +1,62 @@
-# unimall
+> unimall 针对中小商户、企业和个人学习者开发。使用Java编码，采用SpringBoot、Mybatis-Plus等易用框架，适合个人学习研究。同时支持单机部署、集群部署，中小商户企业可根据业务动态扩容。unimall使用uniapp前端框架，可同时编译到 微信小程序、H5、Android App、iOS App等几个平台，可为中小商户企业节约大量维护成本。也可支撑中小商户企业前期平台横扩需求。
 
-#### 介绍
-又双叒叕一个电商开源项目，正在编码。使用Java开发，同时支持微信小程序、安卓App、苹果App。支持集群部署，单机部署。尽情期待！
+---
+QQ讨论群：656676341
+---
 
-#### 软件架构
-软件架构说明
+#### 用户端系统演示
 
+下面分别是微信小程序包和Android安装Apk。因为苹果开发者ID太贵，所以这里没有打包，实际也可同时支持苹果的。
 
-#### 安装教程
+![二维码](snapshoot/qr.jpg)
 
-1. xxxx
-2. xxxx
-3. xxxx
-
-#### 使用说明
-
-1. xxxx
-2. xxxx
-3. xxxx
-
-#### 参与贡献
-
-1. Fork 本仓库
-2. 新建 Feat_xxx 分支
-3. 提交代码
-4. 新建 Pull Request
+---
 
 
-#### 码云特技
+![前端演示](snapshoot/front.jpg)
 
-1. 使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2. 码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3. 你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4. [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5. 码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6. 码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+#### 后台端系统演示
+
+![后端演示](snapshoot/backend1.png)
+
+#### Unimall 基本框架
+
+Unimall使用前后分离的设计、后端采用Java编写，前端均适用vuejs编写。
+
+![架构图](snapshoot/framework.png)
+
+#### 项目部署方式
+
+>项目部署
+
+##### ⓪ 服务器推荐
+服务器可根据自身业务来选购，单机环境推荐2C4G
+
+##### ① 基础运行环境
+
+| 运行环境 | 版本号 |
+|:--------|:--------|
+|  MySQL   |  5.7（推荐）   |
+|  JDK   |  1.8（推荐）   |
+|  Redis   |  4.0.1（其他也可以）   |
+|  Nginx  |  只要Web容器就可以了  |
+
+请参考 [CentOS7.4 安装 MySQL5.7](https://github.com/iotechn/document-basic/blob/master/CentOS7.4_Install_MySQL5.7.md)
+
+请参考 [CentOS 安装 JDK8](https://github.com/iotechn/document-basic/blob/master/CentOS_Install_JDK8.md)
+
+请参照CentOS [安装 NodeJs 8.15.0](https://github.com/iotechn/document-basic/blob/master/CentOS_Install_NodeJS_8.15.0.md)
+
+Redis安装可直接使用yum安装 
+	
+	yum install redis
+
+安装完成后使用 redis-cli 命令，若能进入，则表示redis安装完成
+
+项目部署分为 Server 、 App 、 Admin 三个部分
+
+[部署Step1:Java后台编译&部署](doc/server.md)
+
+[部署Step2:App编译打包](doc/app.md)
+
+[部署Step3:Admin编译打包](doc/admin.md)
