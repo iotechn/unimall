@@ -41,7 +41,7 @@
 			</view> -->
 		</view>
 
-		<text class="mix-btn" @click="confirm">确认支付</text>
+		<text :disabled="submiting" class="mix-btn" @click="confirm">确认支付</text>
 	</view>
 </template>
 
@@ -51,8 +51,8 @@
 			return {
 				payType: 1,
 				price: 0,
-				orderNo: ''
-
+				orderNo: '',
+				submiting: false
 			};
 		},
 		computed: {
@@ -71,9 +71,14 @@
 			//确认支付
 			confirm: async function() {
 				const that = this
+				that.submiting = true
 				that.$api.request('order', 'wxPrepay', {
 					orderNo : that.orderNo
+				}, failres => {
+					that.submiting = false
+					that.$api.msg(failres.errmsg)
 				}).then(prepayRes => {
+					that.submiting = false
 					//#ifdef MP-WEIXIN
 					const payParam = {
 						appId: prepayRes.data.appId,

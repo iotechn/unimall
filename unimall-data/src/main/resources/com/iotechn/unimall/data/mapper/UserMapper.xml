@@ -6,6 +6,9 @@
     <select id="login" resultType="com.iotechn.unimall.data.dto.UserDTO">
         SELECT
             id,
+            phone,
+            login_type AS loginType,
+            open_id AS openId,
             nickname,
             avatar_url AS avartarUrl,
             `level`,
@@ -19,7 +22,6 @@
         FROM
             unimall_user
         WHERE
-
             phone = #{phone} AND `password` = #{cryptPassword}
     </select>
 

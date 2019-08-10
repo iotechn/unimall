@@ -27,7 +27,7 @@
 			 :disabled="logining">微信授权登录</button>
 			<!-- #endif -->
 			<!-- #ifdef APP-PLUS -->
-			<button v-if="loginType === 'wechat'" class="confirm-btn" @click="wechatLogin" :disabled="logining">微信App授权登录</button>
+			<button v-if="loginType === 'wechat'" class="confirm-btn" @click="wechatLogin" :disabled="logining">微信授权登录</button>
 			<!-- #endif -->
 			<button v-if="loginType === 'phone'" class="confirm-btn" @click="toLogin" :disabled="logining">登录</button>
 			<view v-if="loginType === 'phone'" class="forget-section">
@@ -80,15 +80,45 @@
 			},
 			async toLogin() {
 				const that = this
-				that.logining = true;
 				if (that.phone.length !== 11) {
 					that.$api.msg('请输入11位中国手机号')
 				} else if (that.password.length < 8) {
 					that.$api.msg('密码至少8位')
 				} else {
+					that.logining = true;
+					//#ifdef MP-WEIXIN
+					//若是小程序平台，则获取到openId。整个过程是静默完成的
+					uni.login({
+						provider: 'weixin',
+						success: (wxres => {
+							that.$api.request('user', 'login', {
+								phone: that.phone,
+								password: that.password,
+								loginType: 1,
+								raw: JSON.stringify(wxres)
+							}, failres => {
+								that.logining = false
+								uni.showToast({
+									title: failres.errmsg,
+									icon: "none"
+								});
+							}).then(res => {
+								that.logining = false
+								that.$store.commit('login', res.data)
+								uni.setStorageSync('userInfo', res.data)
+								if (that.$api.prePage().lodaData) {
+									that.$api.prePage().loadData()
+								}
+								uni.navigateBack()
+							})
+						})
+					})
+					//#endif
+					//#ifdef APP-PLUS
+					//若是App登录，则不需要保存OpenId。可直接登录
 					that.$api.request('user', 'login', {
 						phone: that.phone,
-						password: that.password
+						password: that.password,
 					}, failres => {
 						that.logining = false
 						uni.showToast({
@@ -104,6 +134,7 @@
 						}
 						uni.navigateBack()
 					})
+					//#endif
 				}
 			},
 			miniWechatLogin(e) {
@@ -162,7 +193,6 @@
 							that.$api.msg(failres.errmsg)
 							uni.hideLoading()
 						}).then(res => {
-							console.log(res)
 							that.logining = false
 							uni.getUserInfo({
 								lang: 'zh_CN',
@@ -188,11 +218,6 @@
 								}
 							})
 						})
-					}),
-					fail: (failres => {
-						uni.hideLoading()
-						that.$api.msg('微信App登录失败')
-						console.log(failres)
 					})
 				})
 			}

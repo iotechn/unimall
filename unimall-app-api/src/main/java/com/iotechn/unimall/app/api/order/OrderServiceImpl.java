@@ -314,7 +314,7 @@ public class OrderServiceImpl implements OrderService {
         if (UserLoginType.MP_WEIXIN.getCode() == loginType) {
             appId = wxMiNiAppid;
             tradeType = WxPayConstants.TradeType.JSAPI;
-        } else if (UserLoginType.APP_WEIXIN.getCode() == loginType) {
+        } else if (UserLoginType.APP_WEIXIN.getCode() == loginType || UserLoginType.REGISTER.getCode() == loginType) {
             appId = wxAppAppid;
             tradeType = WxPayConstants.TradeType.APP;
         } else {

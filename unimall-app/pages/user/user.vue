@@ -7,7 +7,7 @@
 					<image class="portrait" :src="userInfo.avatarUrl || '/static/missing-face.png'"></image>
 				</view>
 				<view class="info-box">
-					<text class="username">{{ hasLogin? (userInfo.nickname || '未设置昵称') : '立即登录' }}</text>
+					<text @click="toLogin" class="username">{{ hasLogin? (userInfo.nickname || '未设置昵称') : '立即登录' }}</text>
 				</view>
 			</view>
 			<view class="vip-card-box">
@@ -161,6 +161,14 @@
 						}
 					}
 				})
+			},
+			
+			toLogin() {
+				if (!this.hasLogin) {
+					uni.navigateTo({
+						url: '/pages/public/login'
+					})
+				}
 			},
 			
 			logout() {

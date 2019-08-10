@@ -26,5 +26,17 @@ public enum UserLoginType {
         return msg;
     }
 
+    public static boolean contains(Integer loginType) {
+        if (loginType == null) {
+            return false;
+        }
+        for (UserLoginType type : values()) {
+            if (type.getCode() == loginType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 }

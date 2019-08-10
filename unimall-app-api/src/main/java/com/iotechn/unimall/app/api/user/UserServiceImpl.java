@@ -6,6 +6,7 @@ import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.notify.SMSClient;
 import com.iotechn.unimall.core.notify.SMSResult;
 import com.iotechn.unimall.core.util.GeneratorUtil;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -176,7 +178,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO login(String phone, String password, String ip) throws ServiceException {
+    @Transactional
+    public UserDTO login(String phone, String password, Integer loginType, String raw, String ip) throws ServiceException {
         String cryptPassword = Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0, 7));
         UserDTO userDTO = userMapper.login(phone, cryptPassword);
         if (userDTO == null) {
@@ -185,6 +188,29 @@ public class UserServiceImpl implements UserService {
         //检查帐号是否已经冻结
         if (userDTO.getStatus() == 0) {
             throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
+        }
+        if (!StringUtils.isEmpty(raw) && UserLoginType.contains(loginType)) {
+            if (loginType == UserLoginType.MP_WEIXIN.getCode()) {
+                try {
+                    JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
+                    String code = thirdPartJsonObject.getString("code");
+                    String body = okHttpClient.newCall(new Request.Builder()
+                            .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? wxMiNiAppid : wxAppAppid) +
+                                    "&secret=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? wxMiNiSecret : wxAppSecret) +
+                                    "&grant_type=authorization_code&js_code=" + code).get().build()).execute().body().string();
+                    JSONObject jsonObject = JSONObject.parseObject(body);
+                    Integer errcode = jsonObject.getInteger("errcode");
+                    if (errcode == null || errcode == 0) {
+                        String miniOpenId = jsonObject.getString("openid");
+                        //将此次登录的openId，暂且放入user的域里面，支付的时候会用到
+                        userDTO.setLoginType(loginType);
+                        userDTO.setOpenId(miniOpenId);
+                    }
+                } catch (Exception e) {
+                    logger.error("[微信第三方登录] 异常", e);
+                    throw new ThirdPartServiceException(ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getMsg(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+                }
+            }
         }
         String accessToken = GeneratorUtil.genSessionId();
         //放入SESSION专用Redis数据源中

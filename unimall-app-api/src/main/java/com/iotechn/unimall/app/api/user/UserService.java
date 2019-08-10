@@ -44,6 +44,8 @@ public interface UserService {
     public UserDTO login(
             @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
             @NotNull @TextFormat(lengthMin = 8,lengthMax = 18,notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
+            @HttpParam(name = "loginType", type = HttpParamType.COMMON, description = "登录方式") Integer loginType,
+            @HttpParam(name = "raw", type = HttpParamType.COMMON, description = "第三方平台返回的数据") String raw,
             @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "登录IP") String ip) throws ServiceException;
 
     @HttpMethod(description = "用户注销")

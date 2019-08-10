@@ -187,7 +187,8 @@
 				selectedSkuIndex: -1,
 				toggleCallback: undefined,
 				maskState: 0, //优惠券面板显示状态
-				couponList: []
+				couponList: [],
+				submiting: false
 
 			};
 		},
