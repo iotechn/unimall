@@ -201,6 +201,7 @@ public class OrderServiceImpl implements OrderService {
                     orderDO.setCouponId(orderRequest.getCoupon().getCouponId());
                     orderDO.setCouponPrice(couponPrice);
                 }
+                orderDO.setMono(orderRequest.getMono());
                 orderDO.setFreightPrice(0);
                 orderDO.setOrderNo(GeneratorUtil.genOrderId(MACHINE_NO, ENV));
                 orderDO.setUserId(userId);

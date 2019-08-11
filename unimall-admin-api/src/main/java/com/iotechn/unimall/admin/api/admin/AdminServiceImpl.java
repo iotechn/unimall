@@ -153,6 +153,7 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NAME_REPEAT);
         }
         BeanUtils.copyProperties(adminDTO, adminDO);
+        adminDO.setPassword(MD5Util.md5(adminDO.getPassword(), adminDO.getUsername()));
         adminDO.setRoleIds(JSONObject.toJSONString(adminDTO.getRoleIds()));
         adminDO.setGmtUpdate(new Date());
         adminDO.setGmtCreate(adminDO.getGmtUpdate());
