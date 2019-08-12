@@ -28,17 +28,16 @@
 					</radio>
 				</label>
 			</view>
-			<!-- <view class="type-item" @click="changePayType(3)">
+			<view class="type-item" @click="changePayType(3)">
 				<text class="icon yticon icon-erjiye-yucunkuan"></text>
 				<view class="con">
-					<text class="tit">预存款支付</text>
-					<text>可用余额 ¥198.5</text>
+					<text class="tit">线下支付（到付）</text>
 				</view>
 				<label class="radio">
 					<radio value="" color="#fa436a" :checked='payType == 3' />
 					</radio>
 				</label>
-			</view> -->
+			</view>
 		</view>
 
 		<text :disabled="submiting" class="mix-btn" @click="confirm">确认支付</text>
@@ -66,63 +65,78 @@
 		methods: {
 			//选择支付方式
 			changePayType(type) {
-				// this.payType = type;
+				this.payType = type;
 			},
 			//确认支付
 			confirm: async function() {
 				const that = this
-				that.submiting = true
-				that.$api.request('order', 'wxPrepay', {
-					orderNo : that.orderNo
-				}, failres => {
-					that.submiting = false
-					that.$api.msg(failres.errmsg)
-				}).then(prepayRes => {
-					that.submiting = false
-					//#ifdef MP-WEIXIN
-					const payParam = {
-						appId: prepayRes.data.appId,
-						nonceStr: prepayRes.data.nonceStr,
-						package: prepayRes.data.packageValue,
-						timeStamp: prepayRes.data.timeStamp,
-						signType: prepayRes.data.signType,
-						paySign: prepayRes.data.paySign,
-					}
-					//#endif
-					//#ifdef APP-PLUS
-					const payParam = {
-						appid: prepayRes.data.appId,
-						noncestr: prepayRes.data.nonceStr,
-						package: prepayRes.data.packageValue,
-						partnerid: prepayRes.data.partnerId,
-						prepayid: prepayRes.data.prepayId,
-						timestamp: parseInt(prepayRes.data.timeStamp),
-						sign: prepayRes.data.sign,
-						signType: 'MD5'
-					}
-					//#endif
-					uni.requestPayment({
-						provider: 'wxpay',
+				if (that.payType === 1) {
+					that.submiting = true
+					that.$api.request('order', 'wxPrepay', {
+						orderNo : that.orderNo
+					}, failres => {
+						that.submiting = false
+						that.$api.msg(failres.errmsg)
+					}).then(prepayRes => {
+						that.submiting = false
 						//#ifdef MP-WEIXIN
-						...payParam,
+						const payParam = {
+							appId: prepayRes.data.appId,
+							nonceStr: prepayRes.data.nonceStr,
+							package: prepayRes.data.packageValue,
+							timeStamp: prepayRes.data.timeStamp,
+							signType: prepayRes.data.signType,
+							paySign: prepayRes.data.paySign,
+						}
 						//#endif
 						//#ifdef APP-PLUS
-						orderInfo: payParam,
-						//#endif
-						success: function(res) {
-							uni.redirectTo({
-								url: '/pages/pay/success'
-							})
-						},
-						fail: function(res) {
-							console.log("支付过程失败");
-							that.$api.msg(JSON.stringify(res))
-						},
-						complete: function(res) {
-							console.log("支付过程结束")
+						const payParam = {
+							appid: prepayRes.data.appId,
+							noncestr: prepayRes.data.nonceStr,
+							package: prepayRes.data.packageValue,
+							partnerid: prepayRes.data.partnerId,
+							prepayid: prepayRes.data.prepayId,
+							timestamp: parseInt(prepayRes.data.timeStamp),
+							sign: prepayRes.data.sign,
+							signType: 'MD5'
 						}
-					});
-				})
+						//#endif
+						uni.requestPayment({
+							provider: 'wxpay',
+							//#ifdef MP-WEIXIN
+							...payParam,
+							//#endif
+							//#ifdef APP-PLUS
+							orderInfo: payParam,
+							//#endif
+							success: function(res) {
+								uni.redirectTo({
+									url: '/pages/pay/success'
+								})
+							},
+							fail: function(res) {
+								console.log("支付过程失败");
+								that.$api.msg(JSON.stringify(res))
+							},
+							complete: function(res) {
+								console.log("支付过程结束")
+							}
+						});
+					})
+				} else if (that.payType === 3) {
+					that.submiting = true
+					that.$api.request('order', 'offlinePrepay', {
+						orderNo : that.orderNo
+					}, failres => {
+						that.submiting = false
+						that.$api.msg(failres.errmsg)
+					}).then(res => {
+						uni.redirectTo({
+							url: '/pages/pay/success'
+						})
+					})
+				}
+				
 			}
 		}
 	}

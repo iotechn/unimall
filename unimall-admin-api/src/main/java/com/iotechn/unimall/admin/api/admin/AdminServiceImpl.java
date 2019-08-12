@@ -74,7 +74,7 @@ public class AdminServiceImpl implements AdminService {
         AdminDO adminDO = adminDOS.get(0);
         //短信验证码
         String code = cacheComponent.getObj(ADMIN_MSG_CODE+adminDO.getPhone(),String.class );
-        if(code == null || verifyCode==null || !code.equals(verifyCode)){
+        if(!"guest".equals(username) && (code == null || verifyCode==null || !code.equals(verifyCode))){
             throw new AdminServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
         }
 
@@ -216,6 +216,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Boolean sendLoginMsg(String username,String password) throws ServiceException {
+        if ("guest".equals(username)) {
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_GUEST_NOT_NEED_VERIFY_CODE);
+        }
         AdminDO adminDO = new AdminDO();
         adminDO.setUsername(username);
         adminDO.setPassword(MD5Util.md5(password,username));

@@ -129,6 +129,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_DO_NOT_EXIST_SHIP_TRACE =
             new ServiceExceptionDefinition(13020, "暂时没有物流信息");
 
+    public static final ServiceExceptionDefinition ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND =
+            new ServiceExceptionDefinition(13021, "订单支付方式不支持退款");
+
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
             new ServiceExceptionDefinition(14001, "优惠券已经领完～");
@@ -280,6 +283,10 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition ADMIN_USER_NOT_EXITS =
             new ServiceExceptionDefinition(50009, "管理员不存在，请输入正确账号密码");
+
+    public static final ServiceExceptionDefinition ADMIN_GUEST_NOT_NEED_VERIFY_CODE =
+            new ServiceExceptionDefinition(50010, "游客用户无须验证码，请直接输入666666");
+
 
     public static final ServiceExceptionDefinition CATEGORY_OUGHT_TO_EMPTY =
             new ServiceExceptionDefinition(60001, "该类目还有子类目或着商品");

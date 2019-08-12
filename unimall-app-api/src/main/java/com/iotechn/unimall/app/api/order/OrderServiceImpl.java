@@ -24,6 +24,7 @@ import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
+import com.iotechn.unimall.data.enums.PayChannelType;
 import com.iotechn.unimall.data.enums.UserLevelType;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.*;
@@ -352,8 +353,31 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public Object offlinePrepay(String orderNo, Long userId) throws ServiceException {
+        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        // 检测订单状态
+        Integer status = orderDO.getStatus();
+        if (status != OrderStatusType.UNPAY.getCode()) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+        }
+        OrderDO updateOrderDO = new OrderDO();
+        updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
+        updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+        updateOrderDO.setGmtUpdate(new Date());
+        boolean succ = orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
+        if (succ) {
+            return "ok";
+        }
+        throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public String refund(String orderNo, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        if (PayChannelType.OFFLINE.getCode().equals(orderDO.getPayChannel())) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
+        }
         if (OrderStatusType.refundable(orderDO.getStatus())) {
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());
