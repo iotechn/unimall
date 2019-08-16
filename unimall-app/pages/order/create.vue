@@ -203,6 +203,9 @@
 			submit() {
 				const that = this
 				that.submiting = true
+				if (that.addressData.id) {
+					that.orderReqeust.addressId = that.addressData.id
+				}
 				that.$api.request('order', 'takeOrder', {
 					orderRequest : JSON.stringify(that.orderReqeust),
 					channel: uni.getSystemInfoSync().platform

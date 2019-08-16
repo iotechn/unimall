@@ -215,6 +215,8 @@ public class OrderServiceImpl implements OrderService {
                     if (!userId.equals(addressDO.getUserId())) {
                         throw new AppServiceException(ExceptionDefinition.ORDER_ADDRESS_NOT_BELONGS_TO_YOU);
                     }
+                    orderDO.setConsignee(addressDO.getConsignee());
+                    orderDO.setPhone(addressDO.getPhone());
                     orderDO.setProvince(addressDO.getProvince());
                     orderDO.setCity(addressDO.getCity());
                     orderDO.setCounty(addressDO.getCounty());
