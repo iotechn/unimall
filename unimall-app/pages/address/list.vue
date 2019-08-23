@@ -36,7 +36,8 @@
 			checkAddress(item) {
 				if (this.source == 1) {
 					//this.$api.prePage()获取上一页实例，在App.vue定义
-					this.$api.prePage().addressData = item;
+					this.$api.prePage().addressData = item
+					this.$api.prePage().orderReqeust = item.id
 					this.$api.prePage().calcFreightPrice()
 					uni.navigateBack()
 				}

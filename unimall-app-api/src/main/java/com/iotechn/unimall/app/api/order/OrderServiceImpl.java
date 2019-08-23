@@ -191,7 +191,7 @@ public class OrderServiceImpl implements OrderService {
                 Integer freightPrice = freightBizService.getFreightMoney(orderRequest);
                 //参数强校验 END
                 //???是否校验actualPrice??强迫校验？
-                int actualPrice = skuPrice - couponPrice - freightPrice;
+                int actualPrice = skuPrice - couponPrice + freightPrice;
                 Date now = new Date();
                 OrderDO orderDO = new OrderDO();
                 orderDO.setSkuTotalPrice(skuPrice);
@@ -203,7 +203,7 @@ public class OrderServiceImpl implements OrderService {
                     orderDO.setCouponPrice(couponPrice);
                 }
                 orderDO.setMono(orderRequest.getMono());
-                orderDO.setFreightPrice(0);
+                orderDO.setFreightPrice(freightPrice);
                 orderDO.setOrderNo(GeneratorUtil.genOrderId(MACHINE_NO, ENV));
                 orderDO.setUserId(userId);
                 orderDO.setStatus(OrderStatusType.UNPAY.getCode());

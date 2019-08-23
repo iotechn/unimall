@@ -122,7 +122,8 @@
 					coupon: undefined,
 					mono: '',
 					takeWay: '',
-					freightPrice: 0
+					freightPrice: 0,
+					addressId: undefined
 				},
 				skuCategoryPriceMap: {},
 				maskState: 0, //优惠券面板显示状态
@@ -191,6 +192,9 @@
 			},
 			calcFreightPrice() {
 				const that = this
+				if (that.addressData) {
+					that.orderReqeust.addressId = that.addressData.id
+				}
 				that.$api.request('freight', 'getFreightMoney', {
 					orderRequestDTO: JSON.stringify(that.orderReqeust)
 				}).then(res => {
