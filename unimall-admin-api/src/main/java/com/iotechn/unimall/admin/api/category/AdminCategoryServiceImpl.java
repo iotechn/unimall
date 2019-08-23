@@ -115,7 +115,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if(!parentId.equals(0l)){
             parent = categoryMapper.selectById(parentId);
             if(parent == null){
-                throw new AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.CATEGORY_EXCEPTION,"父节点信息不准确"));
+                throw new AdminServiceException(ExceptionDefinition.PARENT_NODE_INFORMATION_ERROR);
             }
             categoryDO.setLevel(parent.getLevel() + 1);
         }else{
@@ -130,7 +130,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         categoryDO.setGmtUpdate(now);
 
         if(categoryMapper.insert(categoryDO) <= 0){
-            throw new AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.CATEGORY_EXCEPTION,"数据库类目插入失败"));
+            throw new AdminServiceException(ExceptionDefinition.DATABASE_INSERT_FAILURE);
         }
         cacheComponent.del(CA_CATEGORY_TREE);
         cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
@@ -162,14 +162,20 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     public CategoryTreeNodeDTO updateCategory(Long adminId, Long id, String title, Long parentId, String iconUrl, String picUrl, Integer level) throws ServiceException {
         CategoryDO categoryDO = new CategoryDO();
         if(id == null || parentId == null){
-            throw  new  AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.CATEGORY_EXCEPTION,"传入ID，父节点ID不能为空"));
+            throw  new  AdminServiceException(ExceptionDefinition.CATEGORY_OR_PARENT_NODE_IS_EMPTY);
         }
         categoryDO.setId(parentId);
         CategoryDO categoryParent = categoryMapper.selectOne(categoryDO);
-        if(categoryParent == null && !parentId.equals(0l)){
-            throw  new  AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.CATEGORY_EXCEPTION,"数据库查找失败"));
+
+        //传入父节点等于自身抛出异常
+        if(id.equals(parentId)){
+            throw new AdminServiceException(ExceptionDefinition.PARENT_CAN_NOT_EQUALS_ONESELF);
         }
-        if(parentId.equals(0l)){
+
+        if(categoryParent == null && !parentId.equals(0L)){
+            throw  new  AdminServiceException(ExceptionDefinition.NOT_FIND_PARENT_NODE);
+        }
+        if(parentId.equals(0L)){
             categoryDO.setLevel(0);
         }else{
             categoryDO.setLevel(categoryParent.getLevel() + 1);
@@ -181,7 +187,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         categoryDO.setPicUrl(picUrl);
         categoryDO.setIconUrl(iconUrl);
         if(categoryMapper.updateById(categoryDO) <= 0){
-            throw  new  AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.CATEGORY_EXCEPTION,"修改失败，可能是ID错误"));
+            throw  new  AdminServiceException(ExceptionDefinition.CATEGORY_UPDATE_FAILURE);
         }
         CategoryTreeNodeDTO categoryTreeNodeDTO = new CategoryTreeNodeDTO();
         List<CategoryTreeNodeDTO> list = getCategoryList();

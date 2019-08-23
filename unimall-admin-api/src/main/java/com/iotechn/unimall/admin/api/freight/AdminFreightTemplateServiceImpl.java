@@ -3,9 +3,11 @@ package com.iotechn.unimall.admin.api.freight;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.iotechn.unimall.biz.service.goods.GoodsBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.domain.FreightTemplateDO;
 import com.iotechn.unimall.data.domain.SpuDO;
@@ -40,6 +42,9 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
 
     @Autowired
     private SpuMapper spuMapper;
+
+    @Autowired
+    private CacheComponent cacheComponent;
 
 
     @Override
@@ -83,10 +88,12 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         }
         judgeSQL = freightTemplateCarriageMapper.delete(new EntityWrapper<FreightTemplateCarriageDO>()
                 .eq("template_id",templateId));
-        if(judgeSQL > 0)
-        {return true;}
-        else
-        {return false;}
+        if (judgeSQL > 0) {
+            cacheComponent.delPrefixKey(GoodsBizService.CA_SPU_PREFIX);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -111,6 +118,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
             return t;
         }).collect(Collectors.toList());
         insertFreightTemplateCarriage(freightTemplateDO, collect, now);
+        cacheComponent.delPrefixKey(GoodsBizService.CA_SPU_PREFIX);
         return true;
     }
 

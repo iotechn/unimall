@@ -291,8 +291,24 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition CATEGORY_OUGHT_TO_EMPTY =
             new ServiceExceptionDefinition(60001, "该类目还有子类目或着商品");
 
-    public static final ServiceExceptionDefinition CATEGORY_EXCEPTION =
-            new ServiceExceptionDefinition(60002, "类目异常汇总，由下面方法传入提醒");
+    public static final ServiceExceptionDefinition CATEGORY_OR_PARENT_NODE_IS_EMPTY =
+            new ServiceExceptionDefinition(60002, "传入ID，父节点ID不能为空");
+
+    public static final ServiceExceptionDefinition PARENT_CAN_NOT_EQUALS_ONESELF =
+            new ServiceExceptionDefinition(60003, "父节点不能是自己");
+
+    public static final ServiceExceptionDefinition NOT_FIND_PARENT_NODE =
+            new ServiceExceptionDefinition(60004, "未在数据库中查找到父节点");
+
+    public static final ServiceExceptionDefinition CATEGORY_UPDATE_FAILURE =
+            new ServiceExceptionDefinition(60005, "类目数据库修改失败");
+
+    public static final ServiceExceptionDefinition PARENT_NODE_INFORMATION_ERROR =
+            new ServiceExceptionDefinition(60006, "父节点信息不准确");
+
+    public static final ServiceExceptionDefinition DATABASE_INSERT_FAILURE =
+            new ServiceExceptionDefinition(60007, "数据库类目插入失败");
+
 
 
     public static final ServiceExceptionDefinition ORDER_EXCEL_PARAM_ERROR=
