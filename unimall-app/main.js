@@ -3,16 +3,24 @@ import store from './store'
 import App from './App'
 
 import * as filters from './filters'
+import * as config from './config'
 
 Object.keys(filters).forEach(key => {
-  Vue.filter(key, filters[key])
+	Vue.filter(key, filters[key])
 })
 
-//TODO 放到配置文件
-// const baseUrl = 'http://127.0.0.1:8080'
-const baseUrl = 'https://fresh.easycampus.cn'
-// const baseUrl = 'http://192.168.8.188:8080'
+//#ifdef H5
+let jweixin = require('./components/jweixin-module')
+let jwx = require('./components/jweixin-module/jwx')
+Vue.mixin({
+	onShow() {
+		jwx.configWeiXin(jwx => {
+		})
+	}
+})
+//#endif
 
+const defConfig = config.def
 
 const msg = (title, duration = 1500, mask = false, icon = 'none') => {
 	//统一提示方便全局修改
@@ -53,6 +61,7 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 			userInfo = uni.getStorageSync('userInfo')
 		}
 		let accessToken = userInfo ? userInfo.accessToken : ''
+		let baseUrl = config.def().baseUrl
 		uni.request({
 			url: baseUrl + '/m.api',
 			data: {
@@ -87,14 +96,13 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 										})
 									}
 								},
-								fail: () => {
-								},
-								complete: () =>  {
+								fail: () => {},
+								complete: () => {
 									loginLock = false
 								}
 							})
 						}
-						
+
 					} else {
 						if (failCallback) {
 							failCallback(res.data)
@@ -164,23 +172,23 @@ const uploadImg = (successCallback) => {
 }
 
 function get_suffix(filename) {
-  var pos = filename.lastIndexOf('.')
-  var suffix = ''
-  if (pos != -1) {
-    suffix = filename.substring(pos)
-  }
-  return suffix;
+	var pos = filename.lastIndexOf('.')
+	var suffix = ''
+	if (pos != -1) {
+		suffix = filename.substring(pos)
+	}
+	return suffix;
 }
 
 function random_string(len) {
-  　　len = len || 32;
-  　　var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
-  　　var maxPos = chars.length;
-  　　var pwd = '';
-  　　for (var i = 0; i < len; i++) {
-    pwd += chars.charAt(Math.floor(Math.random() * maxPos));
-  }
-  return pwd;
+	len = len || 32;
+	var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+	var maxPos = chars.length;
+	var pwd = '';
+	for (var i = 0; i < len; i++) {
+		pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+	}
+	return pwd;
 }
 
 const prePage = () => {
@@ -202,8 +210,12 @@ Vue.prototype.$api = {
 	uploadImg,
 	logout,
 	isVip,
-	setUserInfo
+	setUserInfo,
+	defConfig,
 };
+//#ifdef H5
+Vue.prototype.$jweixin = jweixin;
+//#endif
 
 App.mpType = 'app'
 

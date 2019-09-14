@@ -34,4 +34,8 @@ public class GeneratorUtil {
     public static String genFileName(){
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
+
+    public static String genUUId() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
 }

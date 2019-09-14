@@ -7,6 +7,7 @@ public enum UserLoginType {
     REGISTER(0, "手机注册"),
     MP_WEIXIN(1, "WX小程序登录"),
     APP_WEIXIN(2, "WX第三方登录"),
+    H5_WEIXIN(3, "H5微信登录")
     ;
 
     UserLoginType(int code, String msg) {

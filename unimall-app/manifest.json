@@ -109,5 +109,12 @@
         "setting" : {
             "urlCheck" : true
         }
+    },
+    "h5" : {
+        "title" : "unimall 多端商城",
+        "domain" : "m.xiaoyuanawan.com",
+        "router" : {
+            "mode" : "history"
+        }
     }
 }

@@ -97,6 +97,9 @@ public class OrderServiceImpl implements OrderService {
     @Value("${com.iotechn.unimall.wx.app.app-id}")
     private String wxAppAppid;
 
+    @Value("${com.iotechn.unimall.wx.h5.app-id}")
+    private String wxH5Appid;
+
 
     @Override
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
@@ -321,6 +324,9 @@ public class OrderServiceImpl implements OrderService {
         } else if (UserLoginType.APP_WEIXIN.getCode() == loginType || UserLoginType.REGISTER.getCode() == loginType) {
             appId = wxAppAppid;
             tradeType = WxPayConstants.TradeType.APP;
+        } else if (UserLoginType.H5_WEIXIN.getCode() == loginType) {
+            appId = wxH5Appid;
+            tradeType = WxPayConstants.TradeType.JSAPI;
         } else {
             throw new AppServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
         }
@@ -336,7 +342,6 @@ public class OrderServiceImpl implements OrderService {
             orderRequest.setSpbillCreateIp(ip);
             orderRequest.setTradeType(tradeType);
             result = wxPayService.createOrder(orderRequest);
-
             //缓存prepayID用于后续模版通知
             if (result instanceof  WxPayMpOrderResult) {
                 String prepayId = ((WxPayMpOrderResult)result).getPackageValue();

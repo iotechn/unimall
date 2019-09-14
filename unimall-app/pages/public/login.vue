@@ -29,6 +29,9 @@
 			<!-- #ifdef APP-PLUS -->
 			<button v-if="loginType === 'wechat'" class="confirm-btn" @click="wechatLogin" :disabled="logining">微信授权登录</button>
 			<!-- #endif -->
+			<!-- #ifdef H5 -->
+			<button v-if="loginType === 'wechat'" class="confirm-btn" @click="wechatH5Login" :disabled="logining">微信授权登录</button>
+			<!-- #endif -->
 			<button v-if="loginType === 'phone'" class="confirm-btn" @click="toLogin" :disabled="logining">登录</button>
 			<view v-if="loginType === 'phone'" class="forget-section">
 				忘记密码?
@@ -58,8 +61,39 @@
 		onShow() {
 			this.$api.logout()
 		},
-		onLoad() {
-
+		onLoad(options) {
+			//#ifdef H5
+			//H5进入，有可能是回调进来的
+			if (options.code && options.state) {
+				const that = this
+				that.logining = true
+				that.$api.request('user', 'thirdPartLogin', {
+					loginType: 3,
+					raw: options.code
+				}, failres => {
+					that.logining = false
+					that.$api.msg(failres.errmsg)
+				}).then(res => {
+					//登录成功，重定向到指定目标
+					that.logining = false
+					that.$store.commit('login', res.data)
+					uni.setStorageSync('userInfo', res.data)
+					//重定向到
+					//不能重定向到tabbar页面
+					if (options.state === '/pages/cart/cart' || options.state === '/pages/user/user' 
+					|| options.state === '/pages/index/index' || options.state === '/pages/category/category') {
+						uni.switchTab({
+							url: options.state
+						})
+					} else {
+						uni.redirectTo({
+							url: options.state
+						})
+					}
+					
+				})
+			}
+			//#endif
 		},
 		methods: {
 			...mapMutations(['login']),
@@ -114,7 +148,7 @@
 						})
 					})
 					//#endif
-					//#ifdef APP-PLUS
+					//#ifdef APP-PLUS || H5
 					//若是App登录，则不需要保存OpenId。可直接登录
 					that.$api.request('user', 'login', {
 						phone: that.phone,
@@ -220,6 +254,17 @@
 						})
 					})
 				})
+			},
+			wechatH5Login() {
+				const that = this
+				let href = window.location.href
+				let page = that.$api.prePage()
+				let prePath = '/pages/index/index'
+				if (page) {
+					prePath = page.__page__.path
+				}
+				window.location = 'https://open.weixin.qq.com/connect/oauth2/authorize?' 
+				+ 'appid=' + that.$api.defConfig().h5Appid + '&redirect_uri=' + escape(href) + '&response_type=code&scope=snsapi_userinfo&state=' + escape(prePath) + '#wechat_redirect'
 			}
 		},
 

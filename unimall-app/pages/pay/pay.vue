@@ -101,6 +101,7 @@
 							signType: 'MD5'
 						}
 						//#endif
+						//#ifdef MP-WEIXIN || APP-PLUS
 						uni.requestPayment({
 							provider: 'wxpay',
 							//#ifdef MP-WEIXIN
@@ -122,7 +123,31 @@
 								console.log("支付过程结束")
 							}
 						});
+						//#endif
+						//#ifdef H5
+						that.$jweixin.chooseWXPay({
+							nonceStr: prepayRes.data.nonceStr,
+							timestamp: prepayRes.data.timeStamp,
+							package: prepayRes.data.packageValue,
+							signType: prepayRes.data.signType,
+							paySign: prepayRes.data.paySign,
+							success: (e) => {
+								//支付成功
+								uni.redirectTo({
+									url: '/pages/pay/success'
+								})
+							},
+							fail: function(res) {
+								console.log("支付过程失败");
+								that.$api.msg(JSON.stringify(res))
+							},
+							complete: function(res) {
+								console.log("支付过程结束")
+							}
+						})
+						//#endif
 					})
+					
 				} else if (that.payType === 3) {
 					that.submiting = true
 					that.$api.request('order', 'offlinePrepay', {

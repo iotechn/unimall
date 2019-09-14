@@ -190,14 +190,10 @@
 		onShow() {
 			this.isVip = this.$api.isVip()
 		},
-		onLoad() {
+		onLoad(options) {
 			this.loadData()
 		},
 		methods: {
-			/**
-			 * 请求静态数据只是为了代码不那么乱
-			 * 分次请求未作整合
-			 */
 			async loadData() {
 				const that = this
 				uni.showLoading({
@@ -218,7 +214,7 @@
 					})
 					that.carouselList = data.advertisement.t1
 					that.swiperLength = data.advertisement.t1.length
-					that.titleNViewBackground = data.advertisement.t1[0].background
+					that.titleNViewBackground = data.advertisement.t1[0].color
 					//分类精选
 					if (data.advertisement.t2) {
 						that.categoryPickList = data.advertisement.t2
@@ -242,7 +238,7 @@
 			swiperChange(e) {
 				const index = e.detail.current;
 				this.swiperCurrent = index;
-				this.titleNViewBackground = this.carouselList[index].background;
+				this.titleNViewBackground = this.carouselList[index].color;
 			},
 			//详情页
 			navToDetailPage(id) {

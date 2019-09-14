@@ -61,11 +61,16 @@ public interface UserService {
 
     @HttpMethod(description = "同步用户信息")
     public String syncUserInfo(
-            @HttpParam(name = "nickname", type = HttpParamType.COMMON, description = "用户昵称") String nickName,
+            @HttpParam(name = "nickName", type = HttpParamType.COMMON, description = "用户昵称") String nickName,
+            @HttpParam(name = "nickname", type = HttpParamType.COMMON, description = "用户昵称") String nickname,
             @HttpParam(name = "avatarUrl", type = HttpParamType.COMMON, description = "用户头像url") String avatarUrl,
             @HttpParam(name = "gender", type = HttpParamType.COMMON, description = "性别0未知1男2女") Integer gender,
             @HttpParam(name = "birthday", type = HttpParamType.COMMON, description = "用户生日") Long birthday,
             @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "访问令牌") String accessToken,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
+
+    @HttpMethod(description = "获取H5签名")
+    public Object getH5Sign(
+            @NotNull @HttpParam(name = "url", type = HttpParamType.COMMON, description = "url") String url) throws ServiceException;
 
 }
