@@ -305,7 +305,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         if (spuMapper.deleteById(spuId) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
         }
-        cartMapper.delete(new EntityWrapper<CartDO>().in("sku_id", spuMapper.getSkuIds(spuId)));
+        cartMapper.delete(new EntityWrapper<CartDO>().in("sku_id", skuMapper.getSkuIds(spuId)));
         skuMapper.delete(new EntityWrapper<SkuDO>().eq("spu_id", spuId));
         imgMapper.delete(new EntityWrapper<ImgDO>().eq("biz_id", spuId).eq("biz_type", BizType.GOODS.getCode()));
         spuAttributeMapper.delete(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));

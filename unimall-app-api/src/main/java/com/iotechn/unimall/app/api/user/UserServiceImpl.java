@@ -295,7 +295,6 @@ public class UserServiceImpl implements UserService {
                         userDTO.setAccessToken(accessToken);
                         return userDTO;
                     }
-
                 } else {
                     throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
                 }
@@ -351,7 +350,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 微信第三方登录 抽取接口
+     * 微信第三方登录 抽取接口(目前只有小程序)
      *
      * @param loginType
      * @param ip
