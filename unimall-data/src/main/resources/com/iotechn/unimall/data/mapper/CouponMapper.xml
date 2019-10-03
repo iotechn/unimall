@@ -78,7 +78,7 @@
             c.category_id AS categoryId,
             c.days,
             c.gmt_start AS gmtStart,
-            c.gmt_end AS gmtEnt,
+            c.gmt_end AS gmtEnd,
             c.gmt_update AS gmtUpdate,
             c.gmt_create AS gmtCreate,
             y.title AS categoryTitle
@@ -87,7 +87,7 @@
         LEFT JOIN unimall_category AS y ON y.id = c.category_id
         WHERE
             c.`status` = 1
-            AND (c.gmt_end IS NULL OR ( c.gmt_start &gt; now( ) AND c.gmt_end &lt; now( ) ))
+            AND (c.gmt_end IS NULL OR ( c.gmt_start &lt; now( ) AND c.gmt_end &gt; now( ) ))
     </select>
 
 
