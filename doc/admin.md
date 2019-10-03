@@ -17,7 +17,7 @@ Admin使用vuejs+elementui编写。最终打包成静态文件。
 
 将www.example.com替换为自己的域名，最后使用脚本打包
 
-	cpm run build:prod
+	cnpm run build:prod
 
 最后在unimall-admin下会出现生成好的dist文件夹中。dist中包括index.html static等文件。
 
