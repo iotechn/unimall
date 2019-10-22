@@ -21,10 +21,11 @@ unimall项目Gitee地址：[https://gitee.com/iotechn/unimall](https://gitee.com
 看过代码的developer都知道，unimall中舍弃了Controller层。转而全面面向服务开发。Service分为暴露到外部的Service 与 不暴露到外部的BizService。BizService中绝对不能依赖Service。而Service中可依赖BizService，不推荐同层依赖。最下面的就是DAO层。
 
 项目目录结构
+
 ├─unimall-admin                      
 ├─unimall-admin-api                       
-├─unimall-app
-├─unimall-app-api
+├─unimall-app  
+├─unimall-app-api  
 ├─unimall-core                          
 ├─unimall-data                             
 └─unimall-launcher
@@ -248,4 +249,4 @@ unimall完全支持集群部署，并推荐大家使用集群部署。前面可�
 
 launcher中有一个ApiController类，用来接收外面的Http请求。大致逻辑是这样，具体代码自己看。
 
-![6](6.png)
+![7](2developimgs/7.png)
