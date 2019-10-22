@@ -57,6 +57,8 @@ Redis安装可直接使用yum安装
 
 安装完成后使用 redis-cli 命令，若能进入，则表示redis安装完成
 
+##### ② 编译部署前后端代码
+
 项目部署分为 Server 、 App 、 Admin 三个部分
 
 [部署Step1:Java后台编译&部署](doc/server.md)
@@ -64,6 +66,10 @@ Redis安装可直接使用yum安装
 [部署Step2:App编译打包](doc/app.md)
 
 [部署Step3:Admin编译打包](doc/admin.md)
+
+##### ③二次开发文档
+
+[二次开发文档](doc/2develop.md)
 
 #### 版权声明
 
