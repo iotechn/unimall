@@ -53,10 +53,10 @@
         </if>
         <if test="status != null">
           <if test="status >= 0">
-              AND c.status = #{status} AND (c.gmt_end &gt; #{now} or c.days is not null)
+              AND c.status = #{status} AND (unix_timestamp(c.gmt_end) &gt; unix_timestamp(#{now}) or c.days is not null)
           </if>
           <if test="status &lt; 0">
-              AND c.gmt_end &lt; #{now}
+              AND unix_timestamp(c.gmt_end) &lt; unix_timestamp(#{now})
           </if>
         </if>
         order BY c.id DESC
@@ -87,7 +87,7 @@
         LEFT JOIN unimall_category AS y ON y.id = c.category_id
         WHERE
             c.`status` = 1
-            AND (c.gmt_end IS NULL OR ( c.gmt_start &lt; now( ) AND c.gmt_end &gt; now( ) ))
+            AND (c.gmt_end IS NULL OR ( unix_timestamp(c.gmt_start) &lt; unix_timestamp(now( )) AND unix_timestamp(c.gmt_end) &gt; unix_timestamp(now( )) ))
     </select>
 
 
