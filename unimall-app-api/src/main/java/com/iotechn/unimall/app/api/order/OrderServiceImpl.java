@@ -105,6 +105,7 @@ public class OrderServiceImpl implements OrderService {
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
         if (lockComponent.tryLock(TAKE_ORDER_LOCK + userId, 20)) {
             //加上乐观锁，防止用户重复提交订单
+
             try {
                 //用户会员等级
                 Integer userLevel = SessionUtil.getUser().getLevel();

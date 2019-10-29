@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>com.iotechn</groupId>
 		<artifactId>unimall</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1-RELEASE</version>
 	</parent>
 	<packaging>jar</packaging>
 	<groupId>com.iotechn</groupId>
 	<artifactId>unimall-core</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1-RELEASE</version>
 	<name>unimall-core</name>
 	<description>unimall core</description>
 

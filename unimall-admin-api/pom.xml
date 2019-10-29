@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>com.iotechn</groupId>
 		<artifactId>unimall</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1-RELEASE</version>
 	</parent>
 	<groupId>com.iotechn</groupId>
 	<artifactId>unimall-admin-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1-RELEASE</version>
 	<name>unimall-admin-api</name>
 	<description>后台管理Api</description>
 
@@ -22,19 +22,19 @@
 		<dependency>
 			<groupId>com.iotechn</groupId>
 			<artifactId>unimall-core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1-RELEASE</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.iotechn</groupId>
 			<artifactId>unimall-data</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1-RELEASE</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.iotechn</groupId>
 			<artifactId>unimall-biz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1-RELEASE</version>
 		</dependency>
 
 		<!-- 微信第三方封装Api -->

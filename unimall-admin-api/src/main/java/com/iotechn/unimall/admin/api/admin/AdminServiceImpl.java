@@ -29,6 +29,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -144,6 +145,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public AdminDTO create(AdminDTO adminDTO, Long adminId) throws ServiceException {
         AdminDO adminDO = new AdminDO();
         Integer count = adminMapper.selectCount(
@@ -168,6 +170,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String update(AdminDTO adminDTO, Long adminId) throws ServiceException {
         Long id = adminDTO.getId();
         if (id == null) {
@@ -191,6 +194,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String delete(Long id, Long adminId) throws ServiceException {
         if (adminMapper.deleteById(id) > 0) {
             return "ok";
@@ -199,6 +203,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String newPassword(String accessToken, String oldPassword, String newPassword, Long adminId) throws ServiceException {
         AdminDO adminDOExist = adminMapper.selectById(adminId);
         if (!MD5Util.md5(oldPassword, adminDOExist.getUsername()).equals(adminDOExist.getPassword())) {
