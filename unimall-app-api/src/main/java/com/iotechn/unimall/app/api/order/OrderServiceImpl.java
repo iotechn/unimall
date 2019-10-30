@@ -10,6 +10,7 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
 import com.iotechn.unimall.biz.service.freight.FreightBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
+import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -84,6 +85,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private FreightBizService freightBizService;
+
+    @Autowired
+    private UserBizService userBizService;
 
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;
@@ -309,6 +313,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Object wxPrepay(String orderNo, String ip, Long userId) throws ServiceException {
+        Date now = new Date();
         OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
         // 检测订单状态
         Integer status = orderDO.getStatus();
@@ -343,11 +348,16 @@ public class OrderServiceImpl implements OrderService {
             orderRequest.setSpbillCreateIp(ip);
             orderRequest.setTradeType(tradeType);
             result = wxPayService.createOrder(orderRequest);
-            //缓存prepayID用于后续模版通知
             if (result instanceof  WxPayMpOrderResult) {
                 String prepayId = ((WxPayMpOrderResult)result).getPackageValue();
-//TODO 缓存支付Id            userBizService.setVaildFormIdFromSession(prepayId);
                 prepayId = prepayId.replace("prepay_id=", "");
+                UserFormIdDO userFormIdDO = new UserFormIdDO();
+                userFormIdDO.setFormId(prepayId);
+                userFormIdDO.setUserId(userId);
+                userFormIdDO.setOpenid(SessionUtil.getUser().getOpenId());
+                userFormIdDO.setGmtUpdate(now);
+                userFormIdDO.setGmtCreate(now);
+                userBizService.setValidFormId(userFormIdDO);
             }
         } catch (WxPayException e) {
             logger.error("[微信支付] 异常", e);

@@ -47,6 +47,8 @@ mvnw.cmd
 /unimall-data/target/
 /unimall-core/target/
 /unimall-launcher/target/
+/unimall-plugin-core/target/
+/plugins/
 /unimall-app/unpackage/dist/
 /unimall-app/unpackage/resources/
 /unimall-app/unpackage/debug/

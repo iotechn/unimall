@@ -19,12 +19,6 @@
 
     <dependencies>
 
-        <!-- 阿里云对象存储 -->
-        <dependency>
-            <groupId>com.aliyun.oss</groupId>
-            <artifactId>aliyun-sdk-oss</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>com.iotechn</groupId>
             <artifactId>unimall-app-api</artifactId>
@@ -45,10 +39,21 @@
 
         <dependency>
             <groupId>com.iotechn</groupId>
+            <artifactId>unimall-biz</artifactId>
+            <version>0.0.1-RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.iotechn</groupId>
             <artifactId>unimall-core</artifactId>
             <version>0.0.1-RELEASE</version>
         </dependency>
 
+        <!-- 阿里云对象存储 -->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+        </dependency>
 
         <!-- 模板引擎 freemarker -->
         <dependency>

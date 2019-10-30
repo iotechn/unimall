@@ -31,12 +31,6 @@
 			<version>0.0.1-RELEASE</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.iotechn</groupId>
-			<artifactId>unimall-plugin-order</artifactId>
-			<version>0.0.1-RELEASE</version>
-		</dependency>
-
 		<!-- http客户端 -->
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>

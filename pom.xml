@@ -46,6 +46,8 @@
 		<module>unimall-app-api</module>
 		<module>unimall-admin-api</module>
 		<module>unimall-launcher</module>
+		<module>unimall-plugin-core</module>
+		<module>plugins/unimall-plugin-autoship</module>
 	</modules>
 
 	<dependencyManagement>
