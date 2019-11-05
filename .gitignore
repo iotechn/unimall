@@ -66,4 +66,5 @@ unimall.log.*.tmp
 
 ### plugins ###
 /plugins/
-/
+/unimall-app/pages/plugins/
+/unimall-admin/src/views/plugins/
