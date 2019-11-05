@@ -48,7 +48,6 @@ mvnw.cmd
 /unimall-core/target/
 /unimall-launcher/target/
 /unimall-plugin-core/target/
-/plugins/
 /unimall-app/unpackage/dist/
 /unimall-app/unpackage/resources/
 /unimall-app/unpackage/debug/
@@ -63,3 +62,8 @@ mvnw.cmd
 unimall.log
 unimall.log.*.gz
 unimall.log.*.tmp
+
+
+### plugins ###
+/plugins/
+/

@@ -197,13 +197,7 @@
 					"bounce": "none"
 				}
 			}
-        }, {
-            "path" : "pages/category/menu",
-            "style" : {
-				"navigationBarTitleText": "商品列表"
-			}
-        }
-        
+        } 
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
@@ -223,7 +217,7 @@
 				"text": "首页"
 			},
 			{
-				"pagePath": "pages/category/menu",
+				"pagePath": "pages/category/category",
 				"iconPath": "static/tab-cate.png",
 				"selectedIconPath": "static/tab-cate-current.png",
 				"text": "分类"

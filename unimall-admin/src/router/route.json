@@ -97,22 +97,6 @@
 				},
 				"name":"goodsUpsert",
 				"page":"/goods/upsert"
-			},
-			{
-				"path":"autoship",
-				"meta":{
-					"noCache":true,
-					"perms":[
-						"plugin:autoship:create",
-						"plugin:autoship:batchCreate",
-						"plugin:autoship:edit",
-						"plugin:autoship:list",
-						"plugin:autoship:delete"
-					],
-					"title":"自动发货"
-				},
-				"name":"autoship",
-				"page":"/plugins/autoship"
 			}
 		],
 		"meta":{
