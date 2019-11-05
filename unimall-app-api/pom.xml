@@ -27,7 +27,7 @@
 
 		<dependency>
 			<groupId>com.iotechn</groupId>
-			<artifactId>unimall-plugin-autoship</artifactId>
+			<artifactId>unimall-plugin-core</artifactId>
 			<version>0.0.1-RELEASE</version>
 		</dependency>
 
