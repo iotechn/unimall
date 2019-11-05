@@ -83,6 +83,7 @@
       <h3>商品类型(sku)</h3>
       <el-button :plain="true" type="primary" @click="handleSkuShow">添加</el-button>
       <el-table :data="skuList">
+        <el-table-column property="id" label="SkuId"/>
         <el-table-column property="barCode" label="Sku条形码" />
         <el-table-column property="title" label="类型名" />
         <el-table-column property="originalPriceRaw" label="原价" />

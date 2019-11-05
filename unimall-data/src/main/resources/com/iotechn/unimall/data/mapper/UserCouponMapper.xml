@@ -23,7 +23,7 @@
             u.coupon_id = c.id
             AND u.user_id = #{userId}
             AND u.gmt_used IS NULL
-            AND unix_timestamp(u.gmt_start) &lt; unix_timestamp((now())
+            AND unix_timestamp(u.gmt_start) &lt; unix_timestamp(now())
             AND unix_timestamp(u.gmt_end) &gt; unix_timestamp(now())
     </select>
 

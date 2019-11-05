@@ -24,10 +24,6 @@ public class UnimallLauncherApplication {
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext applicationContext = SpringApplication.run(UnimallLauncherApplication.class, args);
-		String[] iocBeans = applicationContext.getBeanDefinitionNames();
-//		for (String bean : iocBeans) {
-//			logger.info("[IOC] Bean存在：" + bean);
-//		}
 		logger.info("[系统初始化完毕]");
 	}
 

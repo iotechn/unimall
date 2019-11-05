@@ -37,6 +37,8 @@ public class CategoryBizService {
 
     public static final String CA_CATEGORY_ID_HASH = "CA_CATEGORY_ID_HASH";
 
+    private static final String CA_CATEGORY_CHILDREN_KEY = "CA_CATEGORY_CHILDREN_";
+
 
     /*获取一棵两级目录树*/
     public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException {
@@ -151,5 +153,15 @@ public class CategoryBizService {
             ids.add(new Long(split[1]));
         }
         return ids;
+    }
+
+    public List<CategoryDO> getChildrenCategoryList(Long categoryId) throws ServiceException {
+        List<CategoryDO> objList = cacheComponent.getObjList(CA_CATEGORY_CHILDREN_KEY + categoryId, CategoryDO.class);
+        if (objList != null) {
+            return objList;
+        }
+        List<CategoryDO> categoryDOList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", categoryId));
+        cacheComponent.putObj(CA_CATEGORY_CHILDREN_KEY + categoryId, objList, Const.CACHE_ONE_DAY);
+        return categoryDOList;
     }
 }

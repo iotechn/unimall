@@ -122,15 +122,17 @@ public class UserBizService {
         return access_token;
     }
 
-    public void sendWechatMiniTemplateMessage(WeChatCommonTemplateMessageModel model) {
+    public boolean sendWechatMiniTemplateMessage(WeChatCommonTemplateMessageModel model) {
         try {
             //step1. accessToken
             String access_token = this.getWxMiniAccessToken();
             //step2. 发送请求
-            wechatCommonTemplateMessage(model, "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=" + access_token);
+            int i = wechatCommonTemplateMessage(model, "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=" + access_token);
+            return i == 0;
         } catch (Exception e) {
             logger.error("[微信模版消息] 异常", e);
         }
+        return false;
     }
 
     public void setValidFormId(UserFormIdDO userFormIdDO) {

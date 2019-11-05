@@ -33,9 +33,9 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>nexus-release</id>
+			<id>iotechn-release</id>
 			<name>unimall maven</name>
-			<url>http://192.168.8.229:8081/repository/maven-releases/</url>
+			<url>http://maven.iotechn.com/repository/maven-releases/</url>
 		</repository>
 	</repositories>
 
@@ -46,7 +46,7 @@
 		<module>unimall-app-api</module>
 		<module>unimall-admin-api</module>
 		<module>unimall-launcher</module>
-		<module>unimall-plugin-core</module>
+		<module>plugins/unimall-plugin-core</module>
 		<module>plugins/unimall-plugin-autoship</module>
 	</modules>
 
@@ -150,9 +150,9 @@
 	<!-- 发布maven私服 -->
 	<distributionManagement>
 		<repository>
-			<id>nexus-release</id>
+			<id>iotechn-release</id>
 			<name>unimall maven</name>
-			<url>http://192.168.8.229:8081/repository/maven-releases/</url>
+			<url>http://maven.iotechn.com/repository/maven-releases/</url>
 		</repository>
 	</distributionManagement>
 

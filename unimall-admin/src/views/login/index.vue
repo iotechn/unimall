@@ -51,8 +51,8 @@
 
       <el-button
         v-show="!show"
+        :disabled="true"
         type="primary"
-        disabled="true"
         style="width:96%;margin-bottom:3px;"
       >{{ count }} s</el-button>
 
