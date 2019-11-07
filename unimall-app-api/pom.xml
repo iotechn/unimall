@@ -25,6 +25,7 @@
 			<artifactId>okhttp</artifactId>
 		</dependency>
 
+		<!-- 插件核心依赖 勿删 -->
 		<dependency>
 			<groupId>com.iotechn</groupId>
 			<artifactId>unimall-plugin-core</artifactId>
