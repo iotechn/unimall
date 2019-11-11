@@ -35,7 +35,6 @@ public class AppraiseBizService {
     public static final String CA_APPRAISE_KEY = "CA_APPRAISE_";
 
     public Page<AppraiseResponseDTO> getSpuAllAppraise(Long spuId, Integer pageNo, Integer pageSize) throws ServiceException {
-        //TODO count条件和查询条件不一致，AppraiseServiceImpl里面还有冗余代码
         String cacheKey = CA_APPRAISE_KEY + spuId + "_" + pageNo + "_" + pageSize;
         Page obj = cacheComponent.getObj(cacheKey, Page.class);
         if (obj != null) {

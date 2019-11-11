@@ -41,6 +41,21 @@
         </span>
       </el-form-item>
 
+      <el-button
+        v-show="show"
+        :loading="verifyLoading"
+        type="primary"
+        style="width:100%;margin-bottom:3px;"
+        @click.native.prevent="sendMsg"
+      >发送验证码</el-button>
+
+      <el-button
+        v-show="!show"
+        :disabled="true"
+        type="primary"
+        style="width:96%;margin-bottom:3px;"
+      >{{ count }} s</el-button>
+
       <el-form-item prop="verifyCode" >
         <span class="svg-container">
           <svg-icon icon-class="password" />
@@ -49,18 +64,7 @@
           v-model="loginForm.verifyCode"
           name="verifyCode"
           placeholder="验证码"
-          style="width:92.5%;"
-        >
-          <el-button
-            v-show="show"
-            slot="append"
-            :loading="verifyLoading"
-            type="text"
-            style="color:#FFF;background-color: #409EFF;border-color: #409EFF;height: 100%; border: none; "
-            @click.native.prevent="sendMsg"
-          >发送验证码</el-button>
-          <span v-show="!show" slot="append" class="count">{{ count }} s</span>
-        </el-input>
+        />
       </el-form-item>
 
       <el-button
@@ -95,9 +99,9 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '1234567',
-        verifyCode: undefined
+        username: 'guest',
+        password: '123456',
+        verifyCode: '666666'
       },
       loginRules: {
         username: [

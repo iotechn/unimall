@@ -11,6 +11,8 @@ import com.iotechn.unimall.data.dto.goods.SpuTreeNodeDTO;
 import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.plugin.core.inter.IPluginUpdateGoods;
+import com.iotechn.unimall.plugin.core.manager.PluginsManager;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,9 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
 
     @Autowired
     private GoodsBizService goodsBizService;
+
+    @Autowired
+    private PluginsManager pluginsManager;
 
     /**
      * 后台低频接口， 无需缓存
@@ -215,6 +220,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         //插入IMG
         insertSpuImg(spuDTO, spuDO.getId(), now);
         goodsBizService.clearGoodsCache(spuDO.getId());
+        pluginUpdateInvoke(spuDO.getId());
         return "ok";
     }
 
@@ -261,6 +267,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         //插入IMG
         insertSpuImg(spuDTO, spuDO.getId(), now);
         goodsBizService.clearGoodsCache(spuDTO.getId());
+        pluginUpdateInvoke(spuDTO.getId());
         return "ok";
     }
 
@@ -305,11 +312,21 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         if (spuMapper.deleteById(spuId) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
         }
-        cartMapper.delete(new EntityWrapper<CartDO>().in("sku_id", spuMapper.getSkuIds(spuId)));
+        cartMapper.delete(new EntityWrapper<CartDO>().in("sku_id", skuMapper.getSkuIds(spuId)));
         skuMapper.delete(new EntityWrapper<SkuDO>().eq("spu_id", spuId));
         imgMapper.delete(new EntityWrapper<ImgDO>().eq("biz_id", spuId).eq("biz_type", BizType.GOODS.getCode()));
         spuAttributeMapper.delete(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));
         goodsBizService.clearGoodsCache(spuId);
+        pluginUpdateInvoke(spuId);
         return "ok";
+    }
+
+    private void pluginUpdateInvoke(Long spuId) {
+        List<IPluginUpdateGoods> plugins = pluginsManager.getPlugins(IPluginUpdateGoods.class);
+        if (!CollectionUtils.isEmpty(plugins)) {
+            for (IPluginUpdateGoods updateGoods : plugins) {
+                updateGoods.invokeGoodsUpdate(spuId);
+            }
+        }
     }
 }

@@ -70,8 +70,7 @@
     position: relative;
 }
 .cart-item .image-wrapper image {
-      -webkit-border-radius: 8rpx;
-              border-radius: 8rpx;
+      border-radius: 8rpx;
 }
 .cart-item .checkbox {
     position: absolute;
@@ -83,8 +82,7 @@
     padding: 4rpx;
     color: #C0C4CC;
     background: #fff;
-    -webkit-border-radius: 50px;
-            border-radius: 50px;
+    border-radius: 50px;
 }
 .cart-item .item-right {
     display: -webkit-box;
@@ -146,8 +144,7 @@
   background: rgba(255, 255, 255, 0.9);
   -webkit-box-shadow: 0 0 20rpx 0 rgba(0, 0, 0, 0.5);
           box-shadow: 0 0 20rpx 0 rgba(0, 0, 0, 0.5);
-  -webkit-border-radius: 16rpx;
-          border-radius: 16rpx;
+  border-radius: 16rpx;
 }
 .action-section .checkbox {
     height: 52rpx;
@@ -171,8 +168,7 @@
     font-size: 28rpx;
     color: #fff;
     background: #C0C4CC;
-    -webkit-border-radius: 0 50px 50px 0;
-            border-radius: 0 50px 50px 0;
+    border-radius: 0 50px 50px 0;
     opacity: 0;
     -webkit-transition: .2s;
     -o-transition: .2s;
@@ -213,8 +209,7 @@
 .action-section .confirm-btn {
     padding: 0 38rpx;
     margin: 0;
-    -webkit-border-radius: 100px;
-            border-radius: 100px;
+    border-radius: 100px;
     height: 76rpx;
     line-height: 76rpx;
     font-size: 30rpx;

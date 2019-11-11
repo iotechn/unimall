@@ -32,10 +32,13 @@ public class FreightBizService {
 
     @Autowired
     private FreightTemplateMapper freightTemplateMapper;
+
     @Autowired
     private FreightTemplateCarriageMapper freightTemplateCarriageMapper;
+
     @Autowired
     private AddressMapper addressMapper;
+
     @Autowired
     private ShipTraceQuery shipTraceQuery;
 
@@ -59,14 +62,15 @@ public class FreightBizService {
                     .eq("template_id", freightTemplateDO.getId()));
 
             Long templateId = freightTemplateDO.getId(); //获得模板ID
-            Integer money = freightMoney.get(templateId);
+
+            Integer money = freightMoney.get(templateId); //计算对应模板的总费用
             if (money == null) {
                 freightMoney.put(templateId, orderRequestSkuDTO.getNum() * orderRequestSkuDTO.getPrice());
             } else {
                 freightMoney.put(templateId, money + orderRequestSkuDTO.getNum() * orderRequestSkuDTO.getPrice());
             }
 
-            Integer num = freightNum.get(templateId);
+            Integer num = freightNum.get(templateId);//计算对应模板的总数量
             if (num == null) {
                 freightNum.put(templateId, orderRequestSkuDTO.getNum());
             } else {
@@ -108,6 +112,12 @@ public class FreightBizService {
 
                 Integer open = freightTemplateCarriageDO.getFirstMoney();
                 num = num - freightTemplateCarriageDO.getFirstNum();
+
+                //该订单中使用该运费模板的商品总数小于或等于该运费模板的起价的件数
+                if (num <= 0) {
+                    return open;
+                }
+
                 if (num % freightTemplateCarriageDO.getContinueNum() != 0) {
                     open = open + freightTemplateCarriageDO.getContinueMoney() * ((num / freightTemplateCarriageDO.getContinueNum()) + 1);
                 } else {
@@ -129,6 +139,12 @@ public class FreightBizService {
 
         Integer open = freightTemplateDO.getDefaultFirstMoney();
         num = num - freightTemplateDO.getDefaultFirstNum();
+
+        //该订单中使用该运费模板的商品总数小于或等于该运费模板的起价的件数
+        if (num <= 0) {
+            return open;
+        }
+
         if (num % freightTemplateDO.getDefaultContinueNum() != 0) {
             open = open + freightTemplateDO.getDefaultContinueMoney() * ((num / freightTemplateDO.getDefaultContinueNum()) + 1);
         } else {
@@ -150,7 +166,6 @@ public class FreightBizService {
         FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO(freightTemplateDO, freightTemplateCarriageDOList);
         return freightTemplateDTO;
     }
-
 
     public ShipTraceDTO getShipTraceList(String shipNo, String shipCode) throws ServiceException {
         return shipTraceQuery.query(shipNo, shipCode);

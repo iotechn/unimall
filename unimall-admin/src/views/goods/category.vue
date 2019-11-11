@@ -449,6 +449,15 @@ export default {
         return false
       }
       const tag = e[e.length - 1]
+
+      if (this.dialogStatus === 'update') {
+        if (this.dataForm.id === tag) {
+          this.$notify.error({
+            title: '失败',
+            message: '请不要选择本节点作为父节点'
+          })
+        }
+      }
       this.dataForm.parentId = tag
     },
     // 查询框选择父类目时，获得父类目的id

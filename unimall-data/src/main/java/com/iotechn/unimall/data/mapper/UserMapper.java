@@ -12,14 +12,16 @@ import java.util.List;
  */
 public interface UserMapper extends BaseMapper<UserDO> {
 
-    public UserDTO login(@Param("phone") String phone,@Param("cryptPassword") String cryptPassword);
+    public UserDTO login(@Param("phone") String phone, @Param("cryptPassword") String cryptPassword);
 
-    public List<UserDO> getUserList(@Param("id") Long id, @Param("nickname") String nickname,
-                                    @Param("level") Integer level, @Param("gender")Integer gender,
-                                    @Param("status")Integer status,@Param("offset")Integer offset,
-                                    @Param("limit")Integer limit);
+    public List<UserDO> getUserList(
+            @Param("id") Long id, @Param("nickname") String nickname,
+            @Param("level") Integer level, @Param("gender") Integer gender,
+            @Param("status") Integer status, @Param("offset") Integer offset,
+            @Param("limit") Integer limit);
 
-    public Integer countUser(@Param("id") Long id, @Param("nickname") String nickname,
-                                    @Param("level") Integer level, @Param("gender")Integer gender,
-                                    @Param("status")Integer status);
+    public Integer countUser(
+            @Param("id") Long id, @Param("nickname") String nickname,
+            @Param("level") Integer level, @Param("gender") Integer gender,
+            @Param("status") Integer status);
 }

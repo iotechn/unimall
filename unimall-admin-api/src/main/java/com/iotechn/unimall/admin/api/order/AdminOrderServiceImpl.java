@@ -12,16 +12,20 @@ import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
+import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
+import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
+import com.iotechn.unimall.data.mapper.UserMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -52,6 +56,15 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Autowired
     private LockComponent lockComponent;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Value("${com.iotechn.unimall.wx.mini.app-id}")
+    private String wxMiNiAppid;
+
+    @Value("${com.iotechn.unimall.wx.app.app-id}")
+    private String wxAppAppid;
 
     @Override
     public Page<OrderDO> list(Integer pageNo, Integer pageSize, Integer status, String orderNo, Long adminId) throws ServiceException {
@@ -93,8 +106,12 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     updateOrderDO.setStatus(OrderStatusType.REFUNDED.getCode());
                     updateOrderDO.setGmtUpdate(new Date());
                     orderBizService.changeOrderStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
+                    Long userId = orderDO.getUserId();
+                    UserDO userDO = userMapper.selectById(userId);
+                    Integer loginType = userDO.getLoginType();
                     //2.2.2 向微信支付平台发送退款请求
                     WxPayRefundRequest wxPayRefundRequest = new WxPayRefundRequest();
+                    wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? wxMiNiAppid : wxAppAppid);
                     wxPayRefundRequest.setOutTradeNo(orderNo);
                     wxPayRefundRequest.setOutRefundNo("refund_" + orderNo);
                     wxPayRefundRequest.setTotalFee(orderDO.getPayPrice() - orderDO.getFreightPrice());

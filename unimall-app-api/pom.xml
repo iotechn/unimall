@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>com.iotechn</groupId>
 		<artifactId>unimall</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1-RELEASE</version>
 	</parent>
 	<groupId>com.iotechn</groupId>
 	<artifactId>unimall-app-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1-RELEASE</version>
 	<name>unimall-app-api</name>
 	<description>小程序,App Api</description>
 
@@ -25,22 +25,29 @@
 			<artifactId>okhttp</artifactId>
 		</dependency>
 
+		<!-- 插件核心依赖 勿删 -->
+		<dependency>
+			<groupId>com.iotechn</groupId>
+			<artifactId>unimall-plugin-core</artifactId>
+			<version>0.0.1-RELEASE</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.iotechn</groupId>
 			<artifactId>unimall-core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1-RELEASE</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.iotechn</groupId>
 			<artifactId>unimall-data</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1-RELEASE</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.iotechn</groupId>
 			<artifactId>unimall-biz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1-RELEASE</version>
 		</dependency>
 
 		<!-- 微信第三方封装Api -->

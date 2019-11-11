@@ -47,7 +47,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
         advertisementDO.setGmtUpdate(now);
 
         if(advertisementMapper.insert(advertisementDO) > 0){
-            cacheComponent.del(ADVERTISEMENT_NAME+adType);
+            cacheComponent.delPrefixKey(ADVERTISEMENT_NAME);
             return true;
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_ADD_FAILED);
@@ -60,7 +60,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
         if(advertisementMapper.delete(new EntityWrapper<AdvertisementDO>()
                 .eq("id",adId)
                 .eq("ad_type",adType)) > 0){
-            cacheComponent.del(ADVERTISEMENT_NAME+adType);
+            cacheComponent.delPrefixKey(ADVERTISEMENT_NAME);
             return true;
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_DELETE_FAILED);
@@ -73,7 +73,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
         advertisementDO.setId(adId);
         advertisementDO.setGmtUpdate(new Date());
         if(advertisementMapper.updateById(advertisementDO)>0){
-            cacheComponent.del(ADVERTISEMENT_NAME+adType);
+            cacheComponent.delPrefixKey(ADVERTISEMENT_NAME);
             return  true;
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_UPDATE_FAILED);

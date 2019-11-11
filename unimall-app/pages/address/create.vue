@@ -97,15 +97,23 @@
 				}
 				if(!/(^1[3|4|5|7|8][0-9]{9}$)/.test(data.phone)){
 					that.$api.msg('请输入正确的手机号码');
-					return;
+					return
 				}
 				if (!data.province) {
 					that.$api.msg('请选择省市区');
-					return;
+					return
+				}
+				if (!data.city) {
+					that.$api.msg('请选择二级城市')
+					return
+				}
+				if (!data.county) {
+					that.$api.msg('请选择三级区或县')
+					return
 				}
 				if(!data.address){
 					that.$api.msg('请输入详细地址');
-					return;
+					return
 				}
 				
 				//this.$api.prePage()获取上一页实例，可直接调用上页所有数据和方法，在App.vue定义

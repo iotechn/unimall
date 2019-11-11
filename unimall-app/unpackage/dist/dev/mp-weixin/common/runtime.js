@@ -1,4 +1,6 @@
-/******/ (function(modules) { // webpackBootstrap
+
+  !function(){try{var r=Function("return this")();r&&!r.Math&&Object.assign(r,{Array:Array,Date:Date,Error:Error,Function:Function,Math:Math,Object:Object,RegExp:RegExp,String:String,TypeError:TypeError,setTimeout:setTimeout,clearTimeout:clearTimeout,setInterval:setInterval,clearInterval:clearInterval})}catch(r){}}();
+  /******/ (function(modules) { // webpackBootstrap
 /******/ 	// install a JSONP callback for chunk loading
 /******/ 	function webpackJsonpCallback(data) {
 /******/ 		var chunkIds = data[0];
@@ -263,3 +265,4 @@
 /************************************************************************/
 /******/ ([]);
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/runtime.js.map
+  

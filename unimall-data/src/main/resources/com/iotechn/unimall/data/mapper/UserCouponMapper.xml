@@ -23,8 +23,8 @@
             u.coupon_id = c.id
             AND u.user_id = #{userId}
             AND u.gmt_used IS NULL
-            AND u.gmt_start &lt; now()
-            AND u.gmt_end &gt; now()
+            AND unix_timestamp(u.gmt_start) &lt; unix_timestamp(now())
+            AND unix_timestamp(u.gmt_end) &gt; unix_timestamp(now())
     </select>
 
     <select id="getUserCouponById" resultType="com.iotechn.unimall.data.dto.UserCouponDTO">
@@ -48,8 +48,8 @@
             AND u.coupon_id = c.id
             AND u.user_id = #{userId}
             AND u.gmt_used IS NULL
-            AND u.gmt_start &lt; now()
-            AND u.gmt_end &gt; now()
+            AND unix_timestamp(u.gmt_start) &lt; unix_timestamp(now())
+            AND unix_timestamp(u.gmt_end) &gt; unix_timestamp(now())
     </select>
 
 </mapper>

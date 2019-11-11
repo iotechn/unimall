@@ -34,7 +34,6 @@ public interface CartService {
             @NotNull @HttpParam(name = "cartId", type = HttpParamType.COMMON, description = "商品ID(传入值有问题，skuId)") Long cartId,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
 
-
     @HttpMethod(description = "批量删除购物车Item")
     public Boolean removeCartItemBatch(
             @NotNull @HttpParam(name = "cartIdList", type = HttpParamType.COMMON, description = "购物车id列表用,隔开") String cartIdList,

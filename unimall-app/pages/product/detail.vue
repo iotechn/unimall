@@ -127,7 +127,7 @@
 
 
 		<!-- 规格-模态层弹窗 -->
-		<view class="popup spec" :class="specClass" @touchmove.stop.prevent="stopPrevent" @click="toggleSpec">
+		<view class="popup spec" :class="specClass" @touchmove.stop.prevent="stopPrevent">
 			<!-- 遮罩层 -->
 			<view class="mask"></view>
 			<view class="layer attr-content" @click.stop="stopPrevent">
@@ -187,7 +187,8 @@
 				selectedSkuIndex: -1,
 				toggleCallback: undefined,
 				maskState: 0, //优惠券面板显示状态
-				couponList: []
+				couponList: [],
+				submiting: false
 
 			};
 		},
@@ -274,7 +275,6 @@
 						that.$api.msg('添加购物车成功')
 					})
 				}
-
 			},
 
 			//分享
@@ -1040,7 +1040,9 @@
 	}
 	
 	rich-text .rich-img {
-		width: 100% ;
-		height: auto ;
+		width: 100%;
+		height: auto;
+		margin: 0;
+		padding: 0;
 	}
 </style>

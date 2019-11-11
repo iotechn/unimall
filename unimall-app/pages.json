@@ -197,8 +197,7 @@
 					"bounce": "none"
 				}
 			}
-        }
-        
+        } 
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

@@ -10,6 +10,7 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
 import com.iotechn.unimall.biz.service.freight.FreightBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
+import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -24,6 +25,7 @@ import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
+import com.iotechn.unimall.data.enums.PayChannelType;
 import com.iotechn.unimall.data.enums.UserLevelType;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.*;
@@ -84,6 +86,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private FreightBizService freightBizService;
 
+    @Autowired
+    private UserBizService userBizService;
+
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;
 
@@ -96,11 +101,15 @@ public class OrderServiceImpl implements OrderService {
     @Value("${com.iotechn.unimall.wx.app.app-id}")
     private String wxAppAppid;
 
+    @Value("${com.iotechn.unimall.wx.h5.app-id}")
+    private String wxH5Appid;
+
 
     @Override
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
         if (lockComponent.tryLock(TAKE_ORDER_LOCK + userId, 20)) {
             //加上乐观锁，防止用户重复提交订单
+
             try {
                 //用户会员等级
                 Integer userLevel = SessionUtil.getUser().getLevel();
@@ -190,7 +199,7 @@ public class OrderServiceImpl implements OrderService {
                 Integer freightPrice = freightBizService.getFreightMoney(orderRequest);
                 //参数强校验 END
                 //???是否校验actualPrice??强迫校验？
-                int actualPrice = skuPrice - couponPrice - freightPrice;
+                int actualPrice = skuPrice - couponPrice + freightPrice;
                 Date now = new Date();
                 OrderDO orderDO = new OrderDO();
                 orderDO.setSkuTotalPrice(skuPrice);
@@ -201,7 +210,8 @@ public class OrderServiceImpl implements OrderService {
                     orderDO.setCouponId(orderRequest.getCoupon().getCouponId());
                     orderDO.setCouponPrice(couponPrice);
                 }
-                orderDO.setFreightPrice(0);
+                orderDO.setMono(orderRequest.getMono());
+                orderDO.setFreightPrice(freightPrice);
                 orderDO.setOrderNo(GeneratorUtil.genOrderId(MACHINE_NO, ENV));
                 orderDO.setUserId(userId);
                 orderDO.setStatus(OrderStatusType.UNPAY.getCode());
@@ -213,6 +223,8 @@ public class OrderServiceImpl implements OrderService {
                     if (!userId.equals(addressDO.getUserId())) {
                         throw new AppServiceException(ExceptionDefinition.ORDER_ADDRESS_NOT_BELONGS_TO_YOU);
                     }
+                    orderDO.setConsignee(addressDO.getConsignee());
+                    orderDO.setPhone(addressDO.getPhone());
                     orderDO.setProvince(addressDO.getProvince());
                     orderDO.setCity(addressDO.getCity());
                     orderDO.setCounty(addressDO.getCounty());
@@ -301,6 +313,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Object wxPrepay(String orderNo, String ip, Long userId) throws ServiceException {
+        Date now = new Date();
         OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
         // 检测订单状态
         Integer status = orderDO.getStatus();
@@ -314,9 +327,12 @@ public class OrderServiceImpl implements OrderService {
         if (UserLoginType.MP_WEIXIN.getCode() == loginType) {
             appId = wxMiNiAppid;
             tradeType = WxPayConstants.TradeType.JSAPI;
-        } else if (UserLoginType.APP_WEIXIN.getCode() == loginType) {
+        } else if (UserLoginType.APP_WEIXIN.getCode() == loginType || UserLoginType.REGISTER.getCode() == loginType) {
             appId = wxAppAppid;
             tradeType = WxPayConstants.TradeType.APP;
+        } else if (UserLoginType.H5_WEIXIN.getCode() == loginType) {
+            appId = wxH5Appid;
+            tradeType = WxPayConstants.TradeType.JSAPI;
         } else {
             throw new AppServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
         }
@@ -332,12 +348,16 @@ public class OrderServiceImpl implements OrderService {
             orderRequest.setSpbillCreateIp(ip);
             orderRequest.setTradeType(tradeType);
             result = wxPayService.createOrder(orderRequest);
-
-            //缓存prepayID用于后续模版通知
             if (result instanceof  WxPayMpOrderResult) {
                 String prepayId = ((WxPayMpOrderResult)result).getPackageValue();
-//TODO 缓存支付Id            userBizService.setVaildFormIdFromSession(prepayId);
                 prepayId = prepayId.replace("prepay_id=", "");
+                UserFormIdDO userFormIdDO = new UserFormIdDO();
+                userFormIdDO.setFormId(prepayId);
+                userFormIdDO.setUserId(userId);
+                userFormIdDO.setOpenid(SessionUtil.getUser().getOpenId());
+                userFormIdDO.setGmtUpdate(now);
+                userFormIdDO.setGmtCreate(now);
+                userBizService.setValidFormId(userFormIdDO);
             }
         } catch (WxPayException e) {
             logger.error("[微信支付] 异常", e);
@@ -351,8 +371,31 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public Object offlinePrepay(String orderNo, Long userId) throws ServiceException {
+        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        // 检测订单状态
+        Integer status = orderDO.getStatus();
+        if (status != OrderStatusType.UNPAY.getCode()) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+        }
+        OrderDO updateOrderDO = new OrderDO();
+        updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
+        updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+        updateOrderDO.setGmtUpdate(new Date());
+        boolean succ = orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
+        if (succ) {
+            return "ok";
+        }
+        throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public String refund(String orderNo, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        if (PayChannelType.OFFLINE.getCode().equals(orderDO.getPayChannel())) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
+        }
         if (OrderStatusType.refundable(orderDO.getStatus())) {
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());

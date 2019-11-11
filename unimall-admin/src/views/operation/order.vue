@@ -75,6 +75,12 @@
         </template>
       </el-table-column>
 
+      <el-table-column align="center" label="支付渠道" prop="payChannel">
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.payChannel | payChannelFilter }}</el-tag>
+        </template>
+      </el-table-column>
+
       <el-table-column align="center" label="订单金额" prop="actualPrice">
         <template slot-scope="scope">¥ {{ scope.row.actualPrice / 100.0 }}</template>
       </el-table-column>
@@ -145,6 +151,11 @@
         <el-form-item label="订单状态">
           <template>
             <el-tag>{{ orderDetail.status | orderStatusFilter }}</el-tag>
+          </template>
+        </el-form-item>
+        <el-form-item label="支付渠道">
+          <template>
+            <el-tag>{{ orderDetail.payChannel | payChannelFilter }}</el-tag>
           </template>
         </el-form-item>
         <el-form-item label="用户留言">
@@ -261,12 +272,25 @@ const shipCodeMap = {
   'TNT': 'TNT快递'
 }
 
+const payChannelMap = {
+  WX: '微信支付',
+  ALI: '支付宝',
+  OFFLINE: '线下支付'
+}
+
 export default {
   name: 'Order',
   components: { Pagination },
   filters: {
     orderStatusFilter(status) {
       return statusMap[status]
+    },
+    payChannelFilter(channel) {
+      const str = payChannelMap[channel]
+      if (str) {
+        return str
+      }
+      return '未支付'
     }
   },
   data() {

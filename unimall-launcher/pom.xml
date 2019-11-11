@@ -5,50 +5,56 @@
     <parent>
         <groupId>com.iotechn</groupId>
         <artifactId>unimall</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.1-RELEASE</version>
     </parent>
     <groupId>com.iotechn</groupId>
     <artifactId>unimall-launcher</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1-RELEASE</version>
     <name>unimall-launcher</name>
     <description>unimall启动器</description>
 
     <properties>
         <java.version>1.8</java.version>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.iotechn</groupId>
+            <artifactId>unimall-app-api</artifactId>
+            <version>0.0.1-RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.iotechn</groupId>
+            <artifactId>unimall-admin-api</artifactId>
+            <version>0.0.1-RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.iotechn</groupId>
+            <artifactId>unimall-data</artifactId>
+            <version>0.0.1-RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.iotechn</groupId>
+            <artifactId>unimall-biz</artifactId>
+            <version>0.0.1-RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.iotechn</groupId>
+            <artifactId>unimall-core</artifactId>
+            <version>0.0.1-RELEASE</version>
+        </dependency>
 
         <!-- 阿里云对象存储 -->
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.iotechn</groupId>
-            <artifactId>unimall-app-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.iotechn</groupId>
-            <artifactId>unimall-admin-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.iotechn</groupId>
-            <artifactId>unimall-data</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.iotechn</groupId>
-            <artifactId>unimall-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
 
         <!-- 模板引擎 freemarker -->
         <dependency>
@@ -109,6 +115,7 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

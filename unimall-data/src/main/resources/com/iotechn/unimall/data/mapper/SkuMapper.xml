@@ -6,7 +6,6 @@
         UPDATE unimall_sku SET stock = stock - #{stock}, freeze_stock = freeze_stock + #{stock} WHERE id = #{skuId}
     </update>
 
-
     <select id="getSkuDTOById" resultType="com.iotechn.unimall.data.dto.goods.SkuDTO">
         SELECT
             k.id,
@@ -30,6 +29,10 @@
         WHERE
             k.id = #{skuId}
             AND k.spu_id = p.id
+    </select>
+
+    <select id="getSkuIds" resultType="java.lang.Long">
+        SELECT id FROM unimall_sku WHERE spu_id = #{spuId}
     </select>
 
 </mapper>

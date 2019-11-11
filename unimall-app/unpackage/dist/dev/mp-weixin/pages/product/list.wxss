@@ -236,8 +236,7 @@ page,
 .goods-list .image-wrapper {
     width: 100%;
     height: 330rpx;
-    -webkit-border-radius: 3px;
-            border-radius: 3px;
+    border-radius: 3px;
     overflow: hidden;
 }
 .goods-list .image-wrapper image {

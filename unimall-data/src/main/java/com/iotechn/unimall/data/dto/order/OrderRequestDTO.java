@@ -1,6 +1,5 @@
 package com.iotechn.unimall.data.dto.order;
 
-import com.iotechn.unimall.data.dto.CouponDTO;
 import com.iotechn.unimall.data.dto.UserCouponDTO;
 import lombok.Data;
 

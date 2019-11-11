@@ -82,7 +82,7 @@
 				<text class="price-tip">￥</text>
 				<text class="price">{{(orderReqeust.totalPrice - (orderReqeust.coupon?orderReqeust.coupon.discount:0) + orderReqeust.freightPrice) / 100.0}}</text>
 			</view>
-			<text class="submit" @click="submit">提交订单</text>
+			<text :disabled="submiting" class="submit" @click="submit">提交订单</text>
 		</view>
 
 		<!-- 优惠券面板 -->
@@ -122,7 +122,8 @@
 					coupon: undefined,
 					mono: '',
 					takeWay: '',
-					freightPrice: 0
+					freightPrice: 0,
+					addressId: undefined
 				},
 				skuCategoryPriceMap: {},
 				maskState: 0, //优惠券面板显示状态
@@ -136,7 +137,8 @@
 					county: '',
 					address: '',
 					defaultAddress: false,
-				}
+				},
+				submiting: false
 			}
 		},
 		onShow() {
@@ -153,7 +155,6 @@
 			let totalOriginalPrice = 0
 			let totalPrice = 0
 			let skuCategoryPriceMap = {}
-			debugger
 			that.orderReqeust.skuList.forEach(item => {
 				totalOriginalPrice += item.originalPrice*item.num
 				totalPrice += that.isVip ? (item.vipPrice*item.num) :  (item.price*item.num)
@@ -191,6 +192,9 @@
 			},
 			calcFreightPrice() {
 				const that = this
+				if (that.addressData) {
+					that.orderReqeust.addressId = that.addressData.id
+				}
 				that.$api.request('freight', 'getFreightMoney', {
 					orderRequestDTO: JSON.stringify(that.orderReqeust)
 				}).then(res => {
@@ -202,11 +206,19 @@
 			},
 			submit() {
 				const that = this
+				that.submiting = true
+				if (that.addressData.id) {
+					that.orderReqeust.addressId = that.addressData.id
+				}
 				that.$api.request('order', 'takeOrder', {
 					orderRequest : JSON.stringify(that.orderReqeust),
 					channel: uni.getSystemInfoSync().platform
+				}, failres => {
+					that.submiting = false
+					that.$api.msg(failres.errmsg)
 				}).then(res => {
 					//提交订单成功
+					that.submiting = false
 					uni.redirectTo({
 						url: '/pages/pay/pay?orderno='+ res.data + '&price=' + that.orderReqeust.totalPrice
 					})

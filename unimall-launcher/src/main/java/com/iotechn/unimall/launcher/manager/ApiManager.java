@@ -55,7 +55,6 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
                 }
             }
         }
-
         for (Class clazz : classList) {
             this.registerService(clazz);
         }

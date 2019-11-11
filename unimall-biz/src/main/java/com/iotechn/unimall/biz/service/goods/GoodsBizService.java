@@ -50,7 +50,7 @@ public class GoodsBizService {
     /**
      * SPU DTO 缓存  CA_SPU_+spuId
      */
-    private static final String CA_SPU_PREFIX = "CA_SPU_";
+    public static final String CA_SPU_PREFIX = "CA_SPU_";
 
     /**
      * SPU 销量缓存

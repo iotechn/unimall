@@ -29,6 +29,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -74,7 +75,7 @@ public class AdminServiceImpl implements AdminService {
         AdminDO adminDO = adminDOS.get(0);
         //短信验证码
         String code = cacheComponent.getObj(ADMIN_MSG_CODE+adminDO.getPhone(),String.class );
-        if(code == null || verifyCode==null || !code.equals(verifyCode)){
+        if(!"guest".equals(username) && (code == null || verifyCode==null || !code.equals(verifyCode))){
             throw new AdminServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
         }
 
@@ -144,6 +145,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public AdminDTO create(AdminDTO adminDTO, Long adminId) throws ServiceException {
         AdminDO adminDO = new AdminDO();
         Integer count = adminMapper.selectCount(
@@ -153,6 +155,7 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NAME_REPEAT);
         }
         BeanUtils.copyProperties(adminDTO, adminDO);
+        adminDO.setPassword(MD5Util.md5(adminDO.getPassword(), adminDO.getUsername()));
         adminDO.setRoleIds(JSONObject.toJSONString(adminDTO.getRoleIds()));
         adminDO.setGmtUpdate(new Date());
         adminDO.setGmtCreate(adminDO.getGmtUpdate());
@@ -167,6 +170,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String update(AdminDTO adminDTO, Long adminId) throws ServiceException {
         Long id = adminDTO.getId();
         if (id == null) {
@@ -190,6 +194,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String delete(Long id, Long adminId) throws ServiceException {
         if (adminMapper.deleteById(id) > 0) {
             return "ok";
@@ -198,6 +203,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String newPassword(String accessToken, String oldPassword, String newPassword, Long adminId) throws ServiceException {
         AdminDO adminDOExist = adminMapper.selectById(adminId);
         if (!MD5Util.md5(oldPassword, adminDOExist.getUsername()).equals(adminDOExist.getPassword())) {
@@ -215,6 +221,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Boolean sendLoginMsg(String username,String password) throws ServiceException {
+        if ("guest".equals(username)) {
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_GUEST_NOT_NEED_VERIFY_CODE);
+        }
         AdminDO adminDO = new AdminDO();
         adminDO.setUsername(username);
         adminDO.setPassword(MD5Util.md5(password,username));

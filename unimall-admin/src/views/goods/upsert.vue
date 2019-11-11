@@ -83,6 +83,7 @@
       <h3>商品类型(sku)</h3>
       <el-button :plain="true" type="primary" @click="handleSkuShow">添加</el-button>
       <el-table :data="skuList">
+        <el-table-column property="id" label="SkuId"/>
         <el-table-column property="barCode" label="Sku条形码" />
         <el-table-column property="title" label="类型名" />
         <el-table-column property="originalPriceRaw" label="原价" />
@@ -261,7 +262,10 @@ export default {
       imgsFileList: [],
       categoryList: [],
       categoryIds: [],
-      goods: { imgList: [] },
+      goods: {
+        imgList: [],
+        priceRaw: 0
+      },
       attributeVisiable: false,
       attributeForm: { attribute: '', value: '' },
       attributes: [],
@@ -353,10 +357,10 @@ export default {
       const goodsId = this.$route.query.id
       if (goodsId) {
         detailGoods(goodsId).then(response => {
-          this.goods = response.data.data
-          this.goods.priceRaw = this.goods.price / 100
-          this.goods.originalPriceRaw = this.goods.originalPrice / 100
-          this.goods.vipPriceRaw = this.goods.vipPrice / 100
+          response.data.data.priceRaw = response.data.data.price / 100
+          response.data.data.originalPriceRaw = response.data.data.originalPrice / 100
+          response.data.data.vipPriceRaw = response.data.data.vipPrice / 100
+          this.goods = Object.assign({}, response.data.data)
           this.attributes = response.data.data.attributeList ? response.data.data.attributeList : []
           this.categoryIds = response.data.data.categoryIds.reverse()
           this.skuList = response.data.data.skuList

@@ -28,7 +28,7 @@
 			<view>
                 <radio-group style="text-align:center" @change="genderRadioChange">
                 <label v-for="(item, index) in genders" :key="item.value">
-                    <radio :value="item.value" :checked="index === current" style="margin:10upx"/>{{item.name}}
+                    <radio :value="item.value + ''" :checked="index === gender" style="margin:10upx"/>{{item.name}}
                 </label>
             </radio-group>
             </view>
@@ -54,7 +54,7 @@
 				inputContent: '',
 				genderShow: false,
 				gender: undefined,
-				genders: [{name: '保密', value:0 },{name: '男', value: 1}, {name: '女', value: 2}]
+				genders: [{name: '保密', value: 0 },{name: '男', value: 1}, {name: '女', value: 2}]
 			};
 		},
 		computed:{
@@ -72,7 +72,7 @@
 			},
 			genderShowModal() {
 				this.genderShow = true
-				this.gender = undefined
+				this.gender = this.userInfo.gender
 			},
 			confirm() {
 				const that = this

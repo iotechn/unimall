@@ -58,8 +58,7 @@ page,
       height: 36rpx;
       width: 8rpx;
       background-color: #fa436a;
-      -webkit-border-radius: 0 4px 4px 0;
-              border-radius: 0 4px 4px 0;
+      border-radius: 0 4px 4px 0;
       opacity: .8;
 }
 .right-aside {

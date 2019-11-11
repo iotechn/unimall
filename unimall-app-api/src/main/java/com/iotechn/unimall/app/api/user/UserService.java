@@ -44,6 +44,8 @@ public interface UserService {
     public UserDTO login(
             @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
             @NotNull @TextFormat(lengthMin = 8,lengthMax = 18,notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
+            @HttpParam(name = "loginType", type = HttpParamType.COMMON, description = "登录方式") Integer loginType,
+            @HttpParam(name = "raw", type = HttpParamType.COMMON, description = "第三方平台返回的数据") String raw,
             @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "登录IP") String ip) throws ServiceException;
 
     @HttpMethod(description = "用户注销")
@@ -59,11 +61,16 @@ public interface UserService {
 
     @HttpMethod(description = "同步用户信息")
     public String syncUserInfo(
-            @HttpParam(name = "nickname", type = HttpParamType.COMMON, description = "用户昵称") String nickName,
+            @HttpParam(name = "nickName", type = HttpParamType.COMMON, description = "用户昵称") String nickName,
+            @HttpParam(name = "nickname", type = HttpParamType.COMMON, description = "用户昵称") String nickname,
             @HttpParam(name = "avatarUrl", type = HttpParamType.COMMON, description = "用户头像url") String avatarUrl,
             @HttpParam(name = "gender", type = HttpParamType.COMMON, description = "性别0未知1男2女") Integer gender,
             @HttpParam(name = "birthday", type = HttpParamType.COMMON, description = "用户生日") Long birthday,
             @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "访问令牌") String accessToken,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
+
+    @HttpMethod(description = "获取H5签名")
+    public Object getH5Sign(
+            @NotNull @HttpParam(name = "url", type = HttpParamType.COMMON, description = "url") String url) throws ServiceException;
 
 }

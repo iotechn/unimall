@@ -11,6 +11,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition THIRD_PART_SERVICE_EXCEPTION =
             new ServiceExceptionDefinition(0, "第三方服务异常");
 
+    public static final ServiceExceptionDefinition PLUGIN_EXCEPTION =
+            new ServiceExceptionDefinition(1, "插件异常: ${0}");
+
     public static final ServiceExceptionDefinition APP_UNKNOWN_EXCEPTION =
             new ServiceExceptionDefinition(10000, "系统未知异常");
 
@@ -128,6 +131,9 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition ORDER_DO_NOT_EXIST_SHIP_TRACE =
             new ServiceExceptionDefinition(13020, "暂时没有物流信息");
+
+    public static final ServiceExceptionDefinition ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND =
+            new ServiceExceptionDefinition(13021, "订单支付方式不支持退款");
 
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
@@ -281,18 +287,39 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ADMIN_USER_NOT_EXITS =
             new ServiceExceptionDefinition(50009, "管理员不存在，请输入正确账号密码");
 
-    public static final ServiceExceptionDefinition CATEGORY_OUGHT_TO_EMPTY =
-            new ServiceExceptionDefinition(60001, "该类目还有子类目或着商品");
+    public static final ServiceExceptionDefinition ADMIN_GUEST_NOT_NEED_VERIFY_CODE =
+            new ServiceExceptionDefinition(50010, "游客用户无须验证码，请直接输入666666");
 
-    public static final ServiceExceptionDefinition CATEGORY_EXCEPTION =
-            new ServiceExceptionDefinition(60002, "类目异常汇总，由下面方法传入提醒");
+    public static final ServiceExceptionDefinition ADMIN_VERIFY_CODE_SEND_FAIL=
+            new ServiceExceptionDefinition(50011, "登陆验证码发送失败");
+
+
+    public static final ServiceExceptionDefinition CATEGORY_OUGHT_TO_EMPTY =
+            new ServiceExceptionDefinition(51001, "该类目还有子类目或着商品");
+
+    public static final ServiceExceptionDefinition CATEGORY_OR_PARENT_NODE_IS_EMPTY =
+            new ServiceExceptionDefinition(51002, "传入ID，父节点ID不能为空");
+
+    public static final ServiceExceptionDefinition PARENT_CAN_NOT_EQUALS_ONESELF =
+            new ServiceExceptionDefinition(51003, "父节点不能是自己");
+
+    public static final ServiceExceptionDefinition NOT_FIND_PARENT_NODE =
+            new ServiceExceptionDefinition(51004, "未在数据库中查找到父节点");
+
+    public static final ServiceExceptionDefinition CATEGORY_UPDATE_FAILURE =
+            new ServiceExceptionDefinition(51005, "类目数据库修改失败");
+
+    public static final ServiceExceptionDefinition PARENT_NODE_INFORMATION_ERROR =
+            new ServiceExceptionDefinition(51006, "父节点信息不准确");
+
+    public static final ServiceExceptionDefinition DATABASE_INSERT_FAILURE =
+            new ServiceExceptionDefinition(51007, "数据库类目插入失败");
+
 
 
     public static final ServiceExceptionDefinition ORDER_EXCEL_PARAM_ERROR=
-            new ServiceExceptionDefinition(61001, "生成excel查询参数错误");
+            new ServiceExceptionDefinition(52001, "生成excel查询参数错误");
 
-    public static final ServiceExceptionDefinition ADMIN_VERIFY_CODE_SEND_FAIL=
-            new ServiceExceptionDefinition(61002, "登陆验证码发送失败");
 
 
 

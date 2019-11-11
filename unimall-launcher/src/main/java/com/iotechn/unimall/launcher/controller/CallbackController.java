@@ -7,16 +7,21 @@ import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
+import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
+import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
+import com.iotechn.unimall.plugin.core.inter.IPluginPaySuccess;
+import com.iotechn.unimall.plugin.core.manager.PluginsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -40,6 +45,9 @@ public class CallbackController {
     private OrderBizService orderBizService;
 
     @Autowired
+    private UserBizService userBizService;
+
+    @Autowired
     private SpuMapper spuMapper;
 
     @Autowired
@@ -50,6 +58,9 @@ public class CallbackController {
 
     @Autowired
     private OrderMapper orderMapper;
+
+    @Autowired
+    private PluginsManager pluginsManager;
 
     @RequestMapping("/wxpay")
     @Transactional(rollbackFor = Exception.class)
@@ -100,17 +111,24 @@ public class CallbackController {
         updateOrderDO.setGmtUpdate(order.getGmtPay());
         updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
         orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
-        try {
-            List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(
-                    new EntityWrapper<OrderSkuDO>()
-                            .eq("order_no", orderNo));
-            orderSkuDOList.forEach(item -> {
-                spuMapper.incSales(item.getSpuId(), item.getNum());
-            });
-        } catch (Exception e) {
-            logger.error("[订单更新销量] 异常", e);
+        List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(
+                new EntityWrapper<OrderSkuDO>()
+                        .eq("order_no", orderNo));
+        orderSkuDOList.forEach(item -> {
+            spuMapper.incSales(item.getSpuId(), item.getNum());
+        });
+
+        OrderDTO orderDTO = new OrderDTO();
+        BeanUtils.copyProperties(order, orderDTO);
+        orderDTO.setSkuList(orderSkuDOList);
+
+        List<IPluginPaySuccess> plugins = pluginsManager.getPlugins(IPluginPaySuccess.class);
+        if (!CollectionUtils.isEmpty(plugins)) {
+            String formId = userBizService.getValidFormIdByUserId(orderDTO.getUserId()).getFormId();
+            for (IPluginPaySuccess paySuccess : plugins) {
+                orderDTO = paySuccess.invoke(orderDTO, formId);
+            }
         }
-        //TODO 模版消息
         return WxPayNotifyResponse.success("支付成功");
     }
 
