@@ -32,10 +32,13 @@ public class FreightBizService {
 
     @Autowired
     private FreightTemplateMapper freightTemplateMapper;
+
     @Autowired
     private FreightTemplateCarriageMapper freightTemplateCarriageMapper;
+
     @Autowired
     private AddressMapper addressMapper;
+
     @Autowired
     private ShipTraceQuery shipTraceQuery;
 
@@ -111,7 +114,7 @@ public class FreightBizService {
                 num = num - freightTemplateCarriageDO.getFirstNum();
 
                 //该订单中使用该运费模板的商品总数小于或等于该运费模板的起价的件数
-                if(num <= 0){
+                if (num <= 0) {
                     return open;
                 }
 
@@ -138,7 +141,7 @@ public class FreightBizService {
         num = num - freightTemplateDO.getDefaultFirstNum();
 
         //该订单中使用该运费模板的商品总数小于或等于该运费模板的起价的件数
-        if(num <= 0){
+        if (num <= 0) {
             return open;
         }
 
@@ -163,7 +166,6 @@ public class FreightBizService {
         FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO(freightTemplateDO, freightTemplateCarriageDOList);
         return freightTemplateDTO;
     }
-
 
     public ShipTraceDTO getShipTraceList(String shipNo, String shipCode) throws ServiceException {
         return shipTraceQuery.query(shipNo, shipCode);
