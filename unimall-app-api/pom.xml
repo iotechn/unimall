@@ -17,6 +17,26 @@
 		<java.version>1.8</java.version>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>maven-ali</id>
+			<url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>iotechn-release</id>
+			<name>unimall maven</name>
+			<url>http://maven.iotechn.com/repository/maven-releases/</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
 
 		<!-- http客户端 -->

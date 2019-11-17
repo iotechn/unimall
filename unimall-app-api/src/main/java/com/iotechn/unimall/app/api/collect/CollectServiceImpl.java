@@ -1,10 +1,5 @@
 package com.iotechn.unimall.app.api.collect;
 
-/*
-@author kbq
-@date  2019/7/5 - 10:48
-*/
-
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.iotechn.unimall.biz.service.collect.CollectBizService;
 import com.iotechn.unimall.biz.service.goods.GoodsBizService;
@@ -25,6 +20,10 @@ import org.springframework.util.CollectionUtils;
 import java.util.Date;
 import java.util.List;
 
+/*
+@author kbq
+@date  2019/7/5 - 10:48
+*/
 @Service
 public class CollectServiceImpl implements CollectService {
 
@@ -40,7 +39,6 @@ public class CollectServiceImpl implements CollectService {
 
     @Autowired
     private CollectBizService collectBizService;
-
 
 
     @Override
