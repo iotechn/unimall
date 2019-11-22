@@ -1,216 +1,377 @@
 <template>
-  <div class="app-container">
-    <!-- 查询和其他操作 -->
-    <div class="filter-container">
-      <el-input
-        v-model="listQuery.title"
-        clearable
-        class="filter-item"
-        style="width: 200px;"
-        placeholder="请输入商品名称"
-      />
-      <el-button v-permission="['operation:goods:list']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
-      <el-button v-permission="['operation:goods:create']" class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">添加</el-button>
-    </div>
+	<view class="content">
+		<view class="navbar" :style="{position:headerPosition,top:headerTop}">
+			<view class="nav-item" :class="{current: filterIndex === 0}" @click="tabClick(0)">
+				销量优先
+			</view>
+			<view class="nav-item" :class="{current: filterIndex === 1}" @click="tabClick(1)">
+				<text>价格</text>
+				<view class="p-box">
+					<text :class="{active: priceOrder === 1 && filterIndex === 1}" class="yticon icon-shang"></text>
+					<text :class="{active: priceOrder === 2 && filterIndex === 1}" class="yticon icon-shang xia"></text>
+				</view>
+			</view>
+		</view>
+		<view class="goods-list">
+			<view v-for="(item, index) in goodsList" :key="index" class="goods-item" @click="navToDetailPage(item)">
+				<view class="image-wrapper">
+					<image :src="item.img + '?x-oss-process=style/400px'" mode="aspectFill"></image>
+				</view>
+				<text class="title clamp">{{item.title}}</text>
+				<view class="price-box">
+					<text class="price">{{isVip? (item.vipPrice / 100.0 + ' [VIP]') : (item.price / 100.0)}}</text>
+					<text>已售 {{item.sales?item.sales:0}}</text>
+				</view>
+			</view>
+		</view>
+		<uni-load-more :status="loadingType"></uni-load-more>
 
-    <!-- 查询结果 -->
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      size="small"
-      element-loading-text="正在查询中。。。"
-      border
-      fit
-      highlight-current-row
-    >
-      <el-table-column type="expand">
-        <template slot-scope="props">
-          <el-form label-position="left" class="table-expand">
-            <el-form-item label="商品单位">
-              <span>{{ props.row.unit }}</span>
-            </el-form-item>
-            <el-form-item label="类目ID">
-              <span>{{ props.row.categoryId }}</span>
-            </el-form-item>
-          </el-form>
-        </template>
-      </el-table-column>
-
-      <el-table-column align="center" label="商品编号" prop="id" />
-
-      <el-table-column align="center" min-width="100" label="名称" prop="title" />
-
-      <el-table-column align="center" property="img" label="图片">
-        <template slot-scope="scope">
-          <img :src="scope.row.img" width="40" >
-        </template>
-      </el-table-column>
-
-      <el-table-column align="center" label="详情" prop="detail">
-        <template slot-scope="scope">
-          <el-dialog :visible.sync="detailDialogVisible" title="商品详情">
-            <div v-html="goodsDetail" />
-          </el-dialog>
-          <el-button type="primary" size="mini" @click="showDetail(scope.row)">查看</el-button>
-        </template>
-      </el-table-column>
-
-      <el-table-column align="center" label="原价" prop="originalPrice" />
-
-      <el-table-column align="center" label="现价" prop="price" />
-
-      <el-table-column align="center" label="VIP价格" prop="vipPrice" />
-
-      <el-table-column align="center" label="是否在售" prop="status">
-        <template slot-scope="scope">
-          <el-tag
-            :type="scope.row.status == 1 ? 'success' : 'error' "
-          >{{ scope.row.status == 1 ? '在售' : '未售' }}</el-tag>
-        </template>
-      </el-table-column>
-
-      <el-table-column
-        align="center"
-        max-width="300"
-        min-width="300"
-        label="描述"
-        prop="description"
-      />
-
-      <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button v-permission="['operation:goods:edit']" type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
-          <el-button v-permission="['operation:goods:delete']" type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.limit"
-      @pagination="getList"
-    />
-
-    <el-tooltip placement="top" content="返回顶部">
-      <back-to-top :visibility-height="100" />
-    </el-tooltip>
-  </div>
+	</view>
 </template>
 
-<style>
-.table-expand {
-  font-size: 0;
-}
-
-.table-expand label {
-  width: 100px;
-  color: #99a9bf;
-}
-
-.table-expand .el-form-item {
-  margin-right: 0;
-  margin-bottom: 0;
-}
-
-.gallery {
-  width: 80px;
-  margin-right: 10px;
-}
-</style>
-
 <script>
-import { listGoods, deleteGoods, detailGoods } from '@/api/goods'
-import BackToTop from '@/components/BackToTop'
-import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
+	export default {
+		components: {
+			uniLoadMore
+		},
+		data() {
+			return {
+				cateMaskState: 0, //分类面板展开状态
+				headerPosition: "fixed",
+				headerTop: "0px",
+				loadingType: 'more', //加载更多状态
+				filterIndex: 0,
+				priceOrder: 0, //1 价格从低到高 2价格从高到低
+				goodsList: [],
+				cateId: 0,
+				keywords: '',
+				pageNo: 1,
+				isVip: false
+			};
+		},
+		onShow() {
+			this.isVip = this.$api.isVip()
+		},
+		onLoad(options) {
+			// #ifdef H5
+			this.headerTop = document.getElementsByTagName('uni-page-head')[0].offsetHeight + 'px';
+			// #endif
+			this.cateId = options.tid ? options.tid : 0;
+			this.keywords = options.keywords ? options.keywords : ''
+			this.loadData();
+		},
+		onPageScroll(e) {
+			//兼容iOS端下拉时顶部漂移
+			if (e.scrollTop >= 0) {
+				this.headerPosition = "fixed";
+			} else {
+				this.headerPosition = "absolute";
+			}
+		},
+		//下拉刷新
+		onPullDownRefresh() {
+			this.loadData('refresh');
+		},
+		//加载更多
+		onReachBottom() {
+			this.loadData();
+		},
+		methods: {
+			//加载商品 ，带下拉刷新和上滑加载
+			async loadData(type = 'add', loading) {
+				//没有更多直接返回
+				if (type === 'add') {
+					if (this.loadingType === 'nomore') {
+						return;
+					}
+					this.loadingType = 'loading';
+				} else {
+					this.loadingType = 'more'
+				}
 
-export default {
-  name: 'GoodsList',
-  components: { BackToTop, Pagination },
-  data() {
-    return {
-      list: [],
-      total: 0,
-      listLoading: true,
-      listQuery: {
-        page: 1,
-        limit: 20,
-        title: undefined,
-        sort: 'id',
-        order: 'desc'
-      },
-      goodsDetail: '',
-      detailDialogVisible: false
-    }
-  },
-  created() {
-    this.getList()
-  },
-  methods: {
-    getList() {
-      this.listLoading = true
-      listGoods(this.listQuery)
-        .then(response => {
-          response.data.data.items.forEach(item => {
-            item.price = item.price / 100
-            item.originalPrice = item.originalPrice / 100
-            item.vipPrice = item.vipPrice / 100
-          })
-          this.list = response.data.data.items
-          this.total = response.data.data.total
-          this.listLoading = false
-        })
-        .catch(() => {
-          this.list = []
-          this.total = 0
-          this.listLoading = false
-        })
-    },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-    handleCreate() {
-      this.$router.push({ path: '/goods/upsert' })
-    },
-    handleUpdate(row) {
-      this.$router.push({ path: '/goods/upsert', query: { id: row.id }})
-    },
-    showDetail(row) {
-      if (!this.detailDialogVisible) {
-        detailGoods(row.id)
-          .then(response => {
-            this.goodsDetail = response.data.data.detail.replace(/<img/g, "<img style='max-width:100%;height:auto;line-height:0px'")
-            this.detailDialogVisible = true
-          })
-      }
-    },
-    handleDelete(row) {
-      this.$confirm('此操作将永久删除商品--' + row.title + '--, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        deleteGoods(row.id)
-          .then(response => {
-            this.$notify.success({
-              title: '成功',
-              message: '删除成功'
-            })
-            const index = this.list.indexOf(row)
-            this.list.splice(index, 1)
-          })
-          .catch(response => {
-            this.$notify.error({
-              title: '失败',
-              message: response.data.errmsg
-            })
-          })
-      }).catch(() => {
-        return false
-      })
-    }
-  }
-}
+				let orderByInfo = {}
+				if (this.filterIndex === 0) {
+					//销量排序
+					orderByInfo = {
+						orderBy: 'sales',
+						isAsc: false
+					}
+				}
+				if (this.filterIndex === 1) {
+					//价格排序 需要从新获取Page
+					orderByInfo = {
+						orderBy: 'price',
+						isAsc: this.priceOrder === 1
+					}
+				}
+				if (type === 'refresh') {
+					this.pageNo = 1
+				}
+				this.$api.request('goods', 'getGoodsPage', {
+					categoryId: this.cateId,
+					title: this.keywords,
+					pageNo : this.pageNo,
+					...orderByInfo
+				}).then(res => {
+					let tempList = res.data.items
+					if (type === 'refresh') {
+						this.goodsList = [];
+					}
+					this.goodsList = this.goodsList.concat(tempList);
+					this.pageNo = res.data.pageNo + 1
+					this.loadingType = res.data.totalPageNo > res.data.pageNo ? 'more' : 'nomore';
+					if (type === 'refresh') {
+						if (loading == 1) {
+							uni.hideLoading()
+						} else {
+							uni.stopPullDownRefresh();
+						}
+					}
+				})
+			},
+			//筛选点击
+			tabClick(index) {
+				if (this.filterIndex === index && index !== 1) {
+					return;
+				}
+				this.filterIndex = index;
+				if (index === 1) {
+					this.priceOrder = this.priceOrder === 1 ? 2 : 1;
+				} else {
+					this.priceOrder = 0;
+				}
+				uni.pageScrollTo({
+					duration: 300,
+					scrollTop: 0
+				})
+				this.loadData('refresh', 1);
+				uni.showLoading({
+					title: '正在加载'
+				})
+			},
+			//详情
+			navToDetailPage(item) {
+				//测试数据没有写id，用title代替
+				let id = item.id;
+				uni.navigateTo({
+					url: `/pages/product/detail?id=${id}`
+				})
+			},
+			stopPrevent() {}
+		},
+	}
 </script>
+
+<style lang="scss">
+	page,
+	.content {
+		background: $page-color-base;
+	}
+
+	.content {
+		padding-top: 96upx;
+	}
+
+	.navbar {
+		position: fixed;
+		left: 0;
+		top: var(--window-top);
+		display: flex;
+		width: 100%;
+		height: 80upx;
+		background: #fff;
+		box-shadow: 0 2upx 10upx rgba(0, 0, 0, .06);
+		z-index: 10;
+
+		.nav-item {
+			flex: 1;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100%;
+			font-size: 30upx;
+			color: $font-color-dark;
+			position: relative;
+
+			&.current {
+				color: $base-color;
+
+				&:after {
+					content: '';
+					position: absolute;
+					left: 50%;
+					bottom: 0;
+					transform: translateX(-50%);
+					width: 120upx;
+					height: 0;
+					border-bottom: 4upx solid $base-color;
+				}
+			}
+		}
+
+		.p-box {
+			display: flex;
+			flex-direction: column;
+
+			.yticon {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 30upx;
+				height: 14upx;
+				line-height: 1;
+				margin-left: 4upx;
+				font-size: 26upx;
+				color: #888;
+
+				&.active {
+					color: $base-color;
+				}
+			}
+
+			.xia {
+				transform: scaleY(-1);
+			}
+		}
+
+		.cate-item {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100%;
+			width: 80upx;
+			position: relative;
+			font-size: 44upx;
+
+			&:after {
+				content: '';
+				position: absolute;
+				left: 0;
+				top: 50%;
+				transform: translateY(-50%);
+				border-left: 1px solid #ddd;
+				width: 0;
+				height: 36upx;
+			}
+		}
+	}
+
+	/* 分类 */
+	.cate-mask {
+		position: fixed;
+		left: 0;
+		top: var(--window-top);
+		bottom: 0;
+		width: 100%;
+		background: rgba(0, 0, 0, 0);
+		z-index: 95;
+		transition: .3s;
+
+		.cate-content {
+			width: 630upx;
+			height: 100%;
+			background: #fff;
+			float: right;
+			transform: translateX(100%);
+			transition: .3s;
+		}
+
+		&.none {
+			display: none;
+		}
+
+		&.show {
+			background: rgba(0, 0, 0, .4);
+
+			.cate-content {
+				transform: translateX(0);
+			}
+		}
+	}
+
+	.cate-list {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+
+		.cate-item {
+			display: flex;
+			align-items: center;
+			height: 90upx;
+			padding-left: 30upx;
+			font-size: 28upx;
+			color: #555;
+			position: relative;
+		}
+
+		.two {
+			height: 64upx;
+			color: #303133;
+			font-size: 30upx;
+			background: #f8f8f8;
+		}
+
+		.active {
+			color: $base-color;
+		}
+	}
+
+	/* 商品列表 */
+	.goods-list {
+		display: flex;
+		flex-wrap: wrap;
+		padding: 0 30upx;
+		background: #fff;
+
+		.goods-item {
+			display: flex;
+			flex-direction: column;
+			width: 48%;
+			padding-bottom: 40upx;
+
+			&:nth-child(2n+1) {
+				margin-right: 4%;
+			}
+		}
+
+		.image-wrapper {
+			width: 100%;
+			height: 330upx;
+			border-radius: 3px;
+			overflow: hidden;
+
+			image {
+				width: 100%;
+				height: 100%;
+				opacity: 1;
+			}
+		}
+
+		.title {
+			font-size: $font-lg;
+			color: $font-color-dark;
+			line-height: 80upx;
+		}
+
+		.price-box {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding-right: 10upx;
+			font-size: 24upx;
+			color: $font-color-light;
+		}
+
+		.price {
+			font-size: $font-lg;
+			color: $uni-color-primary;
+			line-height: 1;
+
+			&:before {
+				content: '￥';
+				font-size: 26upx;
+			}
+		}
+	}
+</style>
