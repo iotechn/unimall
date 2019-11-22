@@ -58,8 +58,8 @@ public class AppraiseServiceImpl implements AppraiseService {
         //校验是否有对应等待评价的订单
         Integer integer = orderMapper.selectCount(
                 new EntityWrapper<OrderDO>()
-                        .eq("status", OrderStatusType.WAIT_APPRAISE.getCode())
                         .eq("id", appraiseRequestDTO.getOrderId())
+                        .eq("status", OrderStatusType.WAIT_APPRAISE.getCode())
                         .eq("user_id", userId));
         if (integer == 0) {
             throw new AppServiceException(ExceptionDefinition.APPRAISE_ORDER_CHECK_FAILED);
@@ -67,7 +67,7 @@ public class AppraiseServiceImpl implements AppraiseService {
 
         //如果传入评价list中没有数据，就直接转变订单状态发出
         Date now = new Date();
-        if (appraiseRequestDTO.getAppraiseDTOList() == null || appraiseRequestDTO.getAppraiseDTOList().size() == 0) {
+        if (CollectionUtils.isEmpty(appraiseRequestDTO.getAppraiseDTOList())) {
             OrderDO orderDO = new OrderDO();
             orderDO.setStatus(OrderStatusType.COMPLETE.getCode());
             orderDO.setId(appraiseRequestDTO.getOrderId());
@@ -77,17 +77,18 @@ public class AppraiseServiceImpl implements AppraiseService {
 
         //循环读取订单评价中所有商品的评价
         for (AppraiseRequestItemDTO appraiseDTO : appraiseRequestDTO.getAppraiseDTOList()) {
-            List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>()
-                    .eq("sku_id", appraiseDTO.getSkuId())
-                    .eq("order_id", appraiseRequestDTO.getOrderId()));
+            Integer count = orderSkuMapper.selectCount(new EntityWrapper<OrderSkuDO>()
+                    .eq("order_id", appraiseRequestDTO.getOrderId())
+                    .eq("spu_id", appraiseDTO.getSpuId())
+                    .eq("sku_id", appraiseDTO.getSkuId()));
             //从order_sku表中 验证是否有对应的表单和商品
-            if (CollectionUtils.isEmpty(orderSkuDOList)) {
+            if (count == 0) {
                 throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
             }
 
             AppraiseDO appraiseDO = new AppraiseDO();
             BeanUtils.copyProperties(appraiseDTO, appraiseDO);
-            appraiseDO.setSpuId(orderSkuDOList.get(0).getSpuId());
+            appraiseDO.setSpuId(appraiseDTO.getSpuId());
             appraiseDO.setId(null); //防止传入id,导致插入数据库出错
             appraiseDO.setOrderId(appraiseRequestDTO.getOrderId()); //从传入数据取出，不使用DTO中的冗余数据
             appraiseDO.setUserId(userId);
@@ -133,29 +134,15 @@ public class AppraiseServiceImpl implements AppraiseService {
         }
     }
 
-    //TODO 去除冗余代码
     @Override
     public Page<AppraiseResponseDTO> getUserAllAppraise(Long userId, Integer pageNo, Integer pageSize) throws ServiceException {
         Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("user_id", userId));
-        Integer totalPage = 1;
-        if (pageSize <= 0 || pageNo <= 0) {
-            throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
-        }
-        if (count % pageSize == 0 && count != 0) {
-            totalPage = count / pageSize;
-        } else {
-            totalPage = count / pageSize + 1;
-        }
-        if (pageNo >= totalPage) {
-            pageNo = totalPage;
-        }
-        Integer offset = pageSize * (pageNo - 1);
-        List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectUserAllAppraise(userId, offset, pageSize);
+        List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectUserAllAppraise(userId, pageSize * (pageNo - 1), pageSize);
         for (AppraiseResponseDTO appraiseResponseDTO : appraiseResponseDTOS) {
             appraiseResponseDTO.setImgList(imgMapper.getImgs(BizType.COMMENT.getCode(), appraiseResponseDTO.getId()));
         }
-        Page<AppraiseResponseDTO> pageination = new Page<>(appraiseResponseDTOS, pageNo, pageSize, count);
-        return pageination;
+        Page<AppraiseResponseDTO> page = new Page<>(appraiseResponseDTOS, pageNo, pageSize, count);
+        return page;
     }
 
 
@@ -166,8 +153,6 @@ public class AppraiseServiceImpl implements AppraiseService {
 
     @Override
     public AppraiseResponseDTO getOneById(Long userId, Long appraiseId) throws ServiceException {
-
-
         AppraiseResponseDTO appraiseResponseDTO = appraiseMapper.selectOneById(appraiseId);
         if (appraiseResponseDTO == null) {
             throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);

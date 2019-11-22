@@ -189,8 +189,7 @@
 						"system:user:query",
 						"system:user:delete",
 						"system:user:create",
-						"system:user:update",
-						""
+						"system:user:update"
 					],
 					"title":"会员管理"
 				},

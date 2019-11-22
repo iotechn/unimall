@@ -29,7 +29,6 @@ public class AdminAppraiseImpl implements  AdminAppraise {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteAppraise(Long adminId, Long id) throws ServiceException {
-
         return appraiseMapper.deleteById(id) > 0;
     }
 

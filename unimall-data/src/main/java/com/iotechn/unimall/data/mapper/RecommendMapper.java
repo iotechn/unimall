@@ -20,4 +20,5 @@ public interface RecommendMapper extends BaseMapper<RecommendDO> {
     public List<RecommendDTO> getRecommendByType(@Param("recommendType") Integer recommendType,@Param("offset") Integer offset,@Param("pageSize") Integer pageSize);
 
     public List<RecommendDTO> getAllRecommend(@Param("offset") Integer offset,@Param("pageSize") Integer pageSize);
+
 }
