@@ -13,11 +13,9 @@
             fp.gmt_update AS gmtUpdate
         FROM
             unimall_footprint AS fp,
-            unimall_spu AS sp,
-            unimall_user AS us
+            unimall_spu AS sp
         WHERE
-            fp.user_id = us.id
-            AND fp.spu_id = sp.id
+            fp.spu_id = sp.id
             AND fp.user_id = #{userId}
         ORDER BY fp.gmt_update DESC
             LIMIT

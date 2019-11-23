@@ -65,35 +65,41 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" min-width="75" max-width="75" label="订单编号" prop="orderNo" />
+      <el-table-column align="center" width="180" label="订单编号" prop="orderNo" />
 
-      <el-table-column align="center" label="用户ID" prop="userId" />
+      <el-table-column align="center" width="80" label="用户ID" prop="userId" />
 
-      <el-table-column align="center" label="订单状态" prop="status">
+      <el-table-column align="center" width="120" label="订单状态" prop="status">
         <template slot-scope="scope">
           <el-tag>{{ scope.row.status | orderStatusFilter }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="支付渠道" prop="payChannel">
+      <el-table-column align="center" width="110" label="支付渠道" prop="payChannel">
         <template slot-scope="scope">
           <el-tag>{{ scope.row.payChannel | payChannelFilter }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="订单金额" prop="actualPrice">
+      <el-table-column align="center" width="100" label="订单金额" prop="actualPrice">
         <template slot-scope="scope">¥ {{ scope.row.actualPrice / 100.0 }}</template>
       </el-table-column>
 
       <!--<el-table-column align="center" label="支付金额" prop="actualPrice"/>-->
 
-      <el-table-column align="center" label="创建时间" prop="gmtCreate">
+      <el-table-column align="center" width="140" label="创建时间" prop="gmtCreate">
         <template slot-scope="scope">{{ scope.row.gmtCreate | formatTime }}</template>
       </el-table-column>
 
-      <!--<el-table-column align="center" label="物流单号" prop="shipSn"/>-->
+      <el-table-column align="center" width="140" label="物流渠道" prop="shipCode">
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.shipCode | shipCodeFilter }}</el-tag>
+        </template>
+      </el-table-column>
 
-      <!--<el-table-column align="center" label="物流渠道" prop="shipChannel"/>-->
+      <el-table-column align="center" width="200" label="物流单号" prop="shipCode"/>
+
+      <el-table-column align="center" width="200" label="备注" prop="mono"/>
 
       <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -171,6 +177,7 @@
             <el-table-column align="center" label="名称" prop="spuTitle" />
             <el-table-column align="center" label="规格" prop="title" />
             <el-table-column align="center" label="商品数量" prop="num" />
+            <el-table-column align="center" label="单位" prop="unit" />
             <el-table-column align="center" label="总价（单价*数量）">
               <template slot-scope="scope">
                 <span>{{ scope.row.price * scope.row.num / 100 }}</span>
@@ -291,6 +298,12 @@ export default {
         return str
       }
       return '未支付'
+    },
+    shipCodeFilter(shipCode) {
+      if (shipCode) {
+        return shipCodeMap[shipCode]
+      }
+      return '未发货'
     }
   },
   data() {

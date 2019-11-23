@@ -27,17 +27,17 @@ public class FootprintBizService {
 
     @Transactional(rollbackFor = Exception.class)
     public boolean addOrUpdateFootprint(Long userId, Long spuId) throws ServiceException {
-
         Date now = new Date();
-        List<FootprintDO> footprintDOList = footprintMapper.selectList(new EntityWrapper<FootprintDO>()
-                .eq("user_id",userId)
-                .eq("spu_id",spuId)
-                .orderBy("gmt_update", false));
-        if(CollectionUtils.isEmpty(footprintDOList)){
-            FootprintDO footprintDO = new FootprintDO(userId,spuId);
+        List<FootprintDO> footprintDOList = footprintMapper.selectList(
+                new EntityWrapper<FootprintDO>()
+                        .eq("user_id", userId)
+                        .eq("spu_id", spuId)
+                        .orderBy("gmt_update", false));
+        if (CollectionUtils.isEmpty(footprintDOList)) {
+            FootprintDO footprintDO = new FootprintDO(userId, spuId);
             footprintDO.setGmtCreate(now);
             footprintDO.setGmtUpdate(now);
-            return footprintMapper.insert(footprintDO)>0;
+            return footprintMapper.insert(footprintDO) > 0;
         }
         FootprintDO footprintDO = footprintDOList.get(0);
         footprintDO.setGmtUpdate(now);

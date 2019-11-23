@@ -106,10 +106,10 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
         if (lockComponent.tryLock(TAKE_ORDER_LOCK + userId, 20)) {
             //加上乐观锁，防止用户重复提交订单
-
             try {
                 //用户会员等级
                 Integer userLevel = SessionUtil.getUser().getLevel();
@@ -135,7 +135,6 @@ public class OrderServiceImpl implements OrderService {
                         throw new AppServiceException(ExceptionDefinition.ORDER_SKU_NOT_EXIST);
                     }
                     if (skuDTO.getStock() < orderRequestSkuDTO.getNum()) {
-                        //TODO 这里存在并发问题
                         throw new AppServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH);
                     }
                     int p;

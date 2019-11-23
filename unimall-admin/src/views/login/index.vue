@@ -1,84 +1,107 @@
 <template>
-  <div class="login-container">
-    <el-form
-      ref="loginForm"
-      :model="loginForm"
-      :rules="loginRules"
-      class="login-form"
-      auto-complete="on"
-      label-position="left"
-    >
-      <div class="title-container">
-        <h3 class="title">管理员登录</h3>
+  <div
+    class="login-container"
+    @keyup.enter.native="handleLogin">
+    <div class="login-weaper animated bounceInDown">
+      <div class="login-left">
+        <div class="login-time">
+          欢迎使用
+        </div>
+        <img
+          class="img"
+          src="@/assets/avatar.png"
+          alt="">
+        <p class="title">Unimall 开源商城后台登录</p>
       </div>
-      <el-form-item prop="username">
-        <span class="svg-container svg-container_login">
-          <svg-icon icon-class="user" />
-        </span>
-        <el-input
-          v-model="loginForm.username"
-          name="username"
-          type="text"
-          auto-complete="on"
-          placeholder="username"
-        />
-      </el-form-item>
+      <div class="login-border">
+        <div class="login-main">
+          <h4 class="login-title">
+            登录 Unimall
+          </h4>
+          <el-form
+            ref="loginForm"
+            :rules="loginRules"
+            :model="loginForm"
+            class="login-form"
+            status-icon
+            label-width="0">
+            <el-form-item prop="username">
+              <el-input
+                v-model="loginForm.username"
+                placeholder="请输入用户名"
+                size="small"
+                auto-complete="off"
+                @keyup.enter.native="handleLogin">
+                <i
+                  slot="prefix"
+                  class="icon-yonghu"/>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="password">
+              <el-input
+                :type="passwordType"
+                v-model="loginForm.password"
+                placeholder="请输入密码"
+                size="small"
+                auto-complete="off"
+                @keyup.enter.native="handleLogin">
+                <i
+                  slot="suffix"
+                  class="el-icon-view el-input__icon"
+                  @click="showPwd"/>
+                <i
+                  slot="prefix"
+                  class="icon-mima"/>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="code">
+              <el-input
+                v-model="loginForm.verifyCode"
+                placeholder="输入验证码"
+                size="small"
+                auto-complete="off"
+                @keyup.enter.native="handleLogin">
+                <i
+                  slot="prefix"
+                  class="icon-yanzhengma"
+                  style="margin-top:6px;"/>
+                <template slot="append">
+                  <span
+                    :class="[{display:!show}]"
+                    class="msg-text"
+                    @click="sendShortMsg">{{ show ? '验证码' : count }}</span>
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button
+                type="primary"
+                size="small"
+                class="login-submit"
+                @click.native.prevent="handleLogin">登录</el-button>
+            </el-form-item>
+          </el-form>
 
-      <el-form-item prop="password">
-        <span class="svg-container">
-          <svg-icon icon-class="password" />
-        </span>
-        <el-input
-          :type="passwordType"
-          v-model="loginForm.password"
-          name="password"
-          auto-complete="on"
-          placeholder="password"
-          @keyup.enter.native="handleLogin"
-        />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon icon-class="eye" />
-        </span>
-      </el-form-item>
+          <div class="login-menu">
+            <a
+              href="#"
+              @click.stop="activeName='user'">驽驹官网</a>
+            <a
+              href="#"
+              @click.stop="activeName='code'">客服</a>
+            <a
+              href="#"
+              @click.stop="activeName='third'">Test</a>
+          </div>
+        </div>
 
-      <el-button
-        v-show="show"
-        :loading="verifyLoading"
-        type="primary"
-        style="width:100%;margin-bottom:3px;"
-        @click.native.prevent="sendMsg"
-      >发送验证码</el-button>
-
-      <el-button
-        v-show="!show"
-        :disabled="true"
-        type="primary"
-        style="width:96%;margin-bottom:3px;"
-      >{{ count }} s</el-button>
-
-      <el-form-item prop="verifyCode" >
-        <span class="svg-container">
-          <svg-icon icon-class="password" />
-        </span>
-        <el-input
-          v-model="loginForm.verifyCode"
-          name="verifyCode"
-          placeholder="验证码"
-        />
-      </el-form-item>
-
-      <el-button
-        :loading="loading"
-        type="primary"
-        style="width:100%;margin-bottom:30px;"
-        @click.native.prevent="handleLogin"
-      >登录</el-button>
-    </el-form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { sendMsg } from '@/api/login.js'
+import { sendMsg } from '@/api/login'
 
 export default {
   name: 'Login',
@@ -137,20 +160,13 @@ export default {
     // window.removeEventListener('hashchange', this.afterQRScan)
   },
   methods: {
-    sendMsg() {
-      const TIME_COUNT = 60
-      if (!this.timer) {
-        this.count = TIME_COUNT
-        this.show = false
-        this.timer = setInterval(() => {
-          if (this.count > 0 && this.count <= TIME_COUNT) {
-            this.count--
-          } else {
-            this.show = true
-            clearInterval(this.timer)
-            this.timer = null
-          }
-        }, 1000)
+    sendShortMsg() {
+      if (!this.show) {
+        this.$notify.error({
+          title: '失败',
+          message: '请等待60s后重试'
+        })
+        return
       }
       if (this.loginForm.username == null || this.loginForm.username === '' || this.loginForm.password == null || this.loginForm.password === '') {
         this.$notify.error({
@@ -160,13 +176,28 @@ export default {
         return false
       }
       this.verifyLoading = true
-      sendMsg(this.loginForm).then(response => {
-        this.verifyLoading = false
-        this.$notify.success({
-          title: '成功',
-          message: '信息发送成功'
+      sendMsg(this.loginForm)
+        .then(response => {
+          this.verifyLoading = false
+          this.$notify.success({
+            title: '成功',
+            message: '信息发送成功'
+          })
+          const TIME_COUNT = 60
+          if (!this.timer) {
+            this.count = TIME_COUNT
+            this.show = false
+            this.timer = setInterval(() => {
+              if (this.count > 0 && this.count <= TIME_COUNT) {
+                this.count--
+              } else {
+                this.show = true
+                clearInterval(this.timer)
+                this.timer = null
+              }
+            }, 1000)
+          }
         })
-      })
         .catch(response => {
           this.verifyLoading = false
           this.$notify.error({
@@ -209,98 +240,19 @@ export default {
 }
 </script>
 
-<style rel="stylesheet/scss" lang="scss">
-$bg: #2d3a4b;
-$light_gray: #eee;
-
-/* reset element-ui css */
-.login-container {
-  .el-input {
- //   display: inline-block;
-    height: 47px;
-    width: 85%;
-    input {
-      background: transparent;
-      border: 0px;
-      -webkit-appearance: none;
-      border-radius: 0px;
-      padding: 12px 5px 12px 15px;
-      color: $light_gray;
-      height: 47px;
-      &:-webkit-autofill {
-        box-shadow: 0 0 0px 1000px $bg inset !important;
-        -webkit-box-shadow: 0 0 0px 1000px $bg inset !important;
-        -webkit-text-fill-color: #fff !important;
-      }
-    }
-  }
-  .el-form-item {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    color: #454545;
-  }
+<style>
+.msg-text {
+  display: block;
+  width: 60px;
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+}
+.msg-text.display {
+  color: #ccc;
 }
 </style>
 
-<style rel="stylesheet/scss" lang="scss" scoped>
-$bg: #2d3a4b;
-$dark_gray: #889aa4;
-$light_gray: #eee;
-
-.login-container {
-  position: fixed;
-  height: 100%;
-  width: 100%;
-  background-color: $bg;
-  .login-form {
-    position: absolute;
-    left: 0;
-    right: 0;
-    width: 520px;
-    padding: 35px 35px 15px 35px;
-    margin: 120px auto;
-  }
-  .tips {
-    font-size: 14px;
-    color: #fff;
-    margin-bottom: 10px;
-    span {
-      &:first-of-type {
-        margin-right: 16px;
-      }
-    }
-  }
-  .svg-container {
-    padding: 6px 5px 6px 15px;
-    color: $dark_gray;
-    vertical-align: middle;
-    width: 30px;
-    display: inline-block;
-    &_login {
-      font-size: 20px;
-    }
-  }
-  .title-container {
-    position: relative;
-    .title {
-      font-size: 26px;
-      font-weight: 400;
-      color: $light_gray;
-      margin: 0px auto 40px auto;
-      text-align: center;
-      font-weight: bold;
-    }
-  }
-  .show-pwd {
-    position: absolute;
-    right: 10px;
-    top: 7px;
-    font-size: 16px;
-    color: $dark_gray;
-    cursor: pointer;
-    user-select: none;
-  }
-
-}
+<style lang="scss">
+@import "@/styles/login.scss";
 </style>

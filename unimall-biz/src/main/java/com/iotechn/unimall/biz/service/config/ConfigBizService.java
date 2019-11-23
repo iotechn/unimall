@@ -31,14 +31,26 @@ public class ConfigBizService {
         }
         List<ConfigDO> list = configMapper.selectList(null);
         ConfigDTO configDTO = new ConfigDTO();
-        for(ConfigDO configDO : list){
-            switch (configDO.getKeyWord()){
-                case "title": configDTO.setTitle(configDO.getValueWorth());break;
-                case "logoUrl":configDTO.setLogoUrl(configDO.getValueWorth());break;
-                case "description":configDTO.setDescription(configDO.getValueWorth());break;
-                case "address":configDTO.setAddress(configDO.getValueWorth());break;
-                case "showType":configDTO.setShowType(Integer.parseInt(configDO.getValueWorth()));break;
-                case "status":configDTO.setStatus(Integer.parseInt(configDO.getValueWorth()));break;
+        for (ConfigDO configDO : list) {
+            switch (configDO.getKeyWord()) {
+                case "title":
+                    configDTO.setTitle(configDO.getValueWorth());
+                    break;
+                case "logoUrl":
+                    configDTO.setLogoUrl(configDO.getValueWorth());
+                    break;
+                case "description":
+                    configDTO.setDescription(configDO.getValueWorth());
+                    break;
+                case "address":
+                    configDTO.setAddress(configDO.getValueWorth());
+                    break;
+                case "showType":
+                    configDTO.setShowType(Integer.parseInt(configDO.getValueWorth()));
+                    break;
+                case "status":
+                    configDTO.setStatus(Integer.parseInt(configDO.getValueWorth()));
+                    break;
             }
         }
         cacheComponent.putObj(CA_CONFIG_DTO_KEY, configDTO, Const.CACHE_ONE_DAY);

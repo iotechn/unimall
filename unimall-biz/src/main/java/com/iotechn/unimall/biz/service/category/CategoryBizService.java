@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryBizService {
 
-
     @Autowired
     private CategoryMapper categoryMapper;
 
@@ -36,7 +35,6 @@ public class CategoryBizService {
     public static final String CA_CATEGORY_LIST = "CA_CATEGORY_LIST";
 
     public static final String CA_CATEGORY_ID_HASH = "CA_CATEGORY_ID_HASH";
-
 
     /*获取一棵两级目录树*/
     public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException {
@@ -108,7 +106,6 @@ public class CategoryBizService {
                 }
             });
         });
-
 
         //放入缓存
         cacheComponent.putObj(CA_CATEGORY_LIST, categoryDTOList, Const.CACHE_ONE_DAY);

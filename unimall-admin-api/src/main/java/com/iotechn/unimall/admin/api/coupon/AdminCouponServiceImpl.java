@@ -1,27 +1,20 @@
 package com.iotechn.unimall.admin.api.coupon;
 
-import com.baomidou.mybatisplus.mapper.Condition;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.iotechn.unimall.core.exception.AdminServiceException;
-import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.dto.CouponAdminDTO;
-import com.iotechn.unimall.data.dto.CouponDTO;
 import com.iotechn.unimall.data.mapper.CouponMapper;
 import com.iotechn.unimall.data.mapper.UserCouponMapper;
 import com.iotechn.unimall.data.model.Page;
-import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -33,33 +26,34 @@ import java.util.List;
  * Time: 下午11:26
  */
 @Service
-public class AdminCouponServiceImpl implements  AdminCouponService {
+public class AdminCouponServiceImpl implements AdminCouponService {
 
     @Autowired
     private CouponMapper couponMapper;
 
     @Autowired
     private UserCouponMapper userCouponMapper;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CouponDO addCoupon(Long adminId, String title, Integer type, String description, Integer total, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Long gmtStart, Long gmtEnd) throws ServiceException {
 
         Date start = null;
         Date end = null;
-        if(gmtEnd != null && gmtStart != null){
-            start =  new Date(gmtStart);
-            end =  new Date(gmtEnd);
+        if (gmtEnd != null && gmtStart != null) {
+            start = new Date(gmtStart);
+            end = new Date(gmtEnd);
         }
 
-        CouponDO couponDO = new CouponDO(title,type,description,total,total,limit,discount,min,status,categoryId,days,start,end);
+        CouponDO couponDO = new CouponDO(title, type, description, total, total, limit, discount, min, status, categoryId, days, start, end);
 
         Date now = new Date();
         couponDO.setGmtCreate(now);
         couponDO.setGmtUpdate(now);
-        if(couponMapper.insert(couponDO) > 0){
+        if (couponMapper.insert(couponDO) > 0) {
             return couponDO;
         }
-        throw  new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
@@ -67,8 +61,8 @@ public class AdminCouponServiceImpl implements  AdminCouponService {
     public Boolean deleteCoupon(Long adminId, Long id) throws ServiceException {
         EntityWrapper wrapperC = new EntityWrapper();
         wrapperC.eq("id", id);
-        if(couponMapper.delete(wrapperC) <= 0){
-            throw  new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        if (couponMapper.delete(wrapperC) <= 0) {
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
         }
         EntityWrapper wrapperUC = new EntityWrapper();
         wrapperUC.eq("coupon_id", id);
@@ -79,11 +73,11 @@ public class AdminCouponServiceImpl implements  AdminCouponService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateCoupon(Long adminId, Long id, String title, Integer type, String description, Integer total, Integer surplus, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Date gmtStart, Date gmtEnd) throws ServiceException {
-        CouponDO couponDO = new CouponDO(title,type,description,total,surplus,limit,discount,min,status,categoryId,days,gmtStart,gmtEnd);
+        CouponDO couponDO = new CouponDO(title, type, description, total, surplus, limit, discount, min, status, categoryId, days, gmtStart, gmtEnd);
         couponDO.setId(id);
-        List<CouponDO> couponDOList = couponMapper.selectList(new EntityWrapper<CouponDO>().eq("id",id ));
-        if(CollectionUtils.isEmpty(couponDOList)){
-            throw new AppServiceException(ExceptionDefinition.COUPON_NOT_EXIST);
+        List<CouponDO> couponDOList = couponMapper.selectList(new EntityWrapper<CouponDO>().eq("id", id));
+        if (CollectionUtils.isEmpty(couponDOList)) {
+            throw new AdminServiceException(ExceptionDefinition.COUPON_NOT_EXIST);
         }
         Date now = new Date();
         couponDO.setGmtCreate(couponDOList.get(0).getGmtCreate());
@@ -102,28 +96,28 @@ public class AdminCouponServiceImpl implements  AdminCouponService {
     }
 
     @Override
-    public Page<CouponAdminDTO> queryCouponByTitle(Long adminId, String title,Integer type,Integer status,Integer pageNo, Integer limit) throws ServiceException {
+    public Page<CouponAdminDTO> queryCouponByTitle(Long adminId, String title, Integer type, Integer status, Integer pageNo, Integer limit) throws ServiceException {
         EntityWrapper wrapper = new EntityWrapper();
         Date now = new Date();
-        if(!StringUtils.isEmpty(title)){
+        if (!StringUtils.isEmpty(title)) {
             wrapper.like("title", title);
         }
-        if(type != null){
-            wrapper.eq("type",type );
+        if (type != null) {
+            wrapper.eq("type", type);
         }
-        if(status != null){
-            if(status >= 0 && status < 2){
+        if (status != null) {
+            if (status >= 0 && status < 2) {
                 wrapper.eq("status", status);
                 wrapper.andNew().gt("gmt_end", now).or().isNotNull("days"); //coupon -> conpon.gt("gmt_end", now).or().isNotNull("days")
-            } else if(status < 0){
+            } else if (status < 0) {
                 wrapper.lt("gmt_end", now);
-            } else{
-                throw new AppServiceException(ExceptionDefinition.COUPON_CHECK_DATA_FAILED);
+            } else {
+                throw new AdminServiceException(ExceptionDefinition.COUPON_CHECK_DATA_FAILED);
             }
         }
         Integer count = couponMapper.selectCount(wrapper);
-        List<CouponAdminDTO> couponDTOList = couponMapper.getAdminCouponList(title,type,status,now,(pageNo-1)*limit,limit);
-        Page<CouponAdminDTO> page = new Page<CouponAdminDTO>(couponDTOList,pageNo,limit,count);
+        List<CouponAdminDTO> couponDTOList = couponMapper.getAdminCouponList(title, type, status, now, (pageNo - 1) * limit, limit);
+        Page<CouponAdminDTO> page = new Page<CouponAdminDTO>(couponDTOList, pageNo, limit, count);
         return page;
     }
 }

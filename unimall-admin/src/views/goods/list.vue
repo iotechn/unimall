@@ -51,7 +51,7 @@
           <el-dialog :visible.sync="detailDialogVisible" title="商品详情">
             <div v-html="goodsDetail" />
           </el-dialog>
-          <el-button type="primary" size="mini" @click="showDetail(scope.row.detail)">查看</el-button>
+          <el-button type="primary" size="mini" @click="showDetail(scope.row)">查看</el-button>
         </template>
       </el-table-column>
 
@@ -121,7 +121,7 @@
 </style>
 
 <script>
-import { listGoods, deleteGoods } from '@/api/goods'
+import { listGoods, deleteGoods, detailGoods } from '@/api/goods'
 import BackToTop from '@/components/BackToTop'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
@@ -177,9 +177,14 @@ export default {
     handleUpdate(row) {
       this.$router.push({ path: '/goods/upsert', query: { id: row.id }})
     },
-    showDetail(detail) {
-      this.goodsDetail = detail
-      this.detailDialogVisible = true
+    showDetail(row) {
+      if (!this.detailDialogVisible) {
+        detailGoods(row.id)
+          .then(response => {
+            this.goodsDetail = response.data.data.detail.replace(/<img/g, "<img style='max-width:100%;height:auto;line-height:0px'")
+            this.detailDialogVisible = true
+          })
+      }
     },
     handleDelete(row) {
       this.$confirm('此操作将永久删除商品--' + row.title + '--, 是否继续?', '提示', {

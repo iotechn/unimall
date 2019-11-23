@@ -14,9 +14,9 @@
 			<text class="title">{{goods.title}}</text>
 			<view class="price-box">
 				<text class="price-tip">¥</text>
-				<text class="price">{{isVip ? (goods.vipPrice / 100.0 + ' [VIP]'): (goods.price / 100.0)}}</text>
-				<text v-if="(isVip ? goods.vipPrice: goods.price) < goods.originalPrice" class="m-price">¥{{goods.originalPrice / 100}}</text>
-				<text v-if="(isVip ? goods.vipPrice: goods.price) < goods.originalPrice" class="coupon-tip">{{parseInt((isVip? goods.vipPrice: goods.price) / goods.originalPrice * 100) / 10}}折</text>
+				<text class="price">{{isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) / 100.0  + ' [VIP]': (selectedSku.price ? selectedSku.price : goods.price) / 100.0 }}</text>
+				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) : (selectedSku.price ? selectedSku.price : goods.price)) < (selectedSku.price ? selectedSku.originalPrice : goods.originalPrice)" class="m-price">¥{{(selectedSku.price ? selectedSku.originalPrice : goods.originalPrice) / 100}}</text>
+				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) : (selectedSku.price ? selectedSku.price : goods.price)) < (selectedSku.price ? selectedSku.originalPrice : goods.originalPrice)" class="coupon-tip">{{parseInt((isVip? (selectedSku.price ? selectedSku.vipPrice : goods.vipPrice): (selectedSku.price ? selectedSku.price : goods.price)) / (selectedSku ? selectedSku.originalPrice : goods.originalPrice) * 100) / 10}}折</text>
 			</view>
 			<view class="bot-row">
 				<text>销量: {{goods.sales}}</text>
@@ -64,7 +64,8 @@
 				<text class="yticon icon-you"></text>
 			</view>
 			<view class="eva-box">
-				<image class="portrait" :src="goods.appraisePage.items[0].userAvatarUrl ? goods.appraisePage.items[0].userAvatarUrl : '/static/missing-face.png'" mode="aspectFill"></image>
+				<image class="portrait" :src="goods.appraisePage.items[0].userAvatarUrl ? goods.appraisePage.items[0].userAvatarUrl : '/static/missing-face.png'"
+				 mode="aspectFill"></image>
 				<view class="right">
 					<text class="name">{{goods.appraisePage.items[0].userNickName?goods.appraisePage.items[0].userNickName:('用户' + goods.appraisePage.items[0].userId)}}</text>
 					<text class="con">{{goods.appraisePage.items[0].content}}</text>
@@ -80,7 +81,7 @@
 			<view class="d-header">
 				<text>图文详情</text>
 			</view>
-			<rich-text style="width: 750upx;" :nodes="goods.detail"></rich-text>
+			<u-parse className="rich-img" :content="goods.detail"></u-parse>
 		</view>
 
 		<!-- 底部操作菜单 -->
@@ -147,12 +148,8 @@
 				<view class="attr-list">
 					<!-- <text>规格</text> -->
 					<view class="item-list">
-						<text 
-							v-for="(skuItem, skuIndex) in goods.skuList" 
-							:key="skuIndex" 
-							class="tit"
-							:class="{selected: skuIndex === selectedSkuIndex}"
-							@click="selectSpec(skuItem, skuIndex)">
+						<text v-for="(skuItem, skuIndex) in goods.skuList" :key="skuIndex" class="tit" :class="{selected: skuIndex === selectedSkuIndex}"
+						 @click="selectSpec(skuItem, skuIndex)">
 							{{skuItem.title}}
 						</text>
 					</view>
@@ -167,9 +164,11 @@
 
 <script>
 	import share from '@/components/share';
+	import uParse from '@/components/u-parse/u-parse.vue';
 	export default {
 		components: {
-			share
+			share,
+			uParse
 		},
 		data() {
 			return {
@@ -188,14 +187,14 @@
 				toggleCallback: undefined,
 				maskState: 0, //优惠券面板显示状态
 				couponList: [],
-				submiting: false
+				submiting: false,
 
 			};
 		},
 		onShow() {
 			this.isVip = this.$api.isVip()
 		},
-		async onLoad(options) {
+		onLoad(options) {
 			const that = this
 			uni.showLoading({
 				title: '正在加载'
@@ -207,7 +206,7 @@
 				uni.hideLoading()
 			}).then(res => {
 				that.goods = res.data
-				that.goods.detail = that.goods.detail.replace(/\<img/gi, '<img class="rich-img" ')
+				that.goods.detail = that.goods.detail
 				uni.hideLoading()
 			})
 			that.$api.request('coupon', 'getObtainableCoupon').then(res => {
@@ -227,7 +226,7 @@
 			obtainCoupon(index) {
 				const that = this
 				that.$api.request('coupon', 'obtainCoupon', {
-					couponId : that.couponList[index].id
+					couponId: that.couponList[index].id
 				}).then(res => {
 					that.$api.msg('领取成功')
 					that.couponList[index].nowCount++
@@ -238,7 +237,7 @@
 			toggleSpec(e) {
 				if (this.specClass === 'show') {
 					this.specClass = 'hide';
-					
+
 					setTimeout(() => {
 						this.specClass = 'none';
 						if (this.toggleCallback) {
@@ -287,15 +286,15 @@
 				if (that.goods.collect) {
 					//取消收藏
 					that.goods.collect = false
-					this.$api.request('collect','deleteCollect', {
-						spuId : that.goods.id
+					this.$api.request('collect', 'deleteCollect', {
+						spuId: that.goods.id
 					}).then(res => {
-						
+
 					})
 				} else {
 					//添加收藏
 					that.goods.collect = true
-					this.$api.request('collect','addCollect', {
+					this.$api.request('collect', 'addCollect', {
 						spuId: that.goods.id
 					})
 				}
@@ -328,8 +327,8 @@
 						url: `/pages/order/create?takeway=buy&data=${JSON.stringify(skuList)}`
 					})
 				}
-				
-				
+
+
 			},
 			//查看所有评价
 			navAllAppraise() {
@@ -342,6 +341,7 @@
 
 	}
 </script>
+
 
 <style lang='scss'>
 	page {
@@ -913,6 +913,7 @@
 			}
 		}
 	}
+
 	/* 优惠券面板 */
 	.mask {
 		display: flex;
@@ -1038,11 +1039,12 @@
 			}
 		}
 	}
-	
-	rich-text .rich-img {
+
+	.rich-img {
 		width: 100%;
 		height: auto;
 		margin: 0;
 		padding: 0;
+		line-height: 0px;
 	}
 </style>

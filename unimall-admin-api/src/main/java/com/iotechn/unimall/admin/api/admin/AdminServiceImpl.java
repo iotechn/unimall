@@ -108,7 +108,6 @@ public class AdminServiceImpl implements AdminService {
             permissionNames.add(item.getPermission());
         });
         adminDTO.setPerms(permissionNames);
-
         userRedisTemplate.opsForValue().set(Const.ADMIN_REDIS_PREFIX + accessToken, JSONObject.toJSONString(adminDTO), 30, TimeUnit.MINUTES);
         return accessToken;
     }
