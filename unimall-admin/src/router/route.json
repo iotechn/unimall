@@ -68,6 +68,20 @@
 				},
 				"name":"goodsList",
 				"page":"/goods/list"
+            },
+            {
+				"path":"groupShop",
+				"meta":{
+					"noCache":true,
+					"perms":[
+						"operation:groupShop:query",
+                        "operation:groupShop:create",
+                        "operation:groupShop:delete"
+					],
+					"title":"团购商品"
+				},
+				"name":"groupShop",
+				"page":"/goods/group_shop"
 			},
 			{
 				"path":"category",

@@ -52,6 +52,13 @@
 			<artifactId>okhttp</artifactId>
 		</dependency>
 
+		<!-- 微信第三方封装Api -->
+		<dependency>
+			<groupId>com.github.binarywang</groupId>
+			<artifactId>weixin-java-pay</artifactId>
+		</dependency>
+
+
 	</dependencies>
 
 </project>

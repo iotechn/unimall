@@ -1,10 +1,13 @@
 package com.iotechn.unimall.data.enums;
 
+import net.sf.jsqlparser.statement.select.Wait;
+
 /**
  * Created by rize on 2019/2/13.
  */
 public enum OrderStatusType {
     UNPAY(10, "未付款"),
+    GROUP_SHOP_WAIT(12,"等待团购活动结束"),
     WAIT_STOCK(20, "待出库"),
     WAIT_CONFIRM(30, "待收货"),
     WAIT_APPRAISE(40, "待评价"),

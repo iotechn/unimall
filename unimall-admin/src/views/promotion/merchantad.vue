@@ -2,14 +2,6 @@
   <div class="app-container">
     <!-- 查询和其他操作 -->
     <div class="filter-container">
-      <el-button
-        v-permission="['promote:advertisement:create']"
-        class="filter-item"
-        type="primary"
-        icon="el-icon-edit"
-        @click="handleCreate"
-      >添加</el-button>
-
       <el-select
         v-model="listQuery.status"
         style="width: 200px"
@@ -33,6 +25,14 @@
         icon="el-icon-search"
         @click="handleFilter"
       >查找</el-button>
+
+      <el-button
+        v-permission="['promote:advertisement:create']"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-edit"
+        @click="handleCreate"
+      >添加</el-button>
     </div>
 
     <!-- 查询结果 -->

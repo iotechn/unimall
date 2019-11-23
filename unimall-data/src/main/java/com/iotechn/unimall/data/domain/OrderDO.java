@@ -91,6 +91,9 @@ public class OrderDO extends SuperDO {
 
     private String mono;
 
+    @TableField("group_shop_id")
+    private Long groupShopId;
+
     @TableField("gmt_ship")
     private Date gmtShip;
 
