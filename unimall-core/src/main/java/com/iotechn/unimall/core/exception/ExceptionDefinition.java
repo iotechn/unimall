@@ -370,6 +370,7 @@ public class ExceptionDefinition {
 
 
 
+
     public static ServiceExceptionDefinition buildVariableException(ServiceExceptionDefinition definition, String ...args) {
         String msg = definition.getMsg();
         for (int i = 0; i < args.length; i++) {
