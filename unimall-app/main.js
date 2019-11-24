@@ -120,6 +120,7 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 }
 
 const uploadImg = (successCallback) => {
+	let baseUrl = config.def().baseUrl
 	uni.chooseImage({
 		sizeType: ['compressed'],
 		success: function(res) {

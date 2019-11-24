@@ -122,6 +122,7 @@
 
 					requestItems.push({
 						skuId: item.skuId,
+						spuId: item.spuId,
 						score: item.score,
 						content: item.content,
 						imgUrl: item.imgs.length > 0 ? item.imgs.join(',') : ''
