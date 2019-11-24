@@ -32,11 +32,6 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>iotechn-release</id>
-			<name>unimall maven</name>
-			<url>http://maven.iotechn.com/repository/maven-releases/</url>
-		</repository>
 	</repositories>
 
 	<modules>
@@ -46,6 +41,7 @@
 		<module>unimall-app-api</module>
 		<module>unimall-admin-api</module>
 		<module>unimall-launcher</module>
+		<module>unimall-plugin-core</module>
 	</modules>
 
 	<dependencyManagement>
@@ -138,12 +134,12 @@
 	</dependencyManagement>
 
 	<!-- 发布maven私服 -->
-	<distributionManagement>
-		<repository>
-			<id>iotechn-release</id>
-			<name>unimall maven</name>
-			<url>http://maven.iotechn.com/repository/maven-releases/</url>
-		</repository>
-	</distributionManagement>
+	<!--<distributionManagement>-->
+		<!--<repository>-->
+			<!--<id>iotechn-release</id>-->
+			<!--<name>unimall maven</name>-->
+			<!--<url>http://maven.iotechn.com/repository/maven-releases/</url>-->
+		<!--</repository>-->
+	<!--</distributionManagement>-->
 
 </project>
