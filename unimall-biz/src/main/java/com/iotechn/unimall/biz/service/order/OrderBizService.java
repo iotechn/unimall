@@ -113,7 +113,7 @@ public class OrderBizService {
         return orderDTO;
     }
 
-    @Transactional(rollbackFor = Exception.class)
+//    @Transactional(rollbackFor = Exception.class) 外面加了事务
     public String groupShopStatusRefund(String orderNo) throws ServiceException {
         if (lockComponent.tryLock(OrderBizService.ORDER_REFUND_LOCK + orderNo, 30)) {
             try {

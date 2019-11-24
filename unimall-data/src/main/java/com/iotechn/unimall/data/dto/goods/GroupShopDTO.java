@@ -17,12 +17,11 @@ import java.util.List;
 @Data
 public class GroupShopDTO extends SuperDTO {
 
-    /**
-     * GroupShop属性
-     */
-    private Long groupShopId;
-
     private Long spuId;
+
+    private Integer minPrice;
+
+    private Integer maxPrice;
 
     private Date groupShopTimeStart;
 

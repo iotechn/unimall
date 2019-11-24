@@ -95,6 +95,9 @@ public class GoodsBizService {
     @Autowired
     private AppraiseBizService appraiseBizService;
 
+    @Autowired
+    private GroupShopSkuMapper groupShopSkuMapper;
+
     private static final Column[] baseColumns = {
             Column.create().column("id"),
             Column.create().column("original_price").as("originalPrice"),
@@ -195,7 +198,6 @@ public class GoodsBizService {
         cacheComponent.putHashObj(CA_SPU_HASH, "S" + spuDO, spuDO, Const.CACHE_ONE_DAY);
         return spuDO;
     }
-
 
     public SpuDTO getGoods(Long spuId, Long userId) throws ServiceException {
         SpuDTO spuDTOFromCache = cacheComponent.getObj(CA_SPU_PREFIX + spuId, SpuDTO.class);

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.GroupShopSkuMapper">
+
+    <select id="getSkuList" resultType="com.iotechn.unimall.data.dto.goods.GroupShopSkuDTO">
+        SELECT
+            g.id,
+            g.sku_id AS skuId,
+            g.group_shop_id AS groupShopId,
+            g.sku_group_shop_price AS skuGroupShopPrice,
+            s.bar_code AS barCode,
+            s.title AS title,
+            s.img AS img,
+            s.original_price AS originalPrice,
+            s.vip_price AS vipPrice,
+            s.stock,
+            s.freeze_stock AS freezeStock
+        FROM
+            unimall_group_shop_sku AS g
+        LEFT JOIN unimall_sku AS s ON s.id = g.sku_id
+        WHERE id = #{id}
+    </select>
+
+</mapper>

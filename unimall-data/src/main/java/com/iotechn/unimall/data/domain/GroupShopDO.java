@@ -21,6 +21,15 @@ public class GroupShopDO extends SuperDO {
     @TableField("spu_id")
     private Long spuId;
 
+    /**
+     *  rize: 冗余的团购Sku最低价
+     */
+    @TableField("min_price")
+    private Integer minPrice;
+
+    @TableField("max_price")
+    private Integer maxPrice;
+
     @TableField("gmt_start")
     private Date gmtStart;
 
