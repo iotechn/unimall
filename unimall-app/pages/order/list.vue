@@ -55,9 +55,9 @@
 							<button :disabled="submiting" class="action-btn recom" @click="confirmOrder(item)">确认收货</button>
 						</view>
 						<view class="action-box b-t" v-if="item.status == 40">
-							<navigator url="./orderAppraise">
+							<view >
 								<button :disabled="submiting" class="action-btn recom" @click="appraiseOrder(item)">立即评价</button>
-							</navigator>
+							</view>
 						</view>
 					</view>
 
