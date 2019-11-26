@@ -251,6 +251,7 @@ import checkPermission from '@/utils/permission' // 权限判断函数
 
 const statusMap = {
   10: '未付款',
+  12: '正在拼团',
   20: '待出库',
   30: '待收货',
   40: '待评价',

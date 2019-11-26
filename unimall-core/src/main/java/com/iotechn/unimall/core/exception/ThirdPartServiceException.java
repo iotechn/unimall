@@ -6,6 +6,10 @@ package com.iotechn.unimall.core.exception;
  */
 public class ThirdPartServiceException extends ServiceException {
 
+    public ThirdPartServiceException(ServiceExceptionDefinition definition) {
+        super(definition);
+    }
+
     public ThirdPartServiceException(String message, int code) {
         super(message, code);
     }

@@ -1,8 +1,5 @@
 package com.iotechn.unimall.core.exception;
 
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.exception.ServiceExceptionDefinition;
-
 /**
  * Created by rize on 2019/7/1.
  */
@@ -13,6 +10,9 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition PLUGIN_EXCEPTION =
             new ServiceExceptionDefinition(1, "插件异常: ${0}");
+
+    public static final ServiceExceptionDefinition THIRD_PART_IO_EXCEPTION =
+            new ServiceExceptionDefinition(2, "第三方网络异常");
 
     public static final ServiceExceptionDefinition APP_UNKNOWN_EXCEPTION =
             new ServiceExceptionDefinition(10000, "系统未知异常");
