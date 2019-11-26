@@ -1,6 +1,7 @@
 package com.iotechn.unimall.app.api.goods;
 
 import com.iotechn.unimall.biz.service.goods.GoodsBizService;
+import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.mapper.GroupShopMapper;
@@ -21,7 +22,7 @@ public class GoodsServiceImpl implements GoodsService {
     private GoodsBizService goodsBizService;
 
     @Autowired
-    private GroupShopMapper groupShopMapper;
+    private GroupShopBizService groupShopBizService;
 
     @Override
     public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy,Boolean isAsc, String title) throws ServiceException {
@@ -33,7 +34,7 @@ public class GoodsServiceImpl implements GoodsService {
         //若团购Id不为空，则额外添加团购信息
         SpuDTO goods = goodsBizService.getGoods(spuId, userId);
         if (groupShopId != null) {
-
+            goods.setGroupShop(groupShopBizService.getGroupShopById(groupShopId));
         }
         return goods;
     }

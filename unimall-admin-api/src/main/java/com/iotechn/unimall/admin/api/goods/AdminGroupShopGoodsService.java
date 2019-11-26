@@ -24,7 +24,7 @@ public interface AdminGroupShopGoodsService {
             @NotNull @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "团购开始时间戳") Long gmtStart,
             @NotNull @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "团购结束时间戳") Long gmtEnd,
             @NotNull @Range(min = 1) @HttpParam(name = "minimumNumber", type = HttpParamType.COMMON, description = "团购最低人数") Integer minimumNumber,
-            @NotNull @HttpParam(name = "noFullPeopleAutomaticRefund", type = HttpParamType.COMMON, description = "团购人数未满是否自动退款")  Integer noFullPeopleAutomaticRefund,
+            @NotNull @HttpParam(name = "automaticRefund", type = HttpParamType.COMMON, description = "团购人数未满是否自动退款")  Integer automaticRefund,
             @NotNull @HttpParam(name = "groupShopSkuList", type = HttpParamType.COMMON, description = "团购sku链表") List groupShopSkuList) throws ServiceException;
 
     @HttpMethod(description = "删除", permission = "operation:groupShop:delete", permissionParentName = "商品管理", permissionName = "团购商品管理")
@@ -40,7 +40,7 @@ public interface AdminGroupShopGoodsService {
             @NotNull @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "团购开始时间戳") Long gmtStart,
             @NotNull @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "团购结束时间戳") Long gmtEnd,
             @NotNull @Range(min = 1) @HttpParam(name = "minimumNumber", type = HttpParamType.COMMON, description = "团购最低人数") Integer minimumNumber,
-            @NotNull @HttpParam(name = "noFullPeopleAutomaticRefund", type = HttpParamType.COMMON, description = "团购人数未满是否自动退款")  Integer noFullPeopleAutomaticRefund,
+            @NotNull @HttpParam(name = "automaticRefund", type = HttpParamType.COMMON, description = "团购人数未满是否自动退款")  Integer automaticRefund,
             @NotNull @HttpParam(name = "groupShopSkuList", type = HttpParamType.COMMON, description = "团购sku链表") List groupShopSkuDOList ) throws ServiceException;
 
     @HttpMethod(description = "查询", permission = "operation:groupShop:query", permissionParentName = "商品管理", permissionName = "团购商品管理")

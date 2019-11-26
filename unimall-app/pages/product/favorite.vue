@@ -65,20 +65,23 @@
 				if (type === 'refresh') {
 					that.pageNo = 1
 					that.favoriteList = []
+					that.loadingType = 'more'
 				}
-				that.loadingType = 'loading'
-				that.$api.request('collect', 'getCollectAll', {
-					pageNo: that.pageNo
-				}).then(res => {
-					that.pageNo = res.data.pageNo + 1
-					that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'nomore'
-					res.data.items.forEach(item => {
-						that.favoriteList.push(item);
-						if (type === 'refresh') {
-							uni.stopPullDownRefresh();
-						}
+				if (that.loadingType === 'more') {
+					that.loadingType = 'loading'
+					that.$api.request('collect', 'getCollectAll', {
+						pageNo: that.pageNo
+					}).then(res => {
+						that.pageNo = res.data.pageNo + 1
+						that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'nomore'
+						res.data.items.forEach(item => {
+							that.favoriteList.push(item);
+							if (type === 'refresh') {
+								uni.stopPullDownRefresh();
+							}
+						})
 					})
-				})
+				}
 			},
 			deleteFavorite(item) {
 				const that = this

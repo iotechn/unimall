@@ -58,6 +58,11 @@ public class SpuDTO extends SuperDTO {
      */
     private Page<AppraiseResponseDTO> appraisePage;
 
+    /**
+     * 商品现在携带的团购信息
+     */
+    private GroupShopDTO groupShop;
+
     private String unit;
 
     private Long freightTemplateId;

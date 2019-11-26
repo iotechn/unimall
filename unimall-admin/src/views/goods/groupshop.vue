@@ -16,7 +16,7 @@
         style="width: 200px;"
         placeholder="请输入团购ID"
       />
-      <el-select v-model="listQuery.status" clearable style="width: 200px" class="filter-item" placeholder="请选择优惠券状态" >
+      <el-select v-model="listQuery.status" clearable style="width: 200px" class="filter-item" placeholder="请选择团购状态" >
         <el-option v-for="(item,index) in GroupShopStatusMap" :key="index" :label="item.name" :value="item.value" />
       </el-select>
       <el-button v-permission="['operation:groupShop:query']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
@@ -74,30 +74,30 @@
       <el-table-column align="center" label="到期人数未满,是否自动退款" prop="status">
         <template slot-scope="scope">
           <el-tag
-            :type="scope.row.noFullPeopleAutomaticRefund == 1 ? 'success' : 'error' "
-          >{{ scope.row.noFullPeopleAutomaticRefund == 1 ? '退款' : '发货' }}</el-tag>
+            :type="scope.row.automaticRefund == 1 ? 'success' : 'error' "
+          >{{ scope.row.automaticRefund == 1 ? '退款' : '发货' }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="是否在售" prop="status">
+      <el-table-column align="center" label="活动状态" prop="status">
         <template slot-scope="scope">
           <el-tag
             :type="scope.row.status == 1 ? 'success' : 'error' "
-          >{{ scope.row.status == 1 ? '活动' : '冻结' }}</el-tag>
+          >{{ scope.row.status == 1 ? '进行' : '冻结' }}</el-tag>
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="团购开始时间" prop="gmtStart" width="85">
-        <template slot-scope="scope">{{ scope.row.groupShopTimeStart | formatGmt }}</template>
+        <template slot-scope="scope">{{ scope.row.gmtStart | formatGmt }}</template>
       </el-table-column>
 
       <el-table-column align="center" label="团购结束时间" prop="gmtEnd" width="85">
-        <template slot-scope="scope">{{ scope.row.groupShopTimeEnd | formatGmt }}</template>
+        <template slot-scope="scope">{{ scope.row.gmtEnd | formatGmt }}</template>
       </el-table-column>
 
-      <el-table-column align="center" label="描述" prop="groupShopMinimumNumber" />
+      <el-table-column align="center" label="当前人数" prop="alreadyBuyNumber" />
 
-      <el-table-column align="center" width="300" label="描述" prop="description" />
+      <el-table-column align="center" label="目标人数" prop="minimumNumber" />
 
       <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -164,7 +164,7 @@
           </el-form-item>
 
           <el-form-item label="活动结束时人数没有达到基础人数处理">
-            <el-radio-group v-model="dataForm.noFullPeopleAutomaticRefund" >
+            <el-radio-group v-model="dataForm.automaticRefund" >
               <el-radio-button :label="1">自动退款,我不发货</el-radio-button>
               <el-radio-button :label="0">不退款,我要发货</el-radio-button>
             </el-radio-group>
@@ -289,7 +289,7 @@ export default {
         gmtStart: undefined,
         gmtEnd: undefined,
         minimumNumber: 1,
-        noFullPeopleAutomaticRefund: 1,
+        automaticRefund: 1,
         groupShopSkus: [],
         skuList: []
       },
@@ -335,7 +335,7 @@ export default {
         gmtStart: undefined,
         gmtEnd: undefined,
         minimumNumber: 1,
-        noFullPeopleAutomaticRefund: 1,
+        automaticRefund: 1,
         skuList: [],
         groupShopSkus: []
       }
@@ -348,21 +348,20 @@ export default {
       this.dialogFormVisible = true
     },
     openSpuUpdateDialog(data) {
-      console.log(data)
       this.refreshDataForm()
       this.refreshGoodsOptions()
       this.dialogStatus = 'update'
       this.goodsOption = 'G_' + data.spuId
-      this.dataForm = Object.assign({
+      this.dataForm = Object.assign({}, {
         id: data.id,
         spuId: data.spuId,
-        noFullPeopleAutomaticRefund: data.noFullPeopleAutomaticRefund,
-        gmtStart: new Date(data.groupShopTimeStart),
-        gmtEnd: new Date(data.groupShopTimeEnd),
-        minimumNumber: data.groupShopMinimumNumber,
+        automaticRefund: data.automaticRefund,
+        gmtStart: new Date(data.gmtStart),
+        gmtEnd: new Date(data.gmtEnd),
+        minimumNumber: data.minimumNumber,
         skuList: data.groupShopSkuDTOList,
         groupShopSkus: []
-      }, data)
+      })
       this.dialogFormVisible = true
     },
     handleDelete(row) {
@@ -444,8 +443,8 @@ export default {
         })
         return false
       }
-      this.dataForm.gmtStart = this.dataForm.gmtStart.getTime()
-      this.dataForm.gmtEnd = this.dataForm.gmtEnd.getTime()
+      // this.dataForm.gmtStart = this.dataForm.gmtStart.getTime()
+      // this.dataForm.gmtEnd = this.dataForm.gmtEnd.getTime()
 
       // 提取skuList中的属性并改名
       for (var i = 0; i < this.dataForm.skuList.length; i++) {
@@ -454,13 +453,24 @@ export default {
         temp.skuGroupShopPrice = this.dataForm.skuList[i].skuGroupShopPrice * 100
         this.dataForm.groupShopSkus.push(temp)
       }
+      this.dataForm.groupShopSkuList = JSON.stringify(this.dataForm.groupShopSkus)
+      const requestForm = {
+        id: this.dataForm.id,
+        gmtStart: this.dataForm.gmtStart.getTime(),
+        gmtEnd: this.dataForm.gmtEnd.getTime(),
+        groupShopSkuList: this.dataForm.groupShopSkuList,
+        minimumNumber: this.dataForm.minimumNumber,
+        spuId: this.dataForm.spuId,
+        automaticRefund: this.dataForm.automaticRefund
+      }
       if (this.dialogStatus === 'create') {
-        createGroupShop(this.dataForm)
+        createGroupShop(requestForm)
           .then(response => {
             this.$notify.success({
               title: '成功',
               message: '团购商品录入成功!'
             })
+            this.getList()
           })
           .catch(response => {
             this.$notify.error({
@@ -469,12 +479,13 @@ export default {
             })
           })
       } else if (this.dialogStatus === 'update') {
-        editGroupShop(this.dataForm)
+        editGroupShop(requestForm)
           .then(response => {
             this.$notify.success({
               title: '成功',
               message: '团购商品更新成功!'
             })
+            this.getList()
           })
           .catch(response => {
             this.$notify.error({

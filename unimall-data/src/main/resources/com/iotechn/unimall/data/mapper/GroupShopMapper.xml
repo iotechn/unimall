@@ -12,7 +12,7 @@
             g.max_price as maxPrice,
             g.minimum_number as minimumNumber,
             g.already_buy_number as alreadyBuyNumber,
-            g.no_full_people_automatic_refund as noFullPeopleAutomaticRefund
+            g.automatic_refund as automaticRefund,
             g.`status`,
             g.gmt_update as gmtUpdate,
             g.gmt_create as gmtCreate,
@@ -43,7 +43,7 @@
             g.max_price as maxPrice,
             g.minimum_number as minimumNumber,
             g.already_buy_number as alreadyBuyNumber,
-            g.no_full_people_automatic_refund as noFullPeopleAutomaticRefund
+            g.automatic_refund as automaticRefund,
             g.`status`,
             g.gmt_update as gmtUpdate,
             g.gmt_create as gmtCreate,
@@ -58,7 +58,11 @@
             unimall_group_shop AS g
         LEFT JOIN
             unimall_spu as s on s.id = g.spu_id
-        WHERE id = #{id}
+        WHERE g.id = #{id}
     </select>
+
+    <update id="incCurrentNum">
+        UPDATE unimall_group_shop SET already_buy_number = already_buy_number + #{num} WHERE id = #{id}
+    </update>
 
 </mapper>

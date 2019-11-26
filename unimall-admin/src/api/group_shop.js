@@ -18,7 +18,6 @@ export function editGroupShop(data) {
     data: Qs.stringify({
       _gp: 'admin.groupShop',
       _mt: 'editGroupShopSpu',
-      groupShopSkuList: JSON.stringify(data.groupShopSkus),
       ...data
     })
   })
@@ -41,7 +40,6 @@ export function createGroupShop(data) {
     data: Qs.stringify({
       _gp: 'admin.groupShop',
       _mt: 'addGroupShopSpu',
-      groupShopSkuList: JSON.stringify(data.groupShopSkus),
       ...data
     })
   })

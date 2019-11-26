@@ -135,6 +135,12 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND =
             new ServiceExceptionDefinition(13021, "订单支付方式不支持退款");
 
+    public static final ServiceExceptionDefinition ORDER_GROUP_SPU_CAN_SINGLE_TAKE =
+            new ServiceExceptionDefinition(13022, "团购订单只允许单品结算");
+
+    public static final ServiceExceptionDefinition ORDER_GROUP_SHOP_NOT_EXIST_OR_EXPIRED =
+            new ServiceExceptionDefinition(13023, "团购活动已经过期或不存在");
+
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
             new ServiceExceptionDefinition(14001, "优惠券已经领完～");

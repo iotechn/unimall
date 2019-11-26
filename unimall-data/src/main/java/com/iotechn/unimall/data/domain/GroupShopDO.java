@@ -48,8 +48,8 @@ public class GroupShopDO extends SuperDO {
     /**
      * 团购人数未满,是否自动退款,默认自动退款,1是自动退款,0不自动退款
      */
-    @TableField("no_full_people_automatic_refund")
-    private Integer noFullPeopleAutomaticRefund;
+    @TableField("automatic_refund")
+    private Integer automaticRefund;
 
     /**
      * 团购商品的状态,1是可使用状态,0是过期已经不可使用状态

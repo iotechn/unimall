@@ -22,11 +22,11 @@
 			<view v-for="(item, index) in orderReqeust.skuList" :key="index" class="g-item">
 				<image :src="(item.skuImg?item.skuImg:item.spuImg) + '?x-oss-process=style/200px'"></image>
 				<view class="right">
-					<text class="title clamp">{{item.title}}</text>
+					<text class="title clamp">{{ (item.groupShopId ? '[团购]' : '') + item.title}}</text>
 					<text class="spec">{{item.skuTitle}}</text>
 					<view class="price-box">
-						<text class="price"><text v-if="(isVip ? item.vipPrice : item.originalPrice) < item.originalPrice" 
-						style="text-decoration:line-through">￥{{item.originalPrice / 100.0}}</text>￥{{(isVip ? item.vipPrice : item.originalPrice) / 100.0}}</text>
+						<text class="price"><text v-if="(isVip ? item.vipPrice : item.price) < item.originalPrice" 
+						style="text-decoration:line-through; font-size: 25upx; color: #666666;">￥{{item.originalPrice / 100.0}}</text>￥{{(isVip ? item.vipPrice : item.price) / 100.0}}</text>
 						<text class="number">x {{item.num}}</text>
 					</view>
 				</view>
@@ -178,6 +178,11 @@
 				that.addressData = res.data
 				that.calcFreightPrice()
 			})
+			
+			if (that.orderReqeust.skuList.length === 1 && that.orderReqeust.skuList[0].groupShopId) {
+				//若是团购商品，则携带上团购信息
+				that.orderReqeust.groupShopId = that.orderReqeust.skuList[0].groupShopId
+			}
 
 		},
 		methods: {

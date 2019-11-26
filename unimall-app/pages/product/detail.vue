@@ -15,14 +15,30 @@
 			<view class="price-box">
 				<text class="price-tip">¥</text>
 				<text class="price">{{isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) / 100.0  + ' [VIP]': (selectedSku.price ? selectedSku.price : goods.price) / 100.0 }}</text>
-				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) : (selectedSku.price ? selectedSku.price : goods.price)) < (selectedSku.price ? selectedSku.originalPrice : goods.originalPrice)" class="m-price">¥{{(selectedSku.price ? selectedSku.originalPrice : goods.originalPrice) / 100}}</text>
-				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) : (selectedSku.price ? selectedSku.price : goods.price)) < (selectedSku.price ? selectedSku.originalPrice : goods.originalPrice)" class="coupon-tip">{{parseInt((isVip? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice): (selectedSku.price ? selectedSku.price : goods.price)) / (selectedSku.originalPrice ? selectedSku.originalPrice : goods.originalPrice) * 100) / 10}}折</text>
+				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) : (selectedSku.price ? selectedSku.price : goods.price)) < (selectedSku.price ? selectedSku.originalPrice : goods.originalPrice)"
+				 class="m-price">¥{{(selectedSku.price ? selectedSku.originalPrice : goods.originalPrice) / 100}}</text>
+				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) : (selectedSku.price ? selectedSku.price : goods.price)) < (selectedSku.price ? selectedSku.originalPrice : goods.originalPrice)"
+				 class="coupon-tip">{{parseInt((isVip? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice): (selectedSku.price ? selectedSku.price : goods.price)) / (selectedSku.originalPrice ? selectedSku.originalPrice : goods.originalPrice) * 100) / 10}}折</text>
 			</view>
 			<view class="bot-row">
 				<text>销量: {{goods.sales}}</text>
 				<text>库存: {{goods.stock}}</text>
 			</view>
 		</view>
+
+		<!-- 团购分享 -->
+		<button v-if="goods.groupShop" class="share-section" open-type="share">
+			<view class="share-icon">
+				<text class="yticon icon-xingxing"></text>
+				团
+			</view>
+			<text class="tit">{{goods.groupShop.minimumNumber}}人成团，已有{{goods.groupShop.alreadyBuyNumber}}人参团</text>
+			<text class="yticon icon-bangzhu1"></text>
+			<view class="share-btn">
+				告诉TA
+				<text class="yticon icon-you"></text>
+			</view>
+		</button>
 
 		<view class="c-list">
 			<view class="c-row b-b" @click="toggleSpec">
@@ -77,6 +93,7 @@
 			</view>
 		</view>
 
+
 		<view class="detail-desc">
 			<view class="d-header">
 				<text>图文详情</text>
@@ -100,7 +117,7 @@
 				<text>收藏</text>
 			</view>
 			<view class="action-btn-group">
-				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">立即购买</button>
+				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">{{ goods.groupShop ? '立即参团' : '立即购买'}}</button>
 				<button type="primary" class=" action-btn no-border add-cart-btn" @click="addCart">加入购物车</button>
 			</view>
 		</view>
@@ -157,17 +174,13 @@
 				<button class="btn" @click="toggleSpec">完成</button>
 			</view>
 		</view>
-		<!-- 分享 -->
-		<share ref="share" :contentHeight="580" :shareList="shareList"></share>
 	</view>
 </template>
 
 <script>
-	import share from '@/components/share';
 	import uParse from '@/components/u-parse/u-parse.vue';
 	export default {
 		components: {
-			share,
 			uParse
 		},
 		data() {
@@ -181,7 +194,6 @@
 				isVip: false,
 				specClass: 'none',
 				specSelected: [],
-				shareList: [],
 				selectedSku: {},
 				selectedSkuIndex: -1,
 				toggleCallback: undefined,
@@ -200,18 +212,39 @@
 				title: '正在加载'
 			})
 			that.$api.request('goods', 'getGoods', {
-				spuId: options.id
+				spuId: options.id,
+				groupShopId: options.gid ? options.gid : ''
 			}, failres => {
 				that.$api.msg(failres.errmsg)
 				uni.hideLoading()
 			}).then(res => {
 				that.goods = res.data
-				that.goods.detail = that.goods.detail
+				if (that.goods.groupShop) {
+					//若存在团购信息，将价格更新到团购价格
+					that.goods.price = that.goods.groupShop.minPrice
+					that.goods.vipPrice = that.goods.groupShop.minPrice
+					//更新各个SKU的价格
+					for (let i = 0; i < that.goods.skuList.length; i++) {
+						for (let j = 0; j < that.goods.groupShop.groupShopSkuList.length; j++) {
+							if (that.goods.skuList[i].id === that.goods.groupShop.groupShopSkuList[j].skuId) {
+								that.goods.skuList[i].price = that.goods.groupShop.groupShopSkuList[j].skuGroupShopPrice
+								that.goods.skuList[i].vipPrice = that.goods.groupShop.groupShopSkuList[j].skuGroupShopPrice
+							}
+						}
+					}
+				}
 				uni.hideLoading()
 			})
 			that.$api.request('coupon', 'getObtainableCoupon').then(res => {
 				that.couponList = res.data
 			})
+		},
+		onShareAppMessage() {
+			return {
+				title: (this.goods.groupShop ? '立即拼团-' : '好货分享-') + this.goods.title,
+				imageUrl: 'https://easycampus-asset.oss-cn-shenzhen.aliyuncs.com/sharebg.png',
+				path: '/pages/product/detail?id=' + this.goods.id + (this.goods.groupShop ? '&gid=' + this.goods.groupShop.id : '')
+			}
 		},
 		methods: {
 			toggleMask(type) {
@@ -271,14 +304,14 @@
 						skuId: that.selectedSku.id,
 						num: 1
 					}).then(res => {
-						that.$api.msg('添加购物车成功')
+						if (that.goods.groupShop) {
+							that.$api.msg('从购物车结算不会参加团购')
+						} else {
+							that.$api.msg('添加购物车成功')
+						}
+						
 					})
 				}
-			},
-
-			//分享
-			share() {
-				this.$refs.share.toggleMask();
 			},
 			//收藏
 			toFavorite() {
@@ -321,14 +354,15 @@
 						categoryId: that.goods.categoryId,
 						categoryIdList: that.goods.categoryIds
 					}
+					if (that.goods.groupShop) {
+						skuItem['groupShopId'] = that.goods.groupShop.id
+					}
 					let skuList = [1]
 					skuList[0] = skuItem
 					uni.navigateTo({
 						url: `/pages/order/create?takeway=buy&data=${JSON.stringify(skuList)}`
 					})
 				}
-
-
 			},
 			//查看所有评价
 			navAllAppraise() {
@@ -1047,4 +1081,9 @@
 		padding: 0;
 		line-height: 0px;
 	}
+	
+	button::after {
+		border: none;
+	}
+	
 </style>

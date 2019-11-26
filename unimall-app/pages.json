@@ -1,11 +1,6 @@
 {
 	"pages": [
 		{
-			"path": "pages/groupshop/list",
-			"style": {
-				"navigationBarTitleText": "团购"
-			}
-		}, {
 			"path": "pages/index/index",
 			"style": {
 				// #ifdef MP 
@@ -40,6 +35,11 @@
 						]
 					}
 				}
+			}
+		}, {
+			"path": "pages/groupshop/list",
+			"style": {
+				"navigationBarTitleText": "团购"
 			}
 		}, {
 			"path": "pages/address/list",

@@ -9,6 +9,7 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
 import com.iotechn.unimall.biz.service.freight.FreightBizService;
+import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -18,16 +19,14 @@ import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.*;
+import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
 import com.iotechn.unimall.data.dto.goods.SkuDTO;
 import com.iotechn.unimall.data.dto.UserCouponDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
-import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.enums.PayChannelType;
-import com.iotechn.unimall.data.enums.UserLevelType;
-import com.iotechn.unimall.data.enums.UserLoginType;
+import com.iotechn.unimall.data.enums.*;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
@@ -89,6 +88,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private UserBizService userBizService;
 
+    @Autowired
+    private GroupShopBizService groupShopBizService;
+
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;
 
@@ -121,6 +123,25 @@ public class OrderServiceImpl implements OrderService {
                 if (orderRequest.getTotalPrice() <= 0) {
                     throw new AppServiceException(ExceptionDefinition.ORDER_PRICE_MUST_GT_ZERO);
                 }
+                Long groupShopId = orderRequest.getGroupShopId();
+                Integer groupShopPrice = null;
+                if (groupShopId != null) {
+                    //校验团购参数
+                    if (skuList.size() > 1) {
+                        throw new AppServiceException(ExceptionDefinition.ORDER_GROUP_SPU_CAN_SINGLE_TAKE);
+                    }
+                    GroupShopDTO groupShopDTO = groupShopBizService.getGroupShopById(groupShopId);
+                    if (groupShopDTO == null || groupShopDTO.getStatus() == StatusType.LOCK.getCode()) {
+                        throw new AppServiceException(ExceptionDefinition.ORDER_GROUP_SHOP_NOT_EXIST_OR_EXPIRED);
+                    }
+                    List<GroupShopSkuDO> groupShopSkuList = groupShopDTO.getGroupShopSkuList();
+                    for (GroupShopSkuDO groupShopSkuDO : groupShopSkuList) {
+                        if (groupShopSkuDO.getSkuId().equals(groupShopSkuList.get(0).getSkuId())) {
+                            //若找到交集
+                            groupShopPrice = groupShopSkuDO.getSkuGroupShopPrice();
+                        }
+                    }
+                }
                 //商品价格
                 int skuPrice = 0;
                 int skuOriginalPrice = 0;
@@ -138,7 +159,9 @@ public class OrderServiceImpl implements OrderService {
                         throw new AppServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH);
                     }
                     int p;
-                    if (userLevel == UserLevelType.VIP.getCode()) {
+                    if (groupShopId != null && groupShopPrice != null) {
+                        p = groupShopPrice;
+                    } else if (userLevel == UserLevelType.VIP.getCode()) {
                         p = skuDTO.getVipPrice() * orderRequestSkuDTO.getNum();
                     } else {
                         p = skuDTO.getPrice() * orderRequestSkuDTO.getNum();
@@ -205,6 +228,7 @@ public class OrderServiceImpl implements OrderService {
                 orderDO.setSkuOriginalTotalPrice(skuOriginalPrice);
                 orderDO.setChannel(channel);
                 orderDO.setActualPrice(actualPrice);
+                orderDO.setGroupShopId(groupShopId);
                 if (couponPrice != 0) {
                     orderDO.setCouponId(orderRequest.getCoupon().getCouponId());
                     orderDO.setCouponPrice(couponPrice);

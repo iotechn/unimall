@@ -180,8 +180,9 @@ public class CheckQuartz {
                             continue;
                         }
 
-                        if (groupShopDO.getNoFullPeopleAutomaticRefund() == GroupShopAutomaticRefundType.YES.getCode() && groupShopDO.getAlreadyBuyNumber().compareTo(groupShopDO.getMinimumNumber()) < 0) {
+                        if (groupShopDO.getAutomaticRefund() == GroupShopAutomaticRefundType.YES.getCode() && groupShopDO.getAlreadyBuyNumber().compareTo(groupShopDO.getMinimumNumber()) < 0) {
                             // 2.2.2.1.退款
+                            logger.info("[团购结束] 退款逻辑 groupShopId:" + groupShopDO.getId());
                             for (OrderDO orderDO : lockOrderList) {
                                 transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                                     @Override
@@ -189,14 +190,16 @@ public class CheckQuartz {
                                         try {
                                             //对订单退款保证原子性，仅退款成功的单子，变更状态
                                             orderBizService.groupShopStatusRefund(orderDO.getOrderNo());
+                                            logger.info("[团购订单退款] 完成 orderNo:" + orderDO.getOrderNo());
                                         } catch (Exception e) {
-                                            logger.error("[团购订单退款] 异常: orderNo=" + orderDO.getOrderNo() + "; errmsg=" + e.getMessage());
+                                            logger.error("[团购订单退款] 异常 orderNo:" + orderDO.getOrderNo() + "; errmsg:" + e.getMessage());
                                             transactionStatus.setRollbackOnly();
                                         }
                                     }
                                 });
                             }
                         } else {
+                            logger.info("[团购结束] 发货逻辑 groupShopId:" + groupShopDO.getId());
                             // 2.2.2.2 转换订单为待出货状态 (非自动退款场景)
                             List<Long> collect = lockOrderList.stream().map(s -> s.getId()).collect(Collectors.toList());
                             OrderDO orderDO = new OrderDO();

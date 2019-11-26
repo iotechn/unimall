@@ -4,20 +4,26 @@
 		<empty v-if="loadingType === 'nomore' && groupShopList.length === 0"></empty>
 		<view class="favorite-list">
 			<block v-for="(item, index) in groupShopList" :key="index">
-				<view class="favorite-item" :class="{'b-b': index!==groupShopList.length-1}">
+				<navigator class="favorite-item" :class="{'b-b': index!==groupShopList.length-1}" :url="'/pages/product/detail?id=' + item.spuId + '&gid=' + item.id">
 					<view class="image-wrapper">
 						<image :src="item.img + '?x-oss-process=style/200px'" :class="[item.loaded]" mode="aspectFill" lazy-load @load="onImageLoad('groupShopList', index)"
 						 @error="onImageError('groupShopList', index)"></image>
 					</view>
 					<view class="item-right">
 						<text class="clamp title">{{item.title}}</text>
-						<text class="attr">{{item.description}}</text>
-						<text class="attr">已拼团{{item.sales}}件</text>
-						<text class="price"><text v-if="item.originalPrice > (isVip ? item.vipPrice:item.price)" style="text-decoration:line-through">¥{{item.originalPrice / 100.0}}</text>
-							¥{{(isVip ? (item.vipPrice / 100.0 + ' [VIP]'):item.price / 100.0)}}</text>
+						<view class="pro-box">
+						  	<view class="progress-box">
+						  		<progress :percent="100 * item.alreadyBuyNumber / item.minimumNumber" activeColor="#fa436a" active stroke-width="6" />
+						  	</view>
+							<text>{{item.minimumNumber}}人成团</text>
+						</view>
+						<text class="attr">已拼团{{item.alreadyBuyNumber}}件</text>
+						<text class="price">
+							<text style="text-decoration:line-through;color: #6B6B6B;">¥{{item.originalPrice / 100.0}}</text>
+							<text style="color: #fa436a; font-size: 36upx;">¥{{item.minPrice / 100.0}}</text>
+						</text>
 					</view>
-					<text class="del-btn yticon icon-fork" @click="deleteFavorite(item)"></text>
-				</view>
+				</navigator>
 			</block>
 		</view>
 
@@ -37,12 +43,8 @@
 			return {
 				groupShopList: [],
 				pageNo: 1,
-				loadingType: 'more',
-				isVip: false
+				loadingType: 'more'
 			};
-		},
-		onShow() {
-			this.isVip = this.$api.isVip()
 		},
 		onLoad(options) {
 			this.loadData()
@@ -62,28 +64,23 @@
 				if (type === 'refresh') {
 					that.pageNo = 1
 					that.groupShopList = []
+					that.loadingType = 'more'
 				}
-				that.loadingType = 'loading'
-				that.$api.request('groupshop', 'getGroupShopPage', {
-					pageNo: that.pageNo
-				}).then(res => {
-					that.pageNo = res.data.pageNo + 1
-					that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'nomore'
-					res.data.items.forEach(item => {
-						that.groupShopList.push(item);
+				if (that.loadingType == 'more') {
+					that.loadingType = 'loading'
+					that.$api.request('groupshop', 'getGroupShopPage', {
+						pageNo: that.pageNo
+					}).then(res => {
+						that.pageNo = res.data.pageNo + 1
+						that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'nomore'
+						res.data.items.forEach(item => {
+							that.groupShopList.push(item);
+						})
+						if (type === 'refresh') {
+							uni.stopPullDownRefresh();
+						}
 					})
-					if (type === 'refresh') {
-						uni.stopPullDownRefresh();
-					}
-				})
-			},
-			deleteFavorite(item) {
-				const that = this
-				that.$api.request('collect', 'deleteCollect', {
-					spuId: item.spuId
-				}).then(res => {
-					that.loadData('refresh')
-				})
+				}
 			},
 			//监听image加载完成
 			onImageLoad(key, index) {
@@ -186,7 +183,24 @@
 				height: 50upx;
 				line-height: 50upx;
 			}
-
+			
+			.pro-box{
+				display:flex;
+				align-items:center;
+				margin-top: 10upx;
+				font-size: $font-sm;
+				color: $font-base;
+				padding-right: 10upx;
+				
+				.progress-box{
+					flex: 1;
+					border-radius: 10px;
+					overflow: hidden;
+					margin-right: 8upx;
+				}
+				
+			}
+			
 			.price {
 				height: 50upx;
 				line-height: 50upx;

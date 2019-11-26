@@ -137,6 +137,7 @@ public class OrderBizService {
                 wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? wxMiNiAppid : wxAppAppid);
                 wxPayRefundRequest.setOutTradeNo(orderNo);
                 wxPayRefundRequest.setOutRefundNo("refund_" + orderNo);
+                wxPayRefundRequest.setRefundDesc("团购失败退款");
                 wxPayRefundRequest.setTotalFee(orderDO.getPayPrice() - orderDO.getFreightPrice());
                 wxPayRefundRequest.setRefundFee(orderDO.getPayPrice() - orderDO.getFreightPrice());
                 WxPayRefundResult wxPayRefundResult = wxPayService.refund(wxPayRefundRequest);

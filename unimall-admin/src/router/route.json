@@ -70,7 +70,7 @@
 				"page":"/goods/list"
             },
             {
-				"path":"groupShop",
+				"path":"groupshop",
 				"meta":{
 					"noCache":true,
 					"perms":[
@@ -81,7 +81,7 @@
 					"title":"团购商品"
 				},
 				"name":"groupShop",
-				"page":"/goods/group_shop"
+				"page":"/goods/groupshop"
 			},
 			{
 				"path":"category",
