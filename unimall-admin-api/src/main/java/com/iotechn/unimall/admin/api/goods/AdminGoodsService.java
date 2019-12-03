@@ -40,11 +40,19 @@ public interface AdminGoodsService {
             @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页码长度", valueDef = "20") Integer limit,
             @HttpParam(name = "categoryId", type = HttpParamType.COMMON, description = "搜索分类") Long categoryId,
             @HttpParam(name = "title", type = HttpParamType.COMMON, description = "搜索标题") String title,
+            @HttpParam(name = "barcode", type = HttpParamType.COMMON, description = "商品条形码") String barcode,
+            @HttpParam(name = "status", type = HttpParamType.COMMON, description = "商品状态") Integer status,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "详情", permission = "operation:goods:detail", permissionParentName = "商品管理", permissionName = "商品管理")
     public SpuDTO detail(
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "商品Id") Long spuId,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
+
+    @HttpMethod(description = "上下架", permission = "operation:goods:edit", permissionParentName = "商品管理", permissionName = "商品管理")
+    public SpuDTO freezeOrActivation(
+            @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "商品Id") Long spuId,
+            @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "商品想要变为的状态") Integer status,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
 

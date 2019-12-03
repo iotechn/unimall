@@ -66,12 +66,14 @@ export function detailGoods(id) {
   })
 }
 
-export function listCatAndBrand() {
+export function freezeOrActivtion(id, status) {
   return request({
-    method: 'get',
+    method: 'post',
     params: {
-      _gp: 'goods',
-      _mt: 'categories'
+      _gp: 'admin.goods',
+      _mt: 'freezeOrActivation',
+      spuId: id,
+      status: status
     }
   })
 }
