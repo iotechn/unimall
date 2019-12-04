@@ -64,6 +64,11 @@ public class OrderBizService {
 
     public boolean changeOrderStatus(String orderNo, int nowStatus, OrderDO orderDO) throws ServiceException {
         try {
+            // 防止传入值为空,导致其余订单被改变
+            if(orderNo == null || orderDO == null){
+                throw new BizServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+            }
+
             if (lockComponent.tryLock(ORDER_STATUS_LOCK + orderNo, 30)) {
                 if (orderMapper.update(orderDO,
                         new EntityWrapper<OrderDO>()
