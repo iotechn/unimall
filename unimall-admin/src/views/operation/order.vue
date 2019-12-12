@@ -486,7 +486,12 @@ export default {
     // 选择条件下载
     downExcelBtn() {
       this.downloadLoading = true
-      getExcelInfo(this.downData).then(response => {
+      const dataInfo = Object.assign({}, {
+        status: this.downData.status,
+        gmtStart: this.downData.gmtStart.getTime(),
+        gmtEnd: this.downData.gmtEnd.getTime()
+      })
+      getExcelInfo(dataInfo).then(response => {
         if (response.data.data == null) {
           this.$notify.error({
             title: '失败',
