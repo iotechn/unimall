@@ -1,28 +1,32 @@
 package com.iotechn.unimall.admin.api.goods;
 
+import com.baomidou.mybatisplus.entity.Column;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.iotechn.unimall.biz.service.goods.GoodsBizService;
+import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.dto.goods.SpuTreeNodeDTO;
 import com.iotechn.unimall.data.enums.BizType;
+import com.iotechn.unimall.data.enums.SpuStatusType;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.plugin.core.inter.IPluginUpdateGoods;
 import com.iotechn.unimall.plugin.core.manager.PluginsManager;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +58,23 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
 
     @Autowired
     private PluginsManager pluginsManager;
+
+    @Autowired
+    private CacheComponent cacheComponent;
+
+    private static final Column[] spuBaseColumns = {
+            Column.create().column("id"),
+            Column.create().column("original_price").as("originalPrice"),
+            Column.create().column("price"),
+            Column.create().column("vip_price").as("vipPrice"),
+            Column.create().column("title"),
+            Column.create().column("sales"),
+            Column.create().column("img"),
+            Column.create().column("description"),
+            Column.create().column("category_id").as("categoryId"),
+            Column.create().column("freight_template_id").as("freightTemplateId"),
+            Column.create().column("unit"),
+            Column.create().column("status")};
 
     /**
      * 后台低频接口， 无需缓存
@@ -130,49 +151,6 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         return list;
     }
 
-//    @Override
-//    public List<SpuTreeNodeDTO> getSpuBigTree(Long adminId) throws ServiceException {
-//        List<CategoryDO> categoryDOS = categoryMapper.selectList(new EntityWrapper<>());
-//        List<SpuTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
-//            SpuTreeNodeDTO dto = new SpuTreeNodeDTO();
-//            dto.setLabel(item.getTitle());
-//            dto.setValue("C_" + item.getId());
-//            dto.setId(item.getId());
-//            dto.setChildren(new LinkedList<>());
-//            return dto;
-//        }).collect(Collectors.toList());
-//        list.forEach(item -> {
-//            categoryDOS.forEach(categoryDO -> {
-//                if (categoryDO.getParentId().equals(item.getId())) {
-//                    SpuTreeNodeDTO spuTreeNodeDTO = new SpuTreeNodeDTO();
-//                    spuTreeNodeDTO.setChildren(new LinkedList<>());
-//                    spuTreeNodeDTO.setValue("C_" + categoryDO.getId());
-//                    spuTreeNodeDTO.setId(categoryDO.getId());
-//                    spuTreeNodeDTO.setLabel(categoryDO.getTitle());
-//                    item.getChildren().add(spuTreeNodeDTO);
-//                    categoryDOS.forEach(subCategoryDO -> {
-//                        if (subCategoryDO.getParentId().equals(spuTreeNodeDTO.getId())) {
-//                            SpuTreeNodeDTO childSpuNodeDTO = new SpuTreeNodeDTO();
-//                            childSpuNodeDTO.setId(subCategoryDO.getId());
-//                            childSpuNodeDTO.setLabel(subCategoryDO.getTitle());
-//                            childSpuNodeDTO.setValue("C_" + subCategoryDO.getId());
-//                            spuTreeNodeDTO.getChildren().add(childSpuNodeDTO);
-//                            List<SpuDO> spuList = spuMapper.getSpuTitleByCategoryId(subCategoryDO.getId());
-//                            List<SpuTreeNodeDTO> spuTreeNodeList = spuList.stream().map(spuItem -> {
-//                                SpuTreeNodeDTO goodsNode = new SpuTreeNodeDTO();
-//                                goodsNode.setValue("G_" + spuItem.getId());
-//                                goodsNode.setLabel(spuItem.getTitle());
-//                                goodsNode.setId(spuItem.getId());
-//                                return goodsNode;
-//                            }).collect(Collectors.toList());
-//                            childSpuNodeDTO.setChildren(spuTreeNodeList);
-//                        }
-//                    });
-//                }
-//            });
-//        });
-//        return list;
-//    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -221,6 +199,8 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         insertSpuImg(spuDTO, spuDO.getId(), now);
         goodsBizService.clearGoodsCache(spuDO.getId());
         pluginUpdateInvoke(spuDO.getId());
+
+        cacheComponent.delPrefixKey(GoodsBizService.CA_SPU_PAGE_PREFIX);
         return "ok";
     }
 
@@ -268,6 +248,8 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         insertSpuImg(spuDTO, spuDO.getId(), now);
         goodsBizService.clearGoodsCache(spuDTO.getId());
         pluginUpdateInvoke(spuDTO.getId());
+
+        cacheComponent.delPrefixKey(GoodsBizService.CA_SPU_PAGE_PREFIX);
         return "ok";
     }
 
@@ -297,8 +279,76 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
     }
 
     @Override
-    public Page<SpuDTO> list(Integer page, Integer limit, Long categoryId, String title, Long adminId) throws ServiceException {
-        return goodsBizService.getGoodsPage(page, limit, categoryId, "id", false, title);
+    public Page<SpuDTO> list(Integer page, Integer limit, Long categoryId, String title,String barcode, Integer status, Long adminId) throws ServiceException {
+        Wrapper<SpuDO> wrapper = new EntityWrapper<SpuDO>();
+
+        if (!StringUtils.isEmpty(title)) {
+            wrapper.like("title", title);
+        }
+
+        if (categoryId != null && categoryId != 0L) {
+            List<CategoryDO> childrenList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", categoryId));
+            // 传入类目拥有的三级类目集合
+            LinkedList<Long> childrenIds = new LinkedList<>();
+
+            // 传入类目没有子类目
+            if (CollectionUtils.isEmpty(childrenList)) {
+                // 则传入类目为三级类目
+                childrenIds.add(categoryId);
+            } else {
+
+                CategoryDO categoryDO = categoryMapper.selectById(categoryId);
+
+                // 检验传入类目是一级还是二级类目
+                if (categoryDO.getParentId() != 0L) {
+                    //二级分类
+                    childrenList.forEach(item -> {
+                        childrenIds.add(item.getId());
+                    });
+                } else {
+                    //一级分类
+                    childrenList.forEach(item -> {
+                        List<CategoryDO> leafList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", item.getId()));
+                        if (!CollectionUtils.isEmpty(leafList)) {
+                            leafList.forEach(leafItem -> {
+                                childrenIds.add(leafItem.getId());
+                            });
+                        }
+                    });
+                }
+            }
+            wrapper.in("category_id", childrenIds);
+        }
+
+        if(status != null){
+            wrapper.eq("status", status.intValue() <= SpuStatusType.STOCK.getCode()?SpuStatusType.STOCK.getCode():SpuStatusType.SELLING.getCode());
+        }
+
+        if(barcode != null){
+            List<SkuDO> skuDOList = skuMapper.selectList(new EntityWrapper<SkuDO>().eq("bar_code", barcode));
+            if(!CollectionUtils.isEmpty(skuDOList)){
+                SkuDO skuDO = skuDOList.get(0);
+                wrapper.eq("id",skuDO.getSpuId());
+            }
+        }
+
+        wrapper.setSqlSelect(spuBaseColumns);
+        List<SpuDO> spuDOS = spuMapper.selectPage(new RowBounds((page - 1) * limit, limit), wrapper);
+
+        //组装SPU
+        List<SpuDTO> spuDTOList = new ArrayList<>();
+        spuDOS.forEach(item -> {
+            SpuDTO spuDTO = new SpuDTO();
+            BeanUtils.copyProperties(item, spuDTO);
+            List<SkuDO> skuDOList = skuMapper.selectList(new EntityWrapper<SkuDO>().eq("spu_id", item.getId()));
+            spuDTO.setSkuList(skuDOList);
+            spuDTOList.add(spuDTO);
+        });
+
+        Integer count = spuMapper.selectCount(wrapper);
+        Page<SpuDTO> dtoPage = new Page<>(spuDTOList, page, limit, count);
+
+        return dtoPage;
     }
 
     @Override
@@ -318,6 +368,8 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         spuAttributeMapper.delete(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));
         goodsBizService.clearGoodsCache(spuId);
         pluginUpdateInvoke(spuId);
+
+        cacheComponent.delPrefixKey(GoodsBizService.CA_SPU_PAGE_PREFIX);
         return "ok";
     }
 
@@ -328,5 +380,35 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
                 updateGoods.invokeGoodsUpdate(spuId);
             }
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public SpuDTO freezeOrActivation(Long spuId, Integer status, Long adminId) throws ServiceException {
+        SpuDO spuDO = spuMapper.selectById(spuId);
+
+        if(spuDO == null){
+            throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+        }
+
+        status = status <= SpuStatusType.STOCK.getCode() ? SpuStatusType.STOCK.getCode() : SpuStatusType.SELLING.getCode();
+
+        if(spuDO.getStatus().intValue() == status.intValue()){
+            throw new AdminServiceException(ExceptionDefinition.GOODS_NEED_STATUS_ERROR);
+        }
+
+        spuDO.setStatus(status);
+        spuDO.setGmtUpdate(new Date());
+        if(spuMapper.updateById(spuDO) <= 0){
+            throw new AdminServiceException(ExceptionDefinition.GOODS_UPDATE_SQL_FAILED);
+        }
+
+        SpuDTO spuDTO = new SpuDTO();
+        BeanUtils.copyProperties(spuDO,spuDTO);
+        List<SkuDO> skuDOList = skuMapper.selectList(new EntityWrapper<SkuDO>().eq("spu_id", spuDO.getId()));
+        spuDTO.setSkuList(skuDOList);
+
+        cacheComponent.delPrefixKey(GoodsBizService.CA_SPU_PAGE_PREFIX);
+        return spuDTO;
     }
 }

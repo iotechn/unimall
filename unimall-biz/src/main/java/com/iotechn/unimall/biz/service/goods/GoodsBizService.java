@@ -45,7 +45,7 @@ public class GoodsBizService {
     /**
      * SPU 分页缓存
      */
-    private static final String CA_SPU_PAGE_PREFIX = "CA_SPU_PAGE_";
+    public static final String CA_SPU_PAGE_PREFIX = "CA_SPU_PAGE_";
 
     /**
      * SPU DTO 缓存  CA_SPU_+spuId
@@ -114,6 +114,8 @@ public class GoodsBizService {
 
     public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         Wrapper<SpuDO> wrapper = new EntityWrapper<SpuDO>();
+
+
         if (!StringUtils.isEmpty(title)) {
             wrapper.like("title", title);
         } else {
@@ -123,17 +125,24 @@ public class GoodsBizService {
                 return objFromCache;
             }
         }
-        if (categoryId != null && categoryId != 0) {
+
+        if(orderBy != null && isAsc != null){
             wrapper.orderBy(orderBy, isAsc);
+        }
+
+        if (categoryId != null && categoryId != 0L) {
             List<CategoryDO> childrenList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", categoryId));
+
             if (CollectionUtils.isEmpty(childrenList)) {
-                //目标节点为叶子节点
+                //目标节点为叶子节点,即三级类目
                 wrapper.eq("category_id", categoryId);
             } else {
                 //目标节点存在子节点
                 LinkedList<Long> childrenIds = new LinkedList<>();
                 CategoryDO categoryDO = categoryMapper.selectById(categoryId);
-                if (categoryDO.getParentId() != 0) {
+
+                // 检验传入类目是一级还是二级类目
+                if (categoryDO.getParentId() != 0L) {
                     //二级分类
                     childrenList.forEach(item -> {
                         childrenIds.add(item.getId());
@@ -141,7 +150,7 @@ public class GoodsBizService {
                 } else {
                     //一级分类
                     childrenList.forEach(item -> {
-                        List<CategoryDO> leafList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", item.getParentId()));
+                        List<CategoryDO> leafList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", item.getId()));
                         if (!CollectionUtils.isEmpty(leafList)) {
                             leafList.forEach(leafItem -> {
                                 childrenIds.add(leafItem.getId());
@@ -152,6 +161,7 @@ public class GoodsBizService {
                 wrapper.in("category_id", childrenIds);
             }
         }
+
         wrapper.eq("status", SpuStatusType.SELLING.getCode());
         wrapper.setSqlSelect(baseColumns);
         List<SpuDO> spuDOS = spuMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
