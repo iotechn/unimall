@@ -7,7 +7,7 @@
 					<text class="mobile">{{item.phone}}</text>
 				</view>
 				<view class="address-box">
-					<text v-if="item.default" class="tag">默认</text>
+					<text v-if="item.defaultAddress" class="tag">默认</text>
 					<text class="address">{{item.province}} {{item.city}} {{item.county}} {{item.address}}</text>
 				</view>
 			</view>

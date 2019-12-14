@@ -18,7 +18,7 @@ QQ讨论群：656676341 (进群前，请在网页右上角点star)
 
 #### 后台端系统演示
 
-- 后台演示地址: [http://admin.unimall.iotechn.com](http://admin.unimall.iotechn.com)
+- 后台演示地址: [http://admin.unimall.iotechn.com](http://admin.unimall.iotechn.com:9527)
 - 登录名:guest   密码:123456   验证码:666666 (guest仅有只读权限)
 
 ![后端演示0](snapshoot/backend0.png)

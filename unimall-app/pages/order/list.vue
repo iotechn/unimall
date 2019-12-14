@@ -262,8 +262,8 @@
 			confirmOrder(item) {
 				const that = this
 				uni.showModal({
-					title: '退款？',
-					content: '您确定要退款吗？',
+					title: '收货？',
+					content: '您确定要确认收货吗？',
 					success : (e) => {
 						if (e.confirm) {
 							that.submiting = true

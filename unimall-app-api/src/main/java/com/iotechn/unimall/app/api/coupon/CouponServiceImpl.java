@@ -19,7 +19,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -128,6 +130,10 @@ public class CouponServiceImpl implements CouponService {
         List<CouponDTO> couponDOS = couponMapper.getActiveCoupons();
         //活动中的优惠券Id
         List<Long> activeCouponIds = couponDOS.stream().map(couponDO -> couponDO.getId()).collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(activeCouponIds)) {
+            return new ArrayList<>();
+        }
 
         List<KVModel<Long, Long>> userCouponsCount = couponMapper.getUserCouponsCount(userId, activeCouponIds);
 

@@ -82,7 +82,7 @@
 				<text class="price-tip">￥</text>
 				<text class="price">{{(orderReqeust.totalPrice - (orderReqeust.coupon?orderReqeust.coupon.discount:0) + orderReqeust.freightPrice) / 100.0}}</text>
 			</view>
-			<text :disabled="submiting" class="submit" @click="submit">提交订单</text>
+			<text class="submit" @click="submit">提交订单</text>
 		</view>
 
 		<!-- 优惠券面板 -->
@@ -211,6 +211,9 @@
 			},
 			submit() {
 				const that = this
+				if (that.submiting) {
+					return
+				}
 				that.submiting = true
 				if (that.addressData.id) {
 					that.orderReqeust.addressId = that.addressData.id
@@ -222,8 +225,8 @@
 					that.submiting = false
 					that.$api.msg(failres.errmsg)
 				}).then(res => {
-					//提交订单成功
-					that.submiting = false
+					//提交订单成功后，无需再让用户提交订单
+					// that.submiting = false
 					uni.redirectTo({
 						url: '/pages/pay/pay?orderno='+ res.data + '&price=' + that.orderReqeust.totalPrice
 					})
