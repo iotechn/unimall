@@ -209,7 +209,7 @@
 				this.tabCurrentIndex = index;
 			},
 			payOrder(item) {
-				uni.redirectTo({
+				uni.navigateTo({
 					url: '/pages/pay/pay?orderno='+ item.orderNo + '&price=' + item.actualPrice
 				})
 			},

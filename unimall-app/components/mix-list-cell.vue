@@ -1,25 +1,18 @@
 <template>
 	<view class="content">
-		
-		<view class="mix-list-cell" :class="border" @click="eventClick" hover-class="cell-hover"  :hover-stay-time="50">
-			<text
-				v-if="icon"
-				class="cell-icon yticon"
-				:style="[{
-					color: iconColor,
-				}]"
-				:class="icon"
-			></text>
+		<button v-if="openType" :open-type="openType" class="btn"></button>
+		<view class="mix-list-cell" :class="border" @click="eventClick" hover-class="cell-hover" :hover-stay-time="50">
+			<text v-if="icon" class="cell-icon yticon" :style="[{
+						color: iconColor,
+					}]" :class="icon"></text>
 			<text class="cell-tit clamp">{{title}}</text>
 			<text v-if="tips" class="cell-tip">{{tips}}</text>
-			<text class="cell-more yticon"
-				:class="typeList[navigateType]"
-			></text>
-		</view>
+			<text class="cell-more yticon" :class="typeList[navigateType]"></text>
 
+		</view>
 	</view>
 </template>
- 
+
 <script>
 	/**
 	 *  简单封装了下， 应用范围比较狭窄，可以在此基础上进行扩展使用
@@ -37,6 +30,10 @@
 			}
 		},
 		props: {
+			openType: {
+				type: String,
+				default: ''
+			},
 			icon: {
 				type: String,
 				default: ''
@@ -67,7 +64,7 @@
 			}
 		},
 		methods: {
-			eventClick(){
+			eventClick() {
 				this.$emit('eventClick');
 			}
 		},
@@ -75,45 +72,64 @@
 </script>
 
 <style lang='scss'>
-
-	.icon .mix-list-cell.b-b:after{
+	.icon .mix-list-cell.b-b:after {
 		left: 90upx;
 	}
-	.mix-list-cell{
-		display:flex;
-		align-items:baseline;
+
+	.mix-list-cell {
+		display: flex;
+		align-items: baseline;
+		background: #FFFFFF;
+		padding-left: 20upx;
 		padding: 20upx $page-row-spacing;
-		line-height:60upx;
-		position:relative;
-		
-		&.cell-hover{
-			background:#fafafa;
+		line-height: 60upx;
+		position: relative;
+
+		&.cell-hover {
+			background: #fafafa;
 		}
-		&.b-b:after{
+
+		&.b-b:after {
 			left: 30upx;
 		}
 
-		.cell-icon{
-			align-self:center;
-			width:56upx;
-			max-height:60upx;
-			font-size:38upx;
-		}
-		.cell-more{
+		.cell-icon {
 			align-self: center;
-			font-size:30upx;
-			color:$font-color-base;
-			margin-left:$uni-spacing-row-sm;
+			width: 56upx;
+			max-height: 60upx;
+			font-size: 38upx;
 		}
-		.cell-tit{
+
+		.cell-more {
+			align-self: center;
+			font-size: 30upx;
+			color: $font-color-base;
+			margin-left: $uni-spacing-row-sm;
+		}
+
+		.cell-tit {
 			flex: 1;
 			font-size: $font-base;
 			color: $font-color-dark;
-			margin-right:10upx;
+			margin-right: 10upx;
 		}
-		.cell-tip{
+
+		.cell-tip {
+			border-top: #909399;
 			font-size: $font-sm+2upx;
 			color: $font-color-light;
 		}
+
+	}
+
+	.btn::after {
+		display: none;
+	}
+	
+	.btn {
+		width: 95%;
+		position: absolute;
+		opacity: 0;
+		z-index: 99;
 	}
 </style>

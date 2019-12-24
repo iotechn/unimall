@@ -9,7 +9,7 @@
 			class="uni-numbox-value" 
 			type="number" 
 			:disabled="disabled"
-			v-model="value" 
+			v-model="inputValue" 
 			
 			@blur="_onBlur"
 		>
@@ -70,7 +70,7 @@
 			this.minDisabled = this.isMin;
 		},
 		computed: {
-
+				
 		},
 		watch: {
 			inputValue(number) {
@@ -79,6 +79,9 @@
 					index: this.index
 				}
 				this.$emit('eventChange', data);
+			},
+			value(number){
+				this.inputValue = number;
 			}
 		},
 		methods: {

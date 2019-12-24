@@ -404,6 +404,7 @@ public class UserServiceImpl implements UserService {
             userDTO.setAccessToken(accessToken);
             return userDTO;
         } else {
+            logger.info("[微信登录] 回复失败 回复报文：" + body);
             throw new AppServiceException(ExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
         }
 

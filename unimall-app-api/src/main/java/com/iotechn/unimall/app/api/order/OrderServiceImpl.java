@@ -167,7 +167,7 @@ public class OrderServiceImpl implements OrderService {
                         p = skuDTO.getPrice() * orderRequestSkuDTO.getNum();
                     }
                     skuPrice += p;
-                    skuOriginalPrice += skuDTO.getOriginalPrice();
+                    skuOriginalPrice += skuDTO.getOriginalPrice() * orderRequestSkuDTO.getNum();
                     List<Long> categoryFamily = categoryService.getCategoryFamily(skuDTO.getCategoryId());
                     for (Long cid : categoryFamily) {
                         Integer price = categoryPriceMap.get(cid);

@@ -5,12 +5,12 @@
 				{{item.title}}
 			</view>
 		</scroll-view>
-		<scroll-view scroll-with-animation scroll-y class="right-aside" @scroll="asideScroll" :scroll-top="tabScrollTop">
+		<scroll-view scroll-with-animation scroll-y class="right-aside" :scroll-top="tabScrollTop">
 			<view v-for="item in slist" :key="item.id" class="s-list" :id="'main-'+item.id">
 				<text class="s-item">{{item.title}}</text>
 				<view class="t-list">
 					<view @click="navToList(titem.id)" v-if="titem.parentId === item.id" class="t-item" v-for="titem in item.childrenList" :key="titem.id">
-						<image :src="titem.picUrl"></image>
+						<image :src="titem.picUrl + '?x-oss-process=style/200px'"></image>
 						<text>{{titem.title}}</text>
 					</view>
 				</view>
