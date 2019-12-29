@@ -53,3 +53,12 @@ export function deleteAdmin(id) {
   })
 }
 
+export function bindUniNotify() {
+  return request({
+    method: 'post',
+    params: {
+      _gp: 'admin',
+      _mt: 'bindUniNotify'
+    }
+  })
+}

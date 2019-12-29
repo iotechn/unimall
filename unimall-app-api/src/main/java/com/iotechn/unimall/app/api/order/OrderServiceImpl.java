@@ -8,8 +8,10 @@ import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
+import com.iotechn.unimall.app.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.freight.FreightBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
+import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -32,6 +34,7 @@ import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -90,6 +93,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private GroupShopBizService groupShopBizService;
+
+    @Autowired
+    private AdminNotifyBizService adminNotifyBizService;
 
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;
@@ -423,6 +429,13 @@ public class OrderServiceImpl implements OrderService {
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());
             orderBizService.changeOrderStatus(orderNo, orderDO.getStatus() , updateOrderDO);
+            GlobalExecutor.execute(() -> {
+                OrderDTO orderDTO = new OrderDTO();
+                BeanUtils.copyProperties(orderDO, orderDTO);
+                List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_no", orderDO.getOrderNo()));
+                orderDTO.setSkuList(orderSkuList);
+                adminNotifyBizService.refundOrder(orderDTO);
+            });
             return "ok";
         }
         throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_REFUND);

@@ -263,6 +263,15 @@
 				},
 				"name":"password",
 				"page":"/profile/password"
+			},
+			{
+				"path":"notify",
+				"meta":{
+					"noCache":true,
+					"title":"绑定通知"
+				},
+				"name":"notify",
+				"page":"/profile/notify"
 			}
 		],
 		"alwaysShow":true

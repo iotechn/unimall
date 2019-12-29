@@ -151,7 +151,7 @@
 			if (option.takeway) {
 				that.orderReqeust.takeWay = option.takeway
 			}
-			that.orderReqeust.skuList = JSON.parse(option.data);
+			that.orderReqeust.skuList = that.$api.globalData.skuList;
 			let totalOriginalPrice = 0
 			let totalPrice = 0
 			let skuCategoryPriceMap = {}

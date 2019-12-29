@@ -359,8 +359,9 @@
 					}
 					let skuList = [1]
 					skuList[0] = skuItem
+					that.$api.globalData.skuList = skuList
 					uni.navigateTo({
-						url: `/pages/order/create?takeway=buy&data=${JSON.stringify(skuList)}`
+						url: `/pages/order/create?takeway=buy`
 					})
 				}
 			},

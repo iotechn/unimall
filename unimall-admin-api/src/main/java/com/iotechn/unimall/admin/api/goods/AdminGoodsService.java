@@ -22,12 +22,10 @@ public interface AdminGoodsService {
     public List<SpuTreeNodeDTO> getSpuBigTree(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
-
     @HttpMethod(description = "创建", permission = "operation:goods:create", permissionParentName = "商品管理", permissionName = "商品管理")
     public String create(
             @NotNull @HttpParam(name = "spuDTO", type = HttpParamType.COMMON, description = "商品JSON数据") SpuDTO spuDTO,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
-
 
     @HttpMethod(description = "编辑", permission = "operation:goods:edit", permissionParentName = "商品管理", permissionName = "商品管理")
     public String edit(

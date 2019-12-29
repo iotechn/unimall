@@ -6,6 +6,7 @@ import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -61,6 +62,9 @@ public class CallbackController {
 
     @Autowired
     private PluginsManager pluginsManager;
+
+    @Autowired
+    private AdminNotifyBizService adminNotifyBizService;
 
     @RequestMapping("/wxpay")
     @Transactional(rollbackFor = Exception.class)
@@ -138,6 +142,8 @@ public class CallbackController {
                 orderDTO = paySuccess.invoke(orderDTO, formId);
             }
         }
+        //通知管理员发货
+        adminNotifyBizService.newOrder(orderDTO);
         return WxPayNotifyResponse.success("支付成功");
     }
 

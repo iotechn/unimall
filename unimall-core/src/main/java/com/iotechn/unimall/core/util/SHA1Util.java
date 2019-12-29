@@ -12,7 +12,7 @@ public class SHA1Util {
      */
     public static String shaEncode(String inStr) throws Exception {
         MessageDigest sha = null;
-        sha = MessageDigest.getInstance("SHA");
+        sha = MessageDigest.getInstance("SHA-256");
 
         byte[] byteArray = inStr.getBytes("UTF-8");
         byte[] md5Bytes = sha.digest(byteArray);
