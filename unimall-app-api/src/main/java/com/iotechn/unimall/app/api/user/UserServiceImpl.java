@@ -11,11 +11,10 @@ import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.notify.SMSClient;
 import com.iotechn.unimall.core.notify.SMSResult;
 import com.iotechn.unimall.core.util.GeneratorUtil;
-import com.iotechn.unimall.core.util.SHA1Util;
+import com.iotechn.unimall.core.util.SHAUtil;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.UserDTO;
-import com.iotechn.unimall.data.enums.UserLevelType;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.UserMapper;
 import com.iotechn.unimall.data.util.SessionUtil;
@@ -33,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -460,7 +458,7 @@ public class UserServiceImpl implements UserService {
             sb.append(url);
             //明文
             String content = sb.toString();
-            String signature = SHA1Util.shaEncode(content);
+            String signature = SHAUtil.shaEncode(content);
             Map<String, Object> obj = new HashMap<>();
             obj.put("noncestr", noncestr);
             obj.put("timestamp", timestamp);

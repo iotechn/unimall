@@ -1,5 +1,6 @@
 package com.iotechn.unimall.biz.service.notify;
 
+import com.iotechn.unimall.core.util.SHAUtil;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -7,7 +8,12 @@ import okhttp3.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -25,9 +31,10 @@ public class UniNotifyAdminNotifyBizServiceImpl implements AdminNotifyBizService
     @Value("${com.iotechn.admin.notify.uninotify.app-secret}")
     private String appSecret;
 
-    private OkHttpClient okHttpClient = new OkHttpClient();
+    @Value("${com.iotechn.admin.notify.uninotify.url}")
+    private String serverUrl;
 
-    private static final String SEVER_URL = "http://public.dobbinsoft.com/m.api";
+    private OkHttpClient okHttpClient = new OkHttpClient();
 
     private static final Logger logger = LoggerFactory.getLogger(UniNotifyAdminNotifyBizServiceImpl.class);
 
@@ -42,12 +49,16 @@ public class UniNotifyAdminNotifyBizServiceImpl implements AdminNotifyBizService
                     .add("orderNo", orderDTO.getOrderNo())
                     .add("actualPrice", "￥" + (orderDTO.getActualPrice() / 100.0))
                     .add("payChannel", orderDTO.getPayChannel())
-                    .add("consignee", orderDTO.getConsignee())
-                    .add("phone", orderDTO.getPhone())
-                    .add("address", orderDTO.getAddress())
-                    .add("skuInfo", orderDTO.getSkuList().stream().map(item -> (item.getTitle() + " * " + item.getNum())).collect(Collectors.joining("\r\n")))
+                    .add("consignee", StringUtils.isEmpty(orderDTO.getConsignee()) ? "" : orderDTO.getConsignee())
+                    .add("phone", StringUtils.isEmpty(orderDTO.getPhone()) ? "" : orderDTO.getPhone())
+                    .add("address", StringUtils.isEmpty(orderDTO.getAddress()) ? "" : orderDTO.getAddress())
+                    .add("skuInfo", orderDTO.getSkuList().stream().map(item -> (item.getSpuTitle() + "-" + item.getTitle() + " * " + item.getNum())).collect(Collectors.joining("\r\n")))
+                    .add("appId", this.appId)
+                    .add("timestamp", System.currentTimeMillis() + "")
                     .build();
-            okHttpClient.newCall(new Request.Builder().url(SEVER_URL).post(formBody).build()).execute().body().string();
+            String sign = getSign(formBody);
+            String string = okHttpClient.newCall(new Request.Builder().url(serverUrl + "?sign=" + sign).post(formBody).build()).execute().body().string();
+            logger.info(string);
         } catch (Exception e) {
             logger.error("[通知管理员] 异常", e);
         }
@@ -63,11 +74,23 @@ public class UniNotifyAdminNotifyBizServiceImpl implements AdminNotifyBizService
                     .add("userId", "admin")
                     .add("orderNo", orderDTO.getOrderNo())
                     .add("refundPrice", "￥" + ((orderDTO.getActualPrice() - orderDTO.getFreightPrice()) / 100.0))
-                    .add("skuInfo", orderDTO.getSkuList().stream().map(item -> (item.getTitle() + " * " + item.getNum())).collect(Collectors.joining("\r\n")))
+                    .add("skuInfo", orderDTO.getSkuList().stream().map(item -> (item.getSpuTitle() + "-" + item.getTitle() + " * " + item.getNum())).collect(Collectors.joining("\r\n")))
+                    .add("appId", this.appId)
+                    .add("timestamp", System.currentTimeMillis() + "")
                     .build();
-            okHttpClient.newCall(new Request.Builder().url(SEVER_URL).post(formBody).build()).execute().body().string();
+            String sign = getSign(formBody);
+            okHttpClient.newCall(new Request.Builder().url(serverUrl + "?sign=" + sign).post(formBody).build()).execute().body().string();
         } catch (Exception e) {
             logger.error("[通知管理员] 异常", e);
         }
+    }
+
+    private String getSign(FormBody formBody) throws Exception {
+        Set<String> sortSet = new TreeSet<>();
+        for (int i = 0; i < formBody.size(); i++) {
+            sortSet.add(formBody.value(i));
+        }
+        sortSet.add(this.appSecret);
+        return SHAUtil.shaEncode(URLEncoder.encode(sortSet.stream().collect(Collectors.joining()), "utf-8"));
     }
 }

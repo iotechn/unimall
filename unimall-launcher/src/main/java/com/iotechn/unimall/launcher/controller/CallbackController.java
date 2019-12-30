@@ -6,6 +6,7 @@ import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.iotechn.unimall.app.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
@@ -133,6 +134,7 @@ public class CallbackController {
 
         OrderDTO orderDTO = new OrderDTO();
         BeanUtils.copyProperties(order, orderDTO);
+        orderDTO.setPayChannel(updateOrderDO.getPayChannel());
         orderDTO.setSkuList(orderSkuDOList);
 
         List<IPluginPaySuccess> plugins = pluginsManager.getPlugins(IPluginPaySuccess.class);
@@ -143,7 +145,10 @@ public class CallbackController {
             }
         }
         //通知管理员发货
-        adminNotifyBizService.newOrder(orderDTO);
+        OrderDTO finalOrderDTO = orderDTO;
+        GlobalExecutor.execute(() -> {
+            adminNotifyBizService.newOrder(finalOrderDTO);
+        });
         return WxPayNotifyResponse.success("支付成功");
     }
 

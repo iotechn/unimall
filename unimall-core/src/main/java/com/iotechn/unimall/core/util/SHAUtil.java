@@ -2,11 +2,11 @@ package com.iotechn.unimall.core.util;
 
 import java.security.MessageDigest;
 
-public class SHA1Util {
+public class SHAUtil {
 
     /**
      * @return
-     * @Comment SHA1实现
+     * @Comment SHA256实现
      * @Author Ron
      * @Date 2017年9月13日 下午3:30:36
      */

@@ -12,7 +12,7 @@ import com.iotechn.unimall.core.notify.SMSClient;
 import com.iotechn.unimall.core.notify.SMSResult;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.core.util.MD5Util;
-import com.iotechn.unimall.core.util.SHA1Util;
+import com.iotechn.unimall.core.util.SHAUtil;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
@@ -275,7 +275,7 @@ public class AdminServiceImpl implements AdminService {
                     .newCall(new Request.Builder()
                             .get()
                             .url(this.uniNotifyUrl + "?_gp=developer&_mt=getRegisterUrl&userId=" + SessionUtil.getAdmin().getUsername()
-                                    + "&appId=" + this.uniNotifyAppId + "&timestamp=" + timestamp + "&sign=" + SHA1Util.shaEncode(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
+                                    + "&appId=" + this.uniNotifyAppId + "&timestamp=" + timestamp + "&sign=" + SHAUtil.shaEncode(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
                             .build()).execute().body().string();
             JSONObject jsonObject = JSONObject.parseObject(json);
             Integer errcode = jsonObject.getInteger("errno");
