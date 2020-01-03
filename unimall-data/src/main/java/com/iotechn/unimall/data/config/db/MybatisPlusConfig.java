@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-@MapperScan({"com.iotechn.unimall.mapper*"})
 @EnableConfigurationProperties(value = {MybatisPlusProperties.class})
 public class MybatisPlusConfig {
 
