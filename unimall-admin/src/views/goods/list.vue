@@ -7,9 +7,10 @@
       <el-select v-model="listQuery.status" clearable style="width: 200px" class="filter-item" placeholder="选择商品状态" >
         <el-option v-for="(item,index) in goodsStatusMap" :key="index" :label="item.name" :value="item.value" />
       </el-select>
-      <el-cascader :options="categoryOptions" :props="{ checkStrictly: true }" placeholder="可点击输入" clearable class="filter-item" filterable style="width: 200px;" @change="handleCategoryOption" />
+      <el-cascader :options="categoryOptions" :props="{ checkStrictly: true }" placeholder="请选择类目" clearable class="filter-item" filterable style="width: 200px;" @change="handleCategoryOption" />
       <el-button v-permission="['operation:goods:list']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
       <el-button v-permission="['operation:goods:create']" class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">添加</el-button>
+      <el-button v-permission="['operation:goods:batchdelete']" :disabled="selectedIds.length === 0" class="filter-item" type="danger" icon="el-icon-delete" @click="handleBatchDelete">批量删除</el-button>
     </div>
 
     <!-- 查询结果 -->
@@ -21,7 +22,11 @@
       border
       fit
       highlight-current-row
+      @selection-change="handleSelectionChange"
     >
+
+      <el-table-column align="center" type="selection" width="55" />
+
       <el-table-column type="expand" label="sku信息">
         <template slot-scope="props">
           <el-table
@@ -90,7 +95,7 @@
         prop="description"
       />
 
-      <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
+      <el-table-column align="center" label="操作" width="250" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button v-permission="['operation:goods:edit']" type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
           <el-button v-permission="['operation:goods:edit']" v-if=" scope.row.status == 1" type="warning" size="mini" @click="freezeOrActivationBtn(scope.row,'freeze')">下架</el-button>
@@ -115,7 +120,7 @@
 </template>
 
 <script>
-import { listGoods, deleteGoods, detailGoods, freezeOrActivtion } from '@/api/goods'
+import { listGoods, deleteGoods, detailGoods, freezeOrActivtion, batchDeleteGoods } from '@/api/goods'
 import BackToTop from '@/components/BackToTop'
 import { categoryTree } from '@/api/category'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -139,7 +144,8 @@ export default {
         categoryId: undefined
       },
       goodsDetail: '',
-      detailDialogVisible: false
+      detailDialogVisible: false,
+      selectedIds: []
     }
   },
   created() {
@@ -258,6 +264,38 @@ export default {
             message: response.data.errmsg
           })
         })
+      })
+    },
+    handleSelectionChange(e) {
+      const temp = []
+      e.forEach(item => {
+        temp.push(item.id)
+      })
+      this.selectedIds = temp
+    },
+    handleBatchDelete(e) {
+      // 执行批量删除
+      this.$confirm('此操作将永久删除选中的' + this.selectedIds.length + '件商品, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        batchDeleteGoods(this.selectedIds)
+          .then(response => {
+            this.$notify.success({
+              title: '成功',
+              message: '删除成功'
+            })
+            this.getList()
+          })
+          .catch(response => {
+            this.$notify.error({
+              title: '失败',
+              message: response.data.errmsg
+            })
+          })
+      }).catch(() => {
+        return false
       })
     }
   }

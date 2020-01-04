@@ -53,10 +53,14 @@ public interface AdminGoodsService {
             @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "商品想要变为的状态") Integer status,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
-
     @HttpMethod(description = "删除", permission = "operation:goods:delete", permissionParentName = "商品管理", permissionName = "商品管理")
     public String delete(
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "商品Id") Long spuId,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
+
+    @HttpMethod(description = "批量删除", permission = "operation:goods:batchdelete", permissionParentName = "商品管理", permissionName = "商品管理")
+    public String batchDelete(
+            @NotNull @HttpParam(name = "ids", type = HttpParamType.COMMON, description = "商品Id") String ids,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
 }

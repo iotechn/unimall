@@ -1,5 +1,6 @@
 package com.iotechn.unimall.admin.api.goods;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.entity.Column;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
@@ -370,6 +371,27 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         pluginUpdateInvoke(spuId);
 
         cacheComponent.delPrefixKey(GoodsBizService.CA_SPU_PAGE_PREFIX);
+        return "ok";
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String batchDelete(String idsJson, Long adminId) throws ServiceException {
+        List<Long> ids = JSONObject.parseArray(idsJson, Long.class);
+        if (CollectionUtils.isEmpty(ids)) {
+            throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+        }
+        if (spuMapper.delete(new EntityWrapper<SpuDO>().in("id", ids)) <= 0) {
+            throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+        }
+        List<Long> skuIds = skuMapper.selectSkuIdsBySpuIds(ids);
+        cartMapper.delete(new EntityWrapper<CartDO>().in("sku_id", skuIds));
+        skuMapper.delete(new EntityWrapper<SkuDO>().in("spu_id", ids));
+        imgMapper.delete(new EntityWrapper<ImgDO>().in("biz_id", ids).eq("biz_type", BizType.GOODS.getCode()));
+        spuAttributeMapper.delete(new EntityWrapper<SpuAttributeDO>().in("spu_id", ids));
+        for (Long spuId : ids) {
+            goodsBizService.clearGoodsCache(spuId);
+        }
         return "ok";
     }
 

@@ -44,6 +44,17 @@ export function deleteGoods(id) {
   })
 }
 
+export function batchDeleteGoods(ids) {
+  return request({
+    method: 'post',
+    data: Qs.stringify({
+      _gp: 'admin.goods',
+      _mt: 'batchDelete',
+      ids: JSON.stringify(ids)
+    })
+  })
+}
+
 export function createGoods(data) {
   return request({
     method: 'post',
