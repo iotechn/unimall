@@ -44,6 +44,9 @@ public class OrderDO extends SuperDO {
     @TableField("coupon_id")
     private Long couponId;
 
+    @TableField("group_shop_id")
+    private Long groupShopId;
+
     /**
      * 计算优惠后，实际需要支付的价格
      */

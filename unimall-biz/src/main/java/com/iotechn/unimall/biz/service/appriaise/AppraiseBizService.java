@@ -40,27 +40,15 @@ public class AppraiseBizService {
         if (obj != null) {
             return obj;
         }
-        Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("spu_id",spuId));
-        Integer totalPage = 1;
-        if(pageSize <= 0 || pageNo <= 0){
-            throw new AppServiceException(ExceptionDefinition.APPRAISE_PARAM_CHECK_FAILED);
-        }
-        if(count % pageSize == 0 && count != 0){
-            totalPage = count / pageSize;
-        }else {
-            totalPage = count / pageSize + 1;
-        }
-        if(pageNo > totalPage){
-            pageNo = totalPage;
-        }
-        Integer offset = pageSize * (pageNo-1);
-        List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectSpuAllAppraise(spuId,offset,pageSize);
-        for (AppraiseResponseDTO appraiseResponseDTO : appraiseResponseDTOS){
+        Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("spu_id", spuId));
+        Integer offset = pageSize * (pageNo - 1);
+        List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectSpuAllAppraise(spuId, offset, pageSize);
+        for (AppraiseResponseDTO appraiseResponseDTO : appraiseResponseDTOS) {
             appraiseResponseDTO.setImgList(imgMapper.getImgs(BizType.COMMENT.getCode(), appraiseResponseDTO.getId()));
         }
-        Page<AppraiseResponseDTO> pageination = new Page<>(appraiseResponseDTOS,pageNo,pageSize,count);
-        cacheComponent.putObj(cacheKey, pageination, Const.CACHE_ONE_DAY);
-        return pageination;
+        Page<AppraiseResponseDTO> page = new Page<>(appraiseResponseDTOS, pageNo, pageSize, count);
+        cacheComponent.putObj(cacheKey, page, Const.CACHE_ONE_DAY);
+        return page;
     }
 
 }

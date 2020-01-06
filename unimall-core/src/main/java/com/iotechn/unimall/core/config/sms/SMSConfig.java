@@ -1,6 +1,7 @@
 package com.iotechn.unimall.core.config.sms;
 
 import com.iotechn.unimall.core.notify.AliyunSMSClient;
+import com.iotechn.unimall.core.notify.MockSMSClient;
 import com.iotechn.unimall.core.notify.QCloudSMSClient;
 import com.iotechn.unimall.core.notify.SMSClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,10 @@ public class SMSConfig {
             return new QCloudSMSClient();
         } else if ("aliyun".equals(enable)) {
             return new AliyunSMSClient();
+        } else if ("mock".equals(enable)) {
+            return new MockSMSClient();
+        } else {
+            return new MockSMSClient();
         }
-        return null;
     }
 }

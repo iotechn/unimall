@@ -14,15 +14,31 @@
 			<text class="title">{{goods.title}}</text>
 			<view class="price-box">
 				<text class="price-tip">¥</text>
-				<text class="price">{{isVip ? (goods.vipPrice / 100.0 + ' [VIP]'): (goods.price / 100.0)}}</text>
-				<text v-if="(isVip ? goods.vipPrice: goods.price) < goods.originalPrice" class="m-price">¥{{goods.originalPrice / 100}}</text>
-				<text v-if="(isVip ? goods.vipPrice: goods.price) < goods.originalPrice" class="coupon-tip">{{parseInt((isVip? goods.vipPrice: goods.price) / goods.originalPrice * 100) / 10}}折</text>
+				<text class="price">{{isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) / 100.0  + ' [VIP]': (selectedSku.price ? selectedSku.price : goods.price) / 100.0 }}</text>
+				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) : (selectedSku.price ? selectedSku.price : goods.price)) < (selectedSku.price ? selectedSku.originalPrice : goods.originalPrice)"
+				 class="m-price">¥{{(selectedSku.price ? selectedSku.originalPrice : goods.originalPrice) / 100}}</text>
+				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) : (selectedSku.price ? selectedSku.price : goods.price)) < (selectedSku.price ? selectedSku.originalPrice : goods.originalPrice)"
+				 class="coupon-tip">{{parseInt((isVip? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice): (selectedSku.price ? selectedSku.price : goods.price)) / (selectedSku.originalPrice ? selectedSku.originalPrice : goods.originalPrice) * 100) / 10}}折</text>
 			</view>
 			<view class="bot-row">
 				<text>销量: {{goods.sales}}</text>
 				<text>库存: {{goods.stock}}</text>
 			</view>
 		</view>
+
+		<!-- 团购分享 -->
+		<button v-if="goods.groupShop" class="share-section" open-type="share">
+			<view class="share-icon">
+				<text class="yticon icon-xingxing"></text>
+				团
+			</view>
+			<text class="tit">{{goods.groupShop.minimumNumber}}人成团，已有{{goods.groupShop.alreadyBuyNumber}}人参团</text>
+			<text class="yticon icon-bangzhu1"></text>
+			<view class="share-btn">
+				告诉TA
+				<text class="yticon icon-you"></text>
+			</view>
+		</button>
 
 		<view class="c-list">
 			<view class="c-row b-b" @click="toggleSpec">
@@ -64,7 +80,8 @@
 				<text class="yticon icon-you"></text>
 			</view>
 			<view class="eva-box">
-				<image class="portrait" :src="goods.appraisePage.items[0].userAvatarUrl ? goods.appraisePage.items[0].userAvatarUrl : '/static/missing-face.png'" mode="aspectFill"></image>
+				<image class="portrait" :src="goods.appraisePage.items[0].userAvatarUrl ? goods.appraisePage.items[0].userAvatarUrl : '/static/missing-face.png'"
+				 mode="aspectFill"></image>
 				<view class="right">
 					<text class="name">{{goods.appraisePage.items[0].userNickName?goods.appraisePage.items[0].userNickName:('用户' + goods.appraisePage.items[0].userId)}}</text>
 					<text class="con">{{goods.appraisePage.items[0].content}}</text>
@@ -76,11 +93,12 @@
 			</view>
 		</view>
 
+
 		<view class="detail-desc">
 			<view class="d-header">
 				<text>图文详情</text>
 			</view>
-			<rich-text style="width: 750upx;" :nodes="goods.detail"></rich-text>
+			<u-parse className="rich-img" :content="goods.detail"></u-parse>
 		</view>
 
 		<!-- 底部操作菜单 -->
@@ -99,7 +117,7 @@
 				<text>收藏</text>
 			</view>
 			<view class="action-btn-group">
-				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">立即购买</button>
+				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">{{ goods.groupShop ? '立即参团' : '立即购买'}}</button>
 				<button type="primary" class=" action-btn no-border add-cart-btn" @click="addCart">加入购物车</button>
 			</view>
 		</view>
@@ -132,7 +150,7 @@
 			<view class="mask"></view>
 			<view class="layer attr-content" @click.stop="stopPrevent">
 				<view class="a-t">
-					<image :src="(selectedSku.img?selectedSku.img:goods.img) + '?x-oss-process=style/200px'"></image>
+					<image v-if="goods.img" :src="(selectedSku.img?selectedSku.img:goods.img) + '?x-oss-process=style/200px'"></image>
 					<view class="right">
 						<text class="price">¥{{isVip ? (selectedSku.vipPrice / 100.0 + ' [VIP]') : selectedSku.price / 100.0}}</text>
 						<text class="stock">库存：{{selectedSku.stock}}件</text>
@@ -147,12 +165,8 @@
 				<view class="attr-list">
 					<!-- <text>规格</text> -->
 					<view class="item-list">
-						<text 
-							v-for="(skuItem, skuIndex) in goods.skuList" 
-							:key="skuIndex" 
-							class="tit"
-							:class="{selected: skuIndex === selectedSkuIndex}"
-							@click="selectSpec(skuItem, skuIndex)">
+						<text v-for="(skuItem, skuIndex) in goods.skuList" :key="skuIndex" class="tit" :class="{selected: skuIndex === selectedSkuIndex}"
+						 @click="selectSpec(skuItem, skuIndex)">
 							{{skuItem.title}}
 						</text>
 					</view>
@@ -160,16 +174,14 @@
 				<button class="btn" @click="toggleSpec">完成</button>
 			</view>
 		</view>
-		<!-- 分享 -->
-		<share ref="share" :contentHeight="580" :shareList="shareList"></share>
 	</view>
 </template>
 
 <script>
-	import share from '@/components/share';
+	import uParse from '@/components/u-parse/u-parse.vue';
 	export default {
 		components: {
-			share
+			uParse
 		},
 		data() {
 			return {
@@ -182,37 +194,57 @@
 				isVip: false,
 				specClass: 'none',
 				specSelected: [],
-				shareList: [],
 				selectedSku: {},
 				selectedSkuIndex: -1,
 				toggleCallback: undefined,
 				maskState: 0, //优惠券面板显示状态
 				couponList: [],
-				submiting: false
+				submiting: false,
 
 			};
 		},
 		onShow() {
 			this.isVip = this.$api.isVip()
 		},
-		async onLoad(options) {
+		onLoad(options) {
 			const that = this
 			uni.showLoading({
 				title: '正在加载'
 			})
 			that.$api.request('goods', 'getGoods', {
-				spuId: options.id
+				spuId: options.id,
+				groupShopId: options.gid ? options.gid : ''
 			}, failres => {
 				that.$api.msg(failres.errmsg)
 				uni.hideLoading()
 			}).then(res => {
 				that.goods = res.data
-				that.goods.detail = that.goods.detail.replace(/\<img/gi, '<img class="rich-img" ')
+				if (that.goods.groupShop) {
+					//若存在团购信息，将价格更新到团购价格
+					that.goods.price = that.goods.groupShop.minPrice
+					that.goods.vipPrice = that.goods.groupShop.minPrice
+					//更新各个SKU的价格
+					for (let i = 0; i < that.goods.skuList.length; i++) {
+						for (let j = 0; j < that.goods.groupShop.groupShopSkuList.length; j++) {
+							if (that.goods.skuList[i].id === that.goods.groupShop.groupShopSkuList[j].skuId) {
+								that.goods.skuList[i].price = that.goods.groupShop.groupShopSkuList[j].skuGroupShopPrice
+								that.goods.skuList[i].vipPrice = that.goods.groupShop.groupShopSkuList[j].skuGroupShopPrice
+							}
+						}
+					}
+				}
 				uni.hideLoading()
 			})
 			that.$api.request('coupon', 'getObtainableCoupon').then(res => {
 				that.couponList = res.data
 			})
+		},
+		onShareAppMessage() {
+			return {
+				title: (this.goods.groupShop ? '立即拼团-' : '好货分享-') + this.goods.title,
+				imageUrl: 'https://easycampus-asset.oss-cn-shenzhen.aliyuncs.com/sharebg.png',
+				path: '/pages/product/detail?id=' + this.goods.id + (this.goods.groupShop ? '&gid=' + this.goods.groupShop.id : '')
+			}
 		},
 		methods: {
 			toggleMask(type) {
@@ -227,7 +259,7 @@
 			obtainCoupon(index) {
 				const that = this
 				that.$api.request('coupon', 'obtainCoupon', {
-					couponId : that.couponList[index].id
+					couponId: that.couponList[index].id
 				}).then(res => {
 					that.$api.msg('领取成功')
 					that.couponList[index].nowCount++
@@ -238,7 +270,7 @@
 			toggleSpec(e) {
 				if (this.specClass === 'show') {
 					this.specClass = 'hide';
-					
+
 					setTimeout(() => {
 						this.specClass = 'none';
 						if (this.toggleCallback) {
@@ -272,14 +304,14 @@
 						skuId: that.selectedSku.id,
 						num: 1
 					}).then(res => {
-						that.$api.msg('添加购物车成功')
+						if (that.goods.groupShop) {
+							that.$api.msg('从购物车结算不会参加团购')
+						} else {
+							that.$api.msg('添加购物车成功')
+						}
+						
 					})
 				}
-			},
-
-			//分享
-			share() {
-				this.$refs.share.toggleMask();
 			},
 			//收藏
 			toFavorite() {
@@ -287,15 +319,15 @@
 				if (that.goods.collect) {
 					//取消收藏
 					that.goods.collect = false
-					this.$api.request('collect','deleteCollect', {
-						spuId : that.goods.id
+					this.$api.request('collect', 'deleteCollect', {
+						spuId: that.goods.id
 					}).then(res => {
-						
+
 					})
 				} else {
 					//添加收藏
 					that.goods.collect = true
-					this.$api.request('collect','addCollect', {
+					this.$api.request('collect', 'addCollect', {
 						spuId: that.goods.id
 					})
 				}
@@ -322,14 +354,16 @@
 						categoryId: that.goods.categoryId,
 						categoryIdList: that.goods.categoryIds
 					}
+					if (that.goods.groupShop) {
+						skuItem['groupShopId'] = that.goods.groupShop.id
+					}
 					let skuList = [1]
 					skuList[0] = skuItem
+					that.$api.globalData.skuList = skuList
 					uni.navigateTo({
-						url: `/pages/order/create?takeway=buy&data=${JSON.stringify(skuList)}`
+						url: `/pages/order/create?takeway=buy`
 					})
 				}
-				
-				
 			},
 			//查看所有评价
 			navAllAppraise() {
@@ -342,6 +376,7 @@
 
 	}
 </script>
+
 
 <style lang='scss'>
 	page {
@@ -913,6 +948,7 @@
 			}
 		}
 	}
+
 	/* 优惠券面板 */
 	.mask {
 		display: flex;
@@ -1038,11 +1074,17 @@
 			}
 		}
 	}
-	
-	rich-text .rich-img {
+
+	.rich-img {
 		width: 100%;
 		height: auto;
 		margin: 0;
 		padding: 0;
+		line-height: 0px;
 	}
+	
+	button::after {
+		border: none;
+	}
+	
 </style>

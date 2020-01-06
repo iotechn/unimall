@@ -14,7 +14,6 @@ import java.util.List;
  * Date: 2019-07-08
  * Time: 上午8:59
  */
-
 public interface FootprintMapper extends BaseMapper<FootprintDO> {
 
     public List<FootprintDTO> getAllFootprint(@Param("userId")Long userId, @Param("offset")Integer offset, @Param("size")Integer size);

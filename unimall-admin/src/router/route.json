@@ -68,6 +68,20 @@
 				},
 				"name":"goodsList",
 				"page":"/goods/list"
+            },
+            {
+				"path":"groupshop",
+				"meta":{
+					"noCache":true,
+					"perms":[
+						"operation:groupShop:query",
+                        "operation:groupShop:create",
+                        "operation:groupShop:delete"
+					],
+					"title":"团购商品"
+				},
+				"name":"groupShop",
+				"page":"/goods/groupshop"
 			},
 			{
 				"path":"category",
@@ -189,8 +203,7 @@
 						"system:user:query",
 						"system:user:delete",
 						"system:user:create",
-						"system:user:update",
-						""
+						"system:user:update"
 					],
 					"title":"会员管理"
 				},
@@ -250,6 +263,15 @@
 				},
 				"name":"password",
 				"page":"/profile/password"
+			},
+			{
+				"path":"notify",
+				"meta":{
+					"noCache":true,
+					"title":"绑定通知"
+				},
+				"name":"notify",
+				"page":"/profile/notify"
 			}
 		],
 		"alwaysShow":true

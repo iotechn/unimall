@@ -29,6 +29,8 @@ public class QCloudSMSClient implements SMSClient,InitializingBean {
     private Integer resetPasswordTemplateId;
     @Value("${sms.qcloud.admin-login-template-id}")
     private Integer adminLoginTemplateId;
+    @Value("${sms.qcloud.sign}")
+    private String sign;
 
     private static final Logger logger = LoggerFactory.getLogger(QCloudSMSClient.class);
 
@@ -39,7 +41,7 @@ public class QCloudSMSClient implements SMSClient,InitializingBean {
 
     public SMSResult sendMsg(String phone, int templateId, String ...params) throws ServiceException {
         try {
-            SmsSingleSenderResult smsSingleSenderResult = sender.sendWithParam("86", phone, templateId, params, "", "", "");
+            SmsSingleSenderResult smsSingleSenderResult = sender.sendWithParam("86", phone, templateId, params, this.sign, "", "");
             if (smsSingleSenderResult.result == 0) {
                 SMSResult smsResult = new SMSResult();
                 smsResult.setSucc(true);

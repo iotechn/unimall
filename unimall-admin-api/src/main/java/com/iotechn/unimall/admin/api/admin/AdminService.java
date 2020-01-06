@@ -32,7 +32,6 @@ public interface AdminService {
     public AdminDTO info(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-
     @HttpMethod(description = "列表", permission = "admin:admin:list", permissionParentName = "系统管理", permissionName = "管理员")
     public Page<AdminDTO> list(
             @HttpParam(name = "username", type = HttpParamType.COMMON, description = "管理员名称搜索") String name,
@@ -40,24 +39,20 @@ public interface AdminService {
             @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页长度", valueDef = "20") Integer limit,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-
     @HttpMethod(description = "创建", permission = "admin:admin:create", permissionParentName = "系统管理", permissionName = "管理员")
     public AdminDTO create(
             @NotNull @HttpParam(name = "adminDTO", type = HttpParamType.COMMON, description = "欲创建的admin对象JSON") AdminDTO adminDTO,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
-
 
     @HttpMethod(description = "修改", permission = "admin:admin:update", permissionParentName = "系统管理", permissionName = "管理员")
     public String update(
             @NotNull @HttpParam(name = "adminDTO", type = HttpParamType.COMMON, description = "欲修改的admin对象JSON") AdminDTO adminDTO,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-
     @HttpMethod(description = "删除", permission = "admin:admin:delete", permissionParentName = "系统管理", permissionName = "管理员")
     public String delete(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "目标删除Id") Long id,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
-
 
     @HttpMethod(description = "更改密码")
     public String newPassword(
@@ -70,4 +65,9 @@ public interface AdminService {
     public Boolean sendLoginMsg(
             @NotNull @HttpParam(name = "username", type = HttpParamType.COMMON, description = "用户名") String username,
             @NotNull @HttpParam(name = "password", type = HttpParamType.COMMON, description = "密码") String password) throws ServiceException;
+
+    @HttpMethod(description = "绑定通知公众号")
+    public String bindUniNotify(
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
+
 }

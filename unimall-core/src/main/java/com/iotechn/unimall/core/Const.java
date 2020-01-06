@@ -1,5 +1,7 @@
 package com.iotechn.unimall.core;
 
+import com.alibaba.fastjson.TypeReference;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +35,5 @@ public class Const {
     public static final String ADMIN_ACCESS_TOKEN = "ADMINTOKEN";
 
     public static final String ADMIN_REDIS_PREFIX = "ADMIN_SESSION_";
-
 
 }

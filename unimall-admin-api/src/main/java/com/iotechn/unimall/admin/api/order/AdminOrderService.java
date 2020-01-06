@@ -19,7 +19,7 @@ import java.util.List;
 @HttpOpenApi(group = "admin.order", description = "管理员订单服务")
 public interface AdminOrderService {
 
-    @HttpMethod(description = "列表" , permission = "operation:order:list", permissionParentName = "运营管理", permissionName = "订单管理")
+    @HttpMethod(description = "列表", permission = "operation:order:list", permissionParentName = "运营管理", permissionName = "订单管理")
     public Page<OrderDO> list(
             @HttpParam(name = "page", type = HttpParamType.COMMON, description = "订单页码", valueDef = "1") Integer page,
             @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页码长度", valueDef = "20") Integer limit,
@@ -49,8 +49,9 @@ public interface AdminOrderService {
 
 
     @HttpMethod(description = "根据传入时间和订单状态查询订单信息")
-    public List<OrderDTO> queryToExcel( @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "查询开始时间") Long gmtStart,
-                                        @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "查询结束时间") Long gmtEnd,
-                                        @HttpParam(name = "status", type = HttpParamType.COMMON, description = "订单状态",valueDef = "20") Integer status,
-                                        @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
+    public List<OrderDTO> queryToExcel(
+            @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "查询开始时间") Long gmtStart,
+            @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "查询结束时间") Long gmtEnd,
+            @HttpParam(name = "status", type = HttpParamType.COMMON, description = "订单状态", valueDef = "20") Integer status,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 }

@@ -22,7 +22,7 @@
 	<repositories>
 		<repository>
 			<id>maven-ali</id>
-			<url>http://maven.aliyun.com/nexus/content/groups/public//</url>
+			<url>http://maven.aliyun.com/nexus/content/groups/public/</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -31,11 +31,6 @@
 				<updatePolicy>always</updatePolicy>
 				<checksumPolicy>fail</checksumPolicy>
 			</snapshots>
-		</repository>
-		<repository>
-			<id>iotechn-release</id>
-			<name>unimall maven</name>
-			<url>http://maven.iotechn.com/repository/maven-releases/</url>
 		</repository>
 	</repositories>
 
@@ -46,6 +41,7 @@
 		<module>unimall-app-api</module>
 		<module>unimall-admin-api</module>
 		<module>unimall-launcher</module>
+		<module>unimall-plugin-core</module>
 	</modules>
 
 	<dependencyManagement>
@@ -137,21 +133,13 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<optional>true</optional>
-		</dependency>
-	</dependencies>
-
 	<!-- 发布maven私服 -->
-	<distributionManagement>
-		<repository>
-			<id>iotechn-release</id>
-			<name>unimall maven</name>
-			<url>http://maven.iotechn.com/repository/maven-releases/</url>
-		</repository>
-	</distributionManagement>
+	<!--<distributionManagement>-->
+		<!--<repository>-->
+			<!--<id>iotechn-release</id>-->
+			<!--<name>unimall maven</name>-->
+			<!--<url>http://maven.iotechn.com/repository/maven-releases/</url>-->
+		<!--</repository>-->
+	<!--</distributionManagement>-->
 
 </project>

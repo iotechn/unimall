@@ -25,7 +25,6 @@ public interface OrderService {
             @NotNull @HttpParam(name = "channel", type = HttpParamType.COMMON, description = "订单提交渠道") String channel,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "userId") Long userId) throws ServiceException;
 
-
     @HttpMethod(description = "获取订单分页")
     public Page<OrderDTO> getOrderPage(
             @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer pageNo,

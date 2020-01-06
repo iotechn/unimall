@@ -1,8 +1,5 @@
 package com.iotechn.unimall.core.exception;
 
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.exception.ServiceExceptionDefinition;
-
 /**
  * Created by rize on 2019/7/1.
  */
@@ -13,6 +10,9 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition PLUGIN_EXCEPTION =
             new ServiceExceptionDefinition(1, "插件异常: ${0}");
+
+    public static final ServiceExceptionDefinition THIRD_PART_IO_EXCEPTION =
+            new ServiceExceptionDefinition(2, "第三方网络异常");
 
     public static final ServiceExceptionDefinition APP_UNKNOWN_EXCEPTION =
             new ServiceExceptionDefinition(10000, "系统未知异常");
@@ -135,6 +135,12 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND =
             new ServiceExceptionDefinition(13021, "订单支付方式不支持退款");
 
+    public static final ServiceExceptionDefinition ORDER_GROUP_SPU_CAN_SINGLE_TAKE =
+            new ServiceExceptionDefinition(13022, "团购订单只允许单品结算");
+
+    public static final ServiceExceptionDefinition ORDER_GROUP_SHOP_NOT_EXIST_OR_EXPIRED =
+            new ServiceExceptionDefinition(13023, "团购活动已经过期或不存在");
+
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
             new ServiceExceptionDefinition(14001, "优惠券已经领完～");
@@ -232,7 +238,14 @@ public class ExceptionDefinition {
             new ServiceExceptionDefinition(20004, "商品条码已经存在了 商品Id:${0} 重复Sku:${1}");
 
     public static final ServiceExceptionDefinition GOODS_PRICE_CHECKED_FAILED =
-            new ServiceExceptionDefinition(20004, "必须 vip价格 <= 现价 <= 原价");
+            new ServiceExceptionDefinition(20005, "必须 vip价格 <= 现价 <= 原价");
+
+    public static final ServiceExceptionDefinition GOODS_NEED_STATUS_ERROR =
+            new ServiceExceptionDefinition(20006, "商品已经是该状态,无法改变");
+
+    public static final ServiceExceptionDefinition GOODS_UPDATE_SQL_FAILED =
+            new ServiceExceptionDefinition(20007, "商品执行修改SQL失败");
+
 
 
     public static final ServiceExceptionDefinition RECOMMEND_SPU_NO_HAS =
@@ -317,8 +330,54 @@ public class ExceptionDefinition {
 
 
 
-    public static final ServiceExceptionDefinition ORDER_EXCEL_PARAM_ERROR=
+    public static final ServiceExceptionDefinition ORDER_EXCEL_PARAM_ERROR =
             new ServiceExceptionDefinition(52001, "生成excel查询参数错误");
+
+
+    public static final ServiceExceptionDefinition SPU_NO_EXITS_OR_ONLY_SPU =
+            new ServiceExceptionDefinition(53001, "团购商品中对应的spu不存在或只有spu存在,没有对应sku存在");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_SKU_NUMBER_ERROR =
+            new ServiceExceptionDefinition(53002, "团购商品sku数量不对应");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_SKU_ID_ERROR =
+            new ServiceExceptionDefinition(53003, "团购商品sku所对应的sku_id错误.");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_SKU_PRICE_ERROR =
+            new ServiceExceptionDefinition(53004, "团购商品sku价格为空,或者为0");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_SKU_GROUP_SHOP_ID_ERROR =
+            new ServiceExceptionDefinition(53005, "团购商品sku的团购商品spuID和传入的不一致");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_SPU_ADD_SQL_QUERY_ERROR =
+            new ServiceExceptionDefinition(53006, "团购商品spu添加出误");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_SKU_ADD_SQL_QUERY_ERROR =
+            new ServiceExceptionDefinition(53007, "团购商品sku添加出错");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_SPU_DELETE_SQL_QUERY_ERROR =
+            new ServiceExceptionDefinition(53008, "团购商品spu删除出错");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_SKU_DELETE_SQL_QUERY_ERROR =
+            new ServiceExceptionDefinition(53009, "团购商品sku删除出错");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_SPU_NO_EXITS =
+            new ServiceExceptionDefinition(53010, "团购商品spu不存在");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_SPU_UPDATE_SQL_QUERY_ERROR =
+            new ServiceExceptionDefinition(53011, "团购商品spu更新失败");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_START_MUST_LESS_THAN_END =
+            new ServiceExceptionDefinition(53012, "团购开始时间必须小于结束时间");
+
+    public static final ServiceExceptionDefinition ORDER_IS_NOT_GROUP_SHOP_STATUS =
+            new ServiceExceptionDefinition(53013, "订单状态不是团购状态");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_ALREADY_EXIT =
+            new ServiceExceptionDefinition(53014, "该商品已经是团购商品");
+
+    public static final ServiceExceptionDefinition GROUP_SHOP_ALREAD_ATCIVE =
+            new ServiceExceptionDefinition(53015, "团购商品已经在团购中.无法进行编辑或修改操作");
 
 
 

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.GroupShopMapper">
+
+    <select id="getGroupShopPage" resultType="com.iotechn.unimall.data.dto.goods.GroupShopDTO">
+        SELECT
+            g.id,
+            g.spu_id as spuId,
+            g.gmt_start as gmtStart,
+            g.gmt_end as gmtEnd,
+            g.min_price as minPrice,
+            g.max_price as maxPrice,
+            g.minimum_number as minimumNumber,
+            g.already_buy_number as alreadyBuyNumber,
+            g.automatic_refund as automaticRefund,
+            g.`status`,
+            g.gmt_update as gmtUpdate,
+            g.gmt_create as gmtCreate,
+            s.original_price as originalPrice,
+            s.price as price,
+            s.vip_price as vipPrice,
+            s.title,
+            s.sales,
+            s.img,
+            s.unit
+        FROM
+            unimall_group_shop AS g
+        LEFT JOIN
+            unimall_spu as s on s.id = g.spu_id
+        WHERE
+            g.`status` = 1
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="detail" resultType="com.iotechn.unimall.data.dto.goods.GroupShopDTO">
+        SELECT
+            g.id,
+            g.spu_id as spuId,
+            g.gmt_start as gmtStart,
+            g.gmt_end as gmtEnd,
+            g.min_price as minPrice,
+            g.max_price as maxPrice,
+            g.minimum_number as minimumNumber,
+            g.already_buy_number as alreadyBuyNumber,
+            g.automatic_refund as automaticRefund,
+            g.`status`,
+            g.gmt_update as gmtUpdate,
+            g.gmt_create as gmtCreate,
+            s.original_price as originalPrice,
+            s.price as price,
+            s.vip_price as vipPrice,
+            s.title,
+            s.sales,
+            s.img,
+            s.unit
+        FROM
+            unimall_group_shop AS g
+        LEFT JOIN
+            unimall_spu as s on s.id = g.spu_id
+        WHERE g.id = #{id}
+    </select>
+
+    <update id="incCurrentNum">
+        UPDATE unimall_group_shop SET already_buy_number = already_buy_number + #{num} WHERE id = #{id}
+    </update>
+
+</mapper>

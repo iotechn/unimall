@@ -1,9 +1,9 @@
 package com.iotechn.unimall.app.api.cart;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.app.api.category.CategoryService;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.CartDO;
 import com.iotechn.unimall.data.dto.CartDTO;
@@ -28,7 +28,7 @@ public class CartServiceImpl implements CartService {
     private CartMapper cartMapper;
 
     @Autowired
-    private CategoryService categoryService;
+    private CategoryBizService categoryBizService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -138,7 +138,7 @@ public class CartServiceImpl implements CartService {
     public List<CartDTO> getCartList(Long userId) throws ServiceException {
         List<CartDTO> cartList = cartMapper.getCartList(userId);
         for (CartDTO cartDTO : cartList) {
-            List<Long> categoryFamily = categoryService.getCategoryFamily(cartDTO.getCategoryId());
+            List<Long> categoryFamily = categoryBizService.getCategoryFamily(cartDTO.getCategoryId());
             cartDTO.setCategoryIdList(categoryFamily);
         }
         return cartList;

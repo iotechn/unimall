@@ -27,6 +27,7 @@ public interface GoodsService {
     @HttpMethod(description = "获取商品详情")
     public SpuDTO getGoods(
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "商品Id") Long spuId,
+            @HttpParam(name = "groupShopId", type = HttpParamType.COMMON, description = "团购Id") Long groupShopId,
             @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
 }

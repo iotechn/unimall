@@ -246,7 +246,7 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
                         }
                     }
                     docMethod.setRetType(retType);
-                    if(retType.startsWith("cn.easycampus")){
+                    if(retType.startsWith("com.iotechn")){
                         //若返回值类型为复杂类型
                         List<ApiDocumentModel.Field> fieldList = new ArrayList<>();
                         Class returnClass = null;

@@ -8,7 +8,10 @@ import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
+import com.iotechn.unimall.app.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.freight.FreightBizService;
+import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
+import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -18,21 +21,20 @@ import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.*;
+import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
 import com.iotechn.unimall.data.dto.goods.SkuDTO;
 import com.iotechn.unimall.data.dto.UserCouponDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
-import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.enums.PayChannelType;
-import com.iotechn.unimall.data.enums.UserLevelType;
-import com.iotechn.unimall.data.enums.UserLoginType;
+import com.iotechn.unimall.data.enums.*;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -89,6 +91,12 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private UserBizService userBizService;
 
+    @Autowired
+    private GroupShopBizService groupShopBizService;
+
+    @Autowired
+    private AdminNotifyBizService adminNotifyBizService;
+
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;
 
@@ -106,10 +114,10 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
         if (lockComponent.tryLock(TAKE_ORDER_LOCK + userId, 20)) {
             //加上乐观锁，防止用户重复提交订单
-
             try {
                 //用户会员等级
                 Integer userLevel = SessionUtil.getUser().getLevel();
@@ -120,6 +128,25 @@ public class OrderServiceImpl implements OrderService {
                 }
                 if (orderRequest.getTotalPrice() <= 0) {
                     throw new AppServiceException(ExceptionDefinition.ORDER_PRICE_MUST_GT_ZERO);
+                }
+                Long groupShopId = orderRequest.getGroupShopId();
+                Integer groupShopPrice = null;
+                if (groupShopId != null) {
+                    //校验团购参数
+                    if (skuList.size() > 1) {
+                        throw new AppServiceException(ExceptionDefinition.ORDER_GROUP_SPU_CAN_SINGLE_TAKE);
+                    }
+                    GroupShopDTO groupShopDTO = groupShopBizService.getGroupShopById(groupShopId);
+                    if (groupShopDTO == null || groupShopDTO.getStatus() == StatusType.LOCK.getCode()) {
+                        throw new AppServiceException(ExceptionDefinition.ORDER_GROUP_SHOP_NOT_EXIST_OR_EXPIRED);
+                    }
+                    List<GroupShopSkuDO> groupShopSkuList = groupShopDTO.getGroupShopSkuList();
+                    for (GroupShopSkuDO groupShopSkuDO : groupShopSkuList) {
+                        if (groupShopSkuDO.getSkuId().equals(groupShopSkuList.get(0).getSkuId())) {
+                            //若找到交集
+                            groupShopPrice = groupShopSkuDO.getSkuGroupShopPrice();
+                        }
+                    }
                 }
                 //商品价格
                 int skuPrice = 0;
@@ -135,17 +162,18 @@ public class OrderServiceImpl implements OrderService {
                         throw new AppServiceException(ExceptionDefinition.ORDER_SKU_NOT_EXIST);
                     }
                     if (skuDTO.getStock() < orderRequestSkuDTO.getNum()) {
-                        //TODO 这里存在并发问题
                         throw new AppServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH);
                     }
                     int p;
-                    if (userLevel == UserLevelType.VIP.getCode()) {
+                    if (groupShopId != null && groupShopPrice != null) {
+                        p = groupShopPrice;
+                    } else if (userLevel == UserLevelType.VIP.getCode()) {
                         p = skuDTO.getVipPrice() * orderRequestSkuDTO.getNum();
                     } else {
                         p = skuDTO.getPrice() * orderRequestSkuDTO.getNum();
                     }
                     skuPrice += p;
-                    skuOriginalPrice += skuDTO.getOriginalPrice();
+                    skuOriginalPrice += skuDTO.getOriginalPrice() * orderRequestSkuDTO.getNum();
                     List<Long> categoryFamily = categoryService.getCategoryFamily(skuDTO.getCategoryId());
                     for (Long cid : categoryFamily) {
                         Integer price = categoryPriceMap.get(cid);
@@ -206,6 +234,7 @@ public class OrderServiceImpl implements OrderService {
                 orderDO.setSkuOriginalTotalPrice(skuOriginalPrice);
                 orderDO.setChannel(channel);
                 orderDO.setActualPrice(actualPrice);
+                orderDO.setGroupShopId(groupShopId);
                 if (couponPrice != 0) {
                     orderDO.setCouponId(orderRequest.getCoupon().getCouponId());
                     orderDO.setCouponPrice(couponPrice);
@@ -400,6 +429,13 @@ public class OrderServiceImpl implements OrderService {
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());
             orderBizService.changeOrderStatus(orderNo, orderDO.getStatus() , updateOrderDO);
+            GlobalExecutor.execute(() -> {
+                OrderDTO orderDTO = new OrderDTO();
+                BeanUtils.copyProperties(orderDO, orderDTO);
+                List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_no", orderDO.getOrderNo()));
+                orderDTO.setSkuList(orderSkuList);
+                adminNotifyBizService.refundOrder(orderDTO);
+            });
             return "ok";
         }
         throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_REFUND);

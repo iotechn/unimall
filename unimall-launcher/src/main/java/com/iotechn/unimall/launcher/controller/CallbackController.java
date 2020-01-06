@@ -6,6 +6,8 @@ import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.iotechn.unimall.app.executor.GlobalExecutor;
+import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -13,10 +15,7 @@ import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.mapper.OrderMapper;
-import com.iotechn.unimall.data.mapper.OrderSkuMapper;
-import com.iotechn.unimall.data.mapper.SkuMapper;
-import com.iotechn.unimall.data.mapper.SpuMapper;
+import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.plugin.core.inter.IPluginPaySuccess;
 import com.iotechn.unimall.plugin.core.manager.PluginsManager;
 import org.slf4j.Logger;
@@ -54,6 +53,9 @@ public class CallbackController {
     private OrderSkuMapper orderSkuMapper;
 
     @Autowired
+    private GroupShopMapper groupShopMapper;
+
+    @Autowired
     private WxPayService wxPayService;
 
     @Autowired
@@ -61,6 +63,9 @@ public class CallbackController {
 
     @Autowired
     private PluginsManager pluginsManager;
+
+    @Autowired
+    private AdminNotifyBizService adminNotifyBizService;
 
     @RequestMapping("/wxpay")
     @Transactional(rollbackFor = Exception.class)
@@ -109,17 +114,27 @@ public class CallbackController {
         updateOrderDO.setPayPrice(result.getTotalFee());
         updateOrderDO.setGmtPay(new Date());
         updateOrderDO.setGmtUpdate(order.getGmtPay());
-        updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+        if (order.getGroupShopId() != null) {
+            updateOrderDO.setStatus(OrderStatusType.GROUP_SHOP_WAIT.getCode());
+        } else {
+            updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+        }
         orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
         List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(
                 new EntityWrapper<OrderSkuDO>()
                         .eq("order_no", orderNo));
         orderSkuDOList.forEach(item -> {
+            //增加销量
             spuMapper.incSales(item.getSpuId(), item.getNum());
+            if (order.getGroupShopId() != null) {
+                //增加团购人数, 若想算商品数这里就获取orderSku的数量，若想算人数，这里就写1
+                groupShopMapper.incCurrentNum(order.getGroupShopId(), item.getNum());
+            }
         });
 
         OrderDTO orderDTO = new OrderDTO();
         BeanUtils.copyProperties(order, orderDTO);
+        orderDTO.setPayChannel(updateOrderDO.getPayChannel());
         orderDTO.setSkuList(orderSkuDOList);
 
         List<IPluginPaySuccess> plugins = pluginsManager.getPlugins(IPluginPaySuccess.class);
@@ -129,6 +144,11 @@ public class CallbackController {
                 orderDTO = paySuccess.invoke(orderDTO, formId);
             }
         }
+        //通知管理员发货
+        OrderDTO finalOrderDTO = orderDTO;
+        GlobalExecutor.execute(() -> {
+            adminNotifyBizService.newOrder(finalOrderDTO);
+        });
         return WxPayNotifyResponse.success("支付成功");
     }
 

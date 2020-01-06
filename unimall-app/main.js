@@ -120,6 +120,7 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 }
 
 const uploadImg = (successCallback) => {
+	let baseUrl = config.def().baseUrl
 	uni.chooseImage({
 		sizeType: ['compressed'],
 		success: function(res) {
@@ -200,6 +201,8 @@ const prePage = () => {
 	return prePage.$vm;
 }
 
+const globalData = {}
+
 Vue.config.productionTip = false
 Vue.prototype.$fire = new Vue();
 Vue.prototype.$store = store;
@@ -212,6 +215,7 @@ Vue.prototype.$api = {
 	isVip,
 	setUserInfo,
 	defConfig,
+	globalData
 };
 //#ifdef H5
 Vue.prototype.$jweixin = jweixin;

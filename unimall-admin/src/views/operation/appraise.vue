@@ -143,7 +143,7 @@ export default {
           .then(response => {
             this.$notify.success({
               title: '成功',
-              message: '删除优惠券成功'
+              message: '删除评论成功'
             })
             const index = this.list.indexOf(row)
             this.list.splice(index, 1)

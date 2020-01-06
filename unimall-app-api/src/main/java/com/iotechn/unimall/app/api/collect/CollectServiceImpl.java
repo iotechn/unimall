@@ -1,10 +1,5 @@
 package com.iotechn.unimall.app.api.collect;
 
-/*
-@author kbq
-@date  2019/7/5 - 10:48
-*/
-
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.iotechn.unimall.biz.service.collect.CollectBizService;
 import com.iotechn.unimall.biz.service.goods.GoodsBizService;
@@ -25,6 +20,10 @@ import org.springframework.util.CollectionUtils;
 import java.util.Date;
 import java.util.List;
 
+/*
+@author kbq
+@date  2019/7/5 - 10:48
+*/
 @Service
 public class CollectServiceImpl implements CollectService {
 
@@ -40,7 +39,6 @@ public class CollectServiceImpl implements CollectService {
 
     @Autowired
     private CollectBizService collectBizService;
-
 
 
     @Override
@@ -78,24 +76,12 @@ public class CollectServiceImpl implements CollectService {
     }
 
     @Override
-    public Page<CollectDTO> getCollectAll(Long userId, Integer page, Integer size) throws ServiceException {
+    public Page<CollectDTO> getCollectAll(Long userId, Integer pageNo, Integer pageSize) throws ServiceException {
         Integer count = collectMapper.selectCount(new EntityWrapper<CollectDO>().eq("user_id", userId));
-        Integer totalPage = 1;
-        if (size <= 0 || page <= 0) {
-            throw new AppServiceException(ExceptionDefinition.COLLECT_PARAM_CHECK_FAILED);
-        }
-        if (count % size == 0 && count != 0) {
-            totalPage = count / size;
-        } else {
-            totalPage = count / size + 1;
-        }
-        if (page >= totalPage) {
-            page = totalPage;
-        }
-        Integer offset = size * (page - 1);
-        List<CollectDTO> collectAll = collectMapper.getCollectAll(userId, offset, size);
-        Page<CollectDTO> pageination = new Page<CollectDTO>(collectAll, page, size, count);
-        return pageination;
+        Integer offset = pageSize * (pageNo - 1);
+        List<CollectDTO> collectAll = collectMapper.getCollectAll(userId, offset, pageSize);
+        Page<CollectDTO> page = new Page<CollectDTO>(collectAll, pageNo, pageSize, count);
+        return page;
     }
 
     @Override

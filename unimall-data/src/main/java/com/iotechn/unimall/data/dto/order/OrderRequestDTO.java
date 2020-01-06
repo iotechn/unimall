@@ -24,6 +24,8 @@ public class OrderRequestDTO {
 
     private Long addressId;
 
+    private Long groupShopId;
+
     private String mono;
 
     /**

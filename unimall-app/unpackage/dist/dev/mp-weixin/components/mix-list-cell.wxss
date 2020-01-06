@@ -17,6 +17,8 @@
   -webkit-align-items: baseline;
       -ms-flex-align: baseline;
           align-items: baseline;
+  background: #FFFFFF;
+  padding-left: 20rpx;
   padding: 20rpx 30rpx;
   line-height: 60rpx;
   position: relative;
@@ -53,7 +55,17 @@
     margin-right: 10rpx;
 }
 .mix-list-cell .cell-tip {
+    border-top: #909399;
     font-size: 26rpx;
     color: #909399;
+}
+.btn::after {
+  display: none;
+}
+.btn {
+  width: 95%;
+  position: absolute;
+  opacity: 0;
+  z-index: 99;
 }
 

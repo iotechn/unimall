@@ -23,4 +23,5 @@ public interface SkuMapper extends BaseMapper<SkuDO> {
      */
     public List<Long> getSkuIds(@Param("spuId") Long spuId);
 
+    List<Long> selectSkuIdsBySpuIds(@Param("ids") List<Long> ids);
 }

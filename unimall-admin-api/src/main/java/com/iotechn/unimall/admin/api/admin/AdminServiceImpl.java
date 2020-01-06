@@ -12,6 +12,7 @@ import com.iotechn.unimall.core.notify.SMSClient;
 import com.iotechn.unimall.core.notify.SMSResult;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.core.util.MD5Util;
+import com.iotechn.unimall.core.util.SHAUtil;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
@@ -24,17 +25,25 @@ import com.iotechn.unimall.data.mapper.RoleMapper;
 import com.iotechn.unimall.data.mapper.RolePermissionMapper;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.apache.ibatis.session.RowBounds;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Created by rize on 2019/4/8.
@@ -57,11 +66,22 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private CacheComponent cacheComponent;
 
-
     @Autowired
     private SMSClient smsClient;
 
+    @Value("${com.iotechn.admin.notify.uninotify.url}")
+    private String uniNotifyUrl;
+
+    @Value("${com.iotechn.admin.notify.uninotify.app-secret}")
+    private String uniNotifyAppSecret;
+
+    @Value("${com.iotechn.admin.notify.uninotify.app-id}")
+    private String uniNotifyAppId;
+
     private final static String ADMIN_MSG_CODE = "admin_msg_code_";
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
+
     @Override
     public String login(String username, String password,String verifyCode) throws ServiceException {
         String accessToken = generateAccessToken();
@@ -74,7 +94,7 @@ public class AdminServiceImpl implements AdminService {
         }
         AdminDO adminDO = adminDOS.get(0);
         //短信验证码
-        String code = cacheComponent.getObj(ADMIN_MSG_CODE+adminDO.getPhone(),String.class );
+        String code = cacheComponent.getRaw(ADMIN_MSG_CODE+adminDO.getPhone() );
         if(!"guest".equals(username) && (code == null || verifyCode==null || !code.equals(verifyCode))){
             throw new AdminServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
         }
@@ -108,7 +128,6 @@ public class AdminServiceImpl implements AdminService {
             permissionNames.add(item.getPermission());
         });
         adminDTO.setPerms(permissionNames);
-
         userRedisTemplate.opsForValue().set(Const.ADMIN_REDIS_PREFIX + accessToken, JSONObject.toJSONString(adminDTO), 30, TimeUnit.MINUTES);
         return accessToken;
     }
@@ -238,6 +257,40 @@ public class AdminServiceImpl implements AdminService {
             throw new ThirdPartServiceException(smsResult.getMsg(), ExceptionDefinition.ADMIN_VERIFY_CODE_SEND_FAIL.getCode());
         }
         return true;
+    }
+
+    @Override
+    public String bindUniNotify(Long adminId) throws ServiceException {
+        try {
+            OkHttpClient okHttpClient = new OkHttpClient();
+            TreeSet<String> set = new TreeSet<>();
+            set.add("getRegisterUrl");
+            long timestamp = System.currentTimeMillis();
+            set.add(timestamp + "");
+            set.add("developer");
+            set.add(SessionUtil.getAdmin().getUsername());
+            set.add(this.uniNotifyAppSecret);
+            set.add(this.uniNotifyAppId);
+            String json = okHttpClient
+                    .newCall(new Request.Builder()
+                            .get()
+                            .url(this.uniNotifyUrl + "?_gp=developer&_mt=getRegisterUrl&userId=" + SessionUtil.getAdmin().getUsername()
+                                    + "&appId=" + this.uniNotifyAppId + "&timestamp=" + timestamp + "&sign=" + SHAUtil.shaEncode(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
+                            .build()).execute().body().string();
+            JSONObject jsonObject = JSONObject.parseObject(json);
+            Integer errcode = jsonObject.getInteger("errno");
+            if (errcode == 200) {
+                return jsonObject.getString("data");
+            }
+            throw new AdminServiceException(jsonObject.getString("errmsg"), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+        } catch (ServiceException e) {
+            throw e;
+        } catch (IOException e) {
+            throw new AdminServiceException(ExceptionDefinition.THIRD_PART_IO_EXCEPTION);
+        } catch (Exception e) {
+            logger.error("[绑定通知] 异常", e);
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        }
     }
 
     private String generateAccessToken() {

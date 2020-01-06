@@ -44,6 +44,17 @@ export function deleteGoods(id) {
   })
 }
 
+export function batchDeleteGoods(ids) {
+  return request({
+    method: 'post',
+    data: Qs.stringify({
+      _gp: 'admin.goods',
+      _mt: 'batchDelete',
+      ids: JSON.stringify(ids)
+    })
+  })
+}
+
 export function createGoods(data) {
   return request({
     method: 'post',
@@ -66,12 +77,14 @@ export function detailGoods(id) {
   })
 }
 
-export function listCatAndBrand() {
+export function freezeOrActivtion(id, status) {
   return request({
-    method: 'get',
+    method: 'post',
     params: {
-      _gp: 'goods',
-      _mt: 'categories'
+      _gp: 'admin.goods',
+      _mt: 'freezeOrActivation',
+      spuId: id,
+      status: status
     }
   })
 }

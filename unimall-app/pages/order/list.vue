@@ -55,9 +55,9 @@
 							<button :disabled="submiting" class="action-btn recom" @click="confirmOrder(item)">确认收货</button>
 						</view>
 						<view class="action-box b-t" v-if="item.status == 40">
-							<navigator url="./orderAppraise">
+							<view >
 								<button :disabled="submiting" class="action-btn recom" @click="appraiseOrder(item)">立即评价</button>
-							</navigator>
+							</view>
 						</view>
 					</view>
 
@@ -82,6 +82,7 @@
 			return {
 				statusMap: {
 					10: '未付款',
+					12: '正在拼团',
 					20: '待出库',
 					30: '待收货',
 					40: '待评价',
@@ -208,7 +209,7 @@
 				this.tabCurrentIndex = index;
 			},
 			payOrder(item) {
-				uni.redirectTo({
+				uni.navigateTo({
 					url: '/pages/pay/pay?orderno='+ item.orderNo + '&price=' + item.actualPrice
 				})
 			},
@@ -261,8 +262,8 @@
 			confirmOrder(item) {
 				const that = this
 				uni.showModal({
-					title: '退款？',
-					content: '您确定要退款吗？',
+					title: '收货？',
+					content: '您确定要确认收货吗？',
 					success : (e) => {
 						if (e.confirm) {
 							that.submiting = true

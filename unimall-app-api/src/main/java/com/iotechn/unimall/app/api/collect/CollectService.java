@@ -1,23 +1,18 @@
 package com.iotechn.unimall.app.api.collect;
 
-/*
-@author kbq
-@date  2019/7/5 - 10:13
-*/
-
 import com.iotechn.unimall.core.annotation.HttpMethod;
 import com.iotechn.unimall.core.annotation.HttpOpenApi;
 import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.domain.CollectDO;
 import com.iotechn.unimall.data.dto.CollectDTO;
 import com.iotechn.unimall.data.model.Page;
 
-import java.util.List;
-import java.util.Set;
-
+/*
+@author kbq
+@date  2019/7/5 - 10:13
+*/
 @HttpOpenApi(group = "collect", description = "收藏表单")
 public interface CollectService {
 
@@ -34,8 +29,8 @@ public interface CollectService {
     @HttpMethod(description = "查询某一用户收藏记录")
     public Page<CollectDTO> getCollectAll(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId,
-            @HttpParam(name = "pageNo", valueDef = "1", type = HttpParamType.COMMON, description = "分页查询偏移量") Integer page,
-            @HttpParam(name = "pageSize", valueDef = "10", type = HttpParamType.COMMON, description = "分页查询长度") Integer size) throws ServiceException;
+            @HttpParam(name = "pageNo", valueDef = "1", type = HttpParamType.COMMON, description = "分页查询偏移量") Integer pageNo,
+            @HttpParam(name = "pageSize", valueDef = "10", type = HttpParamType.COMMON, description = "分页查询长度") Integer pageSize) throws ServiceException;
 
 
     @HttpMethod(description = "查询某一条收藏记录")

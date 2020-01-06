@@ -35,7 +35,7 @@
         <el-form-item label="是否在售" prop="status">
           <el-radio-group v-model="goods.status">
             <el-radio :label="1">在售</el-radio>
-            <el-radio :label="2">下架</el-radio>
+            <el-radio :label="0">下架</el-radio>
           </el-radio-group>
         </el-form-item>
 

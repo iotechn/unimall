@@ -28,22 +28,20 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    private  final  static String  ADVERTISEMENT_NAME = "ADVERTISEMENT_TYPE_";
+    private final static String ADVERTISEMENT_NAME = "ADVERTISEMENT_TYPE_";
 
     @Override
     public List<AdvertisementDO> getActiveAd(Integer adType) throws ServiceException {
-
         List<AdvertisementDO> advertisementDOList
-                = cacheComponent.getObjList(ADVERTISEMENT_NAME+adType, AdvertisementDO.class);
-
-        if(CollectionUtils.isEmpty(advertisementDOList)){
+                = cacheComponent.getObjList(ADVERTISEMENT_NAME + adType, AdvertisementDO.class);
+        if (CollectionUtils.isEmpty(advertisementDOList)) {
             Wrapper<AdvertisementDO> wrapper = new EntityWrapper<AdvertisementDO>()
                     .eq("status", StatusType.ACTIVE.getCode());
             if (adType != null) {
                 wrapper.eq("ad_type", adType);
             }
             advertisementDOList = advertisementMapper.selectList(wrapper);
-            cacheComponent.putObj(ADVERTISEMENT_NAME+adType,advertisementDOList,100);
+            cacheComponent.putObj(ADVERTISEMENT_NAME + adType, advertisementDOList, 100);
         }
         return advertisementDOList;
     }

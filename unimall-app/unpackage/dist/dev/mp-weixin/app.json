@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/groupshop/list",
     "pages/address/list",
     "pages/address/create",
     "pages/product/search",
@@ -64,5 +65,5 @@
     ]
   },
   "usingComponents": {},
-  "sitemapLocation": "sitemap22.json"
+  "sitemapLocation": "sitemap30.json"
 }

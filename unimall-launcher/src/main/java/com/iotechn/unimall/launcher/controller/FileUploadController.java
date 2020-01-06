@@ -61,6 +61,8 @@ public class FileUploadController implements InitializingBean {
 
     /**
      * 前台签名直传， 由服务器签名，用户可直接上传图片
+     * 这种只支持 Aliyun(因为我编码查看文档时，只有阿里云做了这个设计) 优点是 上传不需要占用应用服务器带宽。 目前前端是使用的这个。
+     * 若需要更改，请自行修改前端上传逻辑
      * @param request
      * @param response
      */
@@ -73,12 +75,10 @@ public class FileUploadController implements InitializingBean {
             PolicyConditions policyConds = new PolicyConditions();
             policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, 1048576000);
             policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir);
-
             String postPolicy = ossClient.generatePostPolicy(expiration, policyConds);
             byte[] binaryData = postPolicy.getBytes("utf-8");
             String encodedPolicy = BinaryUtil.toBase64String(binaryData);
             String postSignature = ossClient.calculatePostSignature(postPolicy);
-
             JSONObject respJsonObj = new JSONObject();
             respJsonObj.put("accessid", accessId);
             respJsonObj.put("policy", encodedPolicy);
@@ -87,7 +87,6 @@ public class FileUploadController implements InitializingBean {
             respJsonObj.put("host", host);
             respJsonObj.put("expire", String.valueOf(expireEndTime / 1000));
             // respMap.put("expire", formatISO8601Date(expiration));
-
             JSONObject jasonCallback = new JSONObject();
             jasonCallback.put("callbackUrl", callbackUrl);
             jasonCallback.put("callbackBody",

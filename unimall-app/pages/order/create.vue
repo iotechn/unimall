@@ -22,11 +22,11 @@
 			<view v-for="(item, index) in orderReqeust.skuList" :key="index" class="g-item">
 				<image :src="(item.skuImg?item.skuImg:item.spuImg) + '?x-oss-process=style/200px'"></image>
 				<view class="right">
-					<text class="title clamp">{{item.title}}</text>
+					<text class="title clamp">{{ (item.groupShopId ? '[团购]' : '') + item.title}}</text>
 					<text class="spec">{{item.skuTitle}}</text>
 					<view class="price-box">
-						<text class="price"><text v-if="(isVip ? item.vipPrice : item.originalPrice) < item.originalPrice" 
-						style="text-decoration:line-through">￥{{item.originalPrice / 100.0}}</text>￥{{(isVip ? item.vipPrice : item.originalPrice) / 100.0}}</text>
+						<text class="price"><text v-if="(isVip ? item.vipPrice : item.price) < item.originalPrice" 
+						style="text-decoration:line-through; font-size: 25upx; color: #666666;">￥{{item.originalPrice / 100.0}}</text>￥{{(isVip ? item.vipPrice : item.price) / 100.0}}</text>
 						<text class="number">x {{item.num}}</text>
 					</view>
 				</view>
@@ -82,7 +82,7 @@
 				<text class="price-tip">￥</text>
 				<text class="price">{{(orderReqeust.totalPrice - (orderReqeust.coupon?orderReqeust.coupon.discount:0) + orderReqeust.freightPrice) / 100.0}}</text>
 			</view>
-			<text :disabled="submiting" class="submit" @click="submit">提交订单</text>
+			<text class="submit" @click="submit">提交订单</text>
 		</view>
 
 		<!-- 优惠券面板 -->
@@ -151,7 +151,7 @@
 			if (option.takeway) {
 				that.orderReqeust.takeWay = option.takeway
 			}
-			that.orderReqeust.skuList = JSON.parse(option.data);
+			that.orderReqeust.skuList = that.$api.globalData.skuList;
 			let totalOriginalPrice = 0
 			let totalPrice = 0
 			let skuCategoryPriceMap = {}
@@ -178,6 +178,11 @@
 				that.addressData = res.data
 				that.calcFreightPrice()
 			})
+			
+			if (that.orderReqeust.skuList.length === 1 && that.orderReqeust.skuList[0].groupShopId) {
+				//若是团购商品，则携带上团购信息
+				that.orderReqeust.groupShopId = that.orderReqeust.skuList[0].groupShopId
+			}
 
 		},
 		methods: {
@@ -206,6 +211,9 @@
 			},
 			submit() {
 				const that = this
+				if (that.submiting) {
+					return
+				}
 				that.submiting = true
 				if (that.addressData.id) {
 					that.orderReqeust.addressId = that.addressData.id
@@ -217,8 +225,8 @@
 					that.submiting = false
 					that.$api.msg(failres.errmsg)
 				}).then(res => {
-					//提交订单成功
-					that.submiting = false
+					//提交订单成功后，无需再让用户提交订单
+					// that.submiting = false
 					uni.redirectTo({
 						url: '/pages/pay/pay?orderno='+ res.data + '&price=' + that.orderReqeust.totalPrice
 					})

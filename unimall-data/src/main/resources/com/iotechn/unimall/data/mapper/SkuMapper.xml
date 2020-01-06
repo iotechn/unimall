@@ -20,6 +20,7 @@
             k.price,
             k.vip_price AS vipPrice,
             k.stock,
+            p.unit,
             k.freeze_stock AS freezeStock,
             k.gmt_update AS gmtUpdate,
             k.gmt_create AS gmtCreate
@@ -33,6 +34,13 @@
 
     <select id="getSkuIds" resultType="java.lang.Long">
         SELECT id FROM unimall_sku WHERE spu_id = #{spuId}
+    </select>
+
+    <select id="selectSkuIdsBySpuIds" resultType="java.lang.Long">
+        SELECT id FROM unimall_sku WHERE spu_id in
+        <foreach collection="ids" separator="," open="(" close=")" item="spuId">
+            #{spuId}
+        </foreach>
     </select>
 
 </mapper>
