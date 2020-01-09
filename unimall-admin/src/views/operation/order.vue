@@ -97,7 +97,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" width="200" label="物流单号" prop="shipCode"/>
+      <el-table-column align="center" width="200" label="物流单号" prop="shipNo"/>
 
       <el-table-column align="center" width="200" label="备注" prop="mono"/>
 

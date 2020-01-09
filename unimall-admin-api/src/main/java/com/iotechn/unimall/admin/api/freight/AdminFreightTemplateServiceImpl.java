@@ -82,7 +82,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         }
         if (freightTemplateCarriageMapper.delete(
                 new EntityWrapper<FreightTemplateCarriageDO>()
-                        .eq("template_id", templateId)) > 0) {
+                        .eq("template_id", templateId)) >= 0) {
             cacheComponent.delPrefixKey(GoodsBizService.CA_SPU_PREFIX);
             return true;
         }
