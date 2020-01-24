@@ -23,7 +23,9 @@ import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -62,6 +64,12 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
 
     @Autowired
     private CacheComponent cacheComponent;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private PlatformTransactionManager platformTransactionManager;
 
     private static final Column[] spuBaseColumns = {
             Column.create().column("id"),

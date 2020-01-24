@@ -68,8 +68,8 @@
 				},
 				"name":"goodsList",
 				"page":"/goods/list"
-            },
-            {
+         },
+         {
 				"path":"groupshop",
 				"meta":{
 					"noCache":true,

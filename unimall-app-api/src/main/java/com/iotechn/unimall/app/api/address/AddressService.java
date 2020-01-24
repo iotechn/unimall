@@ -64,4 +64,5 @@ public interface AddressService {
     @HttpMethod(description = "获取用户默认地址")
     public AddressDO getDefAddress(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户id") Long userId) throws ServiceException;
+
 }
