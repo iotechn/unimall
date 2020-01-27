@@ -4,6 +4,13 @@
 QQ讨论群：656676341 (进群前，请在网页右上角点star)
 ---
 
+#### 视频教程
+
+[01-unimall微信B2C商城搭建-搭建开发环境](https://www.bilibili.com/video/av85227442/)
+[02-unimall微信B2C商城搭建-本地运行前后端代码](https://www.bilibili.com/video/av85237640/)
+[03-unimall微信B2C商城搭建-打包上传到服务器运行（前后端）](https://www.bilibili.com/video/av85244186/)
+[04-零技术基础SaaS搭建 微信电商小程序](https://www.bilibili.com/video/av85247037/)
+
 #### 优先更新地址
 
 https://gitee.com/iotechn/unimall
