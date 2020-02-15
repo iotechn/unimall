@@ -9,13 +9,12 @@ import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.GroupShopDO;
 import com.iotechn.unimall.data.domain.OrderDO;
+import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.enums.GroupShopAutomaticRefundType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.StatusType;
-import com.iotechn.unimall.data.mapper.GroupShopMapper;
-import com.iotechn.unimall.data.mapper.OrderMapper;
-import com.iotechn.unimall.data.mapper.SpuMapper;
+import com.iotechn.unimall.data.mapper.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +52,10 @@ public class CheckQuartz {
     @Autowired
     private SpuMapper spuMapper;
     @Autowired
+    private SkuMapper skuMapper;
+    @Autowired
+    private OrderSkuMapper orderSkuMapper;
+    @Autowired
     private LockComponent lockComponent;
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -65,14 +68,18 @@ public class CheckQuartz {
         if (lockComponent.tryLock(ORDER_STATUS_LOCK, 15)) {
             try {
                 Date now = new Date();
-                List<String> nos = orderMapper.selectExpireOrderNos(OrderStatusType.UNPAY.getCode(), new Date(now.getTime() - 1000l * 60 * 15));
+                List<OrderDO> nos = orderMapper.selectExpireOrderNos(OrderStatusType.UNPAY.getCode(), new Date(now.getTime() - 1000l * 60 * 15));
                 if (!CollectionUtils.isEmpty(nos)) {
                     nos.forEach(no -> {
                         try {
                             OrderDO updateOrderDO = new OrderDO();
                             updateOrderDO.setStatus(OrderStatusType.CANCELED_SYS.getCode());
                             updateOrderDO.setGmtUpdate(now);
-                            orderBizService.changeOrderStatus(no, OrderStatusType.UNPAY.getCode(), updateOrderDO);
+                            List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", no.getId()));
+                            orderSkuList.forEach(item -> {
+                                skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
+                            });
+                            orderBizService.changeOrderStatus(no.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
                         } catch (Exception e) {
                             logger.error("[未付款检测] 异常", e);
                         }
@@ -81,13 +88,17 @@ public class CheckQuartz {
                 //15分钟执行一次
                 long minutes = (now.getTime() / (1000 * 60));
                 if (minutes % 15 == 0) {
-                    List<String> waitConfirmNos = orderMapper.selectExpireOrderNos(OrderStatusType.WAIT_CONFIRM.getCode(), new Date(now.getTime() - 1000l * 60 * 60 * 24 * 7));
+                    List<OrderDO> waitConfirmNos = orderMapper.selectExpireOrderNos(OrderStatusType.WAIT_CONFIRM.getCode(), new Date(now.getTime() - 1000l * 60 * 60 * 24 * 7));
                     waitConfirmNos.forEach(item -> {
                         try {
                             OrderDO updateOrderDO = new OrderDO();
                             updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
                             updateOrderDO.setGmtUpdate(now);
-                            orderBizService.changeOrderStatus(item, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
+                            List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", item.getId()));
+                            orderSkuList.forEach(skuItem -> {
+                                skuMapper.decSkuFreezeStock(skuItem.getSkuId(), skuItem.getNum());
+                            });
+                            orderBizService.changeOrderStatus(item.getOrderNo(), OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
                         } catch (Exception e) {
                             logger.error("[未确认检测] 异常", e);
                         }
@@ -104,7 +115,7 @@ public class CheckQuartz {
     /**
      * 设定60s跑一次,团购商品到期自动退款,改变状态
      */
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "10 * * * * ?")
     @Transactional(rollbackFor = Exception.class)
     public void groupShopStart() throws Exception {
         if (lockComponent.tryLock(GROUP_SHOP_START_LOCK, 30)) {
@@ -146,7 +157,7 @@ public class CheckQuartz {
 
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "10 * * * * ?")
     @Transactional(rollbackFor = Exception.class)
     public void groupShopEnd() throws Exception {
         if (lockComponent.tryLock(GROUP_SHOP_END_LOCK, 30)) {
@@ -222,7 +233,7 @@ public class CheckQuartz {
 
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "10 * * * * ?")
     @Transactional(rollbackFor = Exception.class)
     public void groupShopLock() throws Exception {
         if (lockComponent.tryLock(GROUP_SHOP_LOCK_LOCK, 30)) {

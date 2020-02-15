@@ -16,6 +16,10 @@ public interface SkuMapper extends BaseMapper<SkuDO> {
 
     public Integer decSkuStock(@Param("skuId") Long skuId,@Param("stock") Integer stock);
 
+    public Integer returnSkuStock(@Param("skuId") Long skuId, @Param("stock") Integer stock);
+
+    public Integer decSkuFreezeStock(@Param("skuId") Long skuId, @Param("stock") Integer stock);
+
     /**
      * 删除SPUID
      * @param spuId

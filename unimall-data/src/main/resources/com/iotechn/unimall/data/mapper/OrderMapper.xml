@@ -81,9 +81,10 @@
             `key`;
     </select>
 
-    <select id="selectExpireOrderNos" resultType="java.lang.String">
+    <select id="selectExpireOrderNos" resultType="com.iotechn.unimall.data.domain.OrderDO">
         SELECT
-           order_no
+           id,
+           order_no as orderNo
         FROM
             unimall_order
         WHERE

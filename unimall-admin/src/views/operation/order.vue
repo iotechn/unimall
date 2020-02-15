@@ -232,6 +232,9 @@
           <el-radio v-model="refundForm.type" label="0">拒绝退款</el-radio>
           <el-radio v-model="refundForm.type" label="1">允许退款</el-radio>
         </el-form-item>
+        <el-form-item v-if="refundForm.type === 1 || refundForm.type === '1'" label="金额">
+          <el-input v-model="refundForm.sum"/>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="refundDialogVisible = false">取消</el-button>
@@ -436,7 +439,12 @@ export default {
       })
     },
     handleRefund(row) {
-      this.refundForm.orderNo = row.orderNo
+      const obj = {
+        orderNo: row.orderNo,
+        sum: row.payPrice / 100.0,
+        type: 0
+      }
+      this.refundForm = Object.assign({}, obj)
       this.refundDialogVisible = true
       this.shipForm.shipCode = 'NONE'
     },
@@ -444,7 +452,14 @@ export default {
       this.$refs['refundForm'].validate(valid => {
         if (valid) {
           this.refundSubmiting = true
-          refundOrder(this.refundForm)
+          const obj = {
+            type: this.refundForm.type,
+            orderNo: this.refundForm.orderNo
+          }
+          if (this.refundForm.sum) {
+            obj['sum'] = parseInt(this.refundForm.sum * 100)
+          }
+          refundOrder(obj)
             .then(response => {
               this.refundSubmiting = false
               this.refundDialogVisible = false

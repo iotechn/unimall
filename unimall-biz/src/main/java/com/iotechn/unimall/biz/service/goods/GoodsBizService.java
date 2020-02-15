@@ -167,12 +167,12 @@ public class GoodsBizService {
         List<SpuDO> spuDOS = spuMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
         //组装SPU
         List<SpuDTO> spuDTOList = new ArrayList<>();
+        Map<String, String> salesHashAll = cacheComponent.getHashAll(CA_SPU_SALES_HASH);
         spuDOS.forEach(item -> {
             SpuDTO spuDTO = new SpuDTO();
             BeanUtils.copyProperties(item, spuDTO);
-            Map<String, String> hashAll = cacheComponent.getHashAll(CA_SPU_SALES_HASH);
-            if (hashAll != null) {
-                String salesStr = hashAll.get("S" + item.getId());
+            if (salesHashAll != null) {
+                String salesStr = salesHashAll.get("S" + item.getId());
                 if (!StringUtils.isEmpty(salesStr)) {
                     spuDTO.setSales(new Integer(salesStr));
                 }
@@ -216,8 +216,17 @@ public class GoodsBizService {
             //获取第一页评论
             Page<AppraiseResponseDTO> spuAppraise = appraiseBizService.getSpuAllAppraise(spuId, 1, 10);
             spuDTOFromCache.setAppraisePage(spuAppraise);
-            if (userId != null) {
+            if (userId != null && userId != 0l) {
                 footprintBizService.addOrUpdateFootprint(userId, spuId);
+            }
+            if (userId != null && userId == 0l) {
+                // 从管理员后台进入，返回最新的库存
+                List<SkuDO> skuDOList = skuMapper.selectList(
+                        new EntityWrapper<SkuDO>()
+                                .eq("spu_id", spuId));
+                spuDTOFromCache.setSkuList(skuDOList);
+                int sum = skuDOList.stream().mapToInt(item -> item.getStock()).sum();
+                spuDTOFromCache.setStock(sum);
             }
             return spuDTOFromCache;
         }
@@ -244,7 +253,7 @@ public class GoodsBizService {
         FreightTemplateDTO templateDTO = freightBizService.getTemplateById(spuDO.getFreightTemplateId());
         spuDTO.setFreightTemplate(templateDTO);
         //放入缓存
-        cacheComponent.putObj(CA_SPU_PREFIX + spuId, spuDTO, Const.CACHE_ONE_DAY);
+        cacheComponent.putObj(CA_SPU_PREFIX + spuId, spuDTO, Const.CACHE_ONE_DAY / 2);
         packSpuCollectInfo(spuDTO, userId);
         //获取第一页评论
         Page<AppraiseResponseDTO> spuAppraise = appraiseBizService.getSpuAllAppraise(spuId, 1, 10);

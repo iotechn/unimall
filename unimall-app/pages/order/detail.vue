@@ -50,7 +50,7 @@
 			</view>
 			<view class="yt-list-cell b-b">
 				<text class="cell-tit clamp">运费</text>
-				<text class="cell-tip">{{orderDetail.freightPrice > 0 ?( '+¥' + (orderDetail.freightPrice | priceFormat)) : '免运费'}}</text>
+				<text class="cell-tip">{{orderDetail.freightPrice > 0 ?( '+¥' + (orderDetail.freightPrice / 100.0)) : '免运费'}}</text>
 			</view>
 			<view class="yt-list-cell desc-cell">
 				<text class="cell-tit clamp">备注</text>

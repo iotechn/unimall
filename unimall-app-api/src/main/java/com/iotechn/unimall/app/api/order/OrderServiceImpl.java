@@ -451,11 +451,16 @@ public class OrderServiceImpl implements OrderService {
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.CANCELED.getCode());
         updateOrderDO.setGmtUpdate(new Date());
+        List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+        orderSkuList.forEach(item -> {
+            skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
+        });
         orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
         return "ok";
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String confirm(String orderNo, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
         if (orderDO.getStatus() != OrderStatusType.WAIT_CONFIRM.getCode()) {
@@ -464,6 +469,10 @@ public class OrderServiceImpl implements OrderService {
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
         updateOrderDO.setGmtUpdate(new Date());
+        List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+        orderSkuList.forEach(item -> {
+            skuMapper.decSkuFreezeStock(item.getSkuId(), item.getNum());
+        });
         orderBizService.changeOrderStatus(orderNo, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
         return "ok";
     }

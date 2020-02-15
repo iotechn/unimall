@@ -6,6 +6,14 @@
         UPDATE unimall_sku SET stock = stock - #{stock}, freeze_stock = freeze_stock + #{stock} WHERE id = #{skuId}
     </update>
 
+    <update id="returnSkuStock">
+        UPDATE unimall_sku SET stock = stock + #{stock}, freeze_stock = freeze_stock - #{stock} WHERE id = #{skuId}
+    </update>
+
+    <update id="decSkuFreezeStock">
+        UPDATE unimall_sku SET freeze_stock = freeze_stock - #{stock} WHERE id = #{skuId}
+    </update>
+
     <select id="getSkuDTOById" resultType="com.iotechn.unimall.data.dto.goods.SkuDTO">
         SELECT
             k.id,

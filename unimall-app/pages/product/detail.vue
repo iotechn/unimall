@@ -163,12 +163,16 @@
 					</view>
 				</view>
 				<view class="attr-list">
-					<!-- <text>规格</text> -->
+					<text>规格</text>
 					<view class="item-list">
 						<text v-for="(skuItem, skuIndex) in goods.skuList" :key="skuIndex" class="tit" :class="{selected: skuIndex === selectedSkuIndex}"
 						 @click="selectSpec(skuItem, skuIndex)">
 							{{skuItem.title}}
 						</text>
+					</view>
+					<text>数量</text>
+					<view style="height: 70upx; margin-bottom: 100upx; margin-top: 15upx; position: relative;">
+						<uni-number-box class="step" :min="1" :value="buyNum" :isMin="buyNum===1" :index="index" @eventChange="numberChange"></uni-number-box>
 					</view>
 				</view>
 				<button class="btn" @click="toggleSpec">完成</button>
@@ -178,10 +182,12 @@
 </template>
 
 <script>
+	import uniNumberBox from '@/components/uni-number-box.vue';
 	import uParse from '@/components/u-parse/u-parse.vue';
 	export default {
 		components: {
-			uParse
+			uParse,
+			uniNumberBox
 		},
 		data() {
 			return {
@@ -194,6 +200,7 @@
 				isVip: false,
 				specClass: 'none',
 				specSelected: [],
+				buyNum: 1,
 				selectedSku: {},
 				selectedSkuIndex: -1,
 				toggleCallback: undefined,
@@ -247,6 +254,9 @@
 			}
 		},
 		methods: {
+			numberChange(e) {
+				this.buyNum = e.number
+			},
 			toggleMask(type) {
 				let timer = type === 'show' ? 10 : 300;
 				let state = type === 'show' ? 1 : 0;
@@ -309,7 +319,7 @@
 						} else {
 							that.$api.msg('添加购物车成功')
 						}
-						
+
 					})
 				}
 			},
@@ -341,7 +351,7 @@
 				} else {
 					let skuItem = {
 						skuId: that.selectedSku.id,
-						num: 1,
+						num: that.buyNum,
 						title: that.goods.title,
 						originalPrice: that.selectedSku.originalPrice,
 						price: that.selectedSku.price,
@@ -736,7 +746,7 @@
 		}
 
 		.item-list {
-			padding: 20upx 0 0;
+			padding: 30upx 0 0;
 			display: flex;
 			flex-wrap: wrap;
 
@@ -1082,10 +1092,9 @@
 		padding: 0;
 		line-height: 0px;
 	}
-	
+
 
 	button::after {
 		border: none;
 	}
-	
 </style>

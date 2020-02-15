@@ -238,10 +238,11 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
             skuDO.setId(null);
             skuDO.setSpuId(spuDO.getId());
             skuDO.setGmtUpdate(now);
-            skuDO.setFreezeStock(0);
+            skuDO.setFreezeStock(null);
             if (skuMapper.update(skuDO,
                     new EntityWrapper<SkuDO>()
                             .eq("bar_code", skuDO.getBarCode())) <= 0) {
+                skuDO.setFreezeStock(0);
                 skuDO.setGmtCreate(now);
                 skuMapper.insert(skuDO);
             }
@@ -362,7 +363,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
 
     @Override
     public SpuDTO detail(Long spuId, Long adminId) throws ServiceException {
-        return goodsBizService.getGoods(spuId, null);
+        return goodsBizService.getGoods(spuId, 0l);
     }
 
     @Override

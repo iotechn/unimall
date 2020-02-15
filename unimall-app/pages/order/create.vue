@@ -228,7 +228,7 @@
 					//提交订单成功后，无需再让用户提交订单
 					// that.submiting = false
 					uni.redirectTo({
-						url: '/pages/pay/pay?orderno='+ res.data + '&price=' + that.orderReqeust.totalPrice
+						url: '/pages/pay/pay?orderno='+ res.data + '&price=' + ((that.orderReqeust.totalPrice - (that.orderReqeust.coupon?that.orderReqeust.coupon.discount:0) + that.orderReqeust.freightPrice))
 					})
 				})
 				

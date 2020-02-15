@@ -101,7 +101,7 @@
 								<text v-if="windowSpuList[index+1].spuOriginalPrice > (isVip ? (windowSpuList[index+1].spuVipPrice) : (windowSpuList[index+1].spuPrice))" class="m-price">￥{{windowSpuList[index+1].spuOriginalPrice / 100.0}}</text> 
 							</view>
 							<view class="pro-box">
-								<text>累计销售:{{item.spuSales}}件</text>
+								<text>累计销售:{{windowSpuList[index+1].spuSales}}件</text>
 							</view>
 						</view>
 					</view>

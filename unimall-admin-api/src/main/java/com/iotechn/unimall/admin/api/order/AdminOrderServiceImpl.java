@@ -18,6 +18,7 @@ import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
+import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.mapper.UserMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.apache.ibatis.session.RowBounds;
@@ -55,6 +56,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private OrderSkuMapper orderSkuMapper;
 
     @Autowired
+    private SkuMapper skuMapper;
+
+    @Autowired
     private LockComponent lockComponent;
 
     @Autowired
@@ -83,7 +87,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String refund(String orderNo, Integer type, Long adminId) throws ServiceException {
+    public String refund(String orderNo, Integer type, Integer sum, Long adminId) throws ServiceException {
         if (lockComponent.tryLock(OrderBizService.ORDER_REFUND_LOCK + orderNo, 30)) {
             try {
                 //1.校验订单状态是否处于退款中
@@ -105,17 +109,31 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     OrderDO updateOrderDO = new OrderDO();
                     updateOrderDO.setStatus(OrderStatusType.REFUNDED.getCode());
                     updateOrderDO.setGmtUpdate(new Date());
+                    //订单还库存
+                    List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+                    orderSkuList.forEach(item -> {
+                        skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
+                    });
                     orderBizService.changeOrderStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
                     Long userId = orderDO.getUserId();
                     UserDO userDO = userMapper.selectById(userId);
                     Integer loginType = userDO.getLoginType();
                     //2.2.2 向微信支付平台发送退款请求
+                    Integer refundPrice = null;
+                    if (sum != null) {
+                        if (sum.intValue() > orderDO.getPayPrice()) {
+                            throw new AdminServiceException(ExceptionDefinition.ORDER_REFUND_SUM_MOST_LOWER_THAN_PAY_PRICE);
+                        }
+                        refundPrice = sum;
+                    } else {
+                        refundPrice = orderDO.getPayPrice() - orderDO.getFreightPrice();
+                    }
                     WxPayRefundRequest wxPayRefundRequest = new WxPayRefundRequest();
                     wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? wxMiNiAppid : wxAppAppid);
                     wxPayRefundRequest.setOutTradeNo(orderNo);
                     wxPayRefundRequest.setOutRefundNo("refund_" + orderNo);
-                    wxPayRefundRequest.setTotalFee(orderDO.getPayPrice() - orderDO.getFreightPrice());
-                    wxPayRefundRequest.setRefundFee(orderDO.getPayPrice() - orderDO.getFreightPrice());
+                    wxPayRefundRequest.setTotalFee(orderDO.getPayPrice());
+                    wxPayRefundRequest.setRefundFee(refundPrice);
                     WxPayRefundResult wxPayRefundResult = wxPayService.refund(wxPayRefundRequest);
                     if (!wxPayRefundResult.getReturnCode().equals("SUCCESS")) {
                         logger.warn("[微信退款] 失败 : " + wxPayRefundResult.getReturnMsg());

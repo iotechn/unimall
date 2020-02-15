@@ -81,7 +81,7 @@
 
     <el-card class="box-card">
       <h3>商品类型(sku)</h3>
-      <el-button :plain="true" type="primary" @click="handleSkuShow">添加</el-button>
+      <el-button :plain="true" type="primary" @click="createSkuDialogShow">添加</el-button>
       <el-table :data="skuList">
         <el-table-column property="id" label="SkuId"/>
         <el-table-column property="barCode" label="Sku条形码" />
@@ -90,20 +90,22 @@
         <el-table-column property="priceRaw" label="现价" />
         <el-table-column property="vipPriceRaw" label="VIP价" />
         <el-table-column property="stock" label="库存" />
+        <el-table-column property="freezeStock" label="冻结库存" />
         <el-table-column
           align="center"
           label="操作"
-          width="100"
+          width="180"
           class-name="small-padding fixed-width"
         >
           <template slot-scope="scope">
+            <el-button type="primary" size="mini" @click="updateSkuDialogShow(scope.row)">修改</el-button>
             <el-button type="danger" size="mini" @click="handleSkuDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <!-- 添加SKU的Dialog -->
-      <el-dialog :visible.sync="skuVisiable" title="添加商品类型（Sku）">
+      <el-dialog :visible.sync="skuVisiable" :title="skuStatusDialogMap[skuStatus]">
         <el-form
           ref="skuForm"
           :model="skuForm"
@@ -113,6 +115,7 @@
           label-width="100px"
           style="width: 400px; margin-left:50px;"
         >
+          <el-input v-model="skuForm.id" type="hidden" />
           <el-form-item label="类型条码" prop="barCode">
             <el-input v-model="skuForm.barCode" />
           </el-form-item>
@@ -129,20 +132,14 @@
               <i v-else class="el-icon-plus avatar-uploader-icon"/>
             </el-upload>
           </el-form-item>
-          <el-form-item label="原始价格" prop="originalPriceRaw">
-            <el-input v-model="skuForm.originalPriceRaw" placeholder="0.00">
-              <template slot="append">元</template>
-            </el-input>
+          <el-form-item label="原始价格(元)" prop="originalPriceRaw">
+            <el-input-number v-model="skuForm.originalPriceRaw" placeholder="0.00"/>
           </el-form-item>
-          <el-form-item label="当前价格" prop="priceRaw">
-            <el-input v-model="skuForm.priceRaw" placeholder="0.00">
-              <template slot="append">元</template>
-            </el-input>
+          <el-form-item label="当前价格(元)" prop="priceRaw">
+            <el-input-number v-model="skuForm.priceRaw" placeholder="0.00"/>
           </el-form-item>
-          <el-form-item label="VIP价格" prop="vipPriceRaw">
-            <el-input v-model="skuForm.vipPriceRaw" placeholder="0.00">
-              <template slot="append">元</template>
-            </el-input>
+          <el-form-item label="VIP价格(元)" prop="vipPriceRaw">
+            <el-input-number v-model="skuForm.vipPriceRaw" placeholder="0.00"/>
           </el-form-item>
           <el-form-item label="库存" prop="stock">
             <el-input v-model="skuForm.stock" />
@@ -272,6 +269,8 @@ export default {
       skuVisiable: false,
       skuForm: { img: undefined },
       skuList: [],
+      skuStatusDialogMap: { 'create': '创建sku', 'update': '更新sku' },
+      skuStatus: '',
       rules: {
         status: [
           { required: true, message: '请选择商品状态', trigger: 'blur' }
@@ -555,19 +554,42 @@ export default {
       const index = this.attributes.indexOf(row)
       this.attributes.splice(index, 1)
     },
-    handleSkuShow() {
-      this.skuFrom = {}
+    createSkuDialogShow() {
+      this.skuStatus = 'create'
+      this.skuForm = {}
+      this.skuVisiable = true
+    },
+    updateSkuDialogShow(row) {
+      this.skuStatus = 'update'
+      this.skuForm = Object.assign({}, row)
       this.skuVisiable = true
     },
     handleSkuAdd() {
       this.$refs['skuForm'].validate(valid => {
         if (valid) {
-          this.skuForm.price = parseInt(this.skuForm.priceRaw * 100)
-          this.skuForm.originalPrice = parseInt(this.skuForm.originalPriceRaw * 100)
-          this.skuForm.vipPrice = parseInt(this.skuForm.vipPriceRaw * 100)
-          var temp = Object.assign({}, this.skuForm)
-          this.skuList.unshift(temp)
-          this.skuVisiable = false
+          if (this.skuForm.id) {
+            let index = -1
+            for (let i = 0; i < this.skuList.length; i++) {
+              if (this.skuList[i].id === this.skuForm.id) {
+                index = i
+              }
+            }
+            if (index > -1) {
+              this.skuForm.price = parseInt(this.skuForm.priceRaw * 100)
+              this.skuForm.originalPrice = parseInt(this.skuForm.originalPriceRaw * 100)
+              this.skuForm.vipPrice = parseInt(this.skuForm.vipPriceRaw * 100)
+              var temp1 = Object.assign({}, this.skuForm)
+              this.skuList.splice(index, 1, temp1)
+              this.skuVisiable = false
+            }
+          } else {
+            this.skuForm.price = parseInt(this.skuForm.priceRaw * 100)
+            this.skuForm.originalPrice = parseInt(this.skuForm.originalPriceRaw * 100)
+            this.skuForm.vipPrice = parseInt(this.skuForm.vipPriceRaw * 100)
+            var temp = Object.assign({}, this.skuForm)
+            this.skuList.unshift(temp)
+            this.skuVisiable = false
+          }
         }
       })
     },

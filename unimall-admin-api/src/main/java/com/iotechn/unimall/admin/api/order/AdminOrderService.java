@@ -32,6 +32,7 @@ public interface AdminOrderService {
     public String refund(
             @NotNull @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单号") String orderNo,
             @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "0.拒绝退款 1.同意退款") Integer type,
+            @HttpParam(name = "sum", type = HttpParamType.COMMON, description = "退款金额") Integer sum,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
 

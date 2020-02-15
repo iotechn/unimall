@@ -130,9 +130,7 @@ Unimall SaaS版每年980元。这个价格就和服务器的价格差不多，�
 
 腾讯云市场链接：[https://market.cloud.tencent.com/products/18338](https://market.cloud.tencent.com/products/18338)
 
-微信扫码：
-
-![微信](snapshoot/qcloudqr.png)
+点击“购买”旁边的“试用7天”，可立即试用。
 
 
 

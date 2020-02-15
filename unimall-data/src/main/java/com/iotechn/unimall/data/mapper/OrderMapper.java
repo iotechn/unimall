@@ -7,7 +7,6 @@ import com.iotechn.unimall.data.model.KVModel;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -31,6 +30,6 @@ public interface OrderMapper extends BaseMapper<OrderDO> {
 
     public List<KVModel<String, Long>> selectOrderSumStatistics(String gmtStart);
 
-    public List<String> selectExpireOrderNos(@Param("status") Integer status, @Param("time") Date time);
+    public List<OrderDO> selectExpireOrderNos(@Param("status") Integer status, @Param("time") Date time);
 
 }
