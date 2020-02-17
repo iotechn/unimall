@@ -312,7 +312,7 @@
 					//添加到购车车
 					that.$api.request('cart', 'addCartItem', {
 						skuId: that.selectedSku.id,
-						num: 1
+						num: that.buyNum ? that.buyNum : 1
 					}).then(res => {
 						if (that.goods.groupShop) {
 							that.$api.msg('从购物车结算不会参加团购')

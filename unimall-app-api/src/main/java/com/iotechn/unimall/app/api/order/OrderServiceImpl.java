@@ -420,13 +420,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String refund(String orderNo, Long userId) throws ServiceException {
+    public String refund(String orderNo, String reason, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
         if (PayChannelType.OFFLINE.getCode().equals(orderDO.getPayChannel())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
         }
         if (OrderStatusType.refundable(orderDO.getStatus())) {
             OrderDO updateOrderDO = new OrderDO();
+            updateOrderDO.setRefundReason(reason);
             updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());
             orderBizService.changeOrderStatus(orderNo, orderDO.getStatus() , updateOrderDO);
             GlobalExecutor.execute(() -> {

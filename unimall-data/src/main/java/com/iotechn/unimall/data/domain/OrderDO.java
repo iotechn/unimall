@@ -94,6 +94,15 @@ public class OrderDO extends SuperDO {
 
     private String mono;
 
+    @TableField("admin_mono_level")
+    private Integer adminMonoLevel;
+
+    @TableField("admin_mono")
+    private String adminMono;
+
+    @TableField("refund_reason")
+    private String refundReason;
+
     @TableField("gmt_ship")
     private Date gmtShip;
 

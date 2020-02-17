@@ -77,6 +77,12 @@ public class OrderDTO extends SuperDTO {
 
     private String mono;
 
+    private Integer adminMonoLevel;
+
+    private String adminMono;
+
+    private String refundReason;
+
     private Date gmtShip;
 
     /**

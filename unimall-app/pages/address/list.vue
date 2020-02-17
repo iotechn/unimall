@@ -62,8 +62,10 @@
 					confirmText: '删除',
 					success: (e) => {
 						if (e.confirm) {
-							that.$api.request('address', 'deleteAddress').then(res => {
+							that.$api.request('address', 'deleteAddress', {
 								addressId: item.id
+							}).then(res => {
+								that.refreshList()
 							})
 						}
 					},

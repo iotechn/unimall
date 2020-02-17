@@ -1,5 +1,6 @@
 package com.iotechn.unimall.admin.api.order;
 
+import com.baomidou.mybatisplus.entity.Column;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
@@ -14,6 +15,7 @@ import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
+import com.iotechn.unimall.data.dto.order.OrderStatisticsDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
@@ -34,6 +36,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by rize on 2019/7/10.
@@ -213,4 +216,40 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         return orderDTOList;
     }
+
+    @Override
+    public String editAdminMono(Long orderId, Integer level, String mono, Long adminId) throws ServiceException {
+        OrderDO orderDO = new OrderDO();
+        orderDO.setId(orderId);
+        orderDO.setAdminMonoLevel(level);
+        orderDO.setAdminMono(mono);
+        orderDO.setGmtUpdate(new Date());
+        if (orderMapper.updateById(orderDO) > 0) {
+            return "ok";
+        }
+        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+    }
+
+    @Override
+    public List<OrderStatisticsDTO> statistics(Long gmtStart, Long gmtEnd, Long adminId) throws ServiceException {
+        if (gmtStart == null) {
+            gmtStart = System.currentTimeMillis() - 1000l * 60 * 60 * 24;
+        }
+        if (gmtEnd == null) {
+            gmtEnd = System.currentTimeMillis();
+        }
+        if(gmtStart > gmtStart){
+            throw new AdminServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
+        }
+        Column[] idColumn = {
+                Column.create().column("id")};
+        List<OrderDO> orderDOS = orderMapper.selectList(
+                new EntityWrapper<OrderDO>()
+                        .between("gmt_create", new Date(gmtStart), new Date(gmtEnd))
+                        .setSqlSelect(idColumn));
+        List<Long> ids = orderDOS.stream().map(item -> item.getId()).collect(Collectors.toList());
+        List<OrderStatisticsDTO> statistics = orderSkuMapper.statistics(ids);
+        return statistics;
+    }
+
 }

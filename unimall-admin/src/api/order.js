@@ -54,3 +54,27 @@ export function getExcelInfo(data) {
     }
   })
 }
+
+export function getExcelStatistics(data) {
+  return request({
+    method: 'post',
+    params: {
+      _gp: 'admin.order',
+      _mt: 'statistics',
+      ...data
+    }
+  })
+}
+
+export function editAdminMono(orderId, level, mono) {
+  return request({
+    method: 'post',
+    params: {
+      _gp: 'admin.order',
+      _mt: 'editAdminMono',
+      orderId,
+      level,
+      mono
+    }
+  })
+}

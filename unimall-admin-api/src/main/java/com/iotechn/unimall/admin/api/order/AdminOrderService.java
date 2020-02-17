@@ -9,6 +9,7 @@ import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
+import com.iotechn.unimall.data.dto.order.OrderStatisticsDTO;
 import com.iotechn.unimall.data.model.Page;
 
 import java.util.List;
@@ -27,14 +28,12 @@ public interface AdminOrderService {
             @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单号") String orderNo,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
-
     @HttpMethod(description = "退款", permission = "operation:order:refund", permissionParentName = "运营管理", permissionName = "订单管理")
     public String refund(
             @NotNull @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单号") String orderNo,
             @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "0.拒绝退款 1.同意退款") Integer type,
             @HttpParam(name = "sum", type = HttpParamType.COMMON, description = "退款金额") Integer sum,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
-
 
     @HttpMethod(description = "发货", permission = "operation:order:ship", permissionParentName = "运营管理", permissionName = "订单管理")
     public String ship(
@@ -48,11 +47,25 @@ public interface AdminOrderService {
             @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单Id") Long orderNo,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
-
     @HttpMethod(description = "根据传入时间和订单状态查询订单信息")
     public List<OrderDTO> queryToExcel(
             @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "查询开始时间") Long gmtStart,
             @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "查询结束时间") Long gmtEnd,
             @HttpParam(name = "status", type = HttpParamType.COMMON, description = "订单状态", valueDef = "20") Integer status,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
+
+    @HttpMethod(description = "编辑管理员备注", permission = "operation:order:editadminmono", permissionParentName = "运营管理", permissionName = "订单管理")
+    public String editAdminMono(
+            @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单Id") Long orderId,
+            @NotNull @HttpParam(name = "level", type = HttpParamType.COMMON, description = "备注等级") Integer level,
+            @HttpParam(name = "mono", type = HttpParamType.COMMON, description = "备注") String mono,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "adminId") Long adminId) throws ServiceException;
+
+    @HttpMethod(description = "订单统计", permission = "operation:order:statistics", permissionParentName = "运营管理", permissionName = "订单管理")
+    public List<OrderStatisticsDTO> statistics(
+            @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "查询开始时间") Long gmtStart,
+            @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "查询结束时间") Long gmtEnd,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
+
+
 }
