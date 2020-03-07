@@ -58,7 +58,7 @@
 
       <el-table-column align="center" property="img" label="图片">
         <template slot-scope="scope">
-          <img :src="scope.row.img" width="40" >
+          <img :src="scope.row.img + '?x-oss-process=style/100px'" width="40" >
         </template>
       </el-table-column>
 

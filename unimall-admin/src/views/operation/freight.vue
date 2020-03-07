@@ -110,24 +110,35 @@
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="计费首次数量" prop="defaultFirstNum">
+        <el-form-item v-if="0 !== dataForm.isFree" label="计费首次数量" prop="defaultFirstNum">
           <el-input v-model.number="dataForm.defaultFirstNum" clearable placeholder="">
-            <template slot="append">件</template>
+            <template slot="append">件
+              <el-tooltip class="item" effect="dark" content="当用户购买商品数量小于 ‘这个数’ 就支付默认首次发货价格的运费" placement="top-start">
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </template>
           </el-input>
         </el-form-item>
-        <el-form-item label="计费首次价格" prop="defaultFirstPrice">
+        <el-form-item v-if="0 !== dataForm.isFree" label="计费首次价格" prop="defaultFirstPrice">
           <el-input v-model.number="dataForm.defaultFirstPrice" clearable placeholder="">
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="计费续件数量" prop="defaultContinueNum">
+        <el-form-item v-if="0 !== dataForm.isFree" label="计费续件数量" prop="defaultContinueNum">
           <el-input v-model.number="dataForm.defaultContinueNum" clearable placeholder="">
-            <template slot="append">件</template>
-          </el-input>
+            <template slot="append">件
+              <el-tooltip class="item" effect="dark" content="当用户购买数量高于 ‘首次发货数量’ 每多 N 件，就须额外支付 ‘续件价格’" placement="top-start">
+                <i class="el-icon-question" />
+              </el-tooltip>
+          </template></el-input>
         </el-form-item>
-        <el-form-item label="计费续件价格" prop="defaultContinuePrice">
+        <el-form-item v-if="0 !== dataForm.isFree" label="计费续件价格" prop="defaultContinuePrice">
           <el-input v-model.number="dataForm.defaultContinuePrice" clearable placeholder="">
-            <template slot="append">元</template>
+            <template slot="append">元
+              <el-tooltip class="item" effect="dark" content="若不需要计件额外算运费，则直接填0即可" placement="top-start">
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </template>
           </el-input>
         </el-form-item>
         <el-form-item label="指定地区价格" prop="freightTemplateCarriageDOList" style="width:150%">
@@ -345,11 +356,11 @@ export default {
         spuLocation: undefined,
         isFree: 1,
         deliveryDeadline: undefined,
-        defaultFreePrice: undefined,
-        defaultFirstPrice: undefined,
-        defaultFirstNum: undefined,
-        defaultContinuePrice: undefined,
-        defaultContinueNum: undefined,
+        defaultFreePrice: 68,
+        defaultFirstPrice: 0,
+        defaultFirstNum: 1,
+        defaultContinuePrice: 0,
+        defaultContinueNum: 1,
         freightTemplateCarriageDOList: []
       }
     },
@@ -400,11 +411,15 @@ export default {
     createData() {
       if (this.dataForm.isFree <= 0) {
         this.dataForm.defaultFreePrice = this.dataForm.isFree
+        if (this.dataForm.isFree === 0) {
+          this.dataForm.defaultFirstPrice = 0
+          this.dataForm.defaultContinuePrice = 0
+        }
       }
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.multiplyHundred(this.dataForm)
-          createFreight(this.dataForm)
+          const formData = this.multiplyHundred(this.dataForm)
+          createFreight(formData)
             .then(response => {
               this.getList()
               this.dialogFormVisible = false
@@ -455,11 +470,15 @@ export default {
     updateDate() {
       if (this.dataForm.isFree <= 0) {
         this.dataForm.defaultFreePrice = this.dataForm.isFree
+        if (this.dataForm.isFree === 0) {
+          this.dataForm.defaultFirstPrice = 0
+          this.dataForm.defaultContinuePrice = 0
+        }
       }
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.multiplyHundred(this.dataForm)
-          updateFreight(this.dataForm)
+          const formData = this.multiplyHundred(this.dataForm)
+          updateFreight(formData)
             .then(response => {
               this.getList()
               this.dialogFormVisible = false
@@ -501,14 +520,15 @@ export default {
       })
     },
     // 用于配合后台数据需要将提交数据乘以100
-    multiplyHundred(data) {
-      data.defaultFreePrice = data.defaultFreePrice * 100
-      data.defaultFirstPrice = data.defaultFirstPrice * 100
-      data.defaultContinuePrice = data.defaultContinuePrice * 100
-      for (let i = 0; i < data.freightTemplateCarriageDOList.length; i++) {
-        data.freightTemplateCarriageDOList[i].freePrice = data.freightTemplateCarriageDOList[i].freePrice * 100
-        data.freightTemplateCarriageDOList[i].firstMoney = data.freightTemplateCarriageDOList[i].firstMoney * 100
-        data.freightTemplateCarriageDOList[i].continueMoney = data.freightTemplateCarriageDOList[i].continueMoney * 100
+    multiplyHundred(rawData) {
+      const data = Object.assign(rawData, {})
+      data.defaultFreePrice = rawData.defaultFreePrice * 100
+      data.defaultFirstPrice = rawData.defaultFirstPrice * 100
+      data.defaultContinuePrice = rawData.defaultContinuePrice * 100
+      for (let i = 0; i < rawData.freightTemplateCarriageDOList.length; i++) {
+        data.freightTemplateCarriageDOList[i].freePrice = rawData.freightTemplateCarriageDOList[i].freePrice * 100
+        data.freightTemplateCarriageDOList[i].firstMoney = rawData.freightTemplateCarriageDOList[i].firstMoney * 100
+        data.freightTemplateCarriageDOList[i].continueMoney = rawData.freightTemplateCarriageDOList[i].continueMoney * 100
       }
       return data
     }

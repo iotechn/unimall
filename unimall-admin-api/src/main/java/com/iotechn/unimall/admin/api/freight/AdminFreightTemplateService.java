@@ -28,10 +28,10 @@ public interface AdminFreightTemplateService {
             @HttpParam(name = "spuLocation", type = HttpParamType.COMMON, description = "宝贝地址") String spuLocation,
             @NotNull @HttpParam(name = "deliveryDeadline", type = HttpParamType.COMMON, description = "发货期限") Integer deliveryDeadline,
             @NotNull @HttpParam(name = "defaultFreePrice", type = HttpParamType.COMMON, description = "默认满价包邮系列") Integer defaultFreePrice,
-            @NotNull @HttpParam(name = "defaultFirstNum", type = HttpParamType.COMMON, description = "默认首费") Integer defaultFirstNum,
-            @NotNull @Range(min = 1) @HttpParam(name = "defaultFirstPrice", type = HttpParamType.COMMON, description = "默认首件数量") Integer defaultFirstPrice,
-            @NotNull @HttpParam(name = "defaultContinueNum", type = HttpParamType.COMMON, description = "默认续费") Integer defaultContinueNum,
-            @NotNull @Range(min = 1) @HttpParam(name = "defaultContinuePrice", type = HttpParamType.COMMON, description = "默认续件数量") Integer defaultContinuePrice,
+            @NotNull @Range(min = 1) @HttpParam(name = "defaultFirstNum", type = HttpParamType.COMMON, description = "默认首费") Integer defaultFirstNum,
+            @NotNull @Range(min = 0) @HttpParam(name = "defaultFirstPrice", type = HttpParamType.COMMON, description = "默认首件数量") Integer defaultFirstPrice,
+            @NotNull @Range(min = 1) @HttpParam(name = "defaultContinueNum", type = HttpParamType.COMMON, description = "默认续费") Integer defaultContinueNum,
+            @NotNull @Range(min = 0) @HttpParam(name = "defaultContinuePrice", type = HttpParamType.COMMON, description = "默认续件数量") Integer defaultContinuePrice,
             @HttpParam(name = "freightTemplateCarriageDOList", type = HttpParamType.COMMON, description = "特殊运费区") List freightTemplateCarriageDOList,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId
     ) throws ServiceException;

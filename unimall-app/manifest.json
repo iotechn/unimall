@@ -112,9 +112,12 @@
     },
     "h5" : {
         "title" : "unimall 多端商城",
-        "domain" : "m.xiaoyuanawan.com",
+        "domain" : "unimall.h5.iotechn.com",
         "router" : {
             "mode" : "history"
+        },
+        "devServer" : {
+            "disableHostCheck" : true
         }
     }
 }

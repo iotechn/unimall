@@ -32,7 +32,7 @@ const configWeiXin = async function(callback) {
 					    };
 					    jweixin.config(info);
 					    jweixin.error(err => {
-					        //console.log('config fail:', err);
+					        console.log('config fail:', err);
 					    });
 					
 					    jweixin.ready(res => {
