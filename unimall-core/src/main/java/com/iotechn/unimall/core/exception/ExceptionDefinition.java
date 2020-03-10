@@ -144,6 +144,12 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_REFUND_SUM_MOST_LOWER_THAN_PAY_PRICE =
             new ServiceExceptionDefinition(13024, "订单退款金额需要小于等于支付金额");
 
+    public static final ServiceExceptionDefinition ORDER_SPU_NOT_SELLING =
+            new ServiceExceptionDefinition(13025, "有商品没有上架");
+
+    public static final ServiceExceptionDefinition ORDER_ADDRESS_CANNOT_BE_NULL =
+            new ServiceExceptionDefinition(13026, "请完善收货地址~");
+
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
             new ServiceExceptionDefinition(14001, "优惠券已经领完～");
 
@@ -380,10 +386,6 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition GROUP_SHOP_ALREAD_ATCIVE =
             new ServiceExceptionDefinition(53015, "团购商品已经在团购中.无法进行编辑或修改操作");
-
-
-
-
 
 
     public static ServiceExceptionDefinition buildVariableException(ServiceExceptionDefinition definition, String ...args) {

@@ -29,6 +29,7 @@
             k.vip_price AS vipPrice,
             k.stock,
             p.unit,
+            p.status,
             k.freeze_stock AS freezeStock,
             k.gmt_update AS gmtUpdate,
             k.gmt_create AS gmtCreate

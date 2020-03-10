@@ -129,6 +129,10 @@ public class OrderServiceImpl implements OrderService {
                 if (orderRequest.getTotalPrice() <= 0) {
                     throw new AppServiceException(ExceptionDefinition.ORDER_PRICE_MUST_GT_ZERO);
                 }
+                // 若是卖虚拟物品，不需要收货地址，可以将此行注释掉
+                if (orderRequest.getAddressId() == null) {
+                    throw new AppServiceException(ExceptionDefinition.ORDER_ADDRESS_CANNOT_BE_NULL);
+                }
                 Long groupShopId = orderRequest.getGroupShopId();
                 Integer groupShopPrice = null;
                 if (groupShopId != null) {
@@ -158,11 +162,14 @@ public class OrderServiceImpl implements OrderService {
                 for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
                     SkuDTO skuDTO = skuMapper.getSkuDTOById(orderRequestSkuDTO.getSkuId());
                     skuIdDTOMap.put(skuDTO.getId(), skuDTO);
+                    if (skuDTO.getStatus() == SpuStatusType.STOCK.getCode()) {
+                        throw new AppServiceException(skuDTO.getSpuTitle() + "." + skuDTO.getTitle() + " 已经下架!", ExceptionDefinition.ORDER_SPU_NOT_SELLING.getCode());
+                    }
                     if (skuDTO == null) {
                         throw new AppServiceException(ExceptionDefinition.ORDER_SKU_NOT_EXIST);
                     }
                     if (skuDTO.getStock() < orderRequestSkuDTO.getNum()) {
-                        throw new AppServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH);
+                        throw new AppServiceException(skuDTO.getSpuTitle() + "." + skuDTO.getTitle() + " 库存不足!", ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH.getCode());
                     }
                     int p;
                     if (groupShopId != null && groupShopPrice != null) {
