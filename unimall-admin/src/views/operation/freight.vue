@@ -521,7 +521,8 @@ export default {
     },
     // 用于配合后台数据需要将提交数据乘以100
     multiplyHundred(rawData) {
-      const data = Object.assign(rawData, {})
+      // Object.assign 属于浅拷贝，故用JSON来解析
+      const data = JSON.parse(JSON.stringify(rawData))
       data.defaultFreePrice = rawData.defaultFreePrice * 100
       data.defaultFirstPrice = rawData.defaultFirstPrice * 100
       data.defaultContinuePrice = rawData.defaultContinuePrice * 100
