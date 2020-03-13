@@ -81,7 +81,7 @@
 
       <el-table-column align="center" label="使用类目名称" prop="categoryTitle" width="100">
         <template slot-scope="scope">
-          <el-tag> {{ scope.row.categoryTitle != null?scope.row.categoryTitle:"全部类目" }} </el-tag>
+          <el-tag> {{ scope.row.categoryTitle != null?scope.row.categoryTitle:(scope.row.categoryId ? '类目已删除' : "全部类目") }} </el-tag>
         </template>
       </el-table-column>
 

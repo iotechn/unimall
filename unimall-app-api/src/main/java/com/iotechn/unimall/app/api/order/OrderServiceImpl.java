@@ -212,6 +212,10 @@ public class OrderServiceImpl implements OrderService {
                         throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_NOT_EXIST);
                     }
 
+                    if (userCouponFromDB.getGmtUsed() != null) {
+                        throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_NOT_EXIST);
+                    }
+
                     if (!userCouponFromDB.getDiscount().equals(userCouponFromFront.getDiscount())) {
                         throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_DISCOUNT_CHECK_FAILED);
                     }
@@ -243,7 +247,7 @@ public class OrderServiceImpl implements OrderService {
                 orderDO.setActualPrice(actualPrice);
                 orderDO.setGroupShopId(groupShopId);
                 if (couponPrice != 0) {
-                    orderDO.setCouponId(orderRequest.getCoupon().getCouponId());
+                    orderDO.setCouponId(orderRequest.getCoupon().getId());
                     orderDO.setCouponPrice(couponPrice);
                 }
                 orderDO.setMono(orderRequest.getMono());

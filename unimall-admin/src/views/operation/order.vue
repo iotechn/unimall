@@ -69,7 +69,7 @@
     >
       <el-table-column type="expand">
         <template slot-scope="props">
-          <el-form label-position="left" class="table-expand">
+          <el-form label-position="right" class="table-expand">
             <el-form-item label="联系人">
               <span>{{ props.row.consignee }}</span>
             </el-form-item>
