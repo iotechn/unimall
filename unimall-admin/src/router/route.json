@@ -193,6 +193,30 @@
 	},
 	{
 		"redirect":"noredirect",
+		"path":"/tools",
+		"children":[
+			{
+				"path":"generator",
+				"meta":{
+					"noCache":true,
+					"perms":[
+						""
+					],
+					"title":"代码生成器"
+				},
+				"name":"tools",
+				"page":"/tools/generator"
+			}
+		],
+		"meta":{
+			"icon":"tools",
+			"title":"实用工具"
+		},
+		"name":"toolsManage",
+		"alwaysShow":true
+	},
+	{
+		"redirect":"noredirect",
 		"path":"/sys",
 		"children":[
 			{

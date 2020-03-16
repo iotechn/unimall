@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.GeneratorMapper">
+
+
+    <select id="listColumns" resultType="com.iotechn.unimall.data.domain.GeneratorTableColumnDO">
+        show columns from ${tableName};
+    </select>
+
+    <select id="listTables" resultType="java.lang.String">
+        show tables;
+    </select>
+
+</mapper>

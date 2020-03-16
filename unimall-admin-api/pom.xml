@@ -45,6 +45,12 @@
 			<version>0.0.1-RELEASE</version>
 		</dependency>
 
+		<!-- 模板引擎 -->
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+		</dependency>
+
 		<!-- 插件核心依赖 勿删 -->
 		<dependency>
 			<groupId>com.iotechn</groupId>

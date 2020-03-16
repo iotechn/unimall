@@ -314,6 +314,19 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ADMIN_VERIFY_CODE_SEND_FAIL=
             new ServiceExceptionDefinition(50011, "登陆验证码发送失败");
 
+    public static final ServiceExceptionDefinition ADMIN_GENERATOR_WORK_DIR_NOT_EXIST =
+            new ServiceExceptionDefinition(50012, "工作路径不正确");
+
+    public static final ServiceExceptionDefinition ADMIN_GENERATOR_FILE_ALREADY_EXIST =
+            new ServiceExceptionDefinition(50013, "欲生成的文件已经存在");
+
+    public static final ServiceExceptionDefinition ADMIN_GENERATOR_IO_EXCEPTION =
+            new ServiceExceptionDefinition(50013, "代码生成网络异常");
+
+    public static final ServiceExceptionDefinition ADMIN_GENERATOR_TEMPLATE_EXCEPTION =
+            new ServiceExceptionDefinition(50013, "代码生成模板异常");
+
+
 
     public static final ServiceExceptionDefinition CATEGORY_OUGHT_TO_EMPTY =
             new ServiceExceptionDefinition(51001, "该类目还有子类目或着商品");
