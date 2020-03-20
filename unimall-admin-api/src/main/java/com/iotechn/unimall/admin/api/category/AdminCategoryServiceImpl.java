@@ -169,24 +169,26 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CategoryTreeNodeDTO updateCategory(Long adminId, Long id, String title, Long parentId, String iconUrl, String picUrl, Integer level) throws ServiceException {
-        CategoryDO categoryDO = new CategoryDO();
         if (id == null || parentId == null) {
             throw new AdminServiceException(ExceptionDefinition.CATEGORY_OR_PARENT_NODE_IS_EMPTY);
         }
-        categoryDO.setId(parentId);
-        CategoryDO categoryParent = categoryMapper.selectOne(categoryDO);
+        CategoryDO categoryParent = categoryMapper.selectById(parentId);
+        CategoryDO category = categoryMapper.selectById(id);
 
-        //传入父节点等于自身抛出异常
-        if (id.equals(parentId)) {
-            throw new AdminServiceException(ExceptionDefinition.PARENT_CAN_NOT_EQUALS_ONESELF);
+        if (category == null || (categoryParent == null && !parentId.equals(0L))) {
+            throw new AdminServiceException(ExceptionDefinition.NOT_FIND_PARENT_NODE_OR_NODE);
         }
 
-        if (categoryParent == null && !parentId.equals(0L)) {
-            throw new AdminServiceException(ExceptionDefinition.NOT_FIND_PARENT_NODE);
-        }
+
+        CategoryDO categoryDO = new CategoryDO();
         if (parentId.equals(0L)) {
             categoryDO.setLevel(0);
         } else {
+            // 父节点等级必须在修改节点等级之上
+            if(category.getLevel() <= categoryParent.getLevel()){
+                throw new AdminServiceException(ExceptionDefinition.PARENT_LEVEL_MUST_HIGH_THAN_CURRENT);
+            }
+
             categoryDO.setLevel(categoryParent.getLevel() + 1);
         }
         categoryDO.setId(id);
@@ -198,6 +200,22 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (categoryMapper.updateById(categoryDO) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.CATEGORY_UPDATE_FAILURE);
         }
+
+        List<CategoryDO> two_level = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", id));
+        if(!CollectionUtils.isEmpty(two_level)){
+            for (CategoryDO two : two_level) {
+                List<CategoryDO> three_level = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", two.getId()));
+                two.setLevel(categoryDO.getLevel() + 1);
+                categoryMapper.updateById(two);
+                if(!CollectionUtils.isEmpty(three_level)){
+                    for (CategoryDO three : three_level) {
+                        three.setLevel(categoryDO.getLevel() + 2);
+                        categoryMapper.updateById(three);
+                    }
+                }
+            }
+        }
+
         CategoryTreeNodeDTO categoryTreeNodeDTO = new CategoryTreeNodeDTO();
         List<CategoryTreeNodeDTO> list = getCategoryList();
         for (CategoryTreeNodeDTO temp : list) {

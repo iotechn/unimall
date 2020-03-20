@@ -445,8 +445,14 @@ export default {
     },
     // 填写弹框选择父类目时，获得父类目的id
     handleLink(e) {
+      console.log('===============================')
+      console.log(e)
       if (e == null || e === undefined) {
         return false
+      }
+      if (e.length === 0) {
+        this.dataForm.parentId = 0
+        return true
       }
       const tag = e[e.length - 1]
 

@@ -607,10 +607,15 @@ export default {
     downExcelBtn() {
       this.downloadLoading = true
       const dataInfo = Object.assign({}, {
-        status: this.downData.status,
-        gmtStart: this.downData.gmtStart.getTime(),
-        gmtEnd: this.downData.gmtEnd.getTime()
+        status: this.downData.status
       })
+
+      if (this.downData.gmtStart) {
+        dataInfo['gmtStart'] = this.downData.gmtStart.getTime()
+      }
+      if (this.downData.gmtEnd) {
+        dataInfo['gmtEnd'] = this.downData.gmtEnd.getTime()
+      }
       getExcelInfo(dataInfo).then(response => {
         if (response.data.data == null) {
           this.$notify.error({
