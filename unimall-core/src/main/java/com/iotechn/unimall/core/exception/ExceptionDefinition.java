@@ -352,6 +352,10 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition PARENT_LEVEL_MUST_HIGH_THAN_CURRENT =
             new ServiceExceptionDefinition(51008, "父节点等级必须高于当前节点等级");
 
+    public static final ServiceExceptionDefinition CATEGORY_EXIST_SPU =
+            new ServiceExceptionDefinition(51009, "该类目下存在商品不能变换类目等级");
+
+
 
 
     public static final ServiceExceptionDefinition ORDER_EXCEL_PARAM_ERROR =

@@ -201,18 +201,25 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             throw new AdminServiceException(ExceptionDefinition.CATEGORY_UPDATE_FAILURE);
         }
 
+        if(category.getLevel().intValue() == 2 && categoryDO.getLevel().intValue() != 2){
+            int spuCount = spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("category_id", id));
+            if(spuCount > 0){
+                throw new AdminServiceException(ExceptionDefinition.CATEGORY_EXIST_SPU);
+            }
+        }
+
         List<CategoryDO> two_level = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", id));
         if(!CollectionUtils.isEmpty(two_level)){
             for (CategoryDO two : two_level) {
-                List<CategoryDO> three_level = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", two.getId()));
-                two.setLevel(categoryDO.getLevel() + 1);
-                categoryMapper.updateById(two);
-                if(!CollectionUtils.isEmpty(three_level)){
-                    for (CategoryDO three : three_level) {
-                        three.setLevel(categoryDO.getLevel() + 2);
-                        categoryMapper.updateById(three);
+                if(two.getLevel().intValue() == 2 && (categoryDO.getLevel().intValue() + 1) != 2) {
+                    int spuCount = spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("category_id", two.getId()));
+                    if(spuCount > 0){
+                        throw new AdminServiceException(ExceptionDefinition.CATEGORY_EXIST_SPU);
                     }
                 }
+
+                two.setLevel(categoryDO.getLevel() + 1);
+                categoryMapper.updateById(two);
             }
         }
 
