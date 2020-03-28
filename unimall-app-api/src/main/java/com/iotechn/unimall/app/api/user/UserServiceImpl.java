@@ -243,6 +243,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserDTO thirdPartLogin(Integer loginType, String ip, String raw) throws ServiceException {
         try {
             if (UserLoginType.MP_WEIXIN.getCode() == loginType) {

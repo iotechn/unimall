@@ -388,17 +388,18 @@ public class OrderServiceImpl implements OrderService {
             orderRequest.setSpbillCreateIp(ip);
             orderRequest.setTradeType(tradeType);
             result = wxPayService.createOrder(orderRequest);
-            if (result instanceof  WxPayMpOrderResult) {
-                String prepayId = ((WxPayMpOrderResult)result).getPackageValue();
-                prepayId = prepayId.replace("prepay_id=", "");
-                UserFormIdDO userFormIdDO = new UserFormIdDO();
-                userFormIdDO.setFormId(prepayId);
-                userFormIdDO.setUserId(userId);
-                userFormIdDO.setOpenid(SessionUtil.getUser().getOpenId());
-                userFormIdDO.setGmtUpdate(now);
-                userFormIdDO.setGmtCreate(now);
-                userBizService.setValidFormId(userFormIdDO);
-            }
+            // 微信已经取消模板消息
+//            if (result instanceof  WxPayMpOrderResult) {
+//                String prepayId = ((WxPayMpOrderResult)result).getPackageValue();
+//                prepayId = prepayId.replace("prepay_id=", "");
+//                UserFormIdDO userFormIdDO = new UserFormIdDO();
+//                userFormIdDO.setFormId(prepayId);
+//                userFormIdDO.setUserId(userId);
+//                userFormIdDO.setOpenid(SessionUtil.getUser().getOpenId());
+//                userFormIdDO.setGmtUpdate(now);
+//                userFormIdDO.setGmtCreate(now);
+//                userBizService.setValidFormId(userFormIdDO);
+//            }
         } catch (WxPayException e) {
             logger.error("[微信支付] 异常", e);
             throw new ThirdPartServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());

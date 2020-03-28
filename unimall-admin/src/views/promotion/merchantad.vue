@@ -135,7 +135,7 @@
             <el-option v-for="(key, index) in adStatusMap" :key="index" :label="key.name" :value="key.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="活动链接">
+        <el-form-item label="关联1">
           <el-cascader
             :options="options"
             :props="{ checkStrictly: true }"
@@ -144,6 +144,16 @@
             filterable
             @change="handleLink"
           />
+        </el-form-item>
+        <el-form-item label="关联2">
+          <el-select v-model="linkUnion2" placeholder="关联功能页面" @change="handleLink2">
+            <el-option
+              v-for="item in functionPages"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -197,6 +207,7 @@ import ElOption from '../../../node_modules/element-ui/packages/select/src/optio
 
 const adTypeMap = [{ value: 1, unionType: 3, name: '轮播' }, { value: 2, unionType: 1, name: '分类精选' }, { value: 3, unionType: 3, name: '横幅' }, { value: 4, unionType: 1, name: '首页轮播下5按钮' }, { value: '', name: '全部' }]
 const adStatusMap = [{ value: 0, name: '冻结' }, { value: 1, name: '激活' }, { value: '', name: '全部' }]
+const functionPages = [{ value: '/pages/groupshop/list', label: '团购列表' }]
 
 export default {
   name: 'Ad',
@@ -215,12 +226,14 @@ export default {
   data() {
     return {
       uploadPath,
+      functionPages,
       options: [],
       value: [],
       list: [],
       total: 0,
       listLoading: true,
       linkUnion: undefined,
+      linkUnion2: undefined,
       adTypeMap,
       adStatusMap,
       listQuery: {
@@ -282,6 +295,7 @@ export default {
       if (e === undefined || e === null) {
         return
       }
+      this.linkUnion2 = undefined
       const tag = e[e.length - 1]
       let url = ''
       if (tag.startsWith('C')) {
@@ -297,6 +311,13 @@ export default {
         url = '/pages/product/detail?id=' + (e[3].substring(2))
       }
       this.dataForm.url = url
+    },
+    handleLink2(e) {
+      if (e === undefined || e === null) {
+        return
+      }
+      this.linkUnion = undefined
+      this.dataForm.url = e
     },
     handleFilter() {
       this.listQuery.page = 1
@@ -355,6 +376,9 @@ export default {
       })
     },
     checkAdType() {
+      if (this.linkUnion2) {
+        return true
+      }
       // 检测关联选项是否是三级目录或商品
       if (this.linkUnion === undefined || this.linkUnion === null || this.linkUnion.length < 3) {
         this.$notify.error({
@@ -409,6 +433,8 @@ export default {
                   break
                 }
               }
+              this.linkUnion = undefined
+              this.linkUnion2 = undefined
               this.dialogFormVisible = false
               this.$notify.success({
                 title: '成功',
