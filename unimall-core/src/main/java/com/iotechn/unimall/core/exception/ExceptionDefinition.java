@@ -337,8 +337,8 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition PARENT_CAN_NOT_EQUALS_ONESELF =
             new ServiceExceptionDefinition(51003, "父节点不能是自己");
 
-    public static final ServiceExceptionDefinition NOT_FIND_PARENT_NODE =
-            new ServiceExceptionDefinition(51004, "未在数据库中查找到父节点");
+    public static final ServiceExceptionDefinition NOT_FIND_PARENT_NODE_OR_NODE =
+            new ServiceExceptionDefinition(51004, "未在数据库中查找到父节点或本节点");
 
     public static final ServiceExceptionDefinition CATEGORY_UPDATE_FAILURE =
             new ServiceExceptionDefinition(51005, "类目数据库修改失败");
@@ -348,6 +348,13 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition DATABASE_INSERT_FAILURE =
             new ServiceExceptionDefinition(51007, "数据库类目插入失败");
+
+    public static final ServiceExceptionDefinition PARENT_LEVEL_MUST_HIGH_THAN_CURRENT =
+            new ServiceExceptionDefinition(51008, "父节点等级必须高于当前节点等级");
+
+    public static final ServiceExceptionDefinition CATEGORY_EXIST_SPU =
+            new ServiceExceptionDefinition(51009, "该类目下存在商品不能变换类目等级");
+
 
 
 

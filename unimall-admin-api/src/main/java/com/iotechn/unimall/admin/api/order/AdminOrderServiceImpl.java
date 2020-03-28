@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -248,6 +249,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                         .between("gmt_create", new Date(gmtStart), new Date(gmtEnd))
                         .setSqlSelect(idColumn));
         List<Long> ids = orderDOS.stream().map(item -> item.getId()).collect(Collectors.toList());
+        if(CollectionUtils.isEmpty(ids)){
+            return null;
+        }
+
         List<OrderStatisticsDTO> statistics = orderSkuMapper.statistics(ids);
         return statistics;
     }
