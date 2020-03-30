@@ -120,6 +120,23 @@ Redis安装可直接使用yum安装
 
 mix模板地址：https://ext.dcloud.net.cn/plugin?id=200
 
+#### 授权方式
+
+1.淘宝授权：[https://item.taobao.com/item.htm?spm=a2126o.11854294.0.0.5f164831jltJlx&id=615046003598](https://item.taobao.com/item.htm?spm=a2126o.11854294.0.0.5f164831jltJlx&id=615046003598)
+2.直接在小程序中购买商用授权商品
+
+#### 已授权公司查询(由于是后面统计的，有些未统计到，请用订单号来添加)
+
+[http://www.dobbinsoft.com/authorization.html](http://www.dobbinsoft.com/authorization.html)
+
+
+#### 奸商曝光
+
+这人开过分了，直接将开源放淘宝，而且卖得还贵。
+
+PP开发工作室
+https://item.taobao.com/item.htm?spm=a230r.1.14.4.6ebf5e4bqXCdiv&id=607307308260&ns=1&abbucket=2#detail
+
 ### 更多服务
 
 ### 项目定制开发服务
