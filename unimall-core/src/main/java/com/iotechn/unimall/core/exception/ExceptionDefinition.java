@@ -407,6 +407,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition GROUP_SHOP_ALREAD_ATCIVE =
             new ServiceExceptionDefinition(53015, "团购商品已经在团购中.无法进行编辑或修改操作");
 
+    public static final ServiceExceptionDefinition GROUP_SHOP_ALREAD_EXIST =
+            new ServiceExceptionDefinition(53015, "删除商品已经在团购.请先删除团购数据");
+
 
     public static ServiceExceptionDefinition buildVariableException(ServiceExceptionDefinition definition, String ...args) {
         String msg = definition.getMsg();

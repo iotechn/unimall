@@ -71,6 +71,9 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
     @Autowired
     private PlatformTransactionManager platformTransactionManager;
 
+    @Autowired
+    private GroupShopMapper groupShopMapper;
+
     private static final Column[] spuBaseColumns = {
             Column.create().column("id"),
             Column.create().column("original_price").as("originalPrice"),
@@ -369,6 +372,13 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String delete(Long spuId, Long adminId) throws ServiceException {
+
+        GroupShopDO groupShopDO = new GroupShopDO();
+        groupShopDO.setSpuId(spuId);
+        if(groupShopMapper.selectOne(groupShopDO) != null){
+            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_ALREAD_EXIST);
+        }
+
         if (spuMapper.deleteById(spuId) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
         }
