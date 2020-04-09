@@ -1,14 +1,15 @@
 package com.iotechn.unimall.admin.api.appraise;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.mapper.AppraiseMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -25,11 +26,18 @@ public class AdminAppraiseImpl implements  AdminAppraise {
     @Autowired
     private AppraiseMapper appraiseMapper;
 
+    @Autowired
+    private CacheComponent cacheComponent;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteAppraise(Long adminId, Long id) throws ServiceException {
-        return appraiseMapper.deleteById(id) > 0;
+        AppraiseDO appraiseDO = appraiseMapper.selectById(id);
+        boolean succ = appraiseMapper.deleteById(id) > 0;
+        if (succ) {
+            cacheComponent.delPrefixKey(AppraiseBizService.CA_APPRAISE_KEY + appraiseDO.getSpuId());
+        }
+        return succ;
     }
 
     @Override

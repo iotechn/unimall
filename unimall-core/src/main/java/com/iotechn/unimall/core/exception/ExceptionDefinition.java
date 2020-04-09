@@ -254,6 +254,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition GOODS_UPDATE_SQL_FAILED =
             new ServiceExceptionDefinition(20007, "商品执行修改SQL失败");
 
+    public static final ServiceExceptionDefinition GOODS_UPLOAD_SKU_BARCODE_REPEAT =
+            new ServiceExceptionDefinition(20008, "您上传的SKU列表中条码重复");
+
 
 
     public static final ServiceExceptionDefinition RECOMMEND_SPU_NO_HAS =

@@ -87,20 +87,21 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
 
     /**
      * 后台低频接口， 无需缓存
+     *
      * @return
      * @throws ServiceException
      */
-    public List<SpuTreeNodeDTO> getSpuBigTree(Long adminId) throws  ServiceException{
+    public List<SpuTreeNodeDTO> getSpuBigTree(Long adminId) throws ServiceException {
         List<CategoryDO> categoryDOS = categoryMapper.selectList(new EntityWrapper<CategoryDO>().orderBy("level"));
         List<SpuDO> spuDOS = spuMapper.getSpuTitleAll();
         List<SpuTreeNodeDTO> list = new ArrayList<>();
         Integer recordLevelOne = 0;
         Integer recordLevelTwo = 0;
         for (int i = 0; i < categoryDOS.size(); i++) {
-            if(i != 0 && categoryDOS.get(i-1).getLevel().equals(0) && categoryDOS.get(i).getLevel().equals(1)){
+            if (i != 0 && categoryDOS.get(i - 1).getLevel().equals(0) && categoryDOS.get(i).getLevel().equals(1)) {
                 recordLevelOne = i;
             }
-            if(i != 0 && categoryDOS.get(i-1).getLevel().equals(1) && categoryDOS.get(i).getLevel().equals(2)){
+            if (i != 0 && categoryDOS.get(i - 1).getLevel().equals(1) && categoryDOS.get(i).getLevel().equals(2)) {
                 recordLevelTwo = i;
                 break;
             }
@@ -115,7 +116,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
             dtoOnI.setChildren(new LinkedList<>());
             for (int j = recordLevelOne; j < recordLevelTwo; j++) {
                 CategoryDO categoryOnJ = categoryDOS.get(j);    //二级类目
-                if(!categoryOnJ.getParentId().equals(dtoOnI.getId())){
+                if (!categoryOnJ.getParentId().equals(dtoOnI.getId())) {
                     continue;
                 }
 
@@ -124,10 +125,10 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
                 dtoOnJ.setValue("C_" + categoryOnJ.getId());
                 dtoOnJ.setId(categoryOnJ.getId());
                 dtoOnJ.setChildren(new LinkedList<>());
-                
-                for (int p = recordLevelTwo; p <categoryDOS.size() ; p++) {
+
+                for (int p = recordLevelTwo; p < categoryDOS.size(); p++) {
                     CategoryDO categoryOnP = categoryDOS.get(p);    //三级类目
-                    if(!categoryOnP.getParentId().equals(dtoOnJ.getId())){
+                    if (!categoryOnP.getParentId().equals(dtoOnJ.getId())) {
                         continue;
                     }
 
@@ -138,11 +139,11 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
                     dtoOnP.setChildren(new LinkedList<>());
 
                     for (int k = 0; k < spuDOS.size(); k++) {
-                        if(k != 0 && spuDOS.get(k-1).getCategoryId().equals(dtoOnP.getId()) && !spuDOS.get(k).getCategoryId().equals(dtoOnP.getId())){
+                        if (k != 0 && spuDOS.get(k - 1).getCategoryId().equals(dtoOnP.getId()) && !spuDOS.get(k).getCategoryId().equals(dtoOnP.getId())) {
                             break;
                         }
                         SpuDO spuDO = spuDOS.get(k);        //商品
-                        if(spuDO.getCategoryId().equals(dtoOnP.getId())){
+                        if (spuDO.getCategoryId().equals(dtoOnP.getId())) {
                             SpuTreeNodeDTO dtoOnK = new SpuTreeNodeDTO();
                             dtoOnK.setLabel(spuDO.getTitle());
                             dtoOnK.setValue("G_" + spuDO.getId());
@@ -175,7 +176,10 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
             throw new AdminServiceException(ExceptionDefinition.GOODS_PRICE_CHECKED_FAILED);
         }
         //校验Sku是否重复
-        List<String> barCodes = spuDTO.getSkuList().stream().map(item -> item.getBarCode()).collect(Collectors.toList());
+        Set<String> barCodes = spuDTO.getSkuList().stream().map(item -> item.getBarCode()).collect(Collectors.toSet());
+        if (barCodes.size() != spuDTO.getSkuList().size()) {
+            throw new AdminServiceException(ExceptionDefinition.GOODS_UPLOAD_SKU_BARCODE_REPEAT);
+        }
         List<SkuDO> existSkuDO = skuMapper.selectList(new EntityWrapper<SkuDO>().in("bar_code", barCodes));
         if (!CollectionUtils.isEmpty(existSkuDO)) {
             String spuIds = existSkuDO.stream().map(item -> item.getSpuId().toString()).collect(Collectors.joining(","));
@@ -230,7 +234,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
         BeanUtils.copyProperties(spuDTO, spuDO);
         spuDO.setGmtUpdate(now);
         spuMapper.updateById(spuDO);
-        List<String> barCodes = new LinkedList<>();
+        Set<String> barCodes = new HashSet<>();
         for (SkuDO skuDO : spuDTO.getSkuList()) {
             if (skuDO.getOriginalPrice() < skuDO.getPrice() || skuDO.getPrice() < skuDO.getVipPrice() || skuDO.getOriginalPrice() < skuDO.getVipPrice()) {
                 throw new AdminServiceException(ExceptionDefinition.GOODS_PRICE_CHECKED_FAILED);
@@ -246,10 +250,13 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
                 skuDO.setGmtCreate(now);
                 skuMapper.insert(skuDO);
             }
-            barCodes.add(skuDO.getBarCode());
+            boolean succ = barCodes.add(skuDO.getBarCode());
+            if (!succ) {
+                throw new AdminServiceException(ExceptionDefinition.GOODS_UPLOAD_SKU_BARCODE_REPEAT);
+            }
         }
         //删除多余barCode
-        skuMapper.delete(new EntityWrapper<SkuDO>().eq("spu_id", spuDO.getId()).notIn("bar_code",barCodes));
+        skuMapper.delete(new EntityWrapper<SkuDO>().eq("spu_id", spuDO.getId()).notIn("bar_code", barCodes));
         //插入spuAttr
         spuAttributeMapper.delete(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuDTO.getId()));
         insertSpuAttribute(spuDTO, now);
@@ -289,7 +296,7 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
     }
 
     @Override
-    public Page<SpuDTO> list(Integer page, Integer limit, Long categoryId, String title,String barcode, Integer status, Long adminId) throws ServiceException {
+    public Page<SpuDTO> list(Integer page, Integer limit, Long categoryId, String title, String barcode, Integer status, Long adminId) throws ServiceException {
         Wrapper<SpuDO> wrapper = new EntityWrapper<SpuDO>();
 
         if (!StringUtils.isEmpty(title)) {
@@ -330,15 +337,15 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
             wrapper.in("category_id", childrenIds);
         }
 
-        if(status != null){
-            wrapper.eq("status", status.intValue() <= SpuStatusType.STOCK.getCode()?SpuStatusType.STOCK.getCode():SpuStatusType.SELLING.getCode());
+        if (status != null) {
+            wrapper.eq("status", status.intValue() <= SpuStatusType.STOCK.getCode() ? SpuStatusType.STOCK.getCode() : SpuStatusType.SELLING.getCode());
         }
 
-        if(barcode != null){
+        if (barcode != null) {
             List<SkuDO> skuDOList = skuMapper.selectList(new EntityWrapper<SkuDO>().eq("bar_code", barcode));
-            if(!CollectionUtils.isEmpty(skuDOList)){
+            if (!CollectionUtils.isEmpty(skuDOList)) {
                 SkuDO skuDO = skuDOList.get(0);
-                wrapper.eq("id",skuDO.getSpuId());
+                wrapper.eq("id", skuDO.getSpuId());
             }
         }
 
@@ -418,24 +425,24 @@ public class AdminGoodsServiceImpl implements AdminGoodsService {
     public SpuDTO freezeOrActivation(Long spuId, Integer status, Long adminId) throws ServiceException {
         SpuDO spuDO = spuMapper.selectById(spuId);
 
-        if(spuDO == null){
+        if (spuDO == null) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
         }
 
         status = status <= SpuStatusType.STOCK.getCode() ? SpuStatusType.STOCK.getCode() : SpuStatusType.SELLING.getCode();
 
-        if(spuDO.getStatus().intValue() == status.intValue()){
+        if (spuDO.getStatus().intValue() == status.intValue()) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_NEED_STATUS_ERROR);
         }
 
         spuDO.setStatus(status);
         spuDO.setGmtUpdate(new Date());
-        if(spuMapper.updateById(spuDO) <= 0){
+        if (spuMapper.updateById(spuDO) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_UPDATE_SQL_FAILED);
         }
 
         SpuDTO spuDTO = new SpuDTO();
-        BeanUtils.copyProperties(spuDO,spuDTO);
+        BeanUtils.copyProperties(spuDO, spuDTO);
         List<SkuDO> skuDOList = skuMapper.selectList(new EntityWrapper<SkuDO>().eq("spu_id", spuDO.getId()));
         spuDTO.setSkuList(skuDOList);
 
