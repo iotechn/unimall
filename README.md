@@ -32,7 +32,7 @@ https://gitee.com/iotechn/unimall
 
 #### 后台端系统演示
 
-- 后台演示地址: [http://admin.unimall.iotechn.com:9527](http://admin.unimall.iotechn.com:9527)
+- 后台演示地址: [http://admin.unimall.iotechn.com](http://admin.unimall.iotechn.com)
 - 登录名:guest   密码:123456   验证码:666666 (guest仅有只读权限)
 
 ![后端演示0](snapshoot/backend0.png)
