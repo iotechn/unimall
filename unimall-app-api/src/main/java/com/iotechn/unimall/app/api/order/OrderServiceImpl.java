@@ -146,7 +146,7 @@ public class OrderServiceImpl implements OrderService {
                     }
                     List<GroupShopSkuDO> groupShopSkuList = groupShopDTO.getGroupShopSkuList();
                     for (GroupShopSkuDO groupShopSkuDO : groupShopSkuList) {
-                        if (groupShopSkuDO.getSkuId().equals(groupShopSkuList.get(0).getSkuId())) {
+                        if (groupShopSkuDO.getSkuId().equals(skuList.get(0).getSkuId())) {
                             //若找到交集
                             groupShopPrice = groupShopSkuDO.getSkuGroupShopPrice();
                         }
