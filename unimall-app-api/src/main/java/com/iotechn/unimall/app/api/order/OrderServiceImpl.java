@@ -282,7 +282,7 @@ public class OrderServiceImpl implements OrderService {
                 }
 
                 //插入OrderSku
-                skuList.forEach(item -> {
+                for (OrderRequestSkuDTO item : skuList) {
                     SkuDTO skuDTO = skuIdDTOMap.get(item.getSkuId());
                     OrderSkuDO orderSkuDO = new OrderSkuDO();
                     orderSkuDO.setBarCode(skuDTO.getBarCode());
@@ -307,8 +307,10 @@ public class OrderServiceImpl implements OrderService {
                     orderSkuMapper.insert(orderSkuDO);
 
                     //扣除库存
-                    skuMapper.decSkuStock(item.getSkuId(), item.getNum());
-                });
+                    if (skuMapper.decSkuStock(item.getSkuId(), item.getNum()) <= 0) {
+                        throw new AppServiceException(skuDTO.getSpuTitle() + "." + skuDTO.getTitle() + " 库存不足!", ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH.getCode());
+                    }
+                }
 
                 if (!StringUtils.isEmpty(orderRequest.getTakeWay())) {
                     String takeWay = orderRequest.getTakeWay();

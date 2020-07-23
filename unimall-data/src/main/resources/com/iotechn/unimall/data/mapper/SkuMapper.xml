@@ -3,7 +3,7 @@
 <mapper namespace="com.iotechn.unimall.data.mapper.SkuMapper">
 
     <update id="decSkuStock">
-        UPDATE unimall_sku SET stock = stock - #{stock}, freeze_stock = freeze_stock + #{stock} WHERE id = #{skuId}
+        UPDATE unimall_sku SET stock = stock - #{stock}, freeze_stock = freeze_stock + #{stock} WHERE id = #{skuId} AND stock > #{stock}
     </update>
 
     <update id="returnSkuStock">
