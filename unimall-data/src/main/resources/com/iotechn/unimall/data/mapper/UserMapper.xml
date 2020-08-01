@@ -62,7 +62,6 @@
         <if test="status != null">
             AND status = #{status}
         </if>
-        limit #{offset},#{limit}
     </select>
 
 

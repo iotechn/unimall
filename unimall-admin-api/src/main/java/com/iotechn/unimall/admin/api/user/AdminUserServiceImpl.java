@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -94,9 +93,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public Page<UserDO> getUser(Long adminId, Long id, String nickname, Integer level, Integer gender, Integer status,Integer pageNo,Integer limit) throws ServiceException {
-        Integer count = userMapper. countUser(id,nickname,level,gender,status);
-        List<UserDO> userDOList = userMapper.getUserList(id,nickname,level,gender,status,limit*(pageNo-1),limit);
-        Page<UserDO> page = new Page<UserDO>(userDOList,pageNo,limit,count);
-        return page;
+        return userMapper.getUserList(Page.div(pageNo, limit, UserDO.class), id,nickname,level,gender,status);
     }
 }
