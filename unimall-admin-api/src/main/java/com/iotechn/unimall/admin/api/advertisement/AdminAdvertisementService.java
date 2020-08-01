@@ -8,11 +8,7 @@ import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AdvertisementDO;
-import com.iotechn.unimall.data.dto.RecommendDTO;
-import com.iotechn.unimall.data.enums.StatusType;
 import com.iotechn.unimall.data.model.Page;
-
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.

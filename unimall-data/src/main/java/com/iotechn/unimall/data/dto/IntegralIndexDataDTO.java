@@ -15,8 +15,6 @@ public class IntegralIndexDataDTO {
 
     private Map<String, List<AdvertisementDTO>> advertisement;
 
-    private List<RecommendDTO> windowRecommend;
-
     private List<SpuDTO> salesTop;
 
     private List<SpuDTO> newTop;

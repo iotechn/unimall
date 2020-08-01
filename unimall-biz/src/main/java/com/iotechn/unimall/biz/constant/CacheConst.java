@@ -7,4 +7,7 @@ package com.iotechn.unimall.biz.constant;
  * Time: 12:11
  */
 public class CacheConst {
+
+    public static final String USER_VERIFY_CODE_PREFIX = "USER_VERIFY_CODE:";
+
 }

@@ -2,6 +2,7 @@ package com.iotechn.unimall.app.api.user;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AppServiceException;
@@ -17,6 +18,7 @@ import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.UserMapper;
+import com.iotechn.unimall.data.properties.UnimallWxProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -25,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +43,6 @@ import java.util.Map;
  */
 @Service
 public class UserServiceImpl implements UserService {
-
-    private static final String VERIFY_CODE_PREFIX = "VERIFY_CODE_";
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -64,30 +63,15 @@ public class UserServiceImpl implements UserService {
 
     private OkHttpClient okHttpClient = new OkHttpClient();
 
-    @Value("${com.iotechn.unimall.wx.mini.app-id}")
-    private String wxMiNiAppid;
-
-    @Value("${com.iotechn.unimall.wx.mini.app-secret}")
-    private String wxMiNiSecret;
-
-    @Value("${com.iotechn.unimall.wx.app.app-id}")
-    private String wxAppAppid;
-
-    @Value("${com.iotechn.unimall.wx.app.app-secret}")
-    private String wxAppSecret;
-
-    @Value("${com.iotechn.unimall.wx.h5.app-id}")
-    private String wxH5Appid;
-
-    @Value("${com.iotechn.unimall.wx.h5.app-secret}")
-    private String wxH5Secret;
+    @Autowired
+    private UnimallWxProperties unimallWxProperties;
 
     @Override
     public String sendVerifyCode(String phone) throws ServiceException {
         String verifyCode = GeneratorUtil.genSixVerifyCode();
         SMSResult res = smsClient.sendRegisterVerify(phone, verifyCode);
         if (res.isSucc()) {
-            cacheComponent.putRaw(VERIFY_CODE_PREFIX + phone, verifyCode, 300);
+            cacheComponent.putRaw(CacheConst.USER_VERIFY_CODE_PREFIX + phone, verifyCode, 300);
             return "ok";
         } else {
             throw new AppServiceException(res.getMsg(), ExceptionDefinition.USER_SEND_VERIFY_FAILED.getCode());
@@ -119,7 +103,7 @@ public class UserServiceImpl implements UserService {
         userDO.setLoginType(UserLoginType.REGISTER.getCode());
         userMapper.insert(userDO);
         //返回用户DTO
-        cacheComponent.del(VERIFY_CODE_PREFIX + phone);
+        cacheComponent.del(CacheConst.USER_VERIFY_CODE_PREFIX + phone);
         return null;
     }
 
@@ -141,7 +125,7 @@ public class UserServiceImpl implements UserService {
         updateUserDO.setPhone(phone);
         updateUserDO.setGmtUpdate(new Date());
         if (userMapper.updateById(updateUserDO) > 0) {
-            cacheComponent.del(VERIFY_CODE_PREFIX + phone);
+            cacheComponent.del(CacheConst.USER_VERIFY_CODE_PREFIX + phone);
             return "ok";
         }
         throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
@@ -166,7 +150,7 @@ public class UserServiceImpl implements UserService {
         updateUserDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0, 7)));
         updateUserDO.setGmtUpdate(new Date());
         if (userMapper.updateById(updateUserDO) > 0) {
-            cacheComponent.del(VERIFY_CODE_PREFIX + phone);
+            cacheComponent.del(CacheConst.USER_VERIFY_CODE_PREFIX + phone);
             return "ok";
         }
         throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
@@ -180,7 +164,7 @@ public class UserServiceImpl implements UserService {
      * @throws ServiceException
      */
     private void checkVerifyCode(String phone, String verifyCode) throws ServiceException {
-        String raw = cacheComponent.getRaw(VERIFY_CODE_PREFIX + phone);
+        String raw = cacheComponent.getRaw(CacheConst.USER_VERIFY_CODE_PREFIX + phone);
         if (StringUtils.isEmpty(raw)) {
             throw new AppServiceException(ExceptionDefinition.USER_VERIFY_CODE_NOT_EXIST);
         }
@@ -207,8 +191,8 @@ public class UserServiceImpl implements UserService {
                     JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
                     String code = thirdPartJsonObject.getString("code");
                     String body = okHttpClient.newCall(new Request.Builder()
-                            .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? wxMiNiAppid : wxAppAppid) +
-                                    "&secret=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? wxMiNiSecret : wxAppSecret) +
+                            .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.unimallWxProperties.getMiniAppId() : this.unimallWxProperties.getAppId()) +
+                                    "&secret=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.unimallWxProperties.getMiniAppSecret() : this.unimallWxProperties.getAppSecret()) +
                                     "&grant_type=authorization_code&js_code=" + code).get().build()).execute().body().string();
                     JSONObject jsonObject = JSONObject.parseObject(body);
                     Integer errcode = jsonObject.getInteger("errcode");
@@ -341,8 +325,8 @@ public class UserServiceImpl implements UserService {
         JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
         String code = thirdPartJsonObject.getString("code");
         String body = okHttpClient.newCall(new Request.Builder()
-                .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? wxMiNiAppid : wxAppAppid) +
-                        "&secret=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? wxMiNiSecret : wxAppSecret) +
+                .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.unimallWxProperties.getMiniAppId() : this.unimallWxProperties.getAppId()) +
+                        "&secret=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.unimallWxProperties.getMiniAppSecret() : this.unimallWxProperties.getAppSecret()) +
                         "&grant_type=authorization_code&js_code=" + code).get().build()).execute().body().string();
         JSONObject jsonObject = JSONObject.parseObject(body);
         Integer errcode = jsonObject.getInteger("errcode");
@@ -399,7 +383,7 @@ public class UserServiceImpl implements UserService {
         //H5 微信公众号网页登录
         String json = okHttpClient.newCall(
                 new Request.Builder().url("https://api.weixin.qq.com/sns/oauth2/access_token?appid="
-                        + wxH5Appid + "&secret=" + wxH5Secret + "&code=" + raw + "&grant_type=authorization_code").build()).execute().body().string();
+                        + this.unimallWxProperties.getH5AppId() + "&secret=" + this.unimallWxProperties.getH5AppSecret() + "&code=" + raw + "&grant_type=authorization_code").build()).execute().body().string();
         JSONObject jsonObject = JSONObject.parseObject(json);
         Integer errcode = jsonObject.getInteger("errcode");
         if (errcode == null || errcode == 0) {
