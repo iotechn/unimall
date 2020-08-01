@@ -1,7 +1,10 @@
 package com.iotechn.unimall.biz.service.footpring;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.FootprintDO;
 import com.iotechn.unimall.data.mapper.FootprintMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,25 +26,15 @@ import java.util.List;
 public class FootprintBizService {
 
     @Autowired
-    private FootprintMapper footprintMapper;
+    private CacheComponent cacheComponent;
 
-    @Transactional(rollbackFor = Exception.class)
-    public boolean addOrUpdateFootprint(Long userId, Long spuId) throws ServiceException {
-        Date now = new Date();
-        List<FootprintDO> footprintDOList = footprintMapper.selectList(
-                new QueryWrapper<FootprintDO>()
-                        .eq("user_id", userId)
-                        .eq("spu_id", spuId)
-                        .orderByDesc("gmt_update"));
-        if (CollectionUtils.isEmpty(footprintDOList)) {
-            FootprintDO footprintDO = new FootprintDO(userId, spuId);
-            footprintDO.setGmtCreate(now);
-            footprintDO.setGmtUpdate(now);
-            return footprintMapper.insert(footprintDO) > 0;
+    public boolean addFootPrint(Long userId,String spuId,String spuTitle,String spuPrice,String spuImg){
+        if(userId != null && userId != 0l){
+            cacheComponent.putSetRaw(CacheConst.FOOTPRINT_USER + userId,"spuId:" + spuId, Const.CACHE_ONE_YEAR);
+            cacheComponent.putSetRaw(CacheConst.FOOTPRINT_USER + userId,"spuTitle:" + spuId + ":" + spuTitle, Const.CACHE_ONE_YEAR);
+            cacheComponent.putSetRaw(CacheConst.FOOTPRINT_USER + userId,"spuPrice:" + spuId + ":" + spuPrice, Const.CACHE_ONE_YEAR);
+            cacheComponent.putSetRaw(CacheConst.FOOTPRINT_USER + userId,"spuImg:" + spuId + ":" + spuImg, Const.CACHE_ONE_YEAR);
         }
-        FootprintDO footprintDO = footprintDOList.get(0);
-        footprintDO.setGmtUpdate(now);
-        return footprintMapper.updateById(footprintDO) > 0;
+        return true;
     }
-
 }

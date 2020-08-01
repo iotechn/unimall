@@ -88,9 +88,6 @@ public class ProductBizService {
     private CollectBizService collectBizService;
 
     @Autowired
-    private FootprintBizService footprintBizService;
-
-    @Autowired
     private AppraiseBizService appraiseBizService;
 
     /**
@@ -259,9 +256,6 @@ public class ProductBizService {
             //获取第一页评论
             Page<AppraiseResponseDTO> spuAppraise = appraiseBizService.getSpuAllAppraise(spuId, 1, 10);
             spuDTOFromCache.setAppraisePage(spuAppraise);
-            if (userId != null && userId != 0l) {
-                footprintBizService.addOrUpdateFootprint(userId, spuId);
-            }
             if (userId != null && userId == 0l) {
                 // 从管理员后台进入，返回最新的库存
                 List<SkuDO> skuDOList = skuMapper.selectList(
@@ -301,9 +295,6 @@ public class ProductBizService {
         //获取第一页评论
         Page<AppraiseResponseDTO> spuAppraise = appraiseBizService.getSpuAllAppraise(spuId, 1, 10);
         spuDTO.setAppraisePage(spuAppraise);
-        if (userId != null) {
-            footprintBizService.addOrUpdateFootprint(userId, spuId);
-        }
         return spuDTO;
     }
 

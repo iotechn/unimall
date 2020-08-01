@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * Created with IntelliJ IDEA.
- * Description:
+ * Description: 店铺描述配置
  * User: kbq
  * Date: 2019-07-20
  * Time: 上午11:46

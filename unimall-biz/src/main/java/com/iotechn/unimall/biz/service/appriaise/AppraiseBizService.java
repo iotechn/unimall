@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.annotaion.AspectCommonCache;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
@@ -24,17 +25,12 @@ public class AppraiseBizService {
 
     @Autowired
     private AppraiseMapper appraiseMapper;
-    @Autowired
-    private CacheComponent cacheComponent;
+
     @Autowired
     private ImgMapper imgMapper;
 
+    @AspectCommonCache(value = CacheConst.APPRAISE_KEY,argIndex = {0,1,2},second = Const.CACHE_ONE_DAY)
     public Page<AppraiseResponseDTO> getSpuAllAppraise(Long spuId, Integer pageNo, Integer pageSize) throws ServiceException {
-        String cacheKey = CacheConst.APPRAISE_KEY + spuId + ":" + pageNo + ":" + pageSize;
-        Page obj = cacheComponent.getObj(cacheKey, Page.class);
-        if (obj != null) {
-            return obj;
-        }
         Integer count = appraiseMapper.selectCount(new QueryWrapper<AppraiseDO>().eq("spu_id", spuId));
         Integer offset = pageSize * (pageNo - 1);
         List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectSpuAllAppraise(spuId, offset, pageSize);
@@ -42,7 +38,6 @@ public class AppraiseBizService {
             appraiseResponseDTO.setImgList(imgMapper.getImgs(BizType.COMMENT.getCode(), appraiseResponseDTO.getId()));
         }
         Page<AppraiseResponseDTO> page = new Page<>(appraiseResponseDTOS, pageNo, pageSize, count);
-        cacheComponent.putObj(cacheKey, page, Const.CACHE_ONE_DAY);
         return page;
     }
 

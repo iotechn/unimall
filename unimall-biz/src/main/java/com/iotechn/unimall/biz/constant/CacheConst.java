@@ -45,6 +45,17 @@ public class CacheConst {
 
 
     /**
+     * 用户足迹Set集合
+     * FOOTPRINT_USER: + userId
+     * 每四个值为一组,对应一个足迹
+     * spuId: + spuId
+     * spuTitle: +spuId + ":" + spuTitle
+     * spuPrice: +spuId + ":" + spuPrice
+     * spuImg: +spuId + ":" + spuImg
+     */
+    public static final String FOOTPRINT_USER = "FOOTPRINT_USER:";
+
+    /**
      * 用户收藏商品缓存 COLLECT_USER:+ userID
      */
     public static final String COLLECT_USER = "COLLECT_USER:";
