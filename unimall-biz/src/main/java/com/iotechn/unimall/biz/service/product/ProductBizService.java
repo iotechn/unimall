@@ -92,24 +92,20 @@ public class ProductBizService {
     @Autowired
     private AppraiseBizService appraiseBizService;
 
-    @Autowired
-    private GroupShopSkuMapper groupShopSkuMapper;
-
-    public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
+    public Page<SpuDTO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         QueryWrapper<SpuDO> wrapper = new QueryWrapper<SpuDO>();
-
-
         if (!StringUtils.isEmpty(title)) {
-            wrapper.like("title", title);
-        } else {
-            //若关键字为空，尝试从缓存取列表
-            Page objFromCache = cacheComponent.getObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize + "_" + orderBy + "_" + isAsc, Page.class);
-            if (objFromCache != null) {
-                return objFromCache;
-            }
+            return this.getProductPageFromDB(pageNo, pageSize, categoryId, orderBy, isAsc, title);
         }
+        //若关键字为空，尝试从缓存取列表
+        Page objFromCache = cacheComponent.getObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize + "_" + orderBy + "_" + isAsc, Page.class);
+        if (objFromCache != null) {
+            return objFromCache;
+        }
+        //
+        wrapper.eq("status", SpuStatusType.SELLING.getCode());
 
-        if(orderBy != null && isAsc != null){
+        if (orderBy != null && isAsc != null) {
             if (isAsc) {
                 wrapper.orderByAsc(orderBy);
             } else {
@@ -119,7 +115,6 @@ public class ProductBizService {
 
         if (categoryId != null && categoryId != 0L) {
             List<CategoryDO> childrenList = categoryMapper.selectList(new QueryWrapper<CategoryDO>().eq("parent_id", categoryId));
-
             if (CollectionUtils.isEmpty(childrenList)) {
                 //目标节点为叶子节点,即三级类目
                 wrapper.eq("category_id", categoryId);
@@ -149,7 +144,6 @@ public class ProductBizService {
             }
         }
 
-        wrapper.eq("status", SpuStatusType.SELLING.getCode());
         // TODO search Goods
         // wrapper.setSqlSelect(baseColumns);
         List<SpuDO> spuDOS = new ArrayList<>(); //spuMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
@@ -177,9 +171,32 @@ public class ProductBizService {
         return page;
     }
 
+    /**
+     * 从数据库中获取商品
+     *
+     * @param pageNo
+     * @param pageSize
+     * @param categoryId
+     * @param orderBy
+     * @param isAsc
+     * @param title
+     * @return
+     */
+    public Page<SpuDTO> getProductPageFromDB(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
+        QueryWrapper<SpuDO> wrapper = new QueryWrapper<SpuDO>();
+        if (orderBy != null && isAsc != null) {
+            if (isAsc) {
+                wrapper.orderByAsc(orderBy);
+            } else {
+                wrapper.orderByDesc(orderBy);
+            }
+        }
+        return null;
+    }
 
     /**
      * 通过Id获取SpuDO 领域对象
+     *
      * @param spuId
      * @return
      * @throws ServiceException
