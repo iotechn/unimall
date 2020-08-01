@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.service.footpring;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.FootprintDO;
 import com.iotechn.unimall.data.mapper.FootprintMapper;
@@ -29,10 +29,10 @@ public class FootprintBizService {
     public boolean addOrUpdateFootprint(Long userId, Long spuId) throws ServiceException {
         Date now = new Date();
         List<FootprintDO> footprintDOList = footprintMapper.selectList(
-                new EntityWrapper<FootprintDO>()
+                new QueryWrapper<FootprintDO>()
                         .eq("user_id", userId)
                         .eq("spu_id", spuId)
-                        .orderBy("gmt_update", false));
+                        .orderByDesc("gmt_update"));
         if (CollectionUtils.isEmpty(footprintDOList)) {
             FootprintDO footprintDO = new FootprintDO(userId, spuId);
             footprintDO.setGmtCreate(now);

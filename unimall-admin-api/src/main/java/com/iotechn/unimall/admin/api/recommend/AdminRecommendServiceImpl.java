@@ -1,6 +1,6 @@
 package com.iotechn.unimall.admin.api.recommend;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.recommend.RecommendBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -44,11 +44,11 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean addRecommend(Long adminId, Long spuId, Integer recommendType) throws ServiceException {
 
-        if (!(spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("id", spuId)) > 0)) {
+        if (!(spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("id", spuId)) > 0)) {
             throw new AdminServiceException(ExceptionDefinition.RECOMMEND_SPU_NO_HAS);
         }
 
-        if (recommendMapper.selectCount(new EntityWrapper<RecommendDO>()
+        if (recommendMapper.selectCount(new QueryWrapper<RecommendDO>()
                 .eq("spu_id", spuId)
                 .eq("recommend_type", recommendType)) > 0) {
             throw new AdminServiceException(ExceptionDefinition.RECOMMEND_ALREADY_HAS);
@@ -68,7 +68,7 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteRecommend(Long adminId, Long id, Integer recommendType) throws ServiceException {
 
-        Integer judgeSQL = recommendMapper.delete(new EntityWrapper<RecommendDO>()
+        Integer judgeSQL = recommendMapper.delete(new QueryWrapper<RecommendDO>()
                 .eq("id", id)
                 .eq("recommend_type",recommendType));
 
@@ -86,7 +86,7 @@ public class AdminRecommendServiceImpl implements AdminRecommendService {
             return recommendBizService.queryAllRecommend(pageNo, pageSize);
         }
 
-        Integer count = recommendMapper.selectCount(new EntityWrapper<RecommendDO>().eq("recommend_type",recommendType));
+        Integer count = recommendMapper.selectCount(new QueryWrapper<RecommendDO>().eq("recommend_type",recommendType));
         List<RecommendDTO> recommendDTOList = recommendMapper.getRecommendByType(recommendType,(pageNo-1)*pageSize,pageSize);
         Page<RecommendDTO> page = new Page<>(recommendDTOList,pageNo,pageSize,count);
         return page;

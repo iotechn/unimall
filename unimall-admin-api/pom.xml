@@ -51,13 +51,6 @@
 			<artifactId>freemarker</artifactId>
 		</dependency>
 
-		<!-- 插件核心依赖 勿删 -->
-		<dependency>
-			<groupId>com.iotechn</groupId>
-			<artifactId>unimall-plugin-core</artifactId>
-			<version>0.0.1-RELEASE</version>
-		</dependency>
-
 		<dependency>
 			<groupId>com.iotechn</groupId>
 			<artifactId>unimall-data</artifactId>

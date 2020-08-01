@@ -1,8 +1,6 @@
 package com.iotechn.unimall.app.api.order;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
-import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -13,18 +11,17 @@ import com.iotechn.unimall.biz.service.freight.FreightBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
-import com.iotechn.unimall.biz.service.user.UserBizService;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.*;
-import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
-import com.iotechn.unimall.data.dto.goods.SkuDTO;
 import com.iotechn.unimall.data.dto.UserCouponDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
+import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
+import com.iotechn.unimall.data.dto.goods.SkuDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
@@ -42,7 +39,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -87,9 +87,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private FreightBizService freightBizService;
-
-    @Autowired
-    private UserBizService userBizService;
 
     @Autowired
     private GroupShopBizService groupShopBizService;
@@ -317,7 +314,7 @@ public class OrderServiceImpl implements OrderService {
                     if ("cart".equals(takeWay)) {
                         //扣除购物车
                         List<Long> skuIds = skuList.stream().map(item -> item.getSkuId()).collect(Collectors.toList());
-                        cartMapper.delete(new EntityWrapper<CartDO>().in("sku_id", skuIds).eq("user_id", userId));
+                        cartMapper.delete(new QueryWrapper<CartDO>().in("sku_id", skuIds).eq("user_id", userId));
                     }
                     //直接购买传值为 "buy"
                 }
@@ -342,7 +339,7 @@ public class OrderServiceImpl implements OrderService {
         Long count = orderMapper.countOrder(status, (pageNo - 1) * pageSize, pageSize, userId);
         //封装SKU
         orderDTOList.forEach(item -> {
-            item.setSkuList(orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", item.getId())));
+            item.setSkuList(orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", item.getId())));
         });
         return new Page<>(orderDTOList, pageNo, pageSize, count);
     }
@@ -447,7 +444,7 @@ public class OrderServiceImpl implements OrderService {
             GlobalExecutor.execute(() -> {
                 OrderDTO orderDTO = new OrderDTO();
                 BeanUtils.copyProperties(orderDO, orderDTO);
-                List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_no", orderDO.getOrderNo()));
+                List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_no", orderDO.getOrderNo()));
                 orderDTO.setSkuList(orderSkuList);
                 adminNotifyBizService.refundOrder(orderDTO);
             });
@@ -466,7 +463,7 @@ public class OrderServiceImpl implements OrderService {
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.CANCELED.getCode());
         updateOrderDO.setGmtUpdate(new Date());
-        List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+        List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
         orderSkuList.forEach(item -> {
             skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
         });
@@ -484,7 +481,7 @@ public class OrderServiceImpl implements OrderService {
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
         updateOrderDO.setGmtUpdate(new Date());
-        List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+        List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
         orderSkuList.forEach(item -> {
             skuMapper.decSkuFreezeStock(item.getSkuId(), item.getNum());
         });

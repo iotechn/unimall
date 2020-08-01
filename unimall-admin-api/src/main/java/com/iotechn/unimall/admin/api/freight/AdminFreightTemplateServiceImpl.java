@@ -2,9 +2,8 @@ package com.iotechn.unimall.admin.api.freight;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.biz.service.goods.GoodsBizService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -74,16 +73,16 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteFreightTemplate(Long templateId, Long adminId) throws ServiceException {
-        if (spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("freight_template_id", templateId)) > 0) {
+        if (spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("freight_template_id", templateId)) > 0) {
             throw new AdminServiceException(ExceptionDefinition.FREIGHT_SPU_QUERY_HAS);
         }
-        if (freightTemplateMapper.delete(new EntityWrapper<FreightTemplateDO>().eq("id", templateId)) <= 0) {
+        if (freightTemplateMapper.delete(new QueryWrapper<FreightTemplateDO>().eq("id", templateId)) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_DELETE_FAILED);
         }
         if (freightTemplateCarriageMapper.delete(
-                new EntityWrapper<FreightTemplateCarriageDO>()
+                new QueryWrapper<FreightTemplateCarriageDO>()
                         .eq("template_id", templateId)) >= 0) {
-            cacheComponent.delPrefixKey(GoodsBizService.CA_SPU_PREFIX);
+            cacheComponent.delPrefixKey(ProductBizService.CA_SPU_PREFIX);
             return true;
         }
         throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
@@ -99,7 +98,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         if (freightTemplateMapper.updateById(freightTemplateDO) <= 0) {    //如果主表修改失败
             throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
         }
-        freightTemplateCarriageMapper.delete(new EntityWrapper<FreightTemplateCarriageDO>().eq("template_id", templateId));
+        freightTemplateCarriageMapper.delete(new QueryWrapper<FreightTemplateCarriageDO>().eq("template_id", templateId));
         if (CollectionUtils.isEmpty(freightTemplateCarriageDOList)) {
             return true;
         }
@@ -108,7 +107,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
             return t;
         }).collect(Collectors.toList());
         insertFreightTemplateCarriage(freightTemplateDO, collect, now);
-        cacheComponent.delPrefixKey(GoodsBizService.CA_SPU_PREFIX);
+        cacheComponent.delPrefixKey(ProductBizService.CA_SPU_PREFIX);
         return true;
     }
 
@@ -134,7 +133,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         }
         for (FreightTemplateDO freightTemplateDO : freightTemplateDOList) {  //查出副表中，主表每条数据对应的数据
             FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO();
-            List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new EntityWrapper<FreightTemplateCarriageDO>()
+            List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new QueryWrapper<FreightTemplateCarriageDO>()
                     .eq("template_id", freightTemplateDO.getId()));
             freightTemplateDTO.setFreightTemplateDO(freightTemplateDO);
             freightTemplateDTO.setFreightTemplateCarriageDOList(freightTemplateCarriageDOList);

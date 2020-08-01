@@ -1,4 +1,4 @@
-package com.iotechn.unimall.admin.api.goods;
+package com.iotechn.unimall.admin.api.product;
 
 import com.iotechn.unimall.core.annotation.HttpMethod;
 import com.iotechn.unimall.core.annotation.HttpOpenApi;
@@ -7,15 +7,13 @@ import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.domain.GroupShopSkuDO;
 import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
-import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.model.Page;
 
 import java.util.List;
 
 @HttpOpenApi(group = "admin.groupShop", description = "管理团购商品服务")
-public interface AdminGroupShopGoodsService {
+public interface AdminGroupShopProductService {
 
     @HttpMethod(description = "增加", permission = "operation:groupShop:create", permissionParentName = "商品管理", permissionName = "团购商品管理")
     public String addGroupShopSpu(

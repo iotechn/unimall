@@ -1,11 +1,11 @@
 package com.iotechn.unimall.app.api.collect;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.collect.CollectBizService;
-import com.iotechn.unimall.biz.service.goods.GoodsBizService;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.Const;
+import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CollectDO;
@@ -35,7 +35,7 @@ public class CollectServiceImpl implements CollectService {
     private CacheComponent cacheComponent;
 
     @Autowired
-    private GoodsBizService goodsBizService;
+    private ProductBizService productBizService;
 
     @Autowired
     private CollectBizService collectBizService;
@@ -45,8 +45,8 @@ public class CollectServiceImpl implements CollectService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean addCollect(Long userId, Long spuId) throws ServiceException {
         //校验SPU是否存在
-        goodsBizService.getSpuById(spuId);
-        List<CollectDO> collectDOS = collectMapper.selectList(new EntityWrapper<CollectDO>()
+        productBizService.getSpuById(spuId);
+        List<CollectDO> collectDOS = collectMapper.selectList(new QueryWrapper<CollectDO>()
                 .eq("user_id", userId)
                 .eq("spu_id", spuId));
         if (!CollectionUtils.isEmpty(collectDOS)) {
@@ -63,7 +63,7 @@ public class CollectServiceImpl implements CollectService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteCollect(Long userId, Long spuId) throws ServiceException {
-        Integer num = collectMapper.delete(new EntityWrapper<CollectDO>()
+        Integer num = collectMapper.delete(new QueryWrapper<CollectDO>()
                 .eq("user_id", userId)
                 .eq("spu_id", spuId)
         );
@@ -77,7 +77,7 @@ public class CollectServiceImpl implements CollectService {
 
     @Override
     public Page<CollectDTO> getCollectAll(Long userId, Integer pageNo, Integer pageSize) throws ServiceException {
-        Integer count = collectMapper.selectCount(new EntityWrapper<CollectDO>().eq("user_id", userId));
+        Integer count = collectMapper.selectCount(new QueryWrapper<CollectDO>().eq("user_id", userId));
         Integer offset = pageSize * (pageNo - 1);
         List<CollectDTO> collectAll = collectMapper.getCollectAll(userId, offset, pageSize);
         Page<CollectDTO> page = new Page<CollectDTO>(collectAll, pageNo, pageSize, count);

@@ -1,8 +1,6 @@
-package com.iotechn.unimall.biz.service.goods;
+package com.iotechn.unimall.biz.service.product;
 
-import com.baomidou.mybatisplus.entity.Column;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.biz.service.collect.CollectBizService;
@@ -24,7 +22,6 @@ import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.enums.SpuStatusType;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
-import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +37,7 @@ import java.util.Map;
  * Created by rize on 2019/7/12.
  */
 @Service
-public class GoodsBizService {
+public class ProductBizService {
 
     /**
      * SPU 分页缓存
@@ -98,22 +95,8 @@ public class GoodsBizService {
     @Autowired
     private GroupShopSkuMapper groupShopSkuMapper;
 
-    private static final Column[] baseColumns = {
-            Column.create().column("id"),
-            Column.create().column("original_price").as("originalPrice"),
-            Column.create().column("price"),
-            Column.create().column("vip_price").as("vipPrice"),
-            Column.create().column("title"),
-            Column.create().column("sales"),
-            Column.create().column("img"),
-            Column.create().column("description"),
-            Column.create().column("category_id").as("categoryId"),
-            Column.create().column("freight_template_id").as("freightTemplateId"),
-            Column.create().column("unit"),
-            Column.create().column("status")};
-
     public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
-        Wrapper<SpuDO> wrapper = new EntityWrapper<SpuDO>();
+        QueryWrapper<SpuDO> wrapper = new QueryWrapper<SpuDO>();
 
 
         if (!StringUtils.isEmpty(title)) {
@@ -127,11 +110,15 @@ public class GoodsBizService {
         }
 
         if(orderBy != null && isAsc != null){
-            wrapper.orderBy(orderBy, isAsc);
+            if (isAsc) {
+                wrapper.orderByAsc(orderBy);
+            } else {
+                wrapper.orderByDesc(orderBy);
+            }
         }
 
         if (categoryId != null && categoryId != 0L) {
-            List<CategoryDO> childrenList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", categoryId));
+            List<CategoryDO> childrenList = categoryMapper.selectList(new QueryWrapper<CategoryDO>().eq("parent_id", categoryId));
 
             if (CollectionUtils.isEmpty(childrenList)) {
                 //目标节点为叶子节点,即三级类目
@@ -150,7 +137,7 @@ public class GoodsBizService {
                 } else {
                     //一级分类
                     childrenList.forEach(item -> {
-                        List<CategoryDO> leafList = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", item.getId()));
+                        List<CategoryDO> leafList = categoryMapper.selectList(new QueryWrapper<CategoryDO>().eq("parent_id", item.getId()));
                         if (!CollectionUtils.isEmpty(leafList)) {
                             leafList.forEach(leafItem -> {
                                 childrenIds.add(leafItem.getId());
@@ -163,8 +150,9 @@ public class GoodsBizService {
         }
 
         wrapper.eq("status", SpuStatusType.SELLING.getCode());
-        wrapper.setSqlSelect(baseColumns);
-        List<SpuDO> spuDOS = spuMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
+        // TODO search Goods
+        // wrapper.setSqlSelect(baseColumns);
+        List<SpuDO> spuDOS = new ArrayList<>(); //spuMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
         //组装SPU
         List<SpuDTO> spuDTOList = new ArrayList<>();
         Map<String, String> salesHashAll = cacheComponent.getHashAll(CA_SPU_SALES_HASH);
@@ -222,7 +210,7 @@ public class GoodsBizService {
             if (userId != null && userId == 0l) {
                 // 从管理员后台进入，返回最新的库存
                 List<SkuDO> skuDOList = skuMapper.selectList(
-                        new EntityWrapper<SkuDO>()
+                        new QueryWrapper<SkuDO>()
                                 .eq("spu_id", spuId));
                 spuDTOFromCache.setSkuList(skuDOList);
                 int sum = skuDOList.stream().mapToInt(item -> item.getStock()).sum();
@@ -235,7 +223,7 @@ public class GoodsBizService {
         BeanUtils.copyProperties(spuDO, spuDTO);
         spuDTO.setImgList(imgMapper.getImgs(BizType.GOODS.getCode(), spuId));
         List<SkuDO> skuDOList = skuMapper.selectList(
-                new EntityWrapper<SkuDO>()
+                new QueryWrapper<SkuDO>()
                         .eq("spu_id", spuId));
         spuDTO.setSkuList(skuDOList);
         //类目族
@@ -247,7 +235,7 @@ public class GoodsBizService {
         int sum = skuDOList.stream().mapToInt(item -> item.getStock()).sum();
         spuDTO.setStock(sum);
         //获取商品属性
-        List<SpuAttributeDO> spuAttributeList = spuAttributeMapper.selectList(new EntityWrapper<SpuAttributeDO>().eq("spu_id", spuId));
+        List<SpuAttributeDO> spuAttributeList = spuAttributeMapper.selectList(new QueryWrapper<SpuAttributeDO>().eq("spu_id", spuId));
         spuDTO.setAttributeList(spuAttributeList);
         //获取运费模板
         FreightTemplateDTO templateDTO = freightBizService.getTemplateById(spuDO.getFreightTemplateId());

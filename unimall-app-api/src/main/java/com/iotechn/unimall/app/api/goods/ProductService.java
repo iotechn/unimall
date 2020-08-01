@@ -13,7 +13,7 @@ import com.iotechn.unimall.data.model.Page;
  * Created by rize on 2019/7/1.
  */
 @HttpOpenApi(group = "goods", description = "商品服务")
-public interface GoodsService {
+public interface ProductService {
 
     @HttpMethod(description = "搜索Goods列表")
     public Page<SpuDTO> getGoodsPage(

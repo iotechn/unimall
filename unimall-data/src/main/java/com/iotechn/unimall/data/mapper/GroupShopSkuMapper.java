@@ -1,7 +1,6 @@
 package com.iotechn.unimall.data.mapper;
 
 
-import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.iotechn.unimall.data.domain.GroupShopSkuDO;
 import com.iotechn.unimall.data.dto.goods.GroupShopSkuDTO;
 
@@ -14,7 +13,7 @@ import java.util.List;
 @author kbq
 @date 19-11-13下午4:28
 */
-public interface GroupShopSkuMapper extends BaseMapper<GroupShopSkuDO>{
+public interface GroupShopSkuMapper extends IMapper<GroupShopSkuDO>{
 
     public List<GroupShopSkuDTO> getSkuList(Long groupShopId);
 

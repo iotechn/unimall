@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.service.category;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
@@ -38,7 +38,7 @@ public class CategoryBizService {
 
     /*获取一棵两级目录树*/
     public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException {
-        List<CategoryDO> categoryDOS = categoryMapper.selectList(new EntityWrapper<CategoryDO>().le("level",1 ).orderBy("level"));
+        List<CategoryDO> categoryDOS = categoryMapper.selectList(new QueryWrapper<CategoryDO>().le("level",1 ).orderByAsc("level"));
         List<CategoryTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
             CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
             dto.setLabel(item.getTitle());
@@ -72,7 +72,7 @@ public class CategoryBizService {
             return categoryDTOListFormCache;
         }
         //从数据库查询
-        List<CategoryDO> categoryDOList = categoryMapper.selectList(new EntityWrapper<>());
+        List<CategoryDO> categoryDOList = categoryMapper.selectList(new QueryWrapper<>());
         //组装DTO
         List<CategoryDTO> categoryDTOList = new LinkedList<>();
         categoryDOList.forEach(categoryDO -> {

@@ -1,7 +1,6 @@
 package com.iotechn.unimall.biz.service.order;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -22,7 +21,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
@@ -71,7 +69,7 @@ public class OrderBizService {
 
             if (lockComponent.tryLock(ORDER_STATUS_LOCK + orderNo, 30)) {
                 if (orderMapper.update(orderDO,
-                        new EntityWrapper<OrderDO>()
+                        new QueryWrapper<OrderDO>()
                                 .eq("order_no", orderNo)
                                 .eq("status", nowStatus)) > 0) {
                     return true;
@@ -91,7 +89,7 @@ public class OrderBizService {
     }
 
     public OrderDO checkOrderExist(String orderNo, Long userId) throws ServiceException {
-        Wrapper<OrderDO> wrapper = new EntityWrapper<OrderDO>().eq("order_no", orderNo);
+        QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>().eq("order_no", orderNo);
         if (userId != null) {
             wrapper.eq("user_id", userId);
         }
@@ -103,7 +101,7 @@ public class OrderBizService {
     }
 
     public OrderDTO getOrderDetail(Long orderId, Long userId) throws ServiceException {
-        Wrapper<OrderDO> wrapper = new EntityWrapper<OrderDO>()
+        QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>()
                 .eq("id", orderId);
         if (userId != null) {
             wrapper.eq("user_id", userId);
@@ -114,7 +112,7 @@ public class OrderBizService {
         }
         OrderDTO orderDTO = new OrderDTO();
         BeanUtils.copyProperties(orderDOS.get(0), orderDTO);
-        orderDTO.setSkuList(orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", orderId)));
+        orderDTO.setSkuList(orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderId)));
         return orderDTO;
     }
 

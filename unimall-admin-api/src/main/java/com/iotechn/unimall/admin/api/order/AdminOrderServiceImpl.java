@@ -1,8 +1,6 @@
 package com.iotechn.unimall.admin.api.order;
 
-import com.baomidou.mybatisplus.entity.Column;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -23,7 +21,6 @@ import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.mapper.UserMapper;
 import com.iotechn.unimall.data.model.Page;
-import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -76,15 +73,15 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Override
     public Page<OrderDO> list(Integer pageNo, Integer pageSize, Integer status, String orderNo, Long adminId) throws ServiceException {
-        Wrapper<OrderDO> wrapper = new EntityWrapper<OrderDO>();
-        wrapper.orderBy("id", false);
+        QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>();
+        wrapper.orderByDesc("id");
         if (!StringUtils.isEmpty(orderNo)) {
             wrapper.eq("order_no", orderNo);
         }
         if (status != null) {
             wrapper.eq("status", status);
         }
-        List<OrderDO> orderDOS = orderMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
+        List<OrderDO> orderDOS = null; // TODO orderMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
         Integer count = orderMapper.selectCount(wrapper);
         return new Page<OrderDO>(orderDOS, pageNo, pageSize, count);
     }
@@ -114,7 +111,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     updateOrderDO.setStatus(OrderStatusType.REFUNDED.getCode());
                     updateOrderDO.setGmtUpdate(new Date());
                     //订单还库存
-                    List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+                    List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
                     orderSkuList.forEach(item -> {
                         skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
                     });
@@ -191,7 +188,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Override
     public List<OrderDTO> queryToExcel(Long gmtStart, Long gmtEnd, Integer status, Long adminId) throws ServiceException {
-        EntityWrapper wrapper = new EntityWrapper();
+        QueryWrapper wrapper = new QueryWrapper();
         if(gmtStart != null && gmtEnd != null){
             if(gmtStart > gmtStart){
                 throw new AdminServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
@@ -212,7 +209,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             orderDTOList.add(orderDTO);
         }
         for (OrderDTO orderDTO:orderDTOList) {
-                List<OrderSkuDO> orderSkuDOList =  orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_no",orderDTO.getOrderNo() ));
+                List<OrderSkuDO> orderSkuDOList =  orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_no",orderDTO.getOrderNo() ));
                 orderDTO.setSkuList(orderSkuDOList);
         }
         return orderDTOList;
@@ -242,12 +239,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if(gmtStart > gmtStart){
             throw new AdminServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
         }
-        Column[] idColumn = {
-                Column.create().column("id")};
         List<OrderDO> orderDOS = orderMapper.selectList(
-                new EntityWrapper<OrderDO>()
+                new QueryWrapper<OrderDO>()
                         .between("gmt_create", new Date(gmtStart), new Date(gmtEnd))
-                        .setSqlSelect(idColumn));
+                        .select("id"));
         List<Long> ids = orderDOS.stream().map(item -> item.getId()).collect(Collectors.toList());
         if(CollectionUtils.isEmpty(ids)){
             return null;

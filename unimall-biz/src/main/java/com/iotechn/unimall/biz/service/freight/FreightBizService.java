@@ -1,14 +1,14 @@
 package com.iotechn.unimall.biz.service.freight;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.domain.FreightTemplateDO;
-import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
+import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.mapper.AddressMapper;
@@ -58,7 +58,7 @@ public class FreightBizService {
         //遍历skuID得到，对应的运费模板,并填充上面三个map
         for (OrderRequestSkuDTO orderRequestSkuDTO : orderRequestSkuDTOList) {
             FreightTemplateDO freightTemplateDO = freightTemplateMapper.selectFreightBySkuId(orderRequestSkuDTO.getSkuId());
-            List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new EntityWrapper<FreightTemplateCarriageDO>()
+            List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new QueryWrapper<FreightTemplateCarriageDO>()
                     .eq("template_id", freightTemplateDO.getId()));
 
             Long templateId = freightTemplateDO.getId(); //获得模板ID
@@ -160,7 +160,7 @@ public class FreightBizService {
         }
 
         //查出副表中其他地区的东西
-        List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new EntityWrapper<FreightTemplateCarriageDO>()
+        List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new QueryWrapper<FreightTemplateCarriageDO>()
                 .eq("template_id", freightTemplateDO.getId()));
 
         FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO(freightTemplateDO, freightTemplateCarriageDOList);

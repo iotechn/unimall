@@ -13,7 +13,6 @@ import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AddressDO;
 
-import java.rmi.ServerException;
 import java.util.List;
 
 @HttpOpenApi(group = "address", description = "收货地址")
@@ -30,12 +29,10 @@ public interface AddressService {
             @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "电话") String phone,
             @NotNull @HttpParam(name = "consignee", type = HttpParamType.COMMON, description = "收件人") String consignee) throws ServiceException;
 
-
     @HttpMethod(description = "删除收货地址")
     public Boolean deleteAddress(
             @NotNull @HttpParam(name = "addressId", type = HttpParamType.COMMON, description = "收货地址ID") Long addressId,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
-
 
     @HttpMethod(description = "修改收货地址")
     public Boolean updateAddress(
@@ -49,17 +46,14 @@ public interface AddressService {
             @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "电话") String phone,
             @NotNull @HttpParam(name = "consignee", type = HttpParamType.COMMON, description = "收件人") String consignee) throws ServiceException;
 
-
     @HttpMethod(description = "查询用户所有收货地址")
     public List<AddressDO> getAllAddress(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
-
 
     @HttpMethod(description = "根据地址ID，查询收货地址")
     public AddressDO getAddressById(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId,
             @NotNull @HttpParam(name = "addressId", type = HttpParamType.COMMON, description = "地址Id") Long addressId) throws ServiceException;
-
 
     @HttpMethod(description = "获取用户默认地址")
     public AddressDO getDefAddress(

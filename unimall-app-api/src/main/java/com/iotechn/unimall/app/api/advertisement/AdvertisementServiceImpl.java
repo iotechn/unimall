@@ -1,7 +1,6 @@
 package com.iotechn.unimall.app.api.advertisement;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AdvertisementDO;
@@ -35,7 +34,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
         List<AdvertisementDO> advertisementDOList
                 = cacheComponent.getObjList(ADVERTISEMENT_NAME + adType, AdvertisementDO.class);
         if (CollectionUtils.isEmpty(advertisementDOList)) {
-            Wrapper<AdvertisementDO> wrapper = new EntityWrapper<AdvertisementDO>()
+            QueryWrapper<AdvertisementDO> wrapper = new QueryWrapper<AdvertisementDO>()
                     .eq("status", StatusType.ACTIVE.getCode());
             if (adType != null) {
                 wrapper.eq("ad_type", adType);

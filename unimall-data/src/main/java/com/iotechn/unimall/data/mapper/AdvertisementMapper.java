@@ -1,6 +1,5 @@
 package com.iotechn.unimall.data.mapper;
 
-import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.iotechn.unimall.data.domain.AdvertisementDO;
 import org.apache.ibatis.annotations.Param;
 
@@ -13,7 +12,7 @@ import java.util.List;
  * Date: 2019-07-08
  * Time: 下午8:38
  */
-public interface AdvertisementMapper extends BaseMapper<AdvertisementDO> {
+public interface AdvertisementMapper extends IMapper<AdvertisementDO> {
 
     public List<AdvertisementDO> getAdvertisementByTypeAndStatus(@Param("adType") Integer adType, @Param("status")Integer Status,@Param("offset")Integer offset,@Param("size")Integer size);
 

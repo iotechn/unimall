@@ -1,8 +1,8 @@
 package com.iotechn.unimall.app.api.footprint;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.FootprintDO;
 import com.iotechn.unimall.data.dto.FootprintDTO;
@@ -29,7 +29,7 @@ public class FootprintServiceImpl implements  FootprintService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteFootprint(Long userId, Long footprintId) throws ServiceException {
-        Integer judgeSQL = footprintMapper.delete(new EntityWrapper<FootprintDO>()
+        Integer judgeSQL = footprintMapper.delete(new QueryWrapper<FootprintDO>()
                 .eq("user_id",userId)
                 .eq("id",footprintId));
         if(judgeSQL > 0){

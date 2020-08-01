@@ -1,6 +1,6 @@
 package com.iotechn.unimall.app.api.cart;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -34,7 +34,7 @@ public class CartServiceImpl implements CartService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean addCartItem(Long skuId, Integer num, Long userId) throws ServiceException {
         List<CartDO> cartDOS = cartMapper.selectList(
-                new EntityWrapper<CartDO>()
+                new QueryWrapper<CartDO>()
                         .eq("sku_id", skuId)
                         .eq("user_id", userId));
         CartDO cartDO = new CartDO();
@@ -60,7 +60,7 @@ public class CartServiceImpl implements CartService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean subCartItem(Long skuId, Integer num, Long userId) throws ServiceException {
         List<CartDO> cartDOS = cartMapper.selectList(
-                new EntityWrapper<CartDO>()
+                new QueryWrapper<CartDO>()
                         .eq("sku_id", skuId)
                         .eq("user_id", userId));
 
@@ -82,7 +82,7 @@ public class CartServiceImpl implements CartService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean removeCartItem(Long cartId, Long userId) throws ServiceException {
         return cartMapper.delete(
-                new EntityWrapper<CartDO>()
+                new QueryWrapper<CartDO>()
                         .eq("id", cartId)
                         .eq("user_id", userId)) > 0;
     }
@@ -102,7 +102,7 @@ public class CartServiceImpl implements CartService {
             array.add(new Long(idRaw));
         }
         return cartMapper.delete(
-                new EntityWrapper<CartDO>()
+                new QueryWrapper<CartDO>()
                         .in("id", array)
                         .eq("user_id", userId)) > 0;
     }
@@ -111,7 +111,7 @@ public class CartServiceImpl implements CartService {
     @Transactional
     public Boolean removeCartAll(Long userId) throws ServiceException {
         return cartMapper.delete(
-                new EntityWrapper<CartDO>()
+                new QueryWrapper<CartDO>()
                         .eq("user_id", userId)) > 0;
     }
 
@@ -120,7 +120,7 @@ public class CartServiceImpl implements CartService {
         CartDO cartDO = new CartDO();
         cartDO.setNum(num);
         Integer update = cartMapper.update(cartDO,
-                new EntityWrapper<CartDO>()
+                new QueryWrapper<CartDO>()
                         .eq("id", cartId)
                         .eq("user_id", userId));
         if (update > 0) {

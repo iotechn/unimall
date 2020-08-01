@@ -1,6 +1,5 @@
 package com.iotechn.unimall.data.mapper;
 
-import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.iotechn.unimall.data.domain.UserFormIdDO;
 
 /**
@@ -10,5 +9,5 @@ import com.iotechn.unimall.data.domain.UserFormIdDO;
  * Date: 2019/10/29
  * Time: 23:19
  */
-public interface UserFormIdMapper extends BaseMapper<UserFormIdDO> {
+public interface UserFormIdMapper extends IMapper<UserFormIdDO> {
 }

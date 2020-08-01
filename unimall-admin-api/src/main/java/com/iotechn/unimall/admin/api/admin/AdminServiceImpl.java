@@ -1,8 +1,7 @@
 package com.iotechn.unimall.admin.api.admin;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -27,7 +26,6 @@ import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -87,7 +85,7 @@ public class AdminServiceImpl implements AdminService {
         String accessToken = generateAccessToken();
         //数据库查管理员
         List<AdminDO> adminDOS = adminMapper.selectList(
-                new EntityWrapper<AdminDO>()
+                new QueryWrapper<AdminDO>()
                         .eq("username", username));
         if (CollectionUtils.isEmpty(adminDOS)) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_NOT_EXIST);
@@ -107,7 +105,7 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_ROLE_IS_EMPTY);
         }
         List<RoleDO> roleDOList = roleMapper.selectList(
-                new EntityWrapper<RoleDO>()
+                new QueryWrapper<RoleDO>()
                         .in("id", ids)
                         .eq("status", RoleStatusType.ACTIVE.getCode()));
         List<String> roleNames = new LinkedList<>();
@@ -120,7 +118,7 @@ public class AdminServiceImpl implements AdminService {
         adminDTO.setRoleIds(JSONObject.parseArray(adminDO.getRoleIds(), Long.class));
         adminDTO.setPassword(null);
         List<RolePermissionDO> rolePermissionDOList = rolePermissionMapper.selectList(
-                new EntityWrapper<RolePermissionDO>()
+                new QueryWrapper<RolePermissionDO>()
                         .in("role_id", ids)
                         .eq("deleted", 0));
         List<String> permissionNames = new LinkedList<>();
@@ -145,13 +143,13 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Page<AdminDTO> list(String name, Integer page, Integer limit, Long adminId) throws ServiceException {
-        Wrapper<AdminDO> wrapper = new EntityWrapper<AdminDO>();
+        QueryWrapper<AdminDO> wrapper = new QueryWrapper<AdminDO>();
         if (!StringUtils.isEmpty(name)) {
             wrapper.like("username", name);
         }
-        wrapper.orderBy("id", false);
+        wrapper.orderByDesc("id");
         Integer count = adminMapper.selectCount(wrapper);
-        List<AdminDO> adminDOS = adminMapper.selectPage(new RowBounds((page - 1) * limit, limit), wrapper);
+        List<AdminDO> adminDOS = new ArrayList<>();// TODO adminMapper.selectPage(new RowBounds((page - 1) * limit, limit), wrapper);
         List<AdminDTO> adminDTOS = new ArrayList<AdminDTO>(adminDOS.size());
         for (AdminDO adminDO : adminDOS) {
             AdminDTO adminDTO = new AdminDTO();
@@ -168,7 +166,7 @@ public class AdminServiceImpl implements AdminService {
     public AdminDTO create(AdminDTO adminDTO, Long adminId) throws ServiceException {
         AdminDO adminDO = new AdminDO();
         Integer count = adminMapper.selectCount(
-                new EntityWrapper<AdminDO>()
+                new QueryWrapper<AdminDO>()
                         .eq("username", adminDTO.getUsername()));
         if (count > 0) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NAME_REPEAT);
@@ -244,9 +242,7 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_GUEST_NOT_NEED_VERIFY_CODE);
         }
         AdminDO adminDO = new AdminDO();
-        adminDO.setUsername(username);
-        adminDO.setPassword(MD5Util.md5(password,username));
-        AdminDO admin = adminMapper.selectOne(adminDO);
+        AdminDO admin = adminMapper.selectOne(new QueryWrapper<AdminDO>().eq("username", username).eq("password", MD5Util.md5(password,username)));
         if(admin == null){
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXITS);
         }

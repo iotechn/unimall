@@ -1,6 +1,6 @@
 package com.iotechn.unimall.admin.api.user;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -11,7 +11,6 @@ import org.apache.commons.codec.digest.Md5Crypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -38,7 +37,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if(user.getPhone() == null){
             throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
-        if(userMapper.selectCount(new EntityWrapper<UserDO>().eq("phone",user.getPhone())) > 0){
+        if(userMapper.selectCount(new QueryWrapper<UserDO>().eq("phone",user.getPhone())) > 0){
             throw new AdminServiceException(ExceptionDefinition.USER_PHONE_ALREADY_EXIST);
         }
         Date now = new Date();
@@ -52,7 +51,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteUser(Long adminId, Long id, String nickname) throws ServiceException {
-        return userMapper.delete(new EntityWrapper<UserDO>()
+        return userMapper.delete(new QueryWrapper<UserDO>()
                 .eq("id", id)
                 .eq("nickname",nickname)) > 0;
     }
@@ -66,7 +65,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if(user.getPhone() == null){
             throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
-        if(userMapper.selectCount(new EntityWrapper<UserDO>().eq("phone",user.getPhone()).notIn("id",user.getId())) > 0){
+        if(userMapper.selectCount(new QueryWrapper<UserDO>().eq("phone",user.getPhone()).notIn("id",user.getId())) > 0){
             throw new AdminServiceException(ExceptionDefinition.USER_PHONE_ALREADY_EXIST);
         }
         Date now = new Date();

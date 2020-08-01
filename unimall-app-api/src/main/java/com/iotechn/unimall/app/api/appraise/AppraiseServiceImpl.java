@@ -1,17 +1,17 @@
 package com.iotechn.unimall.app.api.appraise;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.domain.ImgDO;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
-import com.iotechn.unimall.data.dto.appraise.AppraiseRequestItemDTO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseRequestDTO;
+import com.iotechn.unimall.data.dto.appraise.AppraiseRequestItemDTO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
@@ -57,7 +57,7 @@ public class AppraiseServiceImpl implements AppraiseService {
         }
         //校验是否有对应等待评价的订单
         Integer integer = orderMapper.selectCount(
-                new EntityWrapper<OrderDO>()
+                new QueryWrapper<OrderDO>()
                         .eq("id", appraiseRequestDTO.getOrderId())
                         .eq("status", OrderStatusType.WAIT_APPRAISE.getCode())
                         .eq("user_id", userId));
@@ -77,7 +77,7 @@ public class AppraiseServiceImpl implements AppraiseService {
 
         //循环读取订单评价中所有商品的评价
         for (AppraiseRequestItemDTO appraiseDTO : appraiseRequestDTO.getAppraiseDTOList()) {
-            Integer count = orderSkuMapper.selectCount(new EntityWrapper<OrderSkuDO>()
+            Integer count = orderSkuMapper.selectCount(new QueryWrapper<OrderSkuDO>()
                     .eq("order_id", appraiseRequestDTO.getOrderId())
                     .eq("spu_id", appraiseDTO.getSpuId())
                     .eq("sku_id", appraiseDTO.getSkuId()));
@@ -124,7 +124,7 @@ public class AppraiseServiceImpl implements AppraiseService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteAppraiseById(Long appraiseId, Long userId) throws ServiceException {
-        Integer delete = appraiseMapper.delete(new EntityWrapper<AppraiseDO>()
+        Integer delete = appraiseMapper.delete(new QueryWrapper<AppraiseDO>()
                 .eq("id", appraiseId)
                 .eq("user_id", userId)); //根据用户Id,评价Id
         if (delete > 0) {
@@ -136,7 +136,7 @@ public class AppraiseServiceImpl implements AppraiseService {
 
     @Override
     public Page<AppraiseResponseDTO> getUserAllAppraise(Long userId, Integer pageNo, Integer pageSize) throws ServiceException {
-        Integer count = appraiseMapper.selectCount(new EntityWrapper<AppraiseDO>().eq("user_id", userId));
+        Integer count = appraiseMapper.selectCount(new QueryWrapper<AppraiseDO>().eq("user_id", userId));
         List<AppraiseResponseDTO> appraiseResponseDTOS = appraiseMapper.selectUserAllAppraise(userId, pageSize * (pageNo - 1), pageSize);
         for (AppraiseResponseDTO appraiseResponseDTO : appraiseResponseDTOS) {
             appraiseResponseDTO.setImgList(imgMapper.getImgs(BizType.COMMENT.getCode(), appraiseResponseDTO.getId()));
@@ -161,6 +161,5 @@ public class AppraiseServiceImpl implements AppraiseService {
 
         return appraiseResponseDTO;
     }
-
 
 }

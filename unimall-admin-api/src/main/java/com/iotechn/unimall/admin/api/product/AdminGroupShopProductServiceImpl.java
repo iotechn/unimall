@@ -1,4 +1,4 @@
-package com.iotechn.unimall.admin.api.goods;/*
+package com.iotechn.unimall.admin.api.product;/*
 @PackageName:com.iotechn.unimall.admin.api.goods
 @ClassName: AdminGroupShopGoodsServiceImpl
 @Description:
@@ -8,20 +8,24 @@ package com.iotechn.unimall.admin.api.goods;/*
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.admin.api.order.AdminOrderService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
-import com.iotechn.unimall.data.domain.*;
-import com.iotechn.unimall.data.dto.goods.GroupShopSkuDTO;
+import com.iotechn.unimall.data.domain.GroupShopDO;
+import com.iotechn.unimall.data.domain.GroupShopSkuDO;
+import com.iotechn.unimall.data.domain.SkuDO;
+import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
+import com.iotechn.unimall.data.dto.goods.GroupShopSkuDTO;
 import com.iotechn.unimall.data.enums.GroupShopAutomaticRefundType;
 import com.iotechn.unimall.data.enums.StatusType;
-import com.iotechn.unimall.data.mapper.*;
+import com.iotechn.unimall.data.mapper.GroupShopMapper;
+import com.iotechn.unimall.data.mapper.GroupShopSkuMapper;
+import com.iotechn.unimall.data.mapper.SkuMapper;
+import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
-import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -37,7 +41,7 @@ import java.util.stream.Collectors;
 
 @Service
 @EnableScheduling
-public class AdminGroupShopGoodsServiceImpl implements AdminGroupShopGoodsService {
+public class AdminGroupShopProductServiceImpl implements AdminGroupShopProductService {
 
     @Autowired
     private SkuMapper skuMapper;
@@ -71,12 +75,12 @@ public class AdminGroupShopGoodsServiceImpl implements AdminGroupShopGoodsServic
 
         // 2.检验数据库中是否存在spuId对应的sku
         SpuDO spuDO = spuMapper.selectById(spuId);
-        List<SkuDO> skuDOList = skuMapper.selectList((new EntityWrapper<SkuDO>().eq("spu_id", spuId)));
+        List<SkuDO> skuDOList = skuMapper.selectList((new QueryWrapper<SkuDO>().eq("spu_id", spuId)));
         if (spuDO == null || CollectionUtils.isEmpty(skuDOList)) {
             throw new AdminServiceException(ExceptionDefinition.SPU_NO_EXITS_OR_ONLY_SPU);
         }
         // 2.1 检验groupShop表中是否存在此商品
-        Integer count = groupShopMapper.selectCount((new EntityWrapper<GroupShopDO>().eq("spu_id", spuId)));
+        Integer count = groupShopMapper.selectCount((new QueryWrapper<GroupShopDO>().eq("spu_id", spuId)));
         if (count > 0) {
             throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_ALREADY_EXIT);
         }
@@ -127,7 +131,7 @@ public class AdminGroupShopGoodsServiceImpl implements AdminGroupShopGoodsServic
         if (groupShopMapper.deleteById(id) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_DELETE_SQL_QUERY_ERROR);
         }
-        if (groupShopSkuMapper.delete((new EntityWrapper<GroupShopSkuDO>().eq("group_shop_id", id))) <= 0) {
+        if (groupShopSkuMapper.delete((new QueryWrapper<GroupShopSkuDO>().eq("group_shop_id", id))) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SKU_DELETE_SQL_QUERY_ERROR);
         }
 
@@ -149,7 +153,7 @@ public class AdminGroupShopGoodsServiceImpl implements AdminGroupShopGoodsServic
         }
 
         SpuDO spuDO = spuMapper.selectById(spuId);
-        List<SkuDO> skuDOList = skuMapper.selectList((new EntityWrapper<SkuDO>().eq("spu_id", spuId)));
+        List<SkuDO> skuDOList = skuMapper.selectList((new QueryWrapper<SkuDO>().eq("spu_id", spuId)));
         if (spuDO == null || CollectionUtils.isEmpty(skuDOList)) {
             throw new AdminServiceException(ExceptionDefinition.SPU_NO_EXITS_OR_ONLY_SPU);
         }
@@ -180,7 +184,7 @@ public class AdminGroupShopGoodsServiceImpl implements AdminGroupShopGoodsServic
             throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_UPDATE_SQL_QUERY_ERROR);
         }
 
-        if (groupShopSkuMapper.delete((new EntityWrapper<GroupShopSkuDO>().eq("group_shop_id", id))) <= 0) {
+        if (groupShopSkuMapper.delete((new QueryWrapper<GroupShopSkuDO>().eq("group_shop_id", id))) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SKU_DELETE_SQL_QUERY_ERROR);
         }
 
@@ -195,26 +199,26 @@ public class AdminGroupShopGoodsServiceImpl implements AdminGroupShopGoodsServic
 
     @Override
     public Page<GroupShopDTO> queryGroupShop(Long adminId, Long id, String spuName, Integer status, Integer page, Integer limit) throws ServiceException {
-        EntityWrapper<GroupShopDO> groupShopSpuDOEntityWrapper = new EntityWrapper<GroupShopDO>();
+        QueryWrapper<GroupShopDO> groupShopSpuDOQueryWrapper = new QueryWrapper<GroupShopDO>();
         if (id != null) {
-            groupShopSpuDOEntityWrapper.eq("id", id);
+            groupShopSpuDOQueryWrapper.eq("id", id);
         }
 
         if (status != null) {
-            groupShopSpuDOEntityWrapper.eq("status", status);
+            groupShopSpuDOQueryWrapper.eq("status", status);
         }
 
         if (spuName != null) {
-            EntityWrapper<SpuDO> spuDOEntityWrapper = new EntityWrapper<>();
-            spuDOEntityWrapper.setSqlSelect("id");
-            spuDOEntityWrapper.like("title", spuName);
-            List<Object> objectList = spuMapper.selectObjs(spuDOEntityWrapper);
+            QueryWrapper<SpuDO> spuDOQueryWrapper = new QueryWrapper<>();
+            spuDOQueryWrapper.select("id");
+            spuDOQueryWrapper.like("title", spuName);
+            List<Object> objectList = spuMapper.selectObjs(spuDOQueryWrapper);
             List<String> collect = objectList.stream().map(s -> String.valueOf(s)).collect(Collectors.toList());
-            groupShopSpuDOEntityWrapper.in("spu_id", collect);
+            groupShopSpuDOQueryWrapper.in("spu_id", collect);
         }
 
-        List<GroupShopDO> groupShopDOList = groupShopMapper.selectPage(new RowBounds((page - 1) * limit, limit), groupShopSpuDOEntityWrapper);
-        Integer count = groupShopMapper.selectCount(groupShopSpuDOEntityWrapper);
+        List<GroupShopDO> groupShopDOList = null;//TODO groupShopMapper.selectPage(new RowBounds((page - 1) * limit, limit), groupShopSpuDOQueryWrapper);
+        Integer count = groupShopMapper.selectCount(groupShopSpuDOQueryWrapper);
         List<GroupShopDTO> groupShopDTOList = new LinkedList<>();
 
         for (GroupShopDO groupShopDO : groupShopDOList) {
@@ -225,8 +229,8 @@ public class AdminGroupShopGoodsServiceImpl implements AdminGroupShopGoodsServic
             /**
              * 添加groupShopSkuDTOList
              */
-            List<SkuDO> skuDOList = skuMapper.selectList((new EntityWrapper<SkuDO>().eq("spu_id", spuDO.getId())));
-            List<GroupShopSkuDO> groupShopSkuDOList = groupShopSkuMapper.selectList((new EntityWrapper<GroupShopSkuDO>()).eq("group_shop_id", groupShopDO.getId()));
+            List<SkuDO> skuDOList = skuMapper.selectList((new QueryWrapper<SkuDO>().eq("spu_id", spuDO.getId())));
+            List<GroupShopSkuDO> groupShopSkuDOList = groupShopSkuMapper.selectList((new QueryWrapper<GroupShopSkuDO>()).eq("group_shop_id", groupShopDO.getId()));
             List<GroupShopSkuDTO> groupShopSkuDTOList = groupShopSkuDOList.stream().map(s -> {
                 GroupShopSkuDTO groupShopSkuDTO = new GroupShopSkuDTO();
                 BeanUtils.copyProperties(s, groupShopSkuDTO);

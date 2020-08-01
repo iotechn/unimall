@@ -1,8 +1,8 @@
 package com.iotechn.unimall.app.api.coupon;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.CouponDO;
@@ -15,7 +15,6 @@ import com.iotechn.unimall.data.mapper.UserCouponMapper;
 import com.iotechn.unimall.data.model.KVModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,7 +81,7 @@ public class CouponServiceImpl implements CouponService {
                 if (couponDO.getLimit() != -1) {
                     //校验用户是否已经领了
                     Integer count = userCouponMapper.selectCount(
-                            new EntityWrapper<UserCouponDO>()
+                            new QueryWrapper<UserCouponDO>()
                                     .eq("user_id", userId)
                                     .eq("coupon_id", couponId));
 

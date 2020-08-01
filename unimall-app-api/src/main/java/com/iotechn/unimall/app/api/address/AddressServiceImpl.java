@@ -1,8 +1,8 @@
 package com.iotechn.unimall.app.api.address;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.mapper.AddressMapper;
@@ -27,7 +27,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addAddress(String province, String city, String county, String address, Integer defaultAddress, Long userId, String phone, String consignee) throws ServiceException {
-        Integer addressNum = addressMapper.selectCount(new EntityWrapper<AddressDO>().eq("user_id", userId));
+        Integer addressNum = addressMapper.selectCount(new QueryWrapper<AddressDO>().eq("user_id", userId));
         AddressDO addressDO = null;
         if (addressNum == 0) {
             addressDO = new AddressDO(province, city, county, address, 1, userId, phone, consignee);
@@ -36,7 +36,7 @@ public class AddressServiceImpl implements AddressService {
                 AddressDO preDefault = new AddressDO();
                 preDefault.setDefaultAddress(0);
                 if (!(addressMapper.update(preDefault //该用户有地址却没有默认地址，抛出该异常
-                        , new EntityWrapper<AddressDO>()
+                        , new QueryWrapper<AddressDO>()
                                 .eq("user_id", userId)
                                 .eq("default_address", 1)) > 0)) {
                     throw new AppServiceException(ExceptionDefinition.ADDRESS_QUERY_FAILED);
@@ -59,21 +59,21 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteAddress(Long addressId, Long userId) throws ServiceException {
-        Integer defaultNum = addressMapper.selectCount(new EntityWrapper<AddressDO>()
+        Integer defaultNum = addressMapper.selectCount(new QueryWrapper<AddressDO>()
                 .eq("user_id", userId)
                 .eq("id", addressId)
                 .eq("default_address", 1));
         if (defaultNum == 0) {
-            return addressMapper.delete(new EntityWrapper<AddressDO>()
+            return addressMapper.delete(new QueryWrapper<AddressDO>()
                     .eq("id", addressId)
                     .eq("user_id", userId)) > 0;
         } else {
-            if (!(addressMapper.delete(new EntityWrapper<AddressDO>()
+            if (!(addressMapper.delete(new QueryWrapper<AddressDO>()
                     .eq("id", addressId)
                     .eq("user_id", userId)) > 0)) {
                 throw new AppServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
             } else {
-                List<AddressDO> addressDOS = addressMapper.selectList(new EntityWrapper<AddressDO>().eq("user_id", userId));
+                List<AddressDO> addressDOS = addressMapper.selectList(new QueryWrapper<AddressDO>().eq("user_id", userId));
                 if (addressDOS.size() != 0) {
                     AddressDO addressDO = addressDOS.get(0);
                     addressDO.setDefaultAddress(1);
@@ -91,7 +91,7 @@ public class AddressServiceImpl implements AddressService {
         Date now = new Date();
         if (defaultAddress != 0) {
             defaultAddress = 1;
-            List<AddressDO> addressDOS = addressMapper.selectList(new EntityWrapper<AddressDO>().eq("user_id", userId).eq("default_address", 1));
+            List<AddressDO> addressDOS = addressMapper.selectList(new QueryWrapper<AddressDO>().eq("user_id", userId).eq("default_address", 1));
             if (addressDOS.size() != 0) {
                 AddressDO preDefault = addressDOS.get(0);
                 preDefault.setDefaultAddress(0);
@@ -100,7 +100,7 @@ public class AddressServiceImpl implements AddressService {
         }
         addressDO.setDefaultAddress(defaultAddress);
         addressDO.setGmtUpdate(now);
-        return addressMapper.update(addressDO, new EntityWrapper<AddressDO>()
+        return addressMapper.update(addressDO, new QueryWrapper<AddressDO>()
                 .eq("id", addressId)
                 .eq("user_id", userId)) > 0;
 
@@ -108,22 +108,22 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public List<AddressDO> getAllAddress(Long userId) throws ServiceException {
-        return addressMapper.selectList(new EntityWrapper<AddressDO>()
+        return addressMapper.selectList(new QueryWrapper<AddressDO>()
                 .eq("user_id", userId));
     }
 
     @Override
     public AddressDO getAddressById(Long userId, Long addressId) throws ServiceException {
-        AddressDO addressDO = new AddressDO();
-        addressDO.setUserId(userId);
-        addressDO.setId(addressId);
-        return addressMapper.selectOne(addressDO);
+        return addressMapper.selectOne(
+                new QueryWrapper<AddressDO>()
+                        .eq("id", addressId)
+                        .eq("user_id", userId));
     }
 
     @Override
     public AddressDO getDefAddress(Long userId) throws ServiceException {
         List<AddressDO> addressDOS = addressMapper.selectList(
-                new EntityWrapper<AddressDO>()
+                new QueryWrapper<AddressDO>()
                         .eq("user_id", userId)
                         .eq("default_address", 1));
         if (CollectionUtils.isEmpty(addressDOS)) {

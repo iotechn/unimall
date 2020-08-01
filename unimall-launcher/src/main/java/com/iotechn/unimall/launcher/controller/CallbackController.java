@@ -1,7 +1,7 @@
 package com.iotechn.unimall.launcher.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -10,14 +10,14 @@ import com.iotechn.unimall.app.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
-import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.mapper.*;
-import com.iotechn.unimall.plugin.core.inter.IPluginPaySuccess;
-import com.iotechn.unimall.plugin.core.manager.PluginsManager;
+import com.iotechn.unimall.data.mapper.GroupShopMapper;
+import com.iotechn.unimall.data.mapper.OrderMapper;
+import com.iotechn.unimall.data.mapper.OrderSkuMapper;
+import com.iotechn.unimall.data.mapper.SpuMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -62,9 +62,6 @@ public class CallbackController {
     private OrderMapper orderMapper;
 
     @Autowired
-    private PluginsManager pluginsManager;
-
-    @Autowired
     private AdminNotifyBizService adminNotifyBizService;
 
     @RequestMapping("/wxpay")
@@ -85,7 +82,7 @@ public class CallbackController {
         String payId = result.getTransactionId();
 
         List<OrderDO> orderDOList = orderMapper.selectList(
-                new EntityWrapper<OrderDO>()
+                new QueryWrapper<OrderDO>()
                         .eq("order_no", orderNo));
 
         if (CollectionUtils.isEmpty(orderDOList)) {
@@ -121,7 +118,7 @@ public class CallbackController {
         }
         orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
         List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(
-                new EntityWrapper<OrderSkuDO>()
+                new QueryWrapper<OrderSkuDO>()
                         .eq("order_no", orderNo));
         orderSkuDOList.forEach(item -> {
             //增加销量
@@ -137,13 +134,6 @@ public class CallbackController {
         orderDTO.setPayChannel(updateOrderDO.getPayChannel());
         orderDTO.setSkuList(orderSkuDOList);
 
-        List<IPluginPaySuccess> plugins = pluginsManager.getPlugins(IPluginPaySuccess.class);
-        if (!CollectionUtils.isEmpty(plugins)) {
-            String formId = userBizService.getValidFormIdByUserId(orderDTO.getUserId()).getFormId();
-            for (IPluginPaySuccess paySuccess : plugins) {
-                orderDTO = paySuccess.invoke(orderDTO, formId);
-            }
-        }
         //通知管理员发货
         OrderDTO finalOrderDTO = orderDTO;
         GlobalExecutor.execute(() -> {

@@ -1,21 +1,16 @@
 package com.iotechn.unimall.admin.api.advertisement;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AdvertisementDO;
-import com.iotechn.unimall.data.domain.OrderDO;
-import com.iotechn.unimall.data.enums.AdvertisementType;
 import com.iotechn.unimall.data.mapper.AdvertisementMapper;
 import com.iotechn.unimall.data.model.Page;
-import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -57,7 +52,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteAdvertisement(Long adminId,Integer adType, Long adId) throws ServiceException {
 
-        if(advertisementMapper.delete(new EntityWrapper<AdvertisementDO>()
+        if(advertisementMapper.delete(new QueryWrapper<AdvertisementDO>()
                 .eq("id",adId)
                 .eq("ad_type",adType)) > 0){
             cacheComponent.delPrefixKey(ADVERTISEMENT_NAME);
@@ -81,7 +76,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
 
     @Override
     public Page<AdvertisementDO> queryAdvertisement(Long adminId, Integer adType, Integer pageNo, Integer limit, Integer status) throws ServiceException {
-        Wrapper<AdvertisementDO> wrapper = new EntityWrapper<AdvertisementDO>();
+        QueryWrapper<AdvertisementDO> wrapper = new QueryWrapper<AdvertisementDO>();
         if (adType != null) {
             wrapper.eq("ad_type", adType);
         }
@@ -89,7 +84,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
             wrapper.eq("status", status);
         }
 
-        List<AdvertisementDO> advertisementDOList = advertisementMapper.selectPage(new RowBounds(limit *(pageNo - 1), limit),wrapper);
+        List<AdvertisementDO> advertisementDOList = null;// TODOadvertisementMapper.selectPage(new RowBounds(limit *(pageNo - 1), limit),wrapper);
         Integer count = advertisementMapper.selectCount(wrapper);
 
         Page<AdvertisementDO> page = new Page<>(advertisementDOList,pageNo, limit,count);

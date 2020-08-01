@@ -1,6 +1,6 @@
 package com.iotechn.unimall.admin.api.config;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.config.ConfigBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.ConfigDO;
@@ -54,15 +54,15 @@ public class AdminMerchantConfigServiceImpl implements AdminMerchantConfigServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateMerchant(Long adminId, String title, String logoUrl, String description, String address, Integer showType) throws ServiceException {
-        configMapper.update(new ConfigDO("title",title), new EntityWrapper<ConfigDO>().eq("key_word","title"));
+        configMapper.update(new ConfigDO("title",title), new QueryWrapper<ConfigDO>().eq("key_word","title"));
 
-        configMapper.update(new ConfigDO("logoUrl",logoUrl), new EntityWrapper<ConfigDO>().eq("key_word","logoUrl"));
+        configMapper.update(new ConfigDO("logoUrl",logoUrl), new QueryWrapper<ConfigDO>().eq("key_word","logoUrl"));
 
-        configMapper.update(new ConfigDO("description",description), new EntityWrapper<ConfigDO>().eq("key_word","description"));
+        configMapper.update(new ConfigDO("description",description), new QueryWrapper<ConfigDO>().eq("key_word","description"));
 
-        configMapper.update(new ConfigDO("address",address), new EntityWrapper<ConfigDO>().eq("key_word","address"));
+        configMapper.update(new ConfigDO("address",address), new QueryWrapper<ConfigDO>().eq("key_word","address"));
 
-        configMapper.update(new ConfigDO("showType",String.valueOf(showType)), new EntityWrapper<ConfigDO>().eq("key_word","showType"));
+        configMapper.update(new ConfigDO("showType",String.valueOf(showType)), new QueryWrapper<ConfigDO>().eq("key_word","showType"));
 
         configBizService.clearMerchantConfigCache();
         return true;

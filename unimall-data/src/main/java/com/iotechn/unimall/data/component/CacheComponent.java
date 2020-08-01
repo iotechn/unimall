@@ -20,6 +20,10 @@ public class CacheComponent {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    public void putObj(String key, Object obj) {
+        this.putObj(key, obj, null);
+    }
+
     public void putObj(String key, Object obj, Integer expireSec) {
         if (expireSec != null) {
             stringRedisTemplate.opsForValue().set(key, JSONObject.toJSONString(obj), expireSec, TimeUnit.SECONDS);

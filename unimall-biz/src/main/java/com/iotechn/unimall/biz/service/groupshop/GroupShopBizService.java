@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.service.groupshop;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.data.domain.GroupShopSkuDO;
 import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
 import com.iotechn.unimall.data.enums.StatusType;
@@ -32,7 +32,7 @@ public class GroupShopBizService {
         if (detail == null || detail.getStatus() == StatusType.LOCK.getCode()) {
             return null;
         }
-        List<GroupShopSkuDO> groupShopSkuList = groupShopSkuMapper.selectList(new EntityWrapper<GroupShopSkuDO>().eq("group_shop_id", id));
+        List<GroupShopSkuDO> groupShopSkuList = groupShopSkuMapper.selectList(new QueryWrapper<GroupShopSkuDO>().eq("group_shop_id", id));
         detail.setGroupShopSkuList(groupShopSkuList);
         return detail;
     }

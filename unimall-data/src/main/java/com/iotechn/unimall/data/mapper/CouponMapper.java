@@ -1,10 +1,8 @@
 package com.iotechn.unimall.data.mapper;
 
-import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.dto.CouponAdminDTO;
 import com.iotechn.unimall.data.dto.CouponDTO;
-import com.iotechn.unimall.data.dto.UserCouponDTO;
 import com.iotechn.unimall.data.model.KVModel;
 import org.apache.ibatis.annotations.Param;
 
@@ -14,7 +12,7 @@ import java.util.List;
 /**
  * Created by rize on 2019/7/4.
  */
-public interface CouponMapper extends BaseMapper<CouponDO> {
+public interface CouponMapper extends IMapper<CouponDO> {
 
     public Integer decCoupon(Long couponId);
 

@@ -1,11 +1,11 @@
 package com.iotechn.unimall.app.api.user;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.user.UserBizService;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.Const;
+import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.notify.SMSClient;
@@ -102,7 +102,7 @@ public class UserServiceImpl implements UserService {
         checkVerifyCode(phone, verifyCode);
         //2.校验用户是否存在
         Integer count = userMapper.selectCount(
-                new EntityWrapper<UserDO>()
+                new QueryWrapper<UserDO>()
                         .eq("phone", phone));
         if (count > 0) {
             throw new AppServiceException(ExceptionDefinition.USER_PHONE_HAS_EXISTED);
@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
         checkVerifyCode(phone, verifyCode);
         //2.校验用户是否存在
         Integer count = userMapper.selectCount(
-                new EntityWrapper<UserDO>()
+                new QueryWrapper<UserDO>()
                         .eq("phone", phone));
         if (count > 0) {
             throw new AppServiceException(ExceptionDefinition.USER_PHONE_HAS_EXISTED);
@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
         checkVerifyCode(phone, verifyCode);
         //2.校验用户是否存在
         List<UserDO> targetUserList = userMapper.selectList(
-                new EntityWrapper<UserDO>()
+                new QueryWrapper<UserDO>()
                         .eq("phone", phone));
         if (CollectionUtils.isEmpty(targetUserList)) {
             throw new AppServiceException(ExceptionDefinition.USER_PHONE_NOT_EXIST);
@@ -257,7 +257,7 @@ public class UserServiceImpl implements UserService {
                 Integer errcode = jsonObject.getInteger("errcode");
                 if (errcode == null || errcode == 0) {
                     String openid = jsonObject.getString("openid");
-                    List<UserDO> userDOS = userMapper.selectList(new EntityWrapper<UserDO>().eq("open_id", openid).eq("login_type", loginType));
+                    List<UserDO> userDOS = userMapper.selectList(new QueryWrapper<UserDO>().eq("open_id", openid).eq("login_type", loginType));
                     if (!CollectionUtils.isEmpty(userDOS)) {
                         //若用户已经注册，则直接返回用户
                         String accessToken = GeneratorUtil.genSessionId();
@@ -304,7 +304,7 @@ public class UserServiceImpl implements UserService {
                 JSONObject authResult = jsonObject.getJSONObject("authResult");
                 String openid = authResult.getString("openid");
 //                String openid = "osTQe6L_JOoJkrMO1vAT_peMivjA";
-                List<UserDO> userDOS = userMapper.selectList(new EntityWrapper<UserDO>().eq("open_id", openid).eq("login_type", loginType));
+                List<UserDO> userDOS = userMapper.selectList(new QueryWrapper<UserDO>().eq("open_id", openid).eq("login_type", loginType));
                 UserDO userDO;
                 if (CollectionUtils.isEmpty(userDOS)) {
                     //创建新用户
@@ -369,7 +369,7 @@ public class UserServiceImpl implements UserService {
         Integer errcode = jsonObject.getInteger("errcode");
         if (errcode == null || errcode == 0) {
             String miniOpenId = jsonObject.getString("openid");
-            List<UserDO> userDOS = userMapper.selectList(new EntityWrapper<UserDO>().eq("open_id", miniOpenId).eq("login_type", loginType));
+            List<UserDO> userDOS = userMapper.selectList(new QueryWrapper<UserDO>().eq("open_id", miniOpenId).eq("login_type", loginType));
             UserDO userDO;
             if (CollectionUtils.isEmpty(userDOS)) {
                 //若用户为空，则注册此用户

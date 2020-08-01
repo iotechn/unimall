@@ -1,8 +1,11 @@
 package com.iotechn.unimall.admin.api.category;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
-import com.iotechn.unimall.core.exception.*;
+import com.iotechn.unimall.core.exception.AdminServiceException;
+import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.domain.SpuDO;
@@ -10,16 +13,15 @@ import com.iotechn.unimall.data.dto.CategoryTreeNodeDTO;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
-import com.iotechn.unimall.plugin.core.inter.IPluginUpdateCategory;
-import com.iotechn.unimall.plugin.core.manager.PluginsManager;
-import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -39,9 +41,6 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
     @Autowired
     private CacheComponent cacheComponent;
-
-    @Autowired
-    private PluginsManager pluginsManager;
 
     private static final String CA_CATEGORY_TREE = "CA_CATEGORY_TREE";
 
@@ -75,7 +74,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (objList != null) {
             return objList;
         }
-        List<CategoryDO> categoryDOS = categoryMapper.selectList(new EntityWrapper<>());
+        List<CategoryDO> categoryDOS = categoryMapper.selectList(new QueryWrapper<>());
         List<CategoryTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
             CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
             dto.setLabel(item.getTitle());
@@ -144,15 +143,14 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
         cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
         cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
-        pluginInvokeUpdateCategory(categoryDO.getId());
         return categoryDO;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteCategory(Long adminId, Long id) throws ServiceException {
-        Integer count_category = categoryMapper.selectCount(new EntityWrapper<CategoryDO>().eq("parent_id", id));
-        Integer count_spu = spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("category_id", id));
+        Integer count_category = categoryMapper.selectCount(new QueryWrapper<CategoryDO>().eq("parent_id", id));
+        Integer count_spu = spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("category_id", id));
 
         if (count_category != 0 || count_spu != 0) {
             throw new AppServiceException(ExceptionDefinition.CATEGORY_OUGHT_TO_EMPTY);
@@ -162,7 +160,6 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
         cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
         cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
-        pluginInvokeUpdateCategory(id);
         return categoryMapper.deleteById(id) > 0;
     }
 
@@ -202,17 +199,17 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         }
 
         if(category.getLevel().intValue() == 2 && categoryDO.getLevel().intValue() != 2){
-            int spuCount = spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("category_id", id));
+            int spuCount = spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("category_id", id));
             if(spuCount > 0){
                 throw new AdminServiceException(ExceptionDefinition.CATEGORY_EXIST_SPU);
             }
         }
 
-        List<CategoryDO> two_level = categoryMapper.selectList(new EntityWrapper<CategoryDO>().eq("parent_id", id));
+        List<CategoryDO> two_level = categoryMapper.selectList(new QueryWrapper<CategoryDO>().eq("parent_id", id));
         if(!CollectionUtils.isEmpty(two_level)){
             for (CategoryDO two : two_level) {
                 if(two.getLevel().intValue() == 2 && (categoryDO.getLevel().intValue() + 1) != 2) {
-                    int spuCount = spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("category_id", two.getId()));
+                    int spuCount = spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("category_id", two.getId()));
                     if(spuCount > 0){
                         throw new AdminServiceException(ExceptionDefinition.CATEGORY_EXIST_SPU);
                     }
@@ -236,14 +233,13 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
         cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
         cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
-        pluginInvokeUpdateCategory(categoryDO.getId());
         return categoryTreeNodeDTO;
     }
 
     //首先的到所有的类目的List<CategoryTreeNodeDTO>,在根据SQL查询得到的数据转化成传往前端的数据
     @Override
     public Page<CategoryTreeNodeDTO> queryCategory(Long adminId, Long id, String title, Integer level, Long parentId, Integer pageNo, Integer limit) throws ServiceException {
-        EntityWrapper wrapper = new EntityWrapper();
+        QueryWrapper wrapper = new QueryWrapper();
         if (id != null) {
             wrapper.eq("id", id);
         }
@@ -256,10 +252,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (parentId != null) {
             wrapper.eq("parent_id", parentId);
         }
-        wrapper.orderBy("level");
+        wrapper.orderByAsc("level");
         Integer count = categoryMapper.selectCount(wrapper);
 
-        List<CategoryDO> categoryDOS = categoryMapper.selectPage(new RowBounds((pageNo - 1) * limit, limit), wrapper);
+        List<CategoryDO> categoryDOS = null;// TODO categoryMapper.selectPage(new RowBounds((pageNo - 1) * limit, limit), wrapper);
         List<CategoryTreeNodeDTO> totalCategory = getCategoryList();
         List<CategoryTreeNodeDTO> list = categoryDOS.stream().map(item -> {
             CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
@@ -285,8 +281,8 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (objList != null) {
             return objList;
         }
-        EntityWrapper wrapper = new EntityWrapper();
-        wrapper.orderBy("level");
+        QueryWrapper wrapper = new QueryWrapper();
+        wrapper.orderByAsc("level");
         List<CategoryDO> categoryDOS = categoryMapper.selectList(wrapper);
         List<CategoryTreeNodeDTO> list = categoryDOS.stream().map(item -> {
             CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
@@ -315,15 +311,5 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         cacheComponent.putObj(ADMIN_QUERY_CATEGORY_LIST, list, 60 * 60);
         return list;
     }
-
-    private void pluginInvokeUpdateCategory(Long categoryId) {
-        List<IPluginUpdateCategory> plugins = pluginsManager.getPlugins(IPluginUpdateCategory.class);
-        if (!CollectionUtils.isEmpty(plugins)) {
-            for (IPluginUpdateCategory updateGoods : plugins) {
-                updateGoods.invokeCategoryUpdate(categoryId);
-            }
-        }
-    }
-
 
 }

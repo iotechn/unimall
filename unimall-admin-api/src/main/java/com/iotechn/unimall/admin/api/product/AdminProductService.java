@@ -1,4 +1,4 @@
-package com.iotechn.unimall.admin.api.goods;
+package com.iotechn.unimall.admin.api.product;
 
 import com.iotechn.unimall.core.annotation.HttpMethod;
 import com.iotechn.unimall.core.annotation.HttpOpenApi;
@@ -16,7 +16,7 @@ import java.util.List;
  * Created by rize on 2019/7/11.
  */
 @HttpOpenApi(group = "admin.goods", description = "管理员商品服务")
-public interface AdminGoodsService {
+public interface AdminProductService {
 
     @HttpMethod(description = "获取SPU树")
     public List<SpuTreeNodeDTO> getSpuBigTree(

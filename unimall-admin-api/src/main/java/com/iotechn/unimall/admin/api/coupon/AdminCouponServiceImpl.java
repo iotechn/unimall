@@ -1,6 +1,6 @@
 package com.iotechn.unimall.admin.api.coupon;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -59,12 +59,12 @@ public class AdminCouponServiceImpl implements AdminCouponService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteCoupon(Long adminId, Long id) throws ServiceException {
-        EntityWrapper wrapperC = new EntityWrapper();
+        QueryWrapper wrapperC = new QueryWrapper();
         wrapperC.eq("id", id);
         if (couponMapper.delete(wrapperC) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
         }
-        EntityWrapper wrapperUC = new EntityWrapper();
+        QueryWrapper wrapperUC = new QueryWrapper();
         wrapperUC.eq("coupon_id", id);
         userCouponMapper.delete(wrapperUC);
         return true;
@@ -75,14 +75,15 @@ public class AdminCouponServiceImpl implements AdminCouponService {
     public Boolean updateCoupon(Long adminId, Long id, String title, Integer type, String description, Integer total, Integer surplus, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Date gmtStart, Date gmtEnd) throws ServiceException {
         CouponDO couponDO = new CouponDO(title, type, description, total, surplus, limit, discount, min, status, categoryId, days, gmtStart, gmtEnd);
         couponDO.setId(id);
-        List<CouponDO> couponDOList = couponMapper.selectList(new EntityWrapper<CouponDO>().eq("id", id));
+        List<CouponDO> couponDOList = couponMapper.selectList(new QueryWrapper<CouponDO>().eq("id", id));
         if (CollectionUtils.isEmpty(couponDOList)) {
             throw new AdminServiceException(ExceptionDefinition.COUPON_NOT_EXIST);
         }
         Date now = new Date();
         couponDO.setGmtCreate(couponDOList.get(0).getGmtCreate());
         couponDO.setGmtUpdate(now);
-        return couponMapper.updateAllColumnById(couponDO) > 0;
+        // TODO return couponMapper.updateAllColumnById(couponDO) > 0;
+        return null;
     }
 
     @Override
@@ -97,7 +98,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
 
     @Override
     public Page<CouponAdminDTO> queryCouponByTitle(Long adminId, String title, Integer type, Integer status, Integer pageNo, Integer limit) throws ServiceException {
-        EntityWrapper wrapper = new EntityWrapper();
+        QueryWrapper wrapper = new QueryWrapper();
         Date now = new Date();
         if (!StringUtils.isEmpty(title)) {
             wrapper.like("title", title);
@@ -108,7 +109,11 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         if (status != null) {
             if (status >= 0 && status < 2) {
                 wrapper.eq("status", status);
-                wrapper.andNew().gt("gmt_end", now).or().isNotNull("days"); //coupon -> conpon.gt("gmt_end", now).or().isNotNull("days")
+                wrapper
+                        // TODO .andNew()
+                        .gt("gmt_end", now);
+                        // TODo .or()
+                        // TODO.isNotNull("days"); //coupon -> conpon.gt("gmt_end", now).or().isNotNull("days")
             } else if (status < 0) {
                 wrapper.lt("gmt_end", now);
             } else {

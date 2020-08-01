@@ -57,5 +57,4 @@ public interface CartService {
     public List<CartDTO> getCartList(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
-
 }

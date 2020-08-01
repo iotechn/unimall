@@ -1,7 +1,7 @@
 package com.iotechn.unimall.biz.service.user;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.UserFormIdDO;
 import com.iotechn.unimall.data.mapper.UserFormIdMapper;
@@ -134,7 +134,7 @@ public class UserBizService {
 
     public UserFormIdDO getValidFormIdByUserId(Long userId) {
         List<UserFormIdDO> userFormDOS = userFormIdMapper.selectList(
-                new EntityWrapper<UserFormIdDO>()
+                new QueryWrapper<UserFormIdDO>()
                         .eq("user_id", userId)
                         .gt("gmt_create", new Date(System.currentTimeMillis() - (1000l * 60 * 60 * 24 * 7 - 1000l * 60 * 30))));
         if (CollectionUtils.isEmpty(userFormDOS)) {

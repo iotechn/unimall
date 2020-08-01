@@ -1,6 +1,5 @@
 package com.iotechn.unimall.data.mapper;
 
-import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.iotechn.unimall.data.domain.SpuDO;
 import org.apache.ibatis.annotations.Param;
 
@@ -9,7 +8,7 @@ import java.util.List;
 /**
  * Created by rize on 2019/7/2.
  */
-public interface SpuMapper extends BaseMapper<SpuDO> {
+public interface SpuMapper extends IMapper<SpuDO> {
 
     /**
      * 仅可传入叶子类目
