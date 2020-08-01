@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.product;
 
-import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
+import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.model.Page;
@@ -22,8 +22,8 @@ public class ProductServiceImpl implements ProductService {
     private GroupShopBizService groupShopBizService;
 
     @Override
-    public Page<SpuDTO> getGoodsPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy,Boolean isAsc, String title) throws ServiceException {
-        return productBizService.getGoodsPage(pageNo, pageSize, categoryId, orderBy, isAsc, title);
+    public Page<SpuDTO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
+        return productBizService.getProductPage(pageNo, pageSize, categoryId, orderBy, isAsc, title);
     }
 
     @Override

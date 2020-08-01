@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -148,6 +145,17 @@ public class CategoryBizService {
             ids.add(new Long(split[1]));
         }
         return ids;
+    }
+
+    /**
+     * 将一父节点传入，返回父节点本身与其子节点，及其孙节点ID列表
+     * @param categoryId
+     * @return
+     * @throws ServiceException
+     */
+    public List<Long> getCategorySelfAndChildren(Long categoryId) throws ServiceException {
+        // TODO
+        return Arrays.asList(categoryId);
     }
 
 }

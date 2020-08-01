@@ -12,11 +12,11 @@ import com.iotechn.unimall.data.model.Page;
 /**
  * Created by rize on 2019/7/1.
  */
-@HttpOpenApi(group = "goods", description = "商品服务")
+@HttpOpenApi(group = "product", description = "商品服务")
 public interface ProductService {
 
-    @HttpMethod(description = "搜索Goods列表")
-    public Page<SpuDTO> getGoodsPage(
+    @HttpMethod(description = "搜索商品列表")
+    public Page<SpuDTO> getProductPage(
             @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer pageNo,
             @HttpParam(name = "pageSize", type = HttpParamType.COMMON, description = "页码长度", valueDef = "10") Integer pageSize,
             @HttpParam(name = "categoryId", type = HttpParamType.COMMON, description = "搜索分类") Long categoryId,
