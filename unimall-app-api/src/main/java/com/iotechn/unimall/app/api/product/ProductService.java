@@ -1,4 +1,4 @@
-package com.iotechn.unimall.app.api.goods;
+package com.iotechn.unimall.app.api.product;
 
 import com.iotechn.unimall.core.annotation.HttpMethod;
 import com.iotechn.unimall.core.annotation.HttpOpenApi;

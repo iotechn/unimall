@@ -1,4 +1,4 @@
-package com.iotechn.unimall.app.api.goods;
+package com.iotechn.unimall.app.api.product;
 
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
