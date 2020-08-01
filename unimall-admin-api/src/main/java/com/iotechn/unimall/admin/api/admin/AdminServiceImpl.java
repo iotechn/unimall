@@ -2,6 +2,7 @@ package com.iotechn.unimall.admin.api.admin;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -76,7 +77,7 @@ public class AdminServiceImpl implements AdminService {
     @Value("${com.iotechn.admin.notify.uninotify.app-id}")
     private String uniNotifyAppId;
 
-    private final static String ADMIN_MSG_CODE = "admin_msg_code_";
+
 
     private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
@@ -92,7 +93,7 @@ public class AdminServiceImpl implements AdminService {
         }
         AdminDO adminDO = adminDOS.get(0);
         //短信验证码
-        String code = cacheComponent.getRaw(ADMIN_MSG_CODE+adminDO.getPhone() );
+        String code = cacheComponent.getRaw(CacheConst.ADMIN_MSG_CODE+adminDO.getPhone() );
         if(!"guest".equals(username) && (code == null || verifyCode==null || !code.equals(verifyCode))){
             throw new AdminServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
         }
@@ -247,7 +248,7 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXITS);
         }
         String code = GeneratorUtil.genSixVerifyCode();
-        cacheComponent.putRaw(ADMIN_MSG_CODE+admin.getPhone(), code,300 );
+        cacheComponent.putRaw(CacheConst.ADMIN_MSG_CODE+admin.getPhone(), code,300 );
         SMSResult smsResult = smsClient.sendAdminLoginVerify(admin.getPhone(), code);
         if(!smsResult.isSucc()){
             throw new ThirdPartServiceException(smsResult.getMsg(), ExceptionDefinition.ADMIN_VERIFY_CODE_SEND_FAIL.getCode());

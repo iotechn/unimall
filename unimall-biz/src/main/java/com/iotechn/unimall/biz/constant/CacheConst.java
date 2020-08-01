@@ -14,6 +14,12 @@ public class CacheConst {
     public static final String USER_VERIFY_CODE_PREFIX = "USER_VERIFY_CODE:";
 
     /**
+     * 管理员登陆验证码
+     * ADMIN_MSG_CODE: + 电话
+     */
+    public final static String ADMIN_MSG_CODE = "ADMIN_MSG_CODE:";
+
+    /**
      * 广告缓存 (ADVERTISEMENT_TYPE: + 广告类型(adType))
      */
     public static final String ADVERTISEMENT_TYPE = "ADVERTISEMENT_TYPE:";
@@ -24,36 +30,34 @@ public class CacheConst {
     public static final String APPRAISE_KEY = "APPRAISE_KEY:";
 
     /**
-     * 三级类目树
+     * 三级类目树(CategoryDTO作为节点,用户使用)
      */
-    public static final String CATEGORY_THREE_LEVEL_TREE = "CATEGORY_THREE_LEVEL_TREE";
+    public static final String CATEGORY_DTO_THREE_LEVEL_TREE = "CATEGORY_DTO_THREE_LEVEL_TREE";
+
+    /**
+     * 三级类目树(CategoryTreeNodeDTO作为节点，管理员使用)
+     */
+    public static final String CATEGORY_NODE_THREE_LEVEL_TREE = "CATEGORY_NODE_THREE_LEVEL_TREE";
+
+    /**
+     * 包含所有类目的一个链表(CategoryDTO作为节点)
+     */
+    public static final String CATEGORY_NODE_ALL_LIST = "CATEGORY_NODE_ALL_LIST";
+
+    /**
+     * 二级类目树(CategoryTreeNodeDTO作为节点)
+     */
+    public static final String CATEGORY_NODE_SECOND_LEVEL_TREE = "CATEGORY_NODE_SECOND_LEVEL_TREE";
 
     /**
      *TODO???这是啥玩意？
      */
     public static final String CATEGORY_ID_HASH = "CATEGORY_ID_HASH";
 
-
-
-
-
-
-
-
-
-
-
-
     /**
-     * 用户足迹Set集合
-     * FOOTPRINT_USER: + userId
-     * 每四个值为一组,对应一个足迹
-     * spuId: + spuId
-     * spuTitle: +spuId + ":" + spuTitle
-     * spuPrice: +spuId + ":" + spuPrice
-     * spuImg: +spuId + ":" + spuImg
+     * 获取足迹列表+_用户Id (追加)
      */
-    public static final String FOOTPRINT_USER = "FOOTPRINT_USER:";
+    public static final String FOOTPRINT_LRU = "FOOTPRINT_LRU:";
 
     /**
      * 用户收藏商品缓存 COLLECT_USER:+ userID
@@ -89,5 +93,11 @@ public class CacheConst {
      * 商品skuId - 库存缓存 (单独)
      */
     public static final String PRT_SKU_STOCK_BUCKET = "CA_PRODUCT_SKU_DETAIL_HASH_BUCKET";
+
+    /**
+     * 团购商品缓存
+     * GROUP_SHOP_LIST: + pageNo + ":" + pageSize
+     */
+    public static final String GROUP_SHOP_LIST = "GROUP_SHOP_LIST:";
 
 }

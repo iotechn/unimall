@@ -32,6 +32,7 @@ public class CategoryBizService {
     private CacheComponent cacheComponent;
 
     /*获取一棵两级类目树*/
+    @AspectCommonCache(value = CacheConst.CATEGORY_NODE_SECOND_LEVEL_TREE)
     public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException {
         List<CategoryDO> categoryDOS = categoryMapper.selectList(new QueryWrapper<CategoryDO>().le("level",1 ).orderByAsc("level"));
         List<CategoryTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
@@ -60,9 +61,14 @@ public class CategoryBizService {
         return list;
     }
 
-    /*获取一棵三级类目树*/
-    @AspectCommonCache(value = CacheConst.CATEGORY_THREE_LEVEL_TREE,second = -1)
+    /**
+     * 获取一棵三级类目树,类内部有调用，因此不能切面
+     * */
     public List<CategoryDTO> categoryList() throws ServiceException {
+        List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CacheConst.CATEGORY_DTO_THREE_LEVEL_TREE, CategoryDTO.class);
+        if (categoryDTOListFormCache != null) {
+            return categoryDTOListFormCache;
+        }
         //从数据库查询
         List<CategoryDO> categoryDOList = categoryMapper.selectList(new QueryWrapper<>());
         //组装DTO
@@ -98,6 +104,8 @@ public class CategoryBizService {
                 }
             });
         });
+        //放入缓存
+        cacheComponent.putObj(CacheConst.CATEGORY_DTO_THREE_LEVEL_TREE, categoryDTOList, Const.CACHE_ONE_DAY);
         return categoryDTOList;
     }
 

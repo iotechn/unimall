@@ -7,6 +7,7 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.api.category.CategoryService;
 import com.iotechn.unimall.app.executor.GlobalExecutor;
+import com.iotechn.unimall.biz.constant.LockConst;
 import com.iotechn.unimall.biz.service.freight.FreightBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
@@ -52,9 +53,7 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
-
-    private static final String TAKE_ORDER_LOCK = "TAKE_ORDER_";
-
+    
     @Autowired
     private SkuMapper skuMapper;
 
@@ -113,7 +112,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
-        if (lockComponent.tryLock(TAKE_ORDER_LOCK + userId, 20)) {
+        if (lockComponent.tryLock(LockConst.TAKE_ORDER_LOCK + userId, 20)) {
             //加上乐观锁，防止用户重复提交订单
             try {
                 //用户会员等级
@@ -327,7 +326,7 @@ public class OrderServiceImpl implements OrderService {
                 logger.error("[提交订单] 异常", e);
                 throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
             } finally {
-                lockComponent.release(TAKE_ORDER_LOCK + userId);
+                lockComponent.release(LockConst.TAKE_ORDER_LOCK + userId);
             }
         }
         throw new AppServiceException(ExceptionDefinition.ORDER_SYSTEM_BUSY);

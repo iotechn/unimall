@@ -9,6 +9,7 @@ package com.iotechn.unimall.admin.api.product;/*
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -58,7 +59,6 @@ public class AdminGroupShopProductServiceImpl implements AdminGroupShopProductSe
     @Autowired
     private CacheComponent cacheComponent;
 
-    private static final String GROUP_SHOP_CACHE = "CA_GROUP_SHOP";
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -111,7 +111,7 @@ public class AdminGroupShopProductServiceImpl implements AdminGroupShopProductSe
         }
         // 4.插入groupShopSkuList
         this.insertGroupShopSkuList(groupShopSkuDOList, skuDOList, groupShopDO.getId(), now);
-        cacheComponent.delPrefixKey(GROUP_SHOP_CACHE);
+        cacheComponent.delPrefixKey(CacheConst.GROUP_SHOP_LIST);
         return "ok";
     }
 
@@ -135,7 +135,7 @@ public class AdminGroupShopProductServiceImpl implements AdminGroupShopProductSe
             throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SKU_DELETE_SQL_QUERY_ERROR);
         }
 
-        cacheComponent.delPrefixKey(GROUP_SHOP_CACHE);
+        cacheComponent.delPrefixKey(CacheConst.GROUP_SHOP_LIST);
         return "ok";
     }
 
@@ -193,7 +193,7 @@ public class AdminGroupShopProductServiceImpl implements AdminGroupShopProductSe
         }
         // 4.插入groupShopSkuList
         this.insertGroupShopSkuList(groupShopSkuDOList, skuDOList, groupShopDO.getId(), now);
-        cacheComponent.delPrefixKey(GROUP_SHOP_CACHE);
+        cacheComponent.delPrefixKey(CacheConst.GROUP_SHOP_LIST);
         return new GroupShopDTO();
     }
 

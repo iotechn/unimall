@@ -1,6 +1,7 @@
 package com.iotechn.unimall.admin.api.advertisement;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -30,8 +31,6 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
     @Autowired
     private CacheComponent cacheComponent;
 
-    private  final  static String  ADVERTISEMENT_NAME = "ADVERTISEMENT_TYPE_";
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addAdvertisement(Long adminId, Integer adType, String title, String url, String imgUrl, Integer status,String color) throws ServiceException {
@@ -42,7 +41,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
         advertisementDO.setGmtUpdate(now);
 
         if(advertisementMapper.insert(advertisementDO) > 0){
-            cacheComponent.delPrefixKey(ADVERTISEMENT_NAME);
+            cacheComponent.delPrefixKey(CacheConst.ADVERTISEMENT_TYPE + adType);
             return true;
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_ADD_FAILED);
@@ -55,7 +54,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
         if(advertisementMapper.delete(new QueryWrapper<AdvertisementDO>()
                 .eq("id",adId)
                 .eq("ad_type",adType)) > 0){
-            cacheComponent.delPrefixKey(ADVERTISEMENT_NAME);
+            cacheComponent.delPrefixKey(CacheConst.ADVERTISEMENT_TYPE + adType);
             return true;
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_DELETE_FAILED);
@@ -68,7 +67,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
         advertisementDO.setId(adId);
         advertisementDO.setGmtUpdate(new Date());
         if(advertisementMapper.updateById(advertisementDO)>0){
-            cacheComponent.delPrefixKey(ADVERTISEMENT_NAME);
+            cacheComponent.delPrefixKey(CacheConst.ADVERTISEMENT_TYPE + adType);
             return  true;
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_UPDATE_FAILED);
@@ -84,22 +83,11 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
             wrapper.eq("status", status);
         }
 
-        List<AdvertisementDO> advertisementDOList = null;// TODOadvertisementMapper.selectPage(new RowBounds(limit *(pageNo - 1), limit),wrapper);
+        List<AdvertisementDO> advertisementDOList = null;// TODO advertisementMapper.selectPage(new RowBounds(limit *(pageNo - 1), limit),wrapper);
         Integer count = advertisementMapper.selectCount(wrapper);
 
         Page<AdvertisementDO> page = new Page<>(advertisementDOList,pageNo, limit,count);
 
-        return page;
-
-    }
-
-    //冗余，未使用
-    @Override
-    public Page<AdvertisementDO> queryAllAdvertisement(Long adminId,Integer pageNo,Integer pageSize) throws ServiceException {
-
-        List<AdvertisementDO> advertisementDOList = advertisementMapper.getAllAdvertisement(pageSize*(pageNo-1),pageSize);
-        Integer count = advertisementMapper.selectCount(null);
-        Page<AdvertisementDO> page = new Page<>(advertisementDOList,pageNo,pageSize,count);
         return page;
 
     }

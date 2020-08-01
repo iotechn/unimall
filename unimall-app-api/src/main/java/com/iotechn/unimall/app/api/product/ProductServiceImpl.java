@@ -126,7 +126,7 @@ public class ProductServiceImpl implements ProductService {
         // spuDTO.setFreightTemplate(freightTemplateBizService.getFreightTemplateById(spuDTO.getFreightTemplateId()));
         if (userId != null) {
             // 添加用户足迹
-            footprintBizService.addOrUpdateFootprint(spuId, userId);
+            footprintBizService.newFootprint(spuId, userId);
             // TODO 封装用户收藏信息
             // spuDTO.setFavorite(cacheComponent.getHashRaw(ShoppingConst.CA_PRODUCT_FAVORITE_HASH_BUCKET + spuId, "U" + userId) != null);
         }

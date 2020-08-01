@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.biz.constant.LockConst;
 import com.iotechn.unimall.core.exception.*;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.OrderDO;
@@ -31,11 +33,6 @@ import java.util.List;
  */
 @Service
 public class OrderBizService {
-
-    private static final String ORDER_STATUS_LOCK = "ORDER_STATUS_LOCK_";
-
-    //订单退款乐观锁
-    public static final String ORDER_REFUND_LOCK = "ORDER_REFUND_LOCK_";
 
     private static final Logger logger = LoggerFactory.getLogger(OrderBizService.class);
 
@@ -67,7 +64,7 @@ public class OrderBizService {
                 throw new BizServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
             }
 
-            if (lockComponent.tryLock(ORDER_STATUS_LOCK + orderNo, 30)) {
+            if (lockComponent.tryLock(LockConst.ORDER_STATUS_LOCK + orderNo, 30)) {
                 if (orderMapper.update(orderDO,
                         new QueryWrapper<OrderDO>()
                                 .eq("order_no", orderNo)
@@ -84,7 +81,7 @@ public class OrderBizService {
             logger.error("[订单状态扭转] 异常", e);
             throw new BizServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
         } finally {
-            lockComponent.release(ORDER_STATUS_LOCK + orderNo);
+            lockComponent.release(LockConst.ORDER_STATUS_LOCK + orderNo);
         }
     }
 
@@ -118,7 +115,7 @@ public class OrderBizService {
 
 //    @Transactional(rollbackFor = Exception.class) 外面加了事务
     public String groupShopStatusRefund(String orderNo) throws ServiceException {
-        if (lockComponent.tryLock(OrderBizService.ORDER_REFUND_LOCK + orderNo, 30)) {
+        if (lockComponent.tryLock(LockConst.ORDER_REFUND_LOCK + orderNo, 30)) {
             try {
                 //1.校验订单状态是否处于团购状态中
                 OrderDO orderDO = checkOrderExist(orderNo, null);
@@ -161,7 +158,7 @@ public class OrderBizService {
                 logger.error("[微信退款] 异常", e);
                 throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
             } finally {
-                lockComponent.release(OrderBizService.ORDER_REFUND_LOCK + orderNo);
+                lockComponent.release(LockConst.ORDER_REFUND_LOCK + orderNo);
             }
         } else {
             throw new AdminServiceException(ExceptionDefinition.SYSTEM_BUSY);
