@@ -1,5 +1,6 @@
 package com.iotechn.unimall.app.api.product;
 
+import com.iotechn.unimall.biz.service.footpring.FootprintBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -21,6 +22,9 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private GroupShopBizService groupShopBizService;
 
+    @Autowired
+    private FootprintBizService footprintBizService;
+
     @Override
     public Page<SpuDTO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         return productBizService.getProductPage(pageNo, pageSize, categoryId, orderBy, isAsc, title);
@@ -33,6 +37,7 @@ public class ProductServiceImpl implements ProductService {
         if (groupShopId != null) {
             goods.setGroupShop(groupShopBizService.getGroupShopById(groupShopId));
         }
+        footprintBizService.addFootPrint(userId,String.valueOf(goods.getId()),goods.getTitle(),String.valueOf(goods.getPrice()),goods.getImg());
         return goods;
     }
 }

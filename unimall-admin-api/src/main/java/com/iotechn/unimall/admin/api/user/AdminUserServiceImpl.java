@@ -27,8 +27,6 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Autowired
     private UserMapper userMapper;
 
-
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addUser(Long adminId, UserDO user) throws ServiceException {
@@ -97,5 +95,5 @@ public class AdminUserServiceImpl implements AdminUserService {
     public Page<UserDO> getUser(Long adminId, Long id, String nickname, Integer level, Integer gender, Integer status,Integer pageNo,Integer limit) throws ServiceException {
         return userMapper.getUserList(Page.div(pageNo, limit, UserDO.class), id,nickname,level,gender,status);
     }
-
+    
 }

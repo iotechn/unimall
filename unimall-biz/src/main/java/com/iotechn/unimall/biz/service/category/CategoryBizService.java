@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.annotaion.AspectCommonCache;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
@@ -60,11 +61,8 @@ public class CategoryBizService {
     }
 
     /*获取一棵三级类目树*/
+    @AspectCommonCache(value = CacheConst.CATEGORY_THREE_LEVEL_TREE,second = -1)
     public List<CategoryDTO> categoryList() throws ServiceException {
-        List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CacheConst.CATEGORY_THREE_LEVEL_TREE, CategoryDTO.class);
-        if (categoryDTOListFormCache != null) {
-            return categoryDTOListFormCache;
-        }
         //从数据库查询
         List<CategoryDO> categoryDOList = categoryMapper.selectList(new QueryWrapper<>());
         //组装DTO
@@ -100,9 +98,6 @@ public class CategoryBizService {
                 }
             });
         });
-
-        //放入缓存
-        cacheComponent.putObj(CacheConst.CATEGORY_THREE_LEVEL_TREE, categoryDTOList, Const.CACHE_ONE_DAY);
         return categoryDTOList;
     }
 

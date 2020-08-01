@@ -1,6 +1,7 @@
 package com.iotechn.unimall.app.api.coupon;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.LockConst;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -41,17 +42,13 @@ public class CouponServiceImpl implements CouponService {
     @Autowired
     private LockComponent lockComponent;
 
-    private static final String COUPON_LOCK = "COUPON_LOCK_";
-
-    private static final String COUPON_USER_LOCK = "COUPON_USER_LOCK_";
-
     private static final Logger logger = LoggerFactory.getLogger(CouponServiceImpl.class);
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String obtainCoupon(Long couponId, Long userId) throws ServiceException {
         //防止用户一瞬间提交两次表单，导致超领
-        if (lockComponent.tryLock(COUPON_USER_LOCK + userId + "_" + couponId, 10)) {
+        if (lockComponent.tryLock(LockConst.COUPON_USER_LOCK + userId + "_" + couponId, 10)) {
             try {
                 CouponDO couponDO = couponMapper.selectById(couponId);
                 if (couponDO.getStatus() == StatusType.LOCK.getCode()) {
@@ -68,8 +65,8 @@ public class CouponServiceImpl implements CouponService {
                     throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
                 } else {
                     if (couponDO.getTotal() >= 0) {
-                        if (couponDO.getSurplus() == 1) {
-                            if (!lockComponent.tryLock(COUPON_LOCK + couponId, 10)) {
+                        if (couponDO.getSurplus() == 1) { // TODO 三个用户同时领最后两张，锁不住，可以改成数据库乐观锁。
+                            if (!lockComponent.tryLock(LockConst.COUPON_LOCK + couponId, 10)) {
                                 throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
                             }
                         }
@@ -117,7 +114,7 @@ public class CouponServiceImpl implements CouponService {
                 logger.error("[领取优惠券] 异常", e);
                 throw new AppServiceException(ExceptionDefinition.APP_UNKNOWN_EXCEPTION);
             } finally {
-                lockComponent.release(COUPON_USER_LOCK + userId + "_" + couponId);
+                lockComponent.release(LockConst.COUPON_USER_LOCK + userId + "_" + couponId);
             }
         } else {
             throw new AppServiceException(ExceptionDefinition.SYSTEM_BUSY);
