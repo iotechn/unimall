@@ -61,7 +61,6 @@ public interface UserService {
 
     @HttpMethod(description = "同步用户信息")
     public String syncUserInfo(
-            @HttpParam(name = "nickName", type = HttpParamType.COMMON, description = "用户昵称") String nickName,
             @HttpParam(name = "nickname", type = HttpParamType.COMMON, description = "用户昵称") String nickname,
             @HttpParam(name = "avatarUrl", type = HttpParamType.COMMON, description = "用户头像url") String avatarUrl,
             @HttpParam(name = "gender", type = HttpParamType.COMMON, description = "性别0未知1男2女") Integer gender,
@@ -69,6 +68,13 @@ public interface UserService {
             @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "访问令牌") String accessToken,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
 
+    /**
+     * H5 页面签名
+     * 当H5页面需要调用微信的API时，微信为防止DNS劫持等情况，他是需要对每个页面进行签名的
+     * @param url
+     * @return
+     * @throws ServiceException
+     */
     @HttpMethod(description = "获取H5签名")
     public Object getH5Sign(
             @NotNull @HttpParam(name = "url", type = HttpParamType.COMMON, description = "url") String url) throws ServiceException;

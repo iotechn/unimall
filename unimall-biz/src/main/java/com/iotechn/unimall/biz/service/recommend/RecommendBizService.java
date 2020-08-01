@@ -27,7 +27,7 @@ public class RecommendBizService {
     @Autowired
     private RecommendMapper recommendMapper;
 
-    private static final String RECOMMEND_NAME = "RECOMMEND_TYPE_";
+    private static final String RECOMMEND_NAME = "RECOMMEND_TYPE:";
 
     public List<RecommendDTO> getRecommendByType(Integer recommendType, Integer pageNo, Integer pageSize) throws ServiceException {
         List<RecommendDTO> recommendDTOList = cacheComponent.getObjList(RECOMMEND_NAME + recommendType + "_" + pageNo + "_" + pageSize, RecommendDTO.class);

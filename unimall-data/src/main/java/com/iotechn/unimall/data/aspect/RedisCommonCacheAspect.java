@@ -37,7 +37,7 @@ public class RedisCommonCacheAspect {
         String key = annotation.value();
         for (int i = 0; i < ints.length; i++) {
             if (i != 0) {
-                key = key + "_" + args[i];
+                key = key + ":" + args[i];
             } else {
                 key = key + args[i];
             }
