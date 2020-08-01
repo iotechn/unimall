@@ -6,6 +6,7 @@ import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.model.Page;
 
@@ -16,7 +17,7 @@ import com.iotechn.unimall.data.model.Page;
 public interface ProductService {
 
     @HttpMethod(description = "搜索商品列表")
-    public Page<SpuDTO> getProductPage(
+    public Page<SpuDO> getProductPage(
             @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer pageNo,
             @HttpParam(name = "pageSize", type = HttpParamType.COMMON, description = "页码长度", valueDef = "10") Integer pageSize,
             @HttpParam(name = "categoryId", type = HttpParamType.COMMON, description = "搜索分类") Long categoryId,
@@ -25,9 +26,8 @@ public interface ProductService {
             @HttpParam(name = "title", type = HttpParamType.COMMON, description = "搜索标题") String title) throws ServiceException;
 
     @HttpMethod(description = "获取商品详情")
-    public SpuDTO getGoods(
+    public SpuDTO getProduct(
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "商品Id") Long spuId,
-            @HttpParam(name = "groupShopId", type = HttpParamType.COMMON, description = "团购Id") Long groupShopId,
             @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
 }

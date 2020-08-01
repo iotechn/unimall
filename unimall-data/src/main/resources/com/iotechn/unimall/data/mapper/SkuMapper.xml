@@ -52,4 +52,8 @@
         </foreach>
     </select>
 
+    <select id="getStockForUpdate" resultType="java.lang.Integer">
+        SELECT stock FROM hdle_sku WHERE id = #{skuId} FOR UPDATE
+    </select>
+
 </mapper>

@@ -4,9 +4,9 @@ import com.iotechn.unimall.app.api.advertisement.AdvertisementService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AdvertisementDO;
+import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.AdvertisementDTO;
 import com.iotechn.unimall.data.dto.IntegralIndexDataDTO;
-import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.enums.AdvertisementType;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
@@ -43,7 +43,7 @@ public class IntegralServiceImpl implements IntegralService {
         //封装 分类精选 商品
         if (!CollectionUtils.isEmpty(categoryPickAd)) {
             for (AdvertisementDTO item : categoryPickAd) {
-                Page<SpuDTO> pickPage = productBizService.getProductPage(1, 10, new Long(item.getUrl().substring(item.getUrl().lastIndexOf("=") + 1)), "sales", false,null);
+                Page<SpuDO> pickPage = productBizService.getProductPage(1, 10, new Long(item.getUrl().substring(item.getUrl().lastIndexOf("=") + 1)), "sales", false,null);
                 item.setData(pickPage.getItems());
             }
         }
@@ -53,13 +53,13 @@ public class IntegralServiceImpl implements IntegralService {
         /**
          * 销量冠军
          */
-        List<SpuDTO> salesTop = productBizService.getProductPage(1, 8, null, "sales", false, null).getItems();
+        List<SpuDO> salesTop = productBizService.getProductPage(1, 8, null, "sales", false, null).getItems();
         integralIndexDataDTO.setSalesTop(salesTop);
 
         /**
          * 最近上新
          */
-        List<SpuDTO> newTop = productBizService.getProductPage(1, 8, null, "id", false, null).getItems();
+        List<SpuDO> newTop = productBizService.getProductPage(1, 8, null, "id", false, null).getItems();
         integralIndexDataDTO.setNewTop(newTop);
         return integralIndexDataDTO;
     }

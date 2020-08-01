@@ -27,4 +27,6 @@ public interface SkuMapper extends IMapper<SkuDO> {
     public List<Long> getSkuIds(@Param("spuId") Long spuId);
 
     List<Long> selectSkuIdsBySpuIds(@Param("ids") List<Long> ids);
+
+    public Integer getStockForUpdate(Long skuId);
 }

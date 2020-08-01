@@ -33,6 +33,17 @@ public class CacheConst {
      */
     public static final String CATEGORY_ID_HASH = "CATEGORY_ID_HASH";
 
+
+
+
+
+
+
+
+
+
+
+
     /**
      * 用户收藏商品缓存 COLLECT_USER:+ userID
      */
@@ -52,5 +63,20 @@ public class CacheConst {
     public static final String PRT_CATEGORY_ORDER_ID_ZSET = "PRT_CATEGORY_ORDER_ID:";
 
     public static final String PRT_CATEGORY_ORDER_SALES_ZSET = "PRT_CATEGORY_ORDER_SALES:";
+
+    /**
+     * 商品spuId - SpuDO 映射表不包括detail字段 (单独)
+     */
+    public static final String PRT_SPU_HASH_BUCKET = "PRT_SPU_HASH_BUCKET";
+
+    /**
+     * 商品spuId - SpuDTO 详情、SkuList、图片、评论、属性等字段 (单独)
+     */
+    public static final String PRT_SPU_DETAIL_HASH_BUCKET = "PRT_SPU_DETAIL_HASH_BUCKET";
+
+    /**
+     * 商品skuId - 库存缓存 (单独)
+     */
+    public static final String PRT_SKU_STOCK_BUCKET = "CA_PRODUCT_SKU_DETAIL_HASH_BUCKET";
 
 }

@@ -257,6 +257,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition GOODS_UPLOAD_SKU_BARCODE_REPEAT =
             new ServiceExceptionDefinition(20008, "您上传的SKU列表中条码重复");
 
+    public static final ServiceExceptionDefinition GOODS_ORDER_BY_WAY_ILLEGAL =
+            new ServiceExceptionDefinition(20009, "商品排序方式不合法");
+
 
 
     public static final ServiceExceptionDefinition RECOMMEND_SPU_NO_HAS =

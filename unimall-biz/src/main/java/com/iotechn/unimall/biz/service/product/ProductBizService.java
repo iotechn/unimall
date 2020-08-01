@@ -1,6 +1,8 @@
 package com.iotechn.unimall.biz.service.product;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.biz.service.collect.CollectBizService;
@@ -11,7 +13,6 @@ import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
-import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
 import com.iotechn.unimall.data.domain.SpuDO;
@@ -19,19 +20,22 @@ import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.enums.BizType;
-import com.iotechn.unimall.data.enums.SpuStatusType;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.DefaultTypedTuple;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by rize on 2019/7/12.
@@ -69,9 +73,6 @@ public class ProductBizService {
     private SkuMapper skuMapper;
 
     @Autowired
-    private CategoryMapper categoryMapper;
-
-    @Autowired
     private SpuAttributeMapper spuAttributeMapper;
 
     @Autowired
@@ -92,87 +93,99 @@ public class ProductBizService {
     @Autowired
     private AppraiseBizService appraiseBizService;
 
-    public Page<SpuDTO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
-        QueryWrapper<SpuDO> wrapper = new QueryWrapper<SpuDO>();
-        if (!StringUtils.isEmpty(title)) {
-            return this.getProductPageFromDB(pageNo, pageSize, categoryId, orderBy, isAsc, title);
-        }
-        //若关键字为空，尝试从缓存取列表
-        Page objFromCache = cacheComponent.getObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize + "_" + orderBy + "_" + isAsc, Page.class);
-        if (objFromCache != null) {
-            return objFromCache;
-        }
-        //
-        wrapper.eq("status", SpuStatusType.SELLING.getCode());
+    /**
+     * SPU 排除掉detail字段的其他属性
+     */
+    public static final String[] SPU_EXCLUDE_DETAIL_FIELDS;
 
-        if (orderBy != null && isAsc != null) {
-            if (isAsc) {
-                wrapper.orderByAsc(orderBy);
+    private static final Logger logger = LoggerFactory.getLogger(ProductBizService.class);
+
+    static {
+        Field[] fields = SpuDO.class.getFields();
+        SPU_EXCLUDE_DETAIL_FIELDS = new String[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            TableField annotation = field.getAnnotation(TableField.class);
+            if (annotation != null) {
+                SPU_EXCLUDE_DETAIL_FIELDS[i] = annotation.value();
             } else {
-                wrapper.orderByDesc(orderBy);
+                SPU_EXCLUDE_DETAIL_FIELDS[i] = field.getName();
             }
         }
-
-        if (categoryId != null && categoryId != 0L) {
-            List<CategoryDO> childrenList = categoryMapper.selectList(new QueryWrapper<CategoryDO>().eq("parent_id", categoryId));
-            if (CollectionUtils.isEmpty(childrenList)) {
-                //目标节点为叶子节点,即三级类目
-                wrapper.eq("category_id", categoryId);
-            } else {
-                //目标节点存在子节点
-                LinkedList<Long> childrenIds = new LinkedList<>();
-                CategoryDO categoryDO = categoryMapper.selectById(categoryId);
-
-                // 检验传入类目是一级还是二级类目
-                if (categoryDO.getParentId() != 0L) {
-                    //二级分类
-                    childrenList.forEach(item -> {
-                        childrenIds.add(item.getId());
-                    });
-                } else {
-                    //一级分类
-                    childrenList.forEach(item -> {
-                        List<CategoryDO> leafList = categoryMapper.selectList(new QueryWrapper<CategoryDO>().eq("parent_id", item.getId()));
-                        if (!CollectionUtils.isEmpty(leafList)) {
-                            leafList.forEach(leafItem -> {
-                                childrenIds.add(leafItem.getId());
-                            });
-                        }
-                    });
-                }
-                wrapper.in("category_id", childrenIds);
-            }
-        }
-
-        // TODO search Goods
-        // wrapper.setSqlSelect(baseColumns);
-        List<SpuDO> spuDOS = new ArrayList<>(); //spuMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
-        //组装SPU
-        List<SpuDTO> spuDTOList = new ArrayList<>();
-        Map<String, String> salesHashAll = cacheComponent.getHashAll(CA_SPU_SALES_HASH);
-        spuDOS.forEach(item -> {
-            SpuDTO spuDTO = new SpuDTO();
-            BeanUtils.copyProperties(item, spuDTO);
-            if (salesHashAll != null) {
-                String salesStr = salesHashAll.get("S" + item.getId());
-                if (!StringUtils.isEmpty(salesStr)) {
-                    spuDTO.setSales(new Integer(salesStr));
-                }
-            }
-            spuDTOList.add(spuDTO);
-        });
-
-        Integer count = spuMapper.selectCount(wrapper);
-        Page<SpuDTO> page = new Page<>(spuDTOList, pageNo, pageSize, count);
-        if (StringUtils.isEmpty(title)) {
-            //若关键字为空，制作缓存
-            cacheComponent.putObj(CA_SPU_PAGE_PREFIX + categoryId + "_" + pageNo + "_" + pageSize + "_" + orderBy + "_" + isAsc, page, Const.CACHE_ONE_DAY);
-        }
-        return page;
     }
 
     /**
-     * 从数据库中获取商品
+     * 若搜索关键字为空，则从缓存中获取商品列表，此列表不包含detail(商品详情)字段
+     * @param pageNo
+     * @param pageSize
+     * @param categoryId
+     * @param orderBy
+     * @param isAsc
+     * @param title
+     * @return
+     * @throws ServiceException
+     */
+    public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
+        if (!StringUtils.isEmpty(title)) {
+            return this.getProductPageFromDB(pageNo, pageSize, categoryId, orderBy, isAsc, title);
+        }
+        // 1. 从商品列表缓存中取出Id
+        String zsetBucketKey;
+        if ("price".equals(orderBy)) {
+            zsetBucketKey = CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + categoryId;
+        } else if ("id".equals(orderBy)) {
+            zsetBucketKey = CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + categoryId;
+        } else if ("sales".equals(orderBy)) {
+            zsetBucketKey = CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + categoryId;
+        } else {
+            throw new AppServiceException(ExceptionDefinition.GOODS_ORDER_BY_WAY_ILLEGAL);
+        }
+        Page<String> page = cacheComponent.getZSetPage(zsetBucketKey, pageNo, pageSize, isAsc);
+        if (page.getTotal() == 0) {
+            // 若没有缓存，则尝试从DB读取
+            List<SpuDO> productIdsFromDB = getProductIdsOnSaleFromDB(categoryId);
+            if (!CollectionUtils.isEmpty(productIdsFromDB)) {
+                // 若非空，则全部放入ZSet中
+                Set<ZSetOperations.TypedTuple<String>> set = productIdsFromDB.stream().map(item -> (ZSetOperations.TypedTuple<String>) (new DefaultTypedTuple("P" + item.getId(), item.getSales().doubleValue()))).collect(Collectors.toSet());
+                // 放入缓存
+                cacheComponent.putZSetMulti(zsetBucketKey, set);
+                // 重新从缓存中读取
+                page = cacheComponent.getZSetPage(zsetBucketKey, pageNo, pageSize, isAsc);
+            }
+        }
+        // 从Spu Hash桶里面取数据。获取到这页Id所对应的Spu
+        List<SpuDO> spuList = cacheComponent.getHashMultiAsList(CacheConst.PRT_SPU_HASH_BUCKET, page.getItems(), SpuDO.class);
+        boolean hasEmptyObj = false;
+        for (int i = 0; i < spuList.size(); i++) {
+            SpuDO spuDO = spuList.get(i);
+            if (spuDO == null) {
+                // 去数据库获取
+                SpuDO spuDOFromDB = spuMapper.selectOne(new QueryWrapper<SpuDO>().select(SPU_EXCLUDE_DETAIL_FIELDS).eq("id", Long.parseLong(page.getItems().get(i).replace("P", ""))));
+                if (spuDOFromDB == null) {
+                    // 这种情况几乎不可能
+                    hasEmptyObj = true;
+                    logger.error("[缓存数据库不一致] key=" + zsetBucketKey + ";item=" + page.getItems().get(i));
+                    cacheComponent.delZSet(zsetBucketKey, page.getItems().get(i));
+                } else {
+                    // 更新 spuList 列表
+                    spuList.set(i, spuDOFromDB);
+                    // 获取ClassifyIds
+                    List<Long> familyCategoryIds = categoryBizService.getCategoryFamily(spuDOFromDB.getCategoryId());
+                    SpuDTO spuDTO = new SpuDTO();
+                    BeanUtils.copyProperties(spuDOFromDB, spuDTO);
+                    spuDTO.setCategoryIds(familyCategoryIds);
+                    cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuDOFromDB.getId(), spuDTO);
+                }
+            }
+        }
+        if (hasEmptyObj) {
+            spuList = spuList.stream().filter(item -> item != null).collect(Collectors.toList());
+        }
+        return page.replace(spuList);
+    }
+
+    /**
+     * 从数据库中获取商品，此列表不包含detail(商品详情)字段
      *
      * @param pageNo
      * @param pageSize
@@ -182,8 +195,9 @@ public class ProductBizService {
      * @param title
      * @return
      */
-    public Page<SpuDTO> getProductPageFromDB(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
+    public Page<SpuDO> getProductPageFromDB(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         QueryWrapper<SpuDO> wrapper = new QueryWrapper<SpuDO>();
+        wrapper.select(SPU_EXCLUDE_DETAIL_FIELDS);
         if (orderBy != null && isAsc != null) {
             if (isAsc) {
                 wrapper.orderByAsc(orderBy);
@@ -191,11 +205,28 @@ public class ProductBizService {
                 wrapper.orderByDesc(orderBy);
             }
         }
-        return null;
+        if (categoryId != null) {
+            wrapper.eq("category_id", categoryId);
+        }
+        if (!StringUtils.isEmpty(title)) {
+            wrapper.like("title", title);
+        }
+        return spuMapper.selectPage(Page.div(pageNo, pageSize, SpuDO.class), wrapper);
     }
 
     /**
-     * 通过Id获取SpuDO 领域对象
+     * 从数据库中获取列表Id、销量 （在售）
+     *
+     * @param categoryId
+     * @return
+     */
+    private List<SpuDO> getProductIdsOnSaleFromDB(Long categoryId) throws ServiceException {
+        List<Long> categoryFamily = categoryBizService.getCategoryFamily(categoryId);
+        return spuMapper.selectList(new QueryWrapper<SpuDO>().select("id", "sales").in("category_id", categoryFamily));
+    }
+
+    /**
+     * TODO 将会删除 通过Id获取SpuDO 领域对象
      *
      * @param spuId
      * @return
@@ -214,7 +245,14 @@ public class ProductBizService {
         return spuDO;
     }
 
-    public SpuDTO getGoods(Long spuId, Long userId) throws ServiceException {
+    /**
+     * TODO 将会删除
+     * @param spuId
+     * @param userId
+     * @return
+     * @throws ServiceException
+     */
+    public SpuDTO getProduct(Long spuId, Long userId) throws ServiceException {
         SpuDTO spuDTOFromCache = cacheComponent.getObj(CA_SPU_PREFIX + spuId, SpuDTO.class);
         if (spuDTOFromCache != null) {
             packSpuCollectInfo(spuDTOFromCache, userId);
@@ -275,7 +313,7 @@ public class ProductBizService {
 
         cacheComponent.delPrefixKey(CA_SPU_PAGE_PREFIX);
 
-        cacheComponent.delHashObj(CA_SPU_HASH, "S" + spuId);
+        cacheComponent.delHashKey(CA_SPU_HASH, "S" + spuId);
 
     }
 

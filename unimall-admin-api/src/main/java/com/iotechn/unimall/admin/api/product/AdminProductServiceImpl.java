@@ -338,7 +338,7 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     @Override
     public SpuDTO detail(Long spuId, Long adminId) throws ServiceException {
-        return productBizService.getGoods(spuId, 0l);
+        return productBizService.getProduct(spuId, 0l);
     }
 
     @Override
