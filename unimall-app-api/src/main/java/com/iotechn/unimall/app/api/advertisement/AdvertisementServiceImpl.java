@@ -1,7 +1,9 @@
 package com.iotechn.unimall.app.api.advertisement;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.annotaion.AspectCommonCache;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AdvertisementDO;
 import com.iotechn.unimall.data.enums.StatusType;
@@ -24,24 +26,16 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
     @Autowired
     private AdvertisementMapper advertisementMapper;
-    @Autowired
-    private CacheComponent cacheComponent;
-
-    private final static String ADVERTISEMENT_NAME = "ADVERTISEMENT_TYPE_";
 
     @Override
+    @AspectCommonCache(value = CacheConst.ADVERTISEMENT_TYPE, argIndex = {0}, second = 100)
     public List<AdvertisementDO> getActiveAd(Integer adType) throws ServiceException {
-        List<AdvertisementDO> advertisementDOList
-                = cacheComponent.getObjList(ADVERTISEMENT_NAME + adType, AdvertisementDO.class);
-        if (CollectionUtils.isEmpty(advertisementDOList)) {
-            QueryWrapper<AdvertisementDO> wrapper = new QueryWrapper<AdvertisementDO>()
-                    .eq("status", StatusType.ACTIVE.getCode());
-            if (adType != null) {
-                wrapper.eq("ad_type", adType);
-            }
-            advertisementDOList = advertisementMapper.selectList(wrapper);
-            cacheComponent.putObj(ADVERTISEMENT_NAME + adType, advertisementDOList, 100);
+        QueryWrapper<AdvertisementDO> wrapper = new QueryWrapper<AdvertisementDO>()
+                .eq("status", StatusType.ACTIVE.getCode());
+        if (adType != null) {
+            wrapper.eq("ad_type", adType);
         }
+        List<AdvertisementDO> advertisementDOList = advertisementMapper.selectList(wrapper);
         return advertisementDOList;
     }
 

@@ -1,5 +1,6 @@
 package com.iotechn.unimall.admin.api.appraise;
 
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
@@ -35,7 +36,7 @@ public class AdminAppraiseImpl implements  AdminAppraise {
         AppraiseDO appraiseDO = appraiseMapper.selectById(id);
         boolean succ = appraiseMapper.deleteById(id) > 0;
         if (succ) {
-            cacheComponent.delPrefixKey(AppraiseBizService.CA_APPRAISE_KEY + appraiseDO.getSpuId());
+            cacheComponent.delPrefixKey(CacheConst.APPRAISE_KEY + appraiseDO.getSpuId());
         }
         return succ;
     }

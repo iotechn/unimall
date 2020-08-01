@@ -1,6 +1,7 @@
 package com.iotechn.unimall.biz.service.appriaise;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
@@ -28,10 +29,8 @@ public class AppraiseBizService {
     @Autowired
     private ImgMapper imgMapper;
 
-    public static final String CA_APPRAISE_KEY = "CA_APPRAISE_";
-
     public Page<AppraiseResponseDTO> getSpuAllAppraise(Long spuId, Integer pageNo, Integer pageSize) throws ServiceException {
-        String cacheKey = CA_APPRAISE_KEY + spuId + "_" + pageNo + "_" + pageSize;
+        String cacheKey = CacheConst.APPRAISE_KEY + spuId + ":" + pageNo + ":" + pageSize;
         Page obj = cacheComponent.getObj(cacheKey, Page.class);
         if (obj != null) {
             return obj;

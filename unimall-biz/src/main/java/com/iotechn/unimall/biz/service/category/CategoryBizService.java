@@ -1,6 +1,7 @@
 package com.iotechn.unimall.biz.service.category;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
@@ -32,11 +33,7 @@ public class CategoryBizService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    public static final String CA_CATEGORY_LIST = "CA_CATEGORY_LIST";
-
-    public static final String CA_CATEGORY_ID_HASH = "CA_CATEGORY_ID_HASH";
-
-    /*获取一棵两级目录树*/
+    /*获取一棵两级类目树*/
     public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException {
         List<CategoryDO> categoryDOS = categoryMapper.selectList(new QueryWrapper<CategoryDO>().le("level",1 ).orderByAsc("level"));
         List<CategoryTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
@@ -65,9 +62,9 @@ public class CategoryBizService {
         return list;
     }
 
-    /*kbq think 还是获取一棵数啊*/
+    /*获取一棵三级类目树*/
     public List<CategoryDTO> categoryList() throws ServiceException {
-        List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CA_CATEGORY_LIST, CategoryDTO.class);
+        List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CacheConst.CATEGORY_THREE_LEVEL_TREE, CategoryDTO.class);
         if (categoryDTOListFormCache != null) {
             return categoryDTOListFormCache;
         }
@@ -108,7 +105,7 @@ public class CategoryBizService {
         });
 
         //放入缓存
-        cacheComponent.putObj(CA_CATEGORY_LIST, categoryDTOList, Const.CACHE_ONE_DAY);
+        cacheComponent.putObj(CacheConst.CATEGORY_THREE_LEVEL_TREE, categoryDTOList, Const.CACHE_ONE_DAY);
         return categoryDTOList;
     }
 
@@ -120,7 +117,7 @@ public class CategoryBizService {
      * @throws ServiceException
      */
     public List<Long> getCategoryFamily(Long categoryId) throws ServiceException {
-        Map<String, String> hashAll = cacheComponent.getHashAll(CA_CATEGORY_ID_HASH);
+        Map<String, String> hashAll = cacheComponent.getHashAll(CacheConst.CATEGORY_ID_HASH);
         if (hashAll == null) {
             //构建此Hash表
             final Map<String,String> newHash = new HashMap<>();
@@ -136,7 +133,7 @@ public class CategoryBizService {
                     });
             });
             hashAll = newHash;
-            cacheComponent.putHashAll(CA_CATEGORY_ID_HASH, hashAll, Const.CACHE_ONE_DAY);
+            cacheComponent.putHashAll(CacheConst.CATEGORY_ID_HASH, hashAll, Const.CACHE_ONE_DAY);
         }
 
         LinkedList<Long> ids = new LinkedList<>();

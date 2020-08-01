@@ -1,6 +1,7 @@
 package com.iotechn.unimall.app.api.appraise;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -49,6 +50,8 @@ public class AppraiseServiceImpl implements AppraiseService {
     @Autowired
     private AppraiseBizService appraiseBizService;
 
+    // TODO 添加评论的缓存应该手动事务，删除评论没有删缓存和手动事务。
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addAppraise(AppraiseRequestDTO appraiseRequestDTO, Long userId) throws ServiceException {
@@ -95,7 +98,7 @@ public class AppraiseServiceImpl implements AppraiseService {
             appraiseDO.setGmtCreate(now);
             appraiseDO.setGmtUpdate(appraiseDO.getGmtCreate());
             appraiseMapper.insert(appraiseDO);  //插入该订单该商品评价
-            cacheComponent.delPrefixKey(AppraiseBizService.CA_APPRAISE_KEY + appraiseDO.getSpuId()); //删除商品评论缓存
+            cacheComponent.delPrefixKey(CacheConst.APPRAISE_KEY + appraiseDO.getSpuId()); //删除商品评论缓存
             if (appraiseDTO.getImgUrl() == null || appraiseDTO.getImgUrl().equals("")) {
                 continue;
             }

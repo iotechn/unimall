@@ -1,6 +1,7 @@
 package com.iotechn.unimall.admin.api.category;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.AppServiceException;
@@ -141,8 +142,8 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         cacheComponent.del(CA_CATEGORY_TREE);
         cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
         cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
+        cacheComponent.del(CacheConst.CATEGORY_THREE_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_ID_HASH);
         return categoryDO;
     }
 
@@ -158,8 +159,8 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         cacheComponent.del(CA_CATEGORY_TREE);
         cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
         cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
+        cacheComponent.del(CacheConst.CATEGORY_THREE_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_ID_HASH);
         return categoryMapper.deleteById(id) > 0;
     }
 
@@ -231,8 +232,8 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         cacheComponent.del(CA_CATEGORY_TREE);
         cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
         cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
+        cacheComponent.del(CacheConst.CATEGORY_THREE_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_ID_HASH);
         return categoryTreeNodeDTO;
     }
 

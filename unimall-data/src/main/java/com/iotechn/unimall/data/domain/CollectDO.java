@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 /*
 @author kbq
 @date  2019/7/5 - 10:03
+用户收藏商品
 */
 @Data
 @NoArgsConstructor
@@ -20,5 +21,4 @@ public class CollectDO extends SuperDO{
 
     @TableField("spu_id")
     private Long spuId;
-
 }

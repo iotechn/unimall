@@ -1,6 +1,7 @@
 package com.iotechn.unimall.app.api.collect;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.collect.CollectBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.Const;
@@ -56,7 +57,7 @@ public class CollectServiceImpl implements CollectService {
         Date now = new Date();
         collectDO.setGmtCreate(now);
         collectDO.setGmtUpdate(collectDO.getGmtCreate());
-        cacheComponent.putSetRaw(CollectBizService.CA_USER_COLLECT_HASH + userId, spuId + "", Const.CACHE_ONE_DAY);
+        cacheComponent.putSetRaw(CacheConst.COLLECT_USER + userId, spuId + "", Const.CACHE_ONE_DAY);
         return collectMapper.insert(collectDO) > 0;
     }
 
@@ -68,7 +69,7 @@ public class CollectServiceImpl implements CollectService {
                 .eq("spu_id", spuId)
         );
         if (num > 0) {
-            cacheComponent.removeSetRaw(CollectBizService.CA_USER_COLLECT_HASH + userId, spuId + "");
+            cacheComponent.removeSetRaw(CacheConst.COLLECT_USER + userId, spuId + "");
             return true;
         }
 

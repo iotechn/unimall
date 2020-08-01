@@ -141,6 +141,12 @@ public class CacheComponent {
         return stringRedisTemplate.hasKey(key);
     }
 
+    /**
+     * 向一个set中添加数据
+     * @param key
+     * @param member
+     * @param expireSec
+     */
     public void putSetRaw(String key, String member, Integer expireSec) {
         stringRedisTemplate.opsForSet().add(key, member);
         stringRedisTemplate.expire(key, expireSec, TimeUnit.SECONDS);

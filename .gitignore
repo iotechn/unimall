@@ -36,6 +36,7 @@ mvnw
 mvnw.cmd
 
 ###properties###
+/unimall-launcher/src/main/resources/application.properties
 /unimall-launcher/src/main/resources/application-dev.properties
 /unimall-launcher/src/main/resources/application-prd.properties
 
