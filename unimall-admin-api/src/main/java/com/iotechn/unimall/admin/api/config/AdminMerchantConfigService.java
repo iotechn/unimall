@@ -5,15 +5,8 @@ import com.iotechn.unimall.core.annotation.HttpOpenApi;
 import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.domain.CategoryDO;
-import com.iotechn.unimall.data.domain.ConfigDO;
-import com.iotechn.unimall.data.dto.CategoryTreeNodeDTO;
 import com.iotechn.unimall.data.dto.ConfigDTO;
-import com.iotechn.unimall.data.model.Page;
-
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
