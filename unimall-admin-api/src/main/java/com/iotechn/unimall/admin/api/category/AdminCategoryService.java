@@ -31,8 +31,7 @@ public interface AdminCategoryService {
             @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,
             @HttpParam(name = "parentId", type = HttpParamType.COMMON, description = "类目父节点", valueDef = "0") Long parentId,
             @HttpParam(name = "iconUrl", type = HttpParamType.COMMON, description = "类目图标") String iconUrl,
-            @HttpParam(name = "picUrl", type = HttpParamType.COMMON, description = "类目图片") String picUrl,
-            @HttpParam(name = "level", type = HttpParamType.COMMON, description = "类目等级") Integer level) throws ServiceException;
+            @HttpParam(name = "picUrl", type = HttpParamType.COMMON, description = "类目图片") String picUrl) throws ServiceException;
 
     @HttpMethod(description = "删除", permission = "operation:category:delete", permissionParentName = "商品管理", permissionName = "类目管理")
     public boolean delete(

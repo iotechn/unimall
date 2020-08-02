@@ -62,7 +62,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public CategoryDO create(Long adminId, String title, Long parentId, String iconUrl, String picUrl, Integer level) throws ServiceException {
+    public CategoryDO create(Long adminId, String title, Long parentId, String iconUrl, String picUrl) throws ServiceException {
         CategoryDO parent = null;
         CategoryDO categoryDO = new CategoryDO();
         if (!parentId.equals(0l)) {
