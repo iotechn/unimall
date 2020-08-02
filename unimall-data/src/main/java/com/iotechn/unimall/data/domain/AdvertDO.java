@@ -14,10 +14,10 @@ import lombok.NoArgsConstructor;
  * Time: 下午6:50
  */
 @Data
-@TableName("unimall_advertisement")
+@TableName("unimall_advert")
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdvertisementDO extends SuperDO {
+public class AdvertDO extends SuperDO {
 
     @TableField("ad_type")
     private Integer adType;

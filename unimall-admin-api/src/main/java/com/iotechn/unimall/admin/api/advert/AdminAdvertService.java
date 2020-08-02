@@ -1,4 +1,4 @@
-package com.iotechn.unimall.admin.api.advertisement;
+package com.iotechn.unimall.admin.api.advert;
 
 import com.iotechn.unimall.core.annotation.HttpMethod;
 import com.iotechn.unimall.core.annotation.HttpOpenApi;
@@ -7,7 +7,7 @@ import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.domain.AdvertisementDO;
+import com.iotechn.unimall.data.domain.AdvertDO;
 import com.iotechn.unimall.data.model.Page;
 
 /**
@@ -18,11 +18,11 @@ import com.iotechn.unimall.data.model.Page;
  * Time: 下午8:23
  */
 
-@HttpOpenApi(group = "admin.advertisement", description = "广告推销")
-public interface AdminAdvertisementService {
+@HttpOpenApi(group = "admin.advert", description = "广告推销")
+public interface AdminAdvertService {
 
-    @HttpMethod(description = "创建", permission = "promote:advertisement:create", permissionParentName = "推广管理", permissionName = "广告管理")
-    public Boolean addAdvertisement(
+    @HttpMethod(description = "创建", permission = "promote:advert:create", permissionParentName = "推广管理", permissionName = "广告管理")
+    public Boolean create(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
             @NotNull @HttpParam(name = "adType", type = HttpParamType.COMMON, description = "广告类型") Integer adType,
             @HttpParam(name = "title", type = HttpParamType.COMMON, description = "广告标题") String title,
@@ -31,14 +31,14 @@ public interface AdminAdvertisementService {
             @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "广告状态") Integer status,
             @NotNull @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色") String color) throws ServiceException;
 
-    @HttpMethod(description = "删除", permission = "promote:advertisement:delete", permissionParentName = "推广管理", permissionName = "广告管理")
-    public Boolean deleteAdvertisement(
+    @HttpMethod(description = "删除", permission = "promote:advert:delete", permissionParentName = "推广管理", permissionName = "广告管理")
+    public Boolean delete(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
             @NotNull @HttpParam(name = "adType", type = HttpParamType.COMMON, description = "广告类型") Integer adType,
             @NotNull @HttpParam(name = "adId", type = HttpParamType.COMMON, description = "广告ID") Long adId) throws ServiceException;
 
-    @HttpMethod(description = "修改", permission = "promote:advertisement:update", permissionParentName = "推广管理", permissionName = "广告管理")
-    public Boolean updateAdvertisement(
+    @HttpMethod(description = "修改", permission = "promote:advert:update", permissionParentName = "推广管理", permissionName = "广告管理")
+    public Boolean edit(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
             @NotNull @HttpParam(name = "adId", type = HttpParamType.COMMON, description = "广告ID") Long adId,
             @NotNull @HttpParam(name = "adType", type = HttpParamType.COMMON, description = "广告类型") Integer adType,
@@ -49,8 +49,8 @@ public interface AdminAdvertisementService {
             @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色") String color) throws ServiceException;
 
 
-    @HttpMethod(description = "查询", permission = "promote:advertisement:query", permissionParentName = "推广管理", permissionName = "广告管理")
-    public Page<AdvertisementDO> queryAdvertisement(
+    @HttpMethod(description = "查询", permission = "promote:advert:query", permissionParentName = "推广管理", permissionName = "广告管理")
+    public Page<AdvertDO> list(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
             @HttpParam(name = "adType", type = HttpParamType.COMMON, description = "广告类型") Integer adType,
             @Range(min = 1) @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer page,

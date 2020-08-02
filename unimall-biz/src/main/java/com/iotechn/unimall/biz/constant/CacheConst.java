@@ -20,9 +20,9 @@ public class CacheConst {
     public final static String ADMIN_MSG_CODE = "ADMIN_MSG_CODE:";
 
     /**
-     * 广告缓存 (ADVERTISEMENT_TYPE: + 广告类型(adType))
+     * 广告缓存 (ADVERT_TYPE: + 广告类型(adType))
      */
-    public static final String ADVERTISEMENT_TYPE = "ADVERTISEMENT_TYPE:";
+    public static final String ADVERT_TYPE = "ADVERT_TYPE:";
 
     /**
      * 评论缓存 APPRAISE_KEY: + spuId + ":" + pageNo + ":" + pageSize

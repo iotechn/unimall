@@ -13,7 +13,7 @@ import java.util.Map;
 @Data
 public class IntegralIndexDataDTO {
 
-    private Map<String, List<AdvertisementDTO>> advertisement;
+    private Map<String, List<AdvertDTO>> advertisement;
 
     private List<SpuDO> salesTop;
 
