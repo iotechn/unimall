@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.iotechn.unimall.biz.constant.LockConst;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -72,7 +73,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private String wxAppAppid;
 
     @Override
-    public Page<OrderDO> list(Integer pageNo, Integer pageSize, Integer status, String orderNo, Long adminId) throws ServiceException {
+    public Page<OrderDO> list(Integer page, Integer pageSize, Integer status, String orderNo, Long adminId) throws ServiceException {
         QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>();
         wrapper.orderByDesc("id");
         if (!StringUtils.isEmpty(orderNo)) {
@@ -81,15 +82,13 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (status != null) {
             wrapper.eq("status", status);
         }
-        List<OrderDO> orderDOS = null; // TODO orderMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
-        Integer count = orderMapper.selectCount(wrapper);
-        return new Page<OrderDO>(orderDOS, pageNo, pageSize, count);
+        return orderMapper.selectPage(Page.div(page,pageSize,OrderDO.class),wrapper);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String refund(String orderNo, Integer type, Integer sum, Long adminId) throws ServiceException {
-        if (lockComponent.tryLock(OrderBizService.ORDER_REFUND_LOCK + orderNo, 30)) {
+        if (lockComponent.tryLock(LockConst.ORDER_REFUND_LOCK + orderNo, 30)) {
             try {
                 //1.校验订单状态是否处于退款中
                 OrderDO orderDO = orderBizService.checkOrderExist(orderNo, null);
@@ -156,7 +155,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 logger.error("[微信退款] 异常", e);
                 throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
             } finally {
-                lockComponent.release(OrderBizService.ORDER_REFUND_LOCK + orderNo);
+                lockComponent.release(LockConst.ORDER_REFUND_LOCK + orderNo);
             }
         } else {
             throw new AdminServiceException(ExceptionDefinition.SYSTEM_BUSY);

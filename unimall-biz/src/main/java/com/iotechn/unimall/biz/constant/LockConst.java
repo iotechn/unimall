@@ -18,4 +18,23 @@ public class LockConst {
      *  COUPON_USER_LOCK: + userID + ":" + couponId
      */
     public static final String COUPON_USER_LOCK = "COUPON_USER_LOCK:";
+
+    /**
+     * 防止用户重复提交锁
+     * TAKE_ORDER: + USERID
+     */
+    public static final String TAKE_ORDER_LOCK = "TAKE_ORDER_LOCK:";
+
+    /**
+     * 订单状态修改锁
+     * ORDER_STATUS_LOCK: + orderNO
+     */
+    public static final String ORDER_STATUS_LOCK = "ORDER_STATUS_LOCK:";
+
+    /**
+     * 订单退款乐观锁
+     * ORDER_REFUND_LOCK: + orderNO
+     */
+    public static final String ORDER_REFUND_LOCK = "ORDER_REFUND_LOCK:";
+
 }

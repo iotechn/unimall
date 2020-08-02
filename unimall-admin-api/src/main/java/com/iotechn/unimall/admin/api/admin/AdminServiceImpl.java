@@ -2,6 +2,7 @@ package com.iotechn.unimall.admin.api.admin;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -26,6 +27,7 @@ import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -76,7 +78,7 @@ public class AdminServiceImpl implements AdminService {
     @Value("${com.iotechn.admin.notify.uninotify.app-id}")
     private String uniNotifyAppId;
 
-    private final static String ADMIN_MSG_CODE = "admin_msg_code_";
+
 
     private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
@@ -92,7 +94,7 @@ public class AdminServiceImpl implements AdminService {
         }
         AdminDO adminDO = adminDOS.get(0);
         //短信验证码
-        String code = cacheComponent.getRaw(ADMIN_MSG_CODE+adminDO.getPhone() );
+        String code = cacheComponent.getRaw(CacheConst.ADMIN_MSG_CODE+adminDO.getPhone() );
         if(!"guest".equals(username) && (code == null || verifyCode==null || !code.equals(verifyCode))){
             throw new AdminServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
         }
@@ -148,17 +150,19 @@ public class AdminServiceImpl implements AdminService {
             wrapper.like("username", name);
         }
         wrapper.orderByDesc("id");
-        Integer count = adminMapper.selectCount(wrapper);
-        List<AdminDO> adminDOS = new ArrayList<>();// TODO adminMapper.selectPage(new RowBounds((page - 1) * limit, limit), wrapper);
-        List<AdminDTO> adminDTOS = new ArrayList<AdminDTO>(adminDOS.size());
-        for (AdminDO adminDO : adminDOS) {
-            AdminDTO adminDTO = new AdminDTO();
-            BeanUtils.copyProperties(adminDO, adminDTO);
-            adminDTO.setRoleIds(JSONObject.parseArray(adminDO.getRoleIds(), Long.class));
-            adminDTO.setPassword(null);
-            adminDTOS.add(adminDTO);
+        Page<AdminDO> selectPage = adminMapper.selectPage(Page.div(page, limit, AdminDO.class), wrapper);
+        List<AdminDTO> adminDTOS = new ArrayList<AdminDTO>(selectPage.getItems().size());
+
+        if(!CollectionUtils.isEmpty(selectPage.getItems())){
+            for (AdminDO adminDO : selectPage.getItems()) {
+                AdminDTO adminDTO = new AdminDTO();
+                BeanUtils.copyProperties(adminDO, adminDTO);
+                adminDTO.setRoleIds(JSONObject.parseArray(adminDO.getRoleIds(), Long.class));
+                adminDTO.setPassword(null);
+                adminDTOS.add(adminDTO);
+            }
         }
-        return new Page<>(adminDTOS, page, limit, count);
+        return new Page<>(adminDTOS, page, limit, selectPage.getCount());
     }
 
     @Override
@@ -247,7 +251,7 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXITS);
         }
         String code = GeneratorUtil.genSixVerifyCode();
-        cacheComponent.putRaw(ADMIN_MSG_CODE+admin.getPhone(), code,300 );
+        cacheComponent.putRaw(CacheConst.ADMIN_MSG_CODE+admin.getPhone(), code,300 );
         SMSResult smsResult = smsClient.sendAdminLoginVerify(admin.getPhone(), code);
         if(!smsResult.isSucc()){
             throw new ThirdPartServiceException(smsResult.getMsg(), ExceptionDefinition.ADMIN_VERIFY_CODE_SEND_FAIL.getCode());

@@ -7,6 +7,7 @@ import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.annotaion.AspectCommonCache;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.domain.SpuDO;
@@ -43,38 +44,21 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    private static final String CA_CATEGORY_TREE = "CA_CATEGORY_TREE";
-
-    private static final String ADMIN_QUERY_CATEGORY_LIST = "ADMIN_QUERY_CATEGORY_LIST";
-
-    private static final String CA_CATEGORY_SECOND_LEVEL_TREE = "CA_CATEGORY_SECOND_LEVEL_TREE";
-
     /**
-     * @return
-     * @throws ServiceException
+     * 获取两级类目树,用于添加类目时选择使用
      */
-
-
-    /*获取两级目录树*/
     public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException {
-        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(CA_CATEGORY_SECOND_LEVEL_TREE, CategoryTreeNodeDTO.class);
-        if (objList != null) {
-            return objList;
-        }
         List<CategoryTreeNodeDTO> list = categoryBizService.categorySecondLevelTree();
-        cacheComponent.putObj(CA_CATEGORY_SECOND_LEVEL_TREE, list, 60 * 60);
         return list;
     }
 
-
-    /*获取三级目录树。*/
+    /**
+     * 获取三级类目树,用于商品、优惠券之类的使用
+     */
     //TODO 做下优化
     @Override
+    @AspectCommonCache(value = CacheConst.CATEGORY_NODE_THREE_LEVEL_TREE,second = 60 * 60)
     public List<CategoryTreeNodeDTO> categoryTree() throws ServiceException {
-        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(CA_CATEGORY_TREE, CategoryTreeNodeDTO.class);
-        if (objList != null) {
-            return objList;
-        }
         List<CategoryDO> categoryDOS = categoryMapper.selectList(new QueryWrapper<>());
         List<CategoryTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
             CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
@@ -110,7 +94,6 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
                 }
             });
         });
-        cacheComponent.putObj(CA_CATEGORY_TREE, list, 60 * 60);
         return list;
     }
 
@@ -139,10 +122,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (categoryMapper.insert(categoryDO) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.DATABASE_INSERT_FAILURE);
         }
-        cacheComponent.del(CA_CATEGORY_TREE);
-        cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
-        cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
-        cacheComponent.del(CacheConst.CATEGORY_THREE_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_NODE_THREE_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_NODE_ALL_LIST);
+        cacheComponent.del(CacheConst.CATEGORY_NODE_SECOND_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_DTO_THREE_LEVEL_TREE);
         cacheComponent.del(CacheConst.CATEGORY_ID_HASH);
         return categoryDO;
     }
@@ -156,10 +139,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (count_category != 0 || count_spu != 0) {
             throw new AppServiceException(ExceptionDefinition.CATEGORY_OUGHT_TO_EMPTY);
         }
-        cacheComponent.del(CA_CATEGORY_TREE);
-        cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
-        cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
-        cacheComponent.del(CacheConst.CATEGORY_THREE_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_NODE_THREE_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_NODE_ALL_LIST);
+        cacheComponent.del(CacheConst.CATEGORY_NODE_SECOND_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_DTO_THREE_LEVEL_TREE);
         cacheComponent.del(CacheConst.CATEGORY_ID_HASH);
         return categoryMapper.deleteById(id) > 0;
     }
@@ -229,17 +212,17 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
                 break;
             }
         }
-        cacheComponent.del(CA_CATEGORY_TREE);
-        cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
-        cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
-        cacheComponent.del(CacheConst.CATEGORY_THREE_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_NODE_THREE_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_NODE_ALL_LIST);
+        cacheComponent.del(CacheConst.CATEGORY_NODE_SECOND_LEVEL_TREE);
+        cacheComponent.del(CacheConst.CATEGORY_DTO_THREE_LEVEL_TREE);
         cacheComponent.del(CacheConst.CATEGORY_ID_HASH);
         return categoryTreeNodeDTO;
     }
 
     //首先的到所有的类目的List<CategoryTreeNodeDTO>,在根据SQL查询得到的数据转化成传往前端的数据
     @Override
-    public Page<CategoryTreeNodeDTO> queryCategory(Long adminId, Long id, String title, Integer level, Long parentId, Integer pageNo, Integer limit) throws ServiceException {
+    public Page<CategoryTreeNodeDTO> queryCategory(Long adminId, Long id, String title, Integer level, Long parentId, Integer page, Integer limit) throws ServiceException {
         QueryWrapper wrapper = new QueryWrapper();
         if (id != null) {
             wrapper.eq("id", id);
@@ -254,9 +237,9 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             wrapper.eq("parent_id", parentId);
         }
         wrapper.orderByAsc("level");
-        Integer count = categoryMapper.selectCount(wrapper);
 
-        List<CategoryDO> categoryDOS = null;// TODO categoryMapper.selectPage(new RowBounds((pageNo - 1) * limit, limit), wrapper);
+        Page selectPage = categoryMapper.selectPage(Page.div(page, limit, CategoryDO.class), wrapper);
+        List<CategoryDO> categoryDOS = selectPage.getItems();
         List<CategoryTreeNodeDTO> totalCategory = getCategoryList();
         List<CategoryTreeNodeDTO> list = categoryDOS.stream().map(item -> {
             CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
@@ -267,18 +250,18 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
                 }
             }
             BeanUtils.copyProperties(item, dto);
-            ;
             return dto;
         }).collect(Collectors.toList());
-        Page<CategoryTreeNodeDTO> page = new Page<>(list, pageNo, limit, count);
-        return page;
+        return new Page<>(list, page, limit, selectPage.getCount());
     }
 
 
     //TODO 可以做出父节点查询所有子节点
-    //获得所有类目按类目等级排序的类目list,
+    /**
+     * 获得所有类目按类目等级排序的类目list,因为有类内部调用，所以无法使用切面
+     */
     private List<CategoryTreeNodeDTO> getCategoryList() {
-        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(ADMIN_QUERY_CATEGORY_LIST, CategoryTreeNodeDTO.class);
+        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(CacheConst.CATEGORY_NODE_ALL_LIST, CategoryTreeNodeDTO.class);
         if (objList != null) {
             return objList;
         }
@@ -309,7 +292,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             }
 
         }
-        cacheComponent.putObj(ADMIN_QUERY_CATEGORY_LIST, list, 60 * 60);
+        cacheComponent.putObj(CacheConst.CATEGORY_NODE_ALL_LIST, list, 60 * 60);
         return list;
     }
 
