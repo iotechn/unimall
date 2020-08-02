@@ -129,41 +129,16 @@ public class CategoryBizService {
      * @return
      * @throws ServiceException
      */
-    public List<Long> getCategoryFamily(Long categoryId) throws ServiceException {
-        Map<String, String> hashAll = cacheComponent.getHashAll(CacheConst.CATEGORY_ID_HASH);
-        if (hashAll == null) {
-            //构建此Hash表
-            final Map<String,String> newHash = new HashMap<>();
-            //将所有子节点查询出来
-            List<CategoryDTO> categoryDTOList = categoryThreeLevelTree();
-            categoryDTOList.forEach(topItem -> {
-                if (!CollectionUtils.isEmpty(topItem.getChildrenList()))
-                    topItem.getChildrenList().forEach(subItem -> {
-                        if (!CollectionUtils.isEmpty(subItem.getChildrenList()))
-                            subItem.getChildrenList().forEach(leafItem -> {
-                                newHash.put("S" + leafItem.getId(), subItem.getId() + "_" + topItem.getId());
-                            });
-                    });
-            });
-            hashAll = newHash;
-            cacheComponent.putHashAll(CacheConst.CATEGORY_ID_HASH, hashAll, Const.CACHE_ONE_DAY);
-        }
-
-        LinkedList<Long> ids = new LinkedList<>();
-        ids.add(categoryId);
-        String str = hashAll.get("S" + categoryId);
-        if (!StringUtils.isEmpty(str)) {
-            String[] split = str.split("_");
-            ids.add(new Long(split[0]));
-            ids.add(new Long(split[1]));
-        }
+    public List<Long> getCategoryFamily(Long categoryId) {
+        CategoryDO categoryDO = categoryMapper.selectById(categoryId);
+        List<Long> ids = Arrays.asList(categoryDO.getFirstLevelId(), categoryDO.getSecondLevelId(), categoryDO.getId());
         return ids;
     }
 
     /**
      * 获得所有类目list
      */
-    @AspectCommonCache(value = CacheConst.CATEGORY_ALL_LIST,second = 60 * 60 * 24)
+    @AspectCommonCache(value = CacheConst.CATEGORY_ALL_LIST,second = 60 * 60 * 24, arrayClass = CategoryDTO.class)
     public List<CategoryDTO> getCategoryList() throws ServiceException{
         List<CategoryDTO> categoryDTOS = categoryThreeLevelTree();
         List<CategoryDTO> resultList = new LinkedList<>();

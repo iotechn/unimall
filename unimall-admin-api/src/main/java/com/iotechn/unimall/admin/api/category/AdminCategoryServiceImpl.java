@@ -218,7 +218,6 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
                 cacheComponent.del(CacheConst.CATEGORY_ALL_LIST);
                 cacheComponent.del(CacheConst.CATEGORY_SECOND_LEVEL_TREE);
                 cacheComponent.del(CacheConst.CATEGORY_THREE_LEVEL_TREE);
-                cacheComponent.del(CacheConst.CATEGORY_ID_HASH);
             }
         });
     }

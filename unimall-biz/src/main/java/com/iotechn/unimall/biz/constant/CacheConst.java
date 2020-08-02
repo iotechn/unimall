@@ -45,12 +45,6 @@ public class CacheConst {
     public static final String CATEGORY_SECOND_LEVEL_TREE = "CATEGORY_SECOND_LEVEL_TREE";
 
     /**
-     * 一个类目ID的HASH键值对
-     * "S" + 三级类目ID : 二级类目ID + "_" + 一级类目ID
-     */
-    public static final String CATEGORY_ID_HASH = "CATEGORY_ID_HASH";
-
-    /**
      * 获取足迹列表+_用户Id (追加)
      */
     public static final String FOOTPRINT_LRU = "FOOTPRINT_LRU:";
