@@ -318,22 +318,19 @@ public class AdminProductServiceImpl implements AdminProductService {
         }
 
         wrapper.select("id","original_price","price","vip_price","title","sales","img","description","category_id","freight_template_id","unit","status");
-        List<SpuDO> spuDOS = null;//TODO spuMapper.selectPage(new RowBounds((page - 1) * limit, limit), wrapper);
-
+        Page<SpuDO> selectPage = spuMapper.selectPage(Page.div(page, limit, SpuDO.class), wrapper);
         //组装SPU
         List<SpuDTO> spuDTOList = new ArrayList<>();
-        spuDOS.forEach(item -> {
-            SpuDTO spuDTO = new SpuDTO();
-            BeanUtils.copyProperties(item, spuDTO);
-            List<SkuDO> skuDOList = skuMapper.selectList(new QueryWrapper<SkuDO>().eq("spu_id", item.getId()));
-            spuDTO.setSkuList(skuDOList);
-            spuDTOList.add(spuDTO);
-        });
-
-        Integer count = spuMapper.selectCount(wrapper);
-        Page<SpuDTO> dtoPage = new Page<>(spuDTOList, page, limit, count);
-
-        return dtoPage;
+        if(!CollectionUtils.isEmpty(selectPage.getItems())){
+            selectPage.getItems().forEach(item -> {
+                SpuDTO spuDTO = new SpuDTO();
+                BeanUtils.copyProperties(item, spuDTO);
+                List<SkuDO> skuDOList = skuMapper.selectList(new QueryWrapper<SkuDO>().eq("spu_id", item.getId()));
+                spuDTO.setSkuList(skuDOList);
+                spuDTOList.add(spuDTO);
+            });
+        }
+        return new Page<>(spuDTOList,page,limit,selectPage.getCount());
     }
 
     @Override

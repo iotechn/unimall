@@ -82,8 +82,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         Date now = new Date();
         couponDO.setGmtCreate(couponDOList.get(0).getGmtCreate());
         couponDO.setGmtUpdate(now);
-        // TODO return couponMapper.updateAllColumnById(couponDO) > 0;
-        return null;
+        return couponMapper.updateById(couponDO) > 0;
     }
 
     @Override
@@ -98,7 +97,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
 
     @Override
     public Page<CouponAdminDTO> queryCouponByTitle(Long adminId, String title, Integer type, Integer status, Integer pageNo, Integer limit) throws ServiceException {
-        QueryWrapper wrapper = new QueryWrapper();
+        QueryWrapper<CouponDO> wrapper = new QueryWrapper();
         Date now = new Date();
         if (!StringUtils.isEmpty(title)) {
             wrapper.like("title", title);
@@ -109,11 +108,10 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         if (status != null) {
             if (status >= 0 && status < 2) {
                 wrapper.eq("status", status);
-                wrapper
-                        // TODO .andNew()
-                        .gt("gmt_end", now);
-                        // TODo .or()
-                        // TODO.isNotNull("days"); //coupon -> conpon.gt("gmt_end", now).or().isNotNull("days")
+                wrapper.and(i->i
+                        .gt("gmt_end", now)
+                        .or()
+                        .isNotNull("days"));
             } else if (status < 0) {
                 wrapper.lt("gmt_end", now);
             } else {

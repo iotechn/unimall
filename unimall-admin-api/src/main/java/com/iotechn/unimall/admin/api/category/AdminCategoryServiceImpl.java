@@ -222,7 +222,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
     //首先的到所有的类目的List<CategoryTreeNodeDTO>,在根据SQL查询得到的数据转化成传往前端的数据
     @Override
-    public Page<CategoryTreeNodeDTO> queryCategory(Long adminId, Long id, String title, Integer level, Long parentId, Integer pageNo, Integer limit) throws ServiceException {
+    public Page<CategoryTreeNodeDTO> queryCategory(Long adminId, Long id, String title, Integer level, Long parentId, Integer page, Integer limit) throws ServiceException {
         QueryWrapper wrapper = new QueryWrapper();
         if (id != null) {
             wrapper.eq("id", id);
@@ -237,9 +237,9 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             wrapper.eq("parent_id", parentId);
         }
         wrapper.orderByAsc("level");
-        Integer count = categoryMapper.selectCount(wrapper);
 
-        List<CategoryDO> categoryDOS = null;// TODO categoryMapper.selectPage(new RowBounds((pageNo - 1) * limit, limit), wrapper);
+        Page selectPage = categoryMapper.selectPage(Page.div(page, limit, CategoryDO.class), wrapper);
+        List<CategoryDO> categoryDOS = selectPage.getItems();
         List<CategoryTreeNodeDTO> totalCategory = getCategoryList();
         List<CategoryTreeNodeDTO> list = categoryDOS.stream().map(item -> {
             CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
@@ -250,11 +250,9 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
                 }
             }
             BeanUtils.copyProperties(item, dto);
-            ;
             return dto;
         }).collect(Collectors.toList());
-        Page<CategoryTreeNodeDTO> page = new Page<>(list, pageNo, limit, count);
-        return page;
+        return new Page<>(list, page, limit, selectPage.getCount());
     }
 
 

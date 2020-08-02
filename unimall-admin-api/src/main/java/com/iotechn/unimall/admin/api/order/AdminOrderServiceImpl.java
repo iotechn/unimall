@@ -73,7 +73,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private String wxAppAppid;
 
     @Override
-    public Page<OrderDO> list(Integer pageNo, Integer pageSize, Integer status, String orderNo, Long adminId) throws ServiceException {
+    public Page<OrderDO> list(Integer page, Integer pageSize, Integer status, String orderNo, Long adminId) throws ServiceException {
         QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>();
         wrapper.orderByDesc("id");
         if (!StringUtils.isEmpty(orderNo)) {
@@ -82,9 +82,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (status != null) {
             wrapper.eq("status", status);
         }
-        List<OrderDO> orderDOS = null; // TODO orderMapper.selectPage(new RowBounds((pageNo - 1) * pageSize, pageSize), wrapper);
-        Integer count = orderMapper.selectCount(wrapper);
-        return new Page<OrderDO>(orderDOS, pageNo, pageSize, count);
+        return orderMapper.selectPage(Page.div(page,pageSize,OrderDO.class),wrapper);
     }
 
     @Override

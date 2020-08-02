@@ -42,9 +42,7 @@ public class RoleServiceImpl implements RoleService {
         if (!StringUtils.isEmpty(name)) {
             wrapper.like("name", name);
         }
-        List<RoleDO> roleDOS = null;// TODO roleMapper.selectPage(new RowBounds((page - 1) * limit, limit), wrapper);
-        Integer count = roleMapper.selectCount(wrapper);
-        return new Page<RoleDO>(roleDOS, page, limit, count);
+        return roleMapper.selectPage(Page.div(page,limit,RoleDO.class),wrapper);
     }
 
     @Override

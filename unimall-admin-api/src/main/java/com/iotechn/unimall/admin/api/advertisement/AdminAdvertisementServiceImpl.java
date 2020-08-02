@@ -74,7 +74,7 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
     }
 
     @Override
-    public Page<AdvertisementDO> queryAdvertisement(Long adminId, Integer adType, Integer pageNo, Integer limit, Integer status) throws ServiceException {
+    public Page<AdvertisementDO> queryAdvertisement(Long adminId, Integer adType, Integer page, Integer limit, Integer status) throws ServiceException {
         QueryWrapper<AdvertisementDO> wrapper = new QueryWrapper<AdvertisementDO>();
         if (adType != null) {
             wrapper.eq("ad_type", adType);
@@ -82,13 +82,6 @@ public class AdminAdvertisementServiceImpl implements AdminAdvertisementService 
         if (status != null) {
             wrapper.eq("status", status);
         }
-
-        List<AdvertisementDO> advertisementDOList = null;// TODO advertisementMapper.selectPage(new RowBounds(limit *(pageNo - 1), limit),wrapper);
-        Integer count = advertisementMapper.selectCount(wrapper);
-
-        Page<AdvertisementDO> page = new Page<>(advertisementDOList,pageNo, limit,count);
-
-        return page;
-
+        return advertisementMapper.selectPage(Page.div(page,limit,AdvertisementDO.class),wrapper);
     }
 }

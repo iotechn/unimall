@@ -217,38 +217,40 @@ public class AdminGroupShopProductServiceImpl implements AdminGroupShopProductSe
             groupShopSpuDOQueryWrapper.in("spu_id", collect);
         }
 
-        List<GroupShopDO> groupShopDOList = null;//TODO groupShopMapper.selectPage(new RowBounds((page - 1) * limit, limit), groupShopSpuDOQueryWrapper);
-        Integer count = groupShopMapper.selectCount(groupShopSpuDOQueryWrapper);
+        Page<GroupShopDO> groupShopDOPage = groupShopMapper.selectPage(Page.div(page, limit, GroupShopDO.class), groupShopSpuDOQueryWrapper);
+        List<GroupShopDO> groupShopDOList = groupShopDOPage.getItems();
         List<GroupShopDTO> groupShopDTOList = new LinkedList<>();
 
-        for (GroupShopDO groupShopDO : groupShopDOList) {
-            GroupShopDTO groupShopDTO = new GroupShopDTO();
-            SpuDO spuDO = spuMapper.selectById(groupShopDO.getSpuId());
-            BeanUtils.copyProperties(spuDO, groupShopDTO);
-            BeanUtils.copyProperties(groupShopDO, groupShopDTO);
-            /**
-             * 添加groupShopSkuDTOList
-             */
-            List<SkuDO> skuDOList = skuMapper.selectList((new QueryWrapper<SkuDO>().eq("spu_id", spuDO.getId())));
-            List<GroupShopSkuDO> groupShopSkuDOList = groupShopSkuMapper.selectList((new QueryWrapper<GroupShopSkuDO>()).eq("group_shop_id", groupShopDO.getId()));
-            List<GroupShopSkuDTO> groupShopSkuDTOList = groupShopSkuDOList.stream().map(s -> {
-                GroupShopSkuDTO groupShopSkuDTO = new GroupShopSkuDTO();
-                BeanUtils.copyProperties(s, groupShopSkuDTO);
-                return groupShopSkuDTO;
-            }).collect(Collectors.toList());
+        if(!CollectionUtils.isEmpty(groupShopDOList)){
+            for (GroupShopDO groupShopDO : groupShopDOList) {
+                GroupShopDTO groupShopDTO = new GroupShopDTO();
+                SpuDO spuDO = spuMapper.selectById(groupShopDO.getSpuId());
+                BeanUtils.copyProperties(spuDO, groupShopDTO);
+                BeanUtils.copyProperties(groupShopDO, groupShopDTO);
+                /**
+                 * 添加groupShopSkuDTOList
+                 */
+                List<SkuDO> skuDOList = skuMapper.selectList((new QueryWrapper<SkuDO>().eq("spu_id", spuDO.getId())));
+                List<GroupShopSkuDO> groupShopSkuDOList = groupShopSkuMapper.selectList((new QueryWrapper<GroupShopSkuDO>()).eq("group_shop_id", groupShopDO.getId()));
+                List<GroupShopSkuDTO> groupShopSkuDTOList = groupShopSkuDOList.stream().map(s -> {
+                    GroupShopSkuDTO groupShopSkuDTO = new GroupShopSkuDTO();
+                    BeanUtils.copyProperties(s, groupShopSkuDTO);
+                    return groupShopSkuDTO;
+                }).collect(Collectors.toList());
 
-            for (SkuDO skuDO : skuDOList) {
-                for (GroupShopSkuDTO groupShopSkuDTO : groupShopSkuDTOList) {
-                    if (groupShopSkuDTO.getSkuId().equals(skuDO.getId())) {
-                        BeanUtils.copyProperties(skuDO, groupShopSkuDTO);
-                        break;
+                for (SkuDO skuDO : skuDOList) {
+                    for (GroupShopSkuDTO groupShopSkuDTO : groupShopSkuDTOList) {
+                        if (groupShopSkuDTO.getSkuId().equals(skuDO.getId())) {
+                            BeanUtils.copyProperties(skuDO, groupShopSkuDTO);
+                            break;
+                        }
                     }
                 }
+                groupShopDTO.setGroupShopSkuDTOList(groupShopSkuDTOList);
+                groupShopDTOList.add(groupShopDTO);
             }
-            groupShopDTO.setGroupShopSkuDTOList(groupShopSkuDTOList);
-            groupShopDTOList.add(groupShopDTO);
         }
-        return new Page<GroupShopDTO>(groupShopDTOList, page, limit, count);
+        return new Page<GroupShopDTO>(groupShopDTOList, page, limit, groupShopDOPage.getCount());
     }
 
     private void setGroupShopStatus(Date now, Long gmtStart, Long gmtEnd, SpuDO spuDO, GroupShopDO groupShopDO) {

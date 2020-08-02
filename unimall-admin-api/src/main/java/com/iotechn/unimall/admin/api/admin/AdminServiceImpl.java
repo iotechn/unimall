@@ -27,6 +27,7 @@ import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SessionUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -149,17 +150,19 @@ public class AdminServiceImpl implements AdminService {
             wrapper.like("username", name);
         }
         wrapper.orderByDesc("id");
-        Integer count = adminMapper.selectCount(wrapper);
-        List<AdminDO> adminDOS = new ArrayList<>();// TODO adminMapper.selectPage(new RowBounds((page - 1) * limit, limit), wrapper);
-        List<AdminDTO> adminDTOS = new ArrayList<AdminDTO>(adminDOS.size());
-        for (AdminDO adminDO : adminDOS) {
-            AdminDTO adminDTO = new AdminDTO();
-            BeanUtils.copyProperties(adminDO, adminDTO);
-            adminDTO.setRoleIds(JSONObject.parseArray(adminDO.getRoleIds(), Long.class));
-            adminDTO.setPassword(null);
-            adminDTOS.add(adminDTO);
+        Page<AdminDO> selectPage = adminMapper.selectPage(Page.div(page, limit, AdminDO.class), wrapper);
+        List<AdminDTO> adminDTOS = new ArrayList<AdminDTO>(selectPage.getItems().size());
+
+        if(!CollectionUtils.isEmpty(selectPage.getItems())){
+            for (AdminDO adminDO : selectPage.getItems()) {
+                AdminDTO adminDTO = new AdminDTO();
+                BeanUtils.copyProperties(adminDO, adminDTO);
+                adminDTO.setRoleIds(JSONObject.parseArray(adminDO.getRoleIds(), Long.class));
+                adminDTO.setPassword(null);
+                adminDTOS.add(adminDTO);
+            }
         }
-        return new Page<>(adminDTOS, page, limit, count);
+        return new Page<>(adminDTOS, page, limit, selectPage.getCount());
     }
 
     @Override

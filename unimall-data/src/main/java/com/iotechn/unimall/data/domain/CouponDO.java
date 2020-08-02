@@ -33,6 +33,10 @@ public class CouponDO extends SuperDO {
 
     private Integer min;
 
+    /**
+     * 0:下架
+     * 1: 正常
+     */
     private Integer status;
 
     @TableField("category_id")

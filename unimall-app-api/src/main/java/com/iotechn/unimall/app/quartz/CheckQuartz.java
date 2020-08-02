@@ -125,9 +125,7 @@ public class CheckQuartz {
                 // 1.1 查询在活动期间,且冻结状态的团购商品
                 List<GroupShopDO> groupShopDOList = groupShopMapper.selectList(new QueryWrapper<GroupShopDO>()
                         .le("gmt_start", now)
-//                        .and() TODO 翻译成MP3
                         .gt("gmt_end", now)
-//                        .and() TODO
                         .eq("status", StatusType.LOCK.getCode()));
                 if (groupShopDOList != null) {
                     for (GroupShopDO groupShopDO : groupShopDOList) {
@@ -168,10 +166,11 @@ public class CheckQuartz {
                  */
                 QueryWrapper<GroupShopDO> wrapper = new QueryWrapper<GroupShopDO>()
                         .eq("status", StatusType.ACTIVE.getCode())
-//                        .andNew() TODO 翻译成MP3语法
-                        .gt("gmt_start", now)
-                        .or()
-                        .le("gmt_end", now);
+                        .and(i->i
+                                .gt("gmt_start", now)
+                                .or()
+                                .le("gmt_end", now));
+
                 List<GroupShopDO> lockGroupShopDOList = groupShopMapper.selectList(wrapper);
                 // 2.2 将团购订单的状态转为对应的退款或待出库状态,对未达人数且自动退款的商品订单进行退款,对达到人数或不自动退款的商品订单转换状态
                 if (!CollectionUtils.isEmpty(lockGroupShopDOList)) {
@@ -246,9 +245,7 @@ public class CheckQuartz {
 
                 // 3.1 从团购中查询活动期间的商品
                 groupShopDOEntityWrapper.eq("status", StatusType.ACTIVE.getCode())
-//                        .and() TODO 翻译成MP3
                         .le("gmt_start", now)
-//                        .and() TODO 翻译成MP3
                         .gt("gmt_end", now);
                 List<GroupShopDO> groupShopDOS = groupShopMapper.selectList(groupShopDOEntityWrapper);
                 if (!CollectionUtils.isEmpty(groupShopDOS)) {
