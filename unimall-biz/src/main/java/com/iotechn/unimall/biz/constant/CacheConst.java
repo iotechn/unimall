@@ -25,32 +25,28 @@ public class CacheConst {
     public static final String ADVERTISEMENT_TYPE = "ADVERTISEMENT_TYPE:";
 
     /**
-     * 评论缓存 CA_APPRAISE_KEY: + spuId + ":" + pageNo + ":" + pageSize
+     * 评论缓存 APPRAISE_KEY: + spuId + ":" + pageNo + ":" + pageSize
      */
     public static final String APPRAISE_KEY = "APPRAISE_KEY:";
 
     /**
-     * 三级类目树(CategoryDTO作为节点,用户使用)
+     * 三级类目树
      */
-    public static final String CATEGORY_DTO_THREE_LEVEL_TREE = "CATEGORY_DTO_THREE_LEVEL_TREE";
+    public static final String CATEGORY_THREE_LEVEL_TREE = "CATEGORY_THREE_LEVEL_TREE";
 
     /**
-     * 三级类目树(CategoryTreeNodeDTO作为节点，管理员使用)
+     * 包含所有类目的一个链表
      */
-    public static final String CATEGORY_NODE_THREE_LEVEL_TREE = "CATEGORY_NODE_THREE_LEVEL_TREE";
+    public static final String CATEGORY_ALL_LIST = "CATEGORY_ALL_LIST";
 
     /**
-     * 包含所有类目的一个链表(CategoryDTO作为节点)
+     * 二级类目树
      */
-    public static final String CATEGORY_NODE_ALL_LIST = "CATEGORY_NODE_ALL_LIST";
+    public static final String CATEGORY_SECOND_LEVEL_TREE = "CATEGORY_SECOND_LEVEL_TREE";
 
     /**
-     * 二级类目树(CategoryTreeNodeDTO作为节点)
-     */
-    public static final String CATEGORY_NODE_SECOND_LEVEL_TREE = "CATEGORY_NODE_SECOND_LEVEL_TREE";
-
-    /**
-     *TODO???这是啥玩意？
+     * 一个类目ID的HASH键值对
+     * "S" + 三级类目ID : 二级类目ID + "_" + 一级类目ID
      */
     public static final String CATEGORY_ID_HASH = "CATEGORY_ID_HASH";
 

@@ -355,11 +355,8 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition DATABASE_INSERT_FAILURE =
             new ServiceExceptionDefinition(51007, "数据库类目插入失败");
 
-    public static final ServiceExceptionDefinition PARENT_LEVEL_MUST_HIGH_THAN_CURRENT =
-            new ServiceExceptionDefinition(51008, "父节点等级必须高于当前节点等级");
-
-    public static final ServiceExceptionDefinition CATEGORY_EXIST_SPU =
-            new ServiceExceptionDefinition(51009, "该类目下存在商品不能变换类目等级");
+    public static final ServiceExceptionDefinition UPDATE_ONLY_HORIZONTAL_MOVE =
+            new ServiceExceptionDefinition(51008, "修改只能平级移动");
 
 
 

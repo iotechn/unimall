@@ -8,7 +8,6 @@ import com.iotechn.unimall.data.annotaion.AspectCommonCache;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
-import com.iotechn.unimall.data.dto.CategoryTreeNodeDTO;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,82 +30,96 @@ public class CategoryBizService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    /*获取一棵两级类目树*/
-    @AspectCommonCache(value = CacheConst.CATEGORY_NODE_SECOND_LEVEL_TREE)
-    public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException {
-        List<CategoryDO> categoryDOS = categoryMapper.selectList(new QueryWrapper<CategoryDO>().le("level",1 ).orderByAsc("level"));
-        List<CategoryTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
-            CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
-            dto.setLabel(item.getTitle());
-            dto.setLevel(0);
-            dto.setFullName(dto.getLabel());
-            dto.setValue(item.getId());
-            dto.setChildren(new LinkedList<>());
-            return dto;
+    /**
+     * 获取一棵两级类目树
+     */
+    @AspectCommonCache(value = CacheConst.CATEGORY_SECOND_LEVEL_TREE)
+    public List<CategoryDTO> categorySecondLevelTree() throws ServiceException {
+        List<CategoryDO> categoryDOS = categoryMapper.selectList(new QueryWrapper<CategoryDO>()
+                .eq("level",0)
+                .or()
+                .eq("level",1)
+                .orderByAsc("level"));
+
+        List<CategoryDO> firstLevelList = categoryDOS.stream().filter(item -> item.getLevel().intValue() == 0).collect(Collectors.toList());
+        List<CategoryDO> secondLevelList = categoryDOS.stream().filter(item -> item.getLevel().intValue() == 1).collect(Collectors.toList());
+
+        // 以ID为键，组装后的DTO为值，提升组装速度
+        HashMap<Long,CategoryDTO> speedUp = new HashMap<>();
+
+        // 组装一级类目
+        List<CategoryDTO> resultTree = firstLevelList.stream().map(item -> {
+            CategoryDTO first = new CategoryDTO();
+            BeanUtils.copyProperties(item, first);
+            first.setFullName(item.getTitle());
+            speedUp.put(first.getId(),first);
+            return first;
         }).collect(Collectors.toList());
-        list.forEach(item -> {
-            categoryDOS.forEach(categoryDO -> {
-                if (categoryDO.getParentId().equals(item.getValue())) {
-                    CategoryTreeNodeDTO categoryTreeNodeDTO = new CategoryTreeNodeDTO();
-                    categoryTreeNodeDTO.setChildren(new LinkedList<>());
-                    categoryTreeNodeDTO.setValue(categoryDO.getId());
-                    categoryTreeNodeDTO.setLabel(categoryDO.getTitle());
-                    categoryTreeNodeDTO.setLevel(1);
-                    categoryTreeNodeDTO.setParent(item.getValue());
-                    categoryTreeNodeDTO.setFullName(item.getFullName() +"/"+ categoryDO.getTitle());
-                    item.getChildren().add(categoryTreeNodeDTO);
-                }
-            });
+
+        // 组装二级类目
+        secondLevelList.stream().forEach(item ->{
+            publicCodeAssembly(speedUp,item);
         });
-        return list;
+
+        return resultTree;
     }
 
     /**
      * 获取一棵三级类目树,类内部有调用，因此不能切面
-     * */
-    public List<CategoryDTO> categoryList() throws ServiceException {
-        List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CacheConst.CATEGORY_DTO_THREE_LEVEL_TREE, CategoryDTO.class);
+     */
+    public List<CategoryDTO> categoryThreeLevelTree() throws ServiceException {
+        List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CacheConst.CATEGORY_THREE_LEVEL_TREE, CategoryDTO.class);
         if (categoryDTOListFormCache != null) {
             return categoryDTOListFormCache;
         }
         //从数据库查询
         List<CategoryDO> categoryDOList = categoryMapper.selectList(new QueryWrapper<>());
-        //组装DTO
-        List<CategoryDTO> categoryDTOList = new LinkedList<>();
-        categoryDOList.forEach(categoryDO -> {
-            if (categoryDO.getParentId() == 0) {
-                CategoryDTO categoryDTO = new CategoryDTO();
-                BeanUtils.copyProperties(categoryDO, categoryDTO);
-                categoryDTOList.add(categoryDTO);
-            }
+
+        List<CategoryDO> firstLevelList = categoryDOList.stream().filter(item -> item.getLevel().intValue() == 0).collect(Collectors.toList());
+        List<CategoryDO> secondLevelList = categoryDOList.stream().filter(item -> item.getLevel().intValue() == 1).collect(Collectors.toList());
+        List<CategoryDO> thirdLevelList = categoryDOList.stream().filter(item -> item.getLevel().intValue() == 2).collect(Collectors.toList());
+
+        // 以ID为键，组装后的DTO为值，提升组装速度
+        HashMap<Long,CategoryDTO> speedUp = new HashMap<>();
+
+        // 组装一级类目
+        List<CategoryDTO> resultTree = firstLevelList.stream().map(item -> {
+            CategoryDTO first = new CategoryDTO();
+            BeanUtils.copyProperties(item, first);
+            first.setFullName(item.getTitle());
+            speedUp.put(first.getId(),first);
+            return first;
+        }).collect(Collectors.toList());
+
+        // 组装二级类目
+        secondLevelList.stream().forEach(item ->{
+           publicCodeAssembly(speedUp,item);
         });
 
-        //遍历二、三级
-        categoryDTOList.forEach(categoryDTO -> {
-            categoryDOList.forEach(categoryDO -> {
-                if (categoryDO.getParentId().equals(categoryDTO.getId())) {
-                    List<CategoryDTO> childrenList = categoryDTO.getChildrenList();
-                    if (childrenList == null) {
-                        childrenList = new LinkedList<>();
-                        categoryDTO.setChildrenList(childrenList);
-                    }
-                    CategoryDTO childCategoryDTO = new CategoryDTO();
-                    BeanUtils.copyProperties(categoryDO, childCategoryDTO);
-                    childCategoryDTO.setChildrenList(new LinkedList<>());
-                    childrenList.add(childCategoryDTO);
-                    categoryDOList.forEach(leaf -> {
-                        if (childCategoryDTO.getId().equals(leaf.getParentId())) {
-                            CategoryDTO leafCategoryDTO = new CategoryDTO();
-                            BeanUtils.copyProperties(leaf, leafCategoryDTO);
-                            childCategoryDTO.getChildrenList().add(leafCategoryDTO);
-                        }
-                    });
-                }
-            });
+        // 组装三级类目
+        thirdLevelList.stream().forEach(item ->{
+            publicCodeAssembly(speedUp,item);
         });
         //放入缓存
-        cacheComponent.putObj(CacheConst.CATEGORY_DTO_THREE_LEVEL_TREE, categoryDTOList, Const.CACHE_ONE_DAY);
-        return categoryDTOList;
+        cacheComponent.putObj(CacheConst.CATEGORY_THREE_LEVEL_TREE, resultTree, Const.CACHE_ONE_DAY);
+        return resultTree;
+    }
+
+    /**
+     * 上面生成类目树的公用代码提取
+     */
+    private void publicCodeAssembly(HashMap<Long,CategoryDTO> speedUp, CategoryDO item){
+        CategoryDTO parentDTO = speedUp.get(item.getParentId());
+        if(parentDTO != null){
+            if(parentDTO.getChildrenList() == null){
+                parentDTO.setChildrenList(new ArrayList<>());
+            }
+            CategoryDTO child = new CategoryDTO();
+            BeanUtils.copyProperties(item,child);
+            child.setFullName(parentDTO.getFullName() + "/" + item.getTitle());
+            parentDTO.getChildrenList().add(child);
+            speedUp.put(item.getId(),child);
+        }
     }
 
     /**
@@ -122,7 +135,7 @@ public class CategoryBizService {
             //构建此Hash表
             final Map<String,String> newHash = new HashMap<>();
             //将所有子节点查询出来
-            List<CategoryDTO> categoryDTOList = categoryList();
+            List<CategoryDTO> categoryDTOList = categoryThreeLevelTree();
             categoryDTOList.forEach(topItem -> {
                 if (!CollectionUtils.isEmpty(topItem.getChildrenList()))
                     topItem.getChildrenList().forEach(subItem -> {
@@ -148,14 +161,23 @@ public class CategoryBizService {
     }
 
     /**
-     * 将一父节点传入，返回父节点本身与其子节点，及其孙节点ID列表
-     * @param categoryId
-     * @return
-     * @throws ServiceException
+     * 获得所有类目list
      */
-    public List<Long> getCategorySelfAndChildren(Long categoryId) throws ServiceException {
-        // TODO
-        return Arrays.asList(categoryId);
+    @AspectCommonCache(value = CacheConst.CATEGORY_ALL_LIST,second = 60 * 60 * 24)
+    public List<CategoryDTO> getCategoryList() throws ServiceException{
+        List<CategoryDTO> categoryDTOS = categoryThreeLevelTree();
+        List<CategoryDTO> resultList = new LinkedList<>();
+        categoryDTOS.forEach(first -> {
+            resultList.add(first);
+            if (!CollectionUtils.isEmpty(first.getChildrenList()))
+                first.getChildrenList().forEach(second -> {
+                    resultList.add(second);
+                    if (!CollectionUtils.isEmpty(second.getChildrenList()))
+                        second.getChildrenList().forEach(third -> {
+                            resultList.add(third);
+                        });
+                });
+        });
+        return resultList;
     }
-
 }
