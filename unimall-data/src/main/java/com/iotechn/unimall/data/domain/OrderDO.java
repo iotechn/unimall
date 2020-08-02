@@ -18,6 +18,9 @@ public class OrderDO extends SuperDO {
      */
     private String channel;
 
+    @TableField("parent_order_no")
+    private String parentOrderNo;
+
     @TableField("order_no")
     private String orderNo;
 

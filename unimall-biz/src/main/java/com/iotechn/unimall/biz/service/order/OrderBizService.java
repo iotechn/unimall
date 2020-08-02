@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.service.WxPayService;
-import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.constant.LockConst;
 import com.iotechn.unimall.core.exception.*;
 import com.iotechn.unimall.data.component.LockComponent;
@@ -56,6 +55,31 @@ public class OrderBizService {
 
     @Value("${com.iotechn.unimall.wx.app.app-id}")
     private String wxAppAppid;
+
+
+    public List<OrderDO> checkOrderExistByParentNo(String parentOrderNo, Long userId) throws ServiceException {
+        QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>().eq("parent_order_no", parentOrderNo);
+        if (userId != null) {
+            wrapper.eq("user_id", userId);
+        }
+        List<OrderDO> orderDOS = orderMapper.selectList(wrapper);
+        if (CollectionUtils.isEmpty(orderDOS)) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_NOT_EXIST);
+        }
+        return orderDOS;
+    }
+
+    public List<OrderDO> checkOrderExistByNo(String orderNo, Long userId) throws ServiceException {
+        QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>().eq("order_no", orderNo);
+        if (userId != null) {
+            wrapper.eq("user_id", userId);
+        }
+        List<OrderDO> orderDOS = orderMapper.selectList(wrapper);
+        if (CollectionUtils.isEmpty(orderDOS)) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_NOT_EXIST);
+        }
+        return orderDOS;
+    }
 
     public boolean changeOrderStatus(String orderNo, int nowStatus, OrderDO orderDO) throws ServiceException {
         try {

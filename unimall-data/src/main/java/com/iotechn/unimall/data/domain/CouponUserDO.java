@@ -10,8 +10,8 @@ import java.util.Date;
  * Created by rize on 2019/7/4.
  */
 @Data
-@TableName("unimall_user_coupon")
-public class UserCouponDO extends SuperDO {
+@TableName("unimall_coupon_user")
+public class CouponUserDO extends SuperDO {
 
     @TableField("user_id")
     private Long userId;

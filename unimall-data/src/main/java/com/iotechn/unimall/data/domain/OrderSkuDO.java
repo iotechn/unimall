@@ -61,4 +61,16 @@ public class OrderSkuDO extends SuperDO {
     //单位
     private String unit;
 
+    /**
+     * 活动类型
+     */
+    @TableField("activity_type")
+    private Integer activityType;
+
+    /**
+     * 活动Id
+     */
+    @TableField("activity_id")
+    private Long activityId;
+
 }

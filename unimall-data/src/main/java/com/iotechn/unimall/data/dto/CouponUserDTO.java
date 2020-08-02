@@ -8,7 +8,7 @@ import java.util.Date;
  * Created by rize on 2019/7/5.
  */
 @Data
-public class UserCouponDTO extends SuperDTO {
+public class CouponUserDTO extends SuperDTO {
 
     private String title;
 

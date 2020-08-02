@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.domain.FreightTemplateDO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
@@ -84,11 +83,10 @@ public class FreightBizService {
         }
 
         Integer totalMoney = 0;
-        AddressDO addressDO = addressMapper.selectById(orderRequestDTO.getAddressId());
-        Integer discount = orderRequestDTO.getCoupon() != null ? orderRequestDTO.getCoupon().getDiscount() : 0;
-        for (Long key : freightNum.keySet()) {
-            totalMoney = totalMoney + getMoney(freightDTO.get(key), freightNum.get(key), addressDO == null ? "" : addressDO.getProvince(), freightMoney.get(key) - discount);
-        }
+//        AddressDO addressDO = addressMapper.selectById(orderRequestDTO.getAddressId());
+//        Integer discount = orderRequestDTO.getCoupon() != null ? orderRequestDTO.getCoupon().getDiscount() : 0;
+//        for (Long key : freightNum.keySet()) {
+//        }
         return totalMoney;
     }
 

@@ -410,7 +410,7 @@ export default {
               for (let i = 0; i < tempArray.length; i++) {
                 const skuSpecTemp = tempArray[i]
                 const singleArray = skuSpecTemp.split('_')
-                item['id' + singleArray[0]] = singleArray[1]
+                item['id_' + singleArray[0]] = singleArray[1]
                 for (let j = 0; j < this.specList.length; j++) {
                   if (this.specList[j].title === singleArray[0]) {
                     // 若是同一个Key。则将value追加到其values里面
@@ -487,13 +487,14 @@ export default {
             for (let i = 0; i < this.skuTableData.length; i++) {
               let title = ''
               let specification = ''
-              for (const field in this.skuTableData) {
-                console.log(field)
+              for (const field in this.skuTableData[i]) {
                 if (field.startsWith('id_')) {
                   title += (this.skuTableData[i][field] + ',')
                   specification += (field.substring(3) + '_' + this.skuTableData[i][field] + ',')
                 }
               }
+              title = title.substring(0, title.length - 1)
+              specification = specification.substring(0, specification.length - 1)
               const sku = {
                 originalPrice: parseInt(this.skuTableData[i].originalPriceRaw * 100),
                 price: parseInt(this.skuTableData[i].priceRaw * 100),
@@ -514,37 +515,26 @@ export default {
               attributeList: this.attributes,
               skuList: skuList
             }
+            let method = createGoods
+            let successWords = '创建成功'
             if (action === 'edit') {
-              createGoods(finalProduct)
-                .then(response => {
-                  this.$notify.success({
-                    title: '成功',
-                    message: '添加成功'
-                  })
-                  this.$router.push({ path: '/goods/list' })
-                })
-                .catch(response => {
-                  MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
-                    confirmButtonText: '确定',
-                    type: 'error'
-                  })
-                })
-            } else if (action === 'create') {
-              editGoods(finalProduct)
-                .then(response => {
-                  this.$notify.success({
-                    title: '成功',
-                    message: '编辑成功'
-                  })
-                  this.$router.push({ path: '/goods/list' })
-                })
-                .catch(response => {
-                  MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
-                    confirmButtonText: '确定',
-                    type: 'error'
-                  })
-                })
+              method = editGoods
+              successWords = '编辑成功'
             }
+            method(finalProduct)
+              .then(response => {
+                this.$notify.success({
+                  title: '成功',
+                  message: successWords
+                })
+                this.$router.push({ path: '/goods/list' })
+              })
+              .catch(response => {
+                MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
+                  confirmButtonText: '确定',
+                  type: 'error'
+                })
+              })
           }
         } else {
           this.$notify.error({
@@ -672,13 +662,13 @@ export default {
       for (let i = 0; i < newTable.length; i++) {
         const obj = {}
         for (let j = 0; j < newTable[i].length; j++) {
-          obj['id' + attrList[j].title] = newTable[i][j]
+          obj['id_' + attrList[j].title] = newTable[i][j]
         }
         for (let j = 0; j < cacheTable.length; j++) {
           let equals = true
           for (let z = 0; z < this.specList.length; z++) {
             const title = this.specList[z].title
-            if (cacheTable[j]['id' + title] !== obj['id' + title]) {
+            if (cacheTable[j]['id_' + title] !== obj['id_' + title]) {
               equals = false
             }
           }

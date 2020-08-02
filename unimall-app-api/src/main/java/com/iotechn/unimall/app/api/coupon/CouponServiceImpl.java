@@ -7,12 +7,12 @@ import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.CouponDO;
-import com.iotechn.unimall.data.domain.UserCouponDO;
+import com.iotechn.unimall.data.domain.CouponUserDO;
 import com.iotechn.unimall.data.dto.CouponDTO;
-import com.iotechn.unimall.data.dto.UserCouponDTO;
+import com.iotechn.unimall.data.dto.CouponUserDTO;
 import com.iotechn.unimall.data.enums.StatusType;
 import com.iotechn.unimall.data.mapper.CouponMapper;
-import com.iotechn.unimall.data.mapper.UserCouponMapper;
+import com.iotechn.unimall.data.mapper.CouponUserMapper;
 import com.iotechn.unimall.data.model.KVModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class CouponServiceImpl implements CouponService {
     private CouponMapper couponMapper;
 
     @Autowired
-    private UserCouponMapper userCouponMapper;
+    private CouponUserMapper couponUserMapper;
 
     @Autowired
     private LockComponent lockComponent;
@@ -77,8 +77,8 @@ public class CouponServiceImpl implements CouponService {
 
                 if (couponDO.getLimit() != -1) {
                     //校验用户是否已经领了
-                    Integer count = userCouponMapper.selectCount(
-                            new QueryWrapper<UserCouponDO>()
+                    Integer count = couponUserMapper.selectCount(
+                            new QueryWrapper<CouponUserDO>()
                                     .eq("user_id", userId)
                                     .eq("coupon_id", couponId));
 
@@ -88,7 +88,7 @@ public class CouponServiceImpl implements CouponService {
                 }
 
                 //领取优惠券
-                UserCouponDO userCouponDO = new UserCouponDO();
+                CouponUserDO userCouponDO = new CouponUserDO();
                 userCouponDO.setUserId(userId);
                 userCouponDO.setCouponId(couponId);
                 if (couponDO.getGmtStart() != null && couponDO.getGmtEnd() != null) {
@@ -106,7 +106,7 @@ public class CouponServiceImpl implements CouponService {
                 userCouponDO.setGmtUpdate(now);
                 userCouponDO.setGmtCreate(now);
 
-                userCouponMapper.insert(userCouponDO);
+                couponUserMapper.insert(userCouponDO);
                 return "ok";
             } catch (ServiceException e) {
                 throw e;
@@ -148,7 +148,7 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    public List<UserCouponDTO> getUserCoupons(Long userId) throws ServiceException {
-        return userCouponMapper.getUserCoupons(userId);
+    public List<CouponUserDTO> getUserCoupons(Long userId) throws ServiceException {
+        return couponUserMapper.getUserCoupons(userId);
     }
 }

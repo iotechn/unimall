@@ -69,8 +69,8 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_UNKNOWN_EXCEPTION =
             new ServiceExceptionDefinition(13000, "订单系统未知异常");
 
-    public static final ServiceExceptionDefinition ORDER_SKU_CANNOT_EMPTY =
-            new ServiceExceptionDefinition(13001, "订单商品不能为空");
+    public static final ServiceExceptionDefinition ORDER_PARAM_CHECK_FAILED =
+            new ServiceExceptionDefinition(13001, "订单参数校验失败");
 
     public static final ServiceExceptionDefinition ORDER_SYSTEM_BUSY =
             new ServiceExceptionDefinition(13002, "订单系统繁忙~");
@@ -84,8 +84,8 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_PRICE_MUST_GT_ZERO =
             new ServiceExceptionDefinition(13005, "订单金额必须大于0");
 
-    public static final ServiceExceptionDefinition ORDER_PRICE_CHECK_FAILED =
-            new ServiceExceptionDefinition(13006, "订单金额校验失败！");
+    public static final ServiceExceptionDefinition ORDER_PRODUCT_PRICE_HAS_BEEN_CHANGED =
+            new ServiceExceptionDefinition(13006, "商品价格已经发生改变，请重新下单！");
 
     public static final ServiceExceptionDefinition ORDER_COUPON_NOT_EXIST =
             new ServiceExceptionDefinition(13007, "优惠券不存在或已使用！");
@@ -149,6 +149,10 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition ORDER_ADDRESS_CANNOT_BE_NULL =
             new ServiceExceptionDefinition(13026, "请完善收货地址~");
+
+    public static final ServiceExceptionDefinition ORDER_GROUP_SHOP_ACTIVITY_HAS_OVER =
+            new ServiceExceptionDefinition(13027, "团购活动已经结束");
+
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
             new ServiceExceptionDefinition(14001, "优惠券已经领完～");
@@ -259,6 +263,9 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition GOODS_ORDER_BY_WAY_ILLEGAL =
             new ServiceExceptionDefinition(20009, "商品排序方式不合法");
+
+    public static final ServiceExceptionDefinition GOODS_UNION_ACTIVITY_CAN_NOT_BE_OFF_SHELF =
+            new ServiceExceptionDefinition(20010, "商品关联的活动正在进行，不允许下架");
 
 
 

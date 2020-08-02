@@ -7,7 +7,7 @@ import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.dto.CouponAdminDTO;
 import com.iotechn.unimall.data.mapper.CouponMapper;
-import com.iotechn.unimall.data.mapper.UserCouponMapper;
+import com.iotechn.unimall.data.mapper.CouponUserMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
     private CouponMapper couponMapper;
 
     @Autowired
-    private UserCouponMapper userCouponMapper;
+    private CouponUserMapper couponUserMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -66,7 +66,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         }
         QueryWrapper wrapperUC = new QueryWrapper();
         wrapperUC.eq("coupon_id", id);
-        userCouponMapper.delete(wrapperUC);
+        couponUserMapper.delete(wrapperUC);
         return true;
     }
 

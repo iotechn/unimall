@@ -3,7 +3,6 @@ package com.iotechn.unimall.app.api.collect;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.collect.CollectBizService;
-import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -36,9 +35,6 @@ public class CollectServiceImpl implements CollectService {
     private CacheComponent cacheComponent;
 
     @Autowired
-    private ProductBizService productBizService;
-
-    @Autowired
     private CollectBizService collectBizService;
 
 
@@ -46,7 +42,6 @@ public class CollectServiceImpl implements CollectService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean addCollect(Long userId, Long spuId) throws ServiceException {
         //校验SPU是否存在
-        productBizService.getSpuById(spuId);
         List<CollectDO> collectDOS = collectMapper.selectList(new QueryWrapper<CollectDO>()
                 .eq("user_id", userId)
                 .eq("spu_id", spuId));

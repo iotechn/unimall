@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Created by rize on 2019/7/1.
  */
@@ -59,7 +61,9 @@ public class SpuDO extends SuperDO {
     @TableField("category_id")
     private Long categoryId;
 
-    //运费模板
+    /**
+     * 运费模板Id
+     */
     @TableField("freight_template_id")
     private Long freightTemplateId;
 
@@ -72,5 +76,29 @@ public class SpuDO extends SuperDO {
      * 商品状态
      */
     private Integer status;
+
+    /**
+     * 当前商品所参加的促销活动类型
+     */
+    @TableField("activity_type")
+    private Integer activityType;
+
+    /**
+     * 当前商品所参加促销活动ID
+     */
+    @TableField("activity_id")
+    private Long activityId;
+
+    /**
+     * 当前商品参加促销活动开始时间
+     */
+    @TableField("gmt_activity_start")
+    private Date gmtActivityStart;
+
+    /**
+     * 当前商品参加促销活动结束时间
+     */
+    @TableField("gmt_activity_end")
+    private Date gmtActivityEnd;
 
 }

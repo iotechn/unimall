@@ -49,7 +49,7 @@ public interface AdminProductService {
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "上下架", permission = "operation:goods:edit", permissionParentName = "商品管理", permissionName = "商品管理")
-    public SpuDTO freezeOrActivation(
+    public AdminSpuDTO freezeOrActivation(
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "商品Id") Long spuId,
             @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "商品想要变为的状态") Integer status,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;

@@ -3,25 +3,15 @@ package com.iotechn.unimall.biz.service.product;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.constant.CacheConst;
-import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
-import com.iotechn.unimall.biz.service.collect.CollectBizService;
-import com.iotechn.unimall.biz.service.freight.FreightBizService;
-import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
-import com.iotechn.unimall.data.domain.SkuDO;
-import com.iotechn.unimall.data.domain.SpuAttributeDO;
 import com.iotechn.unimall.data.domain.SpuDO;
-import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
-import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
+import com.iotechn.unimall.data.dto.goods.SkuDTO;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
-import com.iotechn.unimall.data.enums.BizType;
-import com.iotechn.unimall.data.mapper.ImgMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
-import com.iotechn.unimall.data.mapper.SpuAttributeMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.slf4j.Logger;
@@ -36,6 +26,7 @@ import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -56,17 +47,9 @@ public class ProductBizService {
     public static final String CA_SPU_PREFIX = "CA_SPU_";
 
     /**
-     * SPU 销量缓存
-     */
-    private static final String CA_SPU_SALES_HASH = "CA_SPU_SALES_HASH";
-
-    /**
      * SPU DO 缓存，加速 getById...  hashKey = 'S' + spuId
      */
     private static final String CA_SPU_HASH = "CA_SPU_HASH";
-
-    @Autowired
-    private ImgMapper imgMapper;
 
     @Autowired
     private SpuMapper spuMapper;
@@ -75,22 +58,10 @@ public class ProductBizService {
     private SkuMapper skuMapper;
 
     @Autowired
-    private SpuAttributeMapper spuAttributeMapper;
-
-    @Autowired
     private CategoryBizService categoryBizService;
 
     @Autowired
-    private FreightBizService freightBizService;
-
-    @Autowired
     private CacheComponent cacheComponent;
-
-    @Autowired
-    private CollectBizService collectBizService;
-
-    @Autowired
-    private AppraiseBizService appraiseBizService;
 
     /**
      * SPU 排除掉detail字段的其他属性
@@ -225,98 +196,29 @@ public class ProductBizService {
     }
 
     /**
-     * TODO 将会删除 通过Id获取SpuDO 领域对象
-     *
-     * @param spuId
+     * 从数据库中获取SKU详细信息
+     * @param skuIds
      * @return
-     * @throws ServiceException
      */
-    public SpuDO getSpuById(Long spuId) throws ServiceException {
-        SpuDO objFromCache = cacheComponent.getHashObj(CA_SPU_HASH, "S" + spuId, SpuDO.class);
-        if (objFromCache != null) {
-            return objFromCache;
-        }
-        SpuDO spuDO = spuMapper.selectById(spuId);
-        if (spuDO == null) {
-            throw new AppServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
-        }
-        cacheComponent.putHashObj(CA_SPU_HASH, "S" + spuDO, spuDO, Const.CACHE_ONE_DAY);
-        return spuDO;
+    public List<SkuDTO> getSkuListByIds(List<Long> skuIds) {
+        return skuMapper.getSkuDTOListByIds(skuIds);
     }
 
     /**
-     * TODO 将会删除
-     * @param spuId
-     * @param userId
+     * 从数据库中获取SPU
+     * @param id
      * @return
-     * @throws ServiceException
      */
-    public SpuDTO getProduct(Long spuId, Long userId) throws ServiceException {
-        SpuDTO spuDTOFromCache = cacheComponent.getObj(CA_SPU_PREFIX + spuId, SpuDTO.class);
-        if (spuDTOFromCache != null) {
-            packSpuCollectInfo(spuDTOFromCache, userId);
-            //获取第一页评论
-            Page<AppraiseResponseDTO> spuAppraise = appraiseBizService.getSpuAllAppraise(spuId, 1, 10);
-            spuDTOFromCache.setAppraisePage(spuAppraise);
-            if (userId != null && userId == 0l) {
-                // 从管理员后台进入，返回最新的库存
-                List<SkuDO> skuDOList = skuMapper.selectList(
-                        new QueryWrapper<SkuDO>()
-                                .eq("spu_id", spuId));
-                spuDTOFromCache.setSkuList(skuDOList);
-                int sum = skuDOList.stream().mapToInt(item -> item.getStock()).sum();
-                spuDTOFromCache.setStock(sum);
-            }
-            return spuDTOFromCache;
-        }
-        SpuDO spuDO = spuMapper.selectById(spuId);
-        SpuDTO spuDTO = new SpuDTO();
-        BeanUtils.copyProperties(spuDO, spuDTO);
-        spuDTO.setImgList(imgMapper.getImgs(BizType.GOODS.getCode(), spuId));
-        List<SkuDO> skuDOList = skuMapper.selectList(
-                new QueryWrapper<SkuDO>()
-                        .eq("spu_id", spuId));
-        spuDTO.setSkuList(skuDOList);
-        //类目族
-        spuDTO.setCategoryIds(categoryBizService.getCategoryFamily(spuDO.getCategoryId()));
-        String salesStr = cacheComponent.getHashRaw(CA_SPU_SALES_HASH, "S" + spuId);
-        if (!StringUtils.isEmpty(salesStr)) {
-            spuDTO.setSales(new Integer(salesStr));
-        }
-        int sum = skuDOList.stream().mapToInt(item -> item.getStock()).sum();
-        spuDTO.setStock(sum);
-        //获取商品属性
-        List<SpuAttributeDO> spuAttributeList = spuAttributeMapper.selectList(new QueryWrapper<SpuAttributeDO>().eq("spu_id", spuId));
-        spuDTO.setAttributeList(spuAttributeList);
-        //获取运费模板
-        FreightTemplateDTO templateDTO = freightBizService.getTemplateById(spuDO.getFreightTemplateId());
-        spuDTO.setFreightTemplate(templateDTO);
-        //放入缓存
-        cacheComponent.putObj(CA_SPU_PREFIX + spuId, spuDTO, Const.CACHE_ONE_DAY / 2);
-        packSpuCollectInfo(spuDTO, userId);
-        //获取第一页评论
-        Page<AppraiseResponseDTO> spuAppraise = appraiseBizService.getSpuAllAppraise(spuId, 1, 10);
-        spuDTO.setAppraisePage(spuAppraise);
-        return spuDTO;
+    public SpuDO getProductById(Long id) {
+        return spuMapper.selectById(id);
     }
 
-    // TODO 将会删除
-    public void clearGoodsCache(Long spuId) {
-
-        cacheComponent.del(CA_SPU_PREFIX + spuId);
-
-        cacheComponent.delPrefixKey(CA_SPU_PAGE_PREFIX);
-
-        cacheComponent.delHashKey(CA_SPU_HASH, "S" + spuId);
-
-    }
-
-    // TODO 将会删除
-    private void packSpuCollectInfo(SpuDTO spuDTO, Long userId) throws ServiceException {
-        if (userId != null) {
-            Boolean collectStatus = collectBizService.getCollectBySpuId(spuDTO.getId(), userId);
-            spuDTO.setCollect(collectStatus);
-        }
+    /**
+     * 扣减库存
+     * @param skuStockMap
+     */
+    public void decSkuStock(Map<Long, Integer> skuStockMap) {
+        skuStockMap.forEach((k, v) -> skuMapper.decStock(k, v));
     }
 
 }
