@@ -136,10 +136,15 @@ public class CategoryBizService {
     }
 
     /**
-     * 获得所有类目list
+     * 获得所有类目list,类中有调用，不能使用切面
+     *
      */
-    @AspectCommonCache(value = CacheConst.CATEGORY_ALL_LIST,second = 60 * 60 * 24, arrayClass = CategoryDTO.class)
     public List<CategoryDTO> getCategoryList() throws ServiceException{
+        List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CacheConst.CATEGORY_ALL_LIST, CategoryDTO.class);
+        if (categoryDTOListFormCache != null) {
+            return categoryDTOListFormCache;
+        }
+
         List<CategoryDTO> categoryDTOS = categoryThreeLevelTree();
         List<CategoryDTO> resultList = new LinkedList<>();
         categoryDTOS.forEach(first -> {
@@ -153,6 +158,40 @@ public class CategoryBizService {
                         });
                 });
         });
+
+        cacheComponent.putObj(CacheConst.CATEGORY_ALL_LIST, resultList, Const.CACHE_ONE_DAY);
         return resultList;
+    }
+
+    /**
+     * 将一父节点传入，返回父节点本身与其子节点，及其孙节点ID列表
+     *
+     * @param categoryId
+     * @return
+     * @throws ServiceException
+     */
+    public List<Long> getCategorySelfAndChildren(Long categoryId) throws ServiceException {
+
+        // 利用冗余数据实现
+        List<CategoryDTO> categoryList = getCategoryList();
+        CategoryDTO categoryDTO = new CategoryDTO();
+        for (int i = 0; i < categoryList.size(); i++) {
+            if(categoryList.get(i).getId().equals(categoryId)){
+                categoryDTO = categoryList.get(i);
+                break;
+            }
+        }
+
+        LinkedList<CategoryDTO> queue = new LinkedList<CategoryDTO>();
+        queue.add(categoryDTO);
+        List<Long> ids = new LinkedList<>();
+        while(!queue.isEmpty()){
+            CategoryDTO pop = queue.pop();
+            if(pop.getChildrenList() != null){
+                queue.addAll(pop.getChildrenList());
+            }
+            ids.add(pop.getId());
+        }
+        return ids;
     }
 }
