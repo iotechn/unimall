@@ -6,7 +6,7 @@ import lombok.Data;
  * Created by rize on 2019/7/14.
  */
 @Data
-public class AdvertisementDTO extends SuperDTO {
+public class AdvertDTO extends SuperDTO {
 
     private Integer adType;
 

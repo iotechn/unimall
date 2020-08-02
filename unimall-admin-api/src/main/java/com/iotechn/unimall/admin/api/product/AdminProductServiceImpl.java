@@ -1,6 +1,5 @@
 package com.iotechn.unimall.admin.api.product;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
@@ -248,8 +247,11 @@ public class AdminProductServiceImpl implements AdminProductService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                // 1. 放入类目缓存 TODO category 放入父类目
-                cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + spuDO.getCategoryId(), spuDO.getPrice(), "P" + spuDO.getId());
+                // 1. 放入类目缓存
+                List<Long> categoryFamily = null;//TODO categoryBizService.getCategoryFamily(spuDO.getCategoryId());
+                for (Long categoryId : categoryFamily) {
+                    cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + categoryId, spuDO.getPrice(), "P" + spuDO.getId());
+                }
             }
         });
         return "ok";
@@ -342,6 +344,12 @@ public class AdminProductServiceImpl implements AdminProductService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String delete(Long spuId, Long adminId) throws ServiceException {
+        // 校验是否有关联此商品的广告
+        SpuDO spuDOBefore = spuMapper.selectById(spuId);
+        // 校验是否有关联广告
+        this.checkUnionAdvert(Arrays.asList(spuId.toString()));
+        // 校验是否有不可下架的活动
+        this.checkProductActivity(spuDOBefore);
         if (spuMapper.deleteById(spuId) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
         }
@@ -349,28 +357,37 @@ public class AdminProductServiceImpl implements AdminProductService {
         skuMapper.delete(new QueryWrapper<SkuDO>().eq("spu_id", spuId));
         imgMapper.delete(new QueryWrapper<ImgDO>().eq("biz_id", spuId).eq("biz_type", BizType.GOODS.getCode()));
         spuAttributeMapper.delete(new QueryWrapper<SpuAttributeDO>().eq("spu_id", spuId));
-        spuSpecificationMapper.delete(new QueryWrapper<SpuSpecificationDO>().eq("spu_id", spuId));
-        // TODO 删除SPU缓存
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                AdminProductServiceImpl.this.deleteSpuCache(spuDOBefore);
+            }
+        });
         return "ok";
+    }
+
+    private void checkUnionAdvert(List<String> ids) throws ServiceException {
+        // TODO
+//        List<AdvertDO> list1 = advertMapper.selectList(
+//                new QueryWrapper<AdvertDO>()
+//                        .eq("union_type", AdvertUnionType.PRODUCT.getCode())
+//                        .in("union_value", ids).last("LIMIT 1"));
+//        if (!CollectionUtils.isEmpty(list1)) {
+//            throw new AdminServiceException(CoreExceptionDefinition.buildVariableException(ShoppingExceptionDefinition.CATEGORY_EXIST_ADVERT, list1.get(0).getTitle()));
+//        }
+//        List<AdvertBusinessDO> list2 = advertBusinessMapper.selectList(
+//                new QueryWrapper<AdvertBusinessDO>()
+//                        .eq("union_type", AdvertBusinessUnionType.PRODUCT.getCode())
+//                        .eq("union_value", ids).last("LIMIT 1"));
+//        if (!CollectionUtils.isEmpty(list2)) {
+//            throw new AdminServiceException(CoreExceptionDefinition.buildVariableException(ShoppingExceptionDefinition.CATEGORY_EXIST_ADVERT, list2.get(0).getTitle()));
+//        }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String batchDelete(String idsJson, Long adminId) throws ServiceException {
-        List<Long> ids = JSONObject.parseArray(idsJson, Long.class);
-        if (CollectionUtils.isEmpty(ids)) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
-        }
-        if (spuMapper.delete(new QueryWrapper<SpuDO>().in("id", ids)) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
-        }
-        List<Long> skuIds = skuMapper.selectSkuIdsBySpuIds(ids);
-        cartMapper.delete(new QueryWrapper<CartDO>().in("sku_id", skuIds));
-        skuMapper.delete(new QueryWrapper<SkuDO>().in("spu_id", ids));
-        imgMapper.delete(new QueryWrapper<ImgDO>().in("biz_id", ids).eq("biz_type", BizType.GOODS.getCode()));
-        spuAttributeMapper.delete(new QueryWrapper<SpuAttributeDO>().in("spu_id", ids));
-        for (Long spuId : ids) {
-        }
+        // TODO
         return "ok";
     }
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.iotechn.unimall.data.mapper.AdvertisementMapper">
+<mapper namespace="com.iotechn.unimall.data.mapper.AdvertMapper">
 
 
-    <select id="getAdvertisementByTypeAndStatus" resultType="com.iotechn.unimall.data.domain.AdvertisementDO">
+    <select id="getAdvertByTypeAndStatus" resultType="com.iotechn.unimall.data.domain.AdvertDO">
         select
           id,
           ad_type as adType,
@@ -22,7 +22,7 @@
         limit #{offset},#{size}
     </select>
 
-    <select id="getAllAdvertisement" resultType="com.iotechn.unimall.data.domain.AdvertisementDO">
+    <select id="getAllAdvert" resultType="com.iotechn.unimall.data.domain.AdvertDO">
         select
           id,
           ad_type as adType,
