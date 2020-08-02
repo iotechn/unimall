@@ -6,7 +6,6 @@ import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.biz.service.collect.CollectBizService;
-import com.iotechn.unimall.biz.service.footpring.FootprintBizService;
 import com.iotechn.unimall.biz.service.freight.FreightBizService;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AppServiceException;
@@ -20,7 +19,10 @@ import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.enums.BizType;
-import com.iotechn.unimall.data.mapper.*;
+import com.iotechn.unimall.data.mapper.ImgMapper;
+import com.iotechn.unimall.data.mapper.SkuMapper;
+import com.iotechn.unimall.data.mapper.SpuAttributeMapper;
+import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -298,6 +300,7 @@ public class ProductBizService {
         return spuDTO;
     }
 
+    // TODO 将会删除
     public void clearGoodsCache(Long spuId) {
 
         cacheComponent.del(CA_SPU_PREFIX + spuId);
@@ -308,6 +311,7 @@ public class ProductBizService {
 
     }
 
+    // TODO 将会删除
     private void packSpuCollectInfo(SpuDTO spuDTO, Long userId) throws ServiceException {
         if (userId != null) {
             Boolean collectStatus = collectBizService.getCollectBySpuId(spuDTO.getId(), userId);
