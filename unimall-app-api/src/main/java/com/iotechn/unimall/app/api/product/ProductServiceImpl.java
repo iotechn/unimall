@@ -2,7 +2,6 @@ package com.iotechn.unimall.app.api.product;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.constant.CacheConst;
-import com.iotechn.unimall.biz.service.footpring.FootprintBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -11,12 +10,10 @@ import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
 import com.iotechn.unimall.data.domain.SpuDO;
+import com.iotechn.unimall.data.domain.SpuSpecificationDO;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.enums.BizType;
-import com.iotechn.unimall.data.mapper.ImgMapper;
-import com.iotechn.unimall.data.mapper.SkuMapper;
-import com.iotechn.unimall.data.mapper.SpuAttributeMapper;
-import com.iotechn.unimall.data.mapper.SpuMapper;
+import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +50,10 @@ public class ProductServiceImpl implements ProductService {
     private SpuAttributeMapper spuAttributeMapper;
 
     @Autowired
-    private TransactionTemplate transactionTemplate;
+    private SpuSpecificationMapper spuSpecificationMapper;
 
     @Autowired
-    private FootprintBizService footprintBizService;
+    private TransactionTemplate transactionTemplate;
 
     @Override
     public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
@@ -95,9 +92,9 @@ public class ProductServiceImpl implements ProductService {
             // 4. 设置商品属性
             List<SpuAttributeDO> attributeList = spuAttributeMapper.selectList(new QueryWrapper<SpuAttributeDO>().eq("spu_id", spuId));
             detailSpuInfo.setAttributeList(attributeList);
-            // TODO 5. 设置商品规格
-//            List<CategoryAttributeDO> categoryAttributeList = categoryAttributeMapper.selectList(new QueryWrapper<CategoryAttributeDO>().eq("category_id", spuDTO.getCategoryId()));
-//            detailSpuInfo.setSpecificationList(categoryAttributeList);
+            // 5. 设置商品规格
+            List<SpuSpecificationDO> specificationList = spuSpecificationMapper.selectList(new QueryWrapper<SpuSpecificationDO>().eq("spu_id", spuId));
+            detailSpuInfo.setSpecificationList(specificationList);
             cacheComponent.putHashObj(CacheConst.PRT_SPU_DETAIL_HASH_BUCKET, "P" + spuId, detailSpuInfo);
         }
         // 记住忽略以上 N 个属性
@@ -126,7 +123,7 @@ public class ProductServiceImpl implements ProductService {
         // spuDTO.setFreightTemplate(freightTemplateBizService.getFreightTemplateById(spuDTO.getFreightTemplateId()));
         if (userId != null) {
             // 添加用户足迹
-            footprintBizService.addOrUpdateFootprint(spuId, userId);
+//            footprintBizService.addOrUpdateFootprint(spuId, userId);
             // TODO 封装用户收藏信息
             // spuDTO.setFavorite(cacheComponent.getHashRaw(ShoppingConst.CA_PRODUCT_FAVORITE_HASH_BUCKET + spuId, "U" + userId) != null);
         }

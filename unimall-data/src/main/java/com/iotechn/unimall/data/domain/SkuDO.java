@@ -22,6 +22,9 @@ public class SkuDO extends SuperDO {
      */
     private String title;
 
+    @TableField("specification")
+    private String specification;
+
     private String img;
 
     @TableField("original_price")
@@ -33,8 +36,5 @@ public class SkuDO extends SuperDO {
     private Integer vipPrice;
 
     private Integer stock;
-
-    @TableField("freeze_stock")
-    private Integer freezeStock;
 
 }

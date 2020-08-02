@@ -2,6 +2,7 @@ package com.iotechn.unimall.data.dto.goods;
 
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
+import com.iotechn.unimall.data.domain.SpuSpecificationDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
 import com.iotechn.unimall.data.dto.SuperDTO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
@@ -54,12 +55,17 @@ public class SpuDTO extends SuperDTO {
     private List<SpuAttributeDO> attributeList;
 
     /**
+     * 商品规格枚举列表
+     */
+    private List<SpuSpecificationDO> specificationList;
+
+    /**
      * 商品的第一页(前10条)评价
      */
     private Page<AppraiseResponseDTO> appraisePage;
 
     /**
-     * 商品现在携带的团购信息
+     *TODO 将要删除 商品现在携带的团购信息
      */
     private GroupShopDTO groupShop;
 
