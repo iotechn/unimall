@@ -93,9 +93,6 @@ public class CheckQuartz {
                             updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
                             updateOrderDO.setGmtUpdate(now);
                             List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", item.getId()));
-                            orderSkuList.forEach(skuItem -> {
-                                skuMapper.decSkuFreezeStock(skuItem.getSkuId(), skuItem.getNum());
-                            });
                             orderBizService.changeOrderStatus(item.getOrderNo(), OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
                         } catch (Exception e) {
                             logger.error("[未确认检测] 异常", e);

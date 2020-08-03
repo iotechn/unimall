@@ -3,15 +3,11 @@
 <mapper namespace="com.iotechn.unimall.data.mapper.SkuMapper">
 
     <update id="decSkuStock">
-        UPDATE unimall_sku SET stock = stock - #{stock}, freeze_stock = freeze_stock + #{stock} WHERE id = #{skuId} AND stock >= #{stock}
+        UPDATE unimall_sku SET stock = stock - #{stock} WHERE id = #{skuId} AND stock >= #{stock}
     </update>
 
     <update id="returnSkuStock">
-        UPDATE unimall_sku SET stock = stock + #{stock}, freeze_stock = freeze_stock - #{stock} WHERE id = #{skuId}
-    </update>
-
-    <update id="decSkuFreezeStock">
-        UPDATE unimall_sku SET freeze_stock = freeze_stock - #{stock} WHERE id = #{skuId}
+        UPDATE unimall_sku SET stock = stock + #{stock} WHERE id = #{skuId}
     </update>
 
     <select id="getSkuDTOById" resultType="com.iotechn.unimall.data.dto.goods.SkuDTO">
@@ -67,6 +63,7 @@
             p.gmt_activity_start AS gmtActivityStart,
             p.gmt_activity_end AS gmtActivityEnd,
             k.specification,
+            k.title,
             p.title AS spuTitle,
             k.img,
             p.img AS spuImg,

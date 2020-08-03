@@ -11,8 +11,6 @@ import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.model.Page;
 
-import java.util.List;
-
 /**
  * Created by rize on 2019/7/4.
  */
@@ -39,7 +37,8 @@ public interface OrderService {
 
     @HttpMethod(description = "微信小程序预先支付")
     public Object wxPrepay(
-            @NotNull @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单串号") String orderNo,
+            @HttpParam(name = "parentOrderNo", type = HttpParamType.COMMON, description = "父单串号") String parentOrderNo,
+            @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单串号") String orderNo,
             @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "ip地址") String ip,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 

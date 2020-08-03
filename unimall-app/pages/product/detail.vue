@@ -218,7 +218,7 @@
 			uni.showLoading({
 				title: '正在加载'
 			})
-			that.$api.request('goods', 'getGoods', {
+			that.$api.request('product', 'getProduct', {
 				spuId: options.id,
 				groupShopId: options.gid ? options.gid : ''
 			}, failres => {

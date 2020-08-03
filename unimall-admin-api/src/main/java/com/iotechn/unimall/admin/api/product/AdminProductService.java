@@ -64,4 +64,8 @@ public interface AdminProductService {
             @NotNull @HttpParam(name = "ids", type = HttpParamType.COMMON, description = "商品Id") String ids,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
+    @HttpMethod(description = "重建商品缓存", permission = "operation:goods:rebuild", permissionParentName = "商品管理", permissionName = "商品管理")
+    public String rebuildProductCache(
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
+
 }

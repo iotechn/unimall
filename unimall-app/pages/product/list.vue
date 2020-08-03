@@ -108,7 +108,7 @@
 				if (type === 'refresh') {
 					this.pageNo = 1
 				}
-				this.$api.request('goods', 'getGoodsPage', {
+				this.$api.request('product', 'getProductPage', {
 					categoryId: this.cateId,
 					title: this.keywords,
 					pageNo : this.pageNo,

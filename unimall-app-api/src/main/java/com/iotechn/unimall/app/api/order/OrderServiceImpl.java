@@ -19,7 +19,6 @@ import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.component.LockComponent;
@@ -123,13 +122,14 @@ public class OrderServiceImpl implements OrderService {
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
         if (lockComponent.tryLock(LockConst.TAKE_ORDER_LOCK + userId, 20)) {
             //加上乐观锁，防止用户重复提交订单
+            List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
+            boolean calcStockFlag = false;
             try {
                 //用户会员等级
                 Integer userLevel = SessionUtil.getUser().getLevel();
                 // 对Sku排序，防止相互拿锁，两边都无法结算的情况。
                 orderRequest.getSkuList().sort((o1, o2) -> (int) (o1.getSkuId() - o2.getSkuId()));
                 //参数强校验 START
-                List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
                 if (CollectionUtils.isEmpty(skuList) || orderRequest.getTotalPrice() == null) {
                     throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
                 }
@@ -183,6 +183,9 @@ public class OrderServiceImpl implements OrderService {
                     orderCalcSpuDTO.setNum(orderRequestSkuDTO.getNum());
                     calcSkuList.add(orderCalcSpuDTO);
                 }
+
+                calcStockFlag = true;
+
                 // 商品库存不足列表，用于前端提示 使用异常的Attach方法
                 if (!CollectionUtils.isEmpty(stockErrorSkuList)) {
                     throw new AppServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH).attach(stockErrorSkuList);
@@ -365,11 +368,19 @@ public class OrderServiceImpl implements OrderService {
                     }
                 }
                 return parentOrderNo;
-            } catch (ServiceException e) {
-                throw e;
             } catch (Exception e) {
+                if (calcStockFlag) {
+                    for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
+                        cacheComponent.incrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + orderRequestSkuDTO.getSkuId(), orderRequestSkuDTO.getNum());
+                    }
+                }
+                if (e instanceof ServiceException) {
+                    // 服务异常
+                    throw e;
+                }
+                // 未知异常
                 logger.error("[提交订单] 异常", e);
-                throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+                throw e;
             } finally {
                 lockComponent.release(LockConst.TAKE_ORDER_LOCK + userId);
             }
@@ -395,15 +406,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Object wxPrepay(String orderNo, String ip, Long userId) throws ServiceException {
-        Date now = new Date();
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
-        // 检测订单状态
-        Integer status = orderDO.getStatus();
-        if (status != OrderStatusType.UNPAY.getCode()) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
-        }
-
+    public Object wxPrepay(String parentOrderNo, String orderNo, String ip, Long userId) throws ServiceException {
+        int actualPrice = this.checkPrepay(parentOrderNo, orderNo, userId);
         Integer loginType = SessionUtil.getUser().getLoginType();
         String appId;
         String tradeType;
@@ -419,26 +423,24 @@ public class OrderServiceImpl implements OrderService {
         } else {
             throw new AppServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
         }
-
-        Object result = null;
         try {
             WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
             orderRequest.setAppid(appId);
-            orderRequest.setOutTradeNo(orderNo);
+            // 区分回调 直接通过 S 来判断
+            orderRequest.setOutTradeNo(StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo);
             orderRequest.setOpenid(SessionUtil.getUser().getOpenId());
-            orderRequest.setBody("订单：" + orderNo);
-            orderRequest.setTotalFee(orderDO.getActualPrice());
+            orderRequest.setBody("buy_" + (StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo));
+            orderRequest.setTotalFee(actualPrice);
             orderRequest.setSpbillCreateIp(ip);
             orderRequest.setTradeType(tradeType);
-            result = wxPayService.createOrder(orderRequest);
+            return wxPayService.createOrder(orderRequest);
         } catch (WxPayException e) {
             logger.error("[微信支付] 异常", e);
-            throw new ThirdPartServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+            throw new AppServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
         } catch (Exception e) {
             logger.error("[预付款异常]", e);
             throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
         }
-        return result;
     }
 
     private int checkPrepay(String parentOrderNo, String orderNo, Long userId) throws ServiceException {
@@ -466,7 +468,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Object offlinePrepay(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         // 检测订单状态
         Integer status = orderDO.getStatus();
         if (status != OrderStatusType.UNPAY.getCode()) {
@@ -486,7 +488,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String refund(String orderNo, String reason, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (PayChannelType.OFFLINE.getCode().equals(orderDO.getPayChannel())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
         }
@@ -510,7 +512,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String cancel(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() != OrderStatusType.UNPAY.getCode()) {
             throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CANCEL);
         }
@@ -528,7 +530,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String confirm(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() != OrderStatusType.WAIT_CONFIRM.getCode()) {
             throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CONFIRM);
         }
@@ -536,16 +538,13 @@ public class OrderServiceImpl implements OrderService {
         updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
         updateOrderDO.setGmtUpdate(new Date());
         List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
-        orderSkuList.forEach(item -> {
-            skuMapper.decSkuFreezeStock(item.getSkuId(), item.getNum());
-        });
         orderBizService.changeOrderStatus(orderNo, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
         return "ok";
     }
 
     @Override
     public ShipTraceDTO queryShip(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() < OrderStatusType.WAIT_CONFIRM.getCode()) {
             throw new AppServiceException(ExceptionDefinition.ORDER_HAS_NOT_SHIP);
         }
@@ -568,7 +567,7 @@ public class OrderServiceImpl implements OrderService {
                          Integer activityType, Long activityId) throws ServiceException {
         OrderDO orderDO = new OrderDO();
         // 设置商品原价，总价
-        orderDO.setSkuTotalPrice(skuOriginalPrice);
+        orderDO.setSkuOriginalTotalPrice(skuOriginalPrice);
         orderDO.setSkuTotalPrice(skuPrice);
         // 下单渠道
         orderDO.setChannel(channel);

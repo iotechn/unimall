@@ -410,6 +410,29 @@ public class AdminProductServiceImpl implements AdminProductService {
     }
 
     @Override
+    public String rebuildProductCache(Long adminId) throws ServiceException {
+        // 1.删除旧缓存
+        cacheComponent.delPrefixKey(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET);
+        cacheComponent.delPrefixKey(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET);
+        cacheComponent.delPrefixKey(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET);
+        cacheComponent.delPrefixKey(CacheConst.PRT_SKU_STOCK_BUCKET);
+        cacheComponent.delPrefixKey(CacheConst.PRT_SPU_DETAIL_HASH_BUCKET);
+        cacheComponent.delPrefixKey(CacheConst.PRT_SPU_HASH_BUCKET);
+        // 2.重建新缓存
+        List<SpuDO> spuDOS = spuMapper.selectList(new QueryWrapper<>());
+        for (SpuDO spuDO : spuDOS) {
+            // 2.1. 重建主表缓存
+            this.createSpuCache(spuDO);
+            // 2.2. 重建SKU缓存
+            List<SkuDO> skuList = skuMapper.selectList(new QueryWrapper<SkuDO>().eq("spu_id", spuDO.getId()));
+            for (SkuDO skuDO : skuList) {
+                cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
+            }
+        }
+        return null;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public AdminSpuDTO freezeOrActivation(Long spuId, Integer status, Long adminId) throws ServiceException {
         SpuDO spuDO = spuMapper.selectById(spuId);
