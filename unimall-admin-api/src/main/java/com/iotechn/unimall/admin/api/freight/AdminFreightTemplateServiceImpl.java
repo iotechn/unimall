@@ -3,6 +3,7 @@ package com.iotechn.unimall.admin.api.freight;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -15,9 +16,13 @@ import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.mapper.FreightTemplateCarriageMapper;
 import com.iotechn.unimall.data.mapper.FreightTemplateMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
+import org.apache.ibatis.transaction.Transaction;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -82,7 +87,13 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         if (freightTemplateCarriageMapper.delete(
                 new QueryWrapper<FreightTemplateCarriageDO>()
                         .eq("template_id", templateId)) >= 0) {
-            cacheComponent.delPrefixKey(ProductBizService.CA_SPU_PREFIX);
+
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    cacheComponent.delPrefixKey(ProductBizService.CA_SPU_PREFIX);
+                }
+            });
             return true;
         }
         throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
@@ -107,7 +118,13 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
             return t;
         }).collect(Collectors.toList());
         insertFreightTemplateCarriage(freightTemplateDO, collect, now);
-        cacheComponent.delPrefixKey(ProductBizService.CA_SPU_PREFIX);
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                cacheComponent.delPrefixKey(ProductBizService.CA_SPU_PREFIX);
+            }
+        });
         return true;
     }
 
@@ -135,8 +152,10 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
             FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO();
             List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new QueryWrapper<FreightTemplateCarriageDO>()
                     .eq("template_id", freightTemplateDO.getId()));
-            freightTemplateDTO.setFreightTemplateDO(freightTemplateDO);
-            freightTemplateDTO.setFreightTemplateCarriageDOList(freightTemplateCarriageDOList);
+
+            // freightTemplateDTO.setFreightTemplateDO(freightTemplateDO);
+            BeanUtils.copyProperties(freightTemplateDO,freightTemplateDTO);
+            freightTemplateDTO.setCarriageDOList(freightTemplateCarriageDOList);
             freightTemplateDTOList.add(freightTemplateDTO);
         }
         return freightTemplateDTOList;

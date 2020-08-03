@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.dto.freight;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.domain.FreightTemplateDO;
 import com.iotechn.unimall.data.dto.SuperDTO;
@@ -21,8 +22,24 @@ import java.util.List;
 @Data
 public class FreightTemplateDTO extends SuperDTO {
 
-    private FreightTemplateDO freightTemplateDO;
+    // private FreightTemplateDO freightTemplateDO;
 
-    private List<FreightTemplateCarriageDO> freightTemplateCarriageDOList;
+    private List<FreightTemplateCarriageDO> carriageDOList;
+
+    private String templateName;
+
+    private String spuLocation;
+
+    private Integer deliveryDeadline;
+
+    private Integer defaultFreePrice;
+
+    private Integer defaultFirstNum;
+
+    private Integer defaultFirstMoney;
+
+    private Integer defaultContinueNum;
+
+    private Integer defaultContinueMoney;
 
 }

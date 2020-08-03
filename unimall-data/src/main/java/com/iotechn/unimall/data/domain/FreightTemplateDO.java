@@ -34,15 +34,29 @@ public class FreightTemplateDO extends SuperDO{
     @TableField("default_free_price")
     private Integer defaultFreePrice;
 
+    /**
+     * 第一次计价后，可以包含的商品数量
+     * default:为了区分特殊地区字段，加的
+     */
     @TableField("default_first_num")
     private Integer defaultFirstNum;
 
+    /**
+     * 第一次计价的价格
+     */
     @TableField("default_first_money")
     private Integer defaultFirstMoney;
 
+    /**
+     * 商品数量超过了第一次计价后的商品数量，会续加一次价格，
+     * 每续加一次价格，包含的商品数量
+     */
     @TableField("default_continue_num")
     private Integer defaultContinueNum;
 
+    /**
+     * 续加计价的价格
+     */
     @TableField("default_continue_money")
     private Integer defaultContinueMoney;
 
