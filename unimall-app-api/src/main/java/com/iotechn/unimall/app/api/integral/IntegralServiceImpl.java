@@ -7,7 +7,7 @@ import com.iotechn.unimall.data.domain.AdvertDO;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.AdvertDTO;
 import com.iotechn.unimall.data.dto.IntegralIndexDataDTO;
-import com.iotechn.unimall.data.enums.AdvertisementType;
+import com.iotechn.unimall.data.enums.AdvertType;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class IntegralServiceImpl implements IntegralService {
             BeanUtils.copyProperties(item, advertDTO);
             return advertDTO;
         }).collect(Collectors.groupingBy(item -> "t" + item.getAdType()));
-        List<AdvertDTO> categoryPickAd = adDTOMap.get("t" + AdvertisementType.CATEGORY_PICK.getCode());
+        List<AdvertDTO> categoryPickAd = adDTOMap.get("t" + AdvertType.CATEGORY_PICK.getCode());
         //封装 分类精选 商品
         if (!CollectionUtils.isEmpty(categoryPickAd)) {
             for (AdvertDTO item : categoryPickAd) {

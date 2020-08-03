@@ -267,6 +267,8 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition GOODS_UNION_ACTIVITY_CAN_NOT_BE_OFF_SHELF =
             new ServiceExceptionDefinition(20010, "商品关联的活动正在进行，不允许下架");
 
+    public static final ServiceExceptionDefinition GOODS_EXIST_ADVERT =
+            new ServiceExceptionDefinition(20011, "商品存在广告，请先移除广告");
 
 
     public static final ServiceExceptionDefinition RECOMMEND_SPU_NO_HAS =
@@ -347,10 +349,10 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition CATEGORY_OR_PARENT_NODE_IS_EMPTY =
             new ServiceExceptionDefinition(51002, "传入ID，父节点ID不能为空");
 
-    public static final ServiceExceptionDefinition PARENT_CAN_NOT_EQUALS_ONESELF =
-            new ServiceExceptionDefinition(51003, "父节点不能是自己");
+    public static final ServiceExceptionDefinition CATEGORY_EXIST_ADVERT =
+            new ServiceExceptionDefinition(51003, "类目被广告关联，请先移除广告");
 
-    public static final ServiceExceptionDefinition NOT_FIND_PARENT_NODE_OR_NODE =
+    public static final ServiceExceptionDefinition CATEGORY_NOT_FIND_PARENT_NODE_OR_NODE =
             new ServiceExceptionDefinition(51004, "未在数据库中查找到父节点或本节点");
 
     public static final ServiceExceptionDefinition CATEGORY_UPDATE_FAILURE =
