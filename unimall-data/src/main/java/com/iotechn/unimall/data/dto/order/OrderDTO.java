@@ -19,6 +19,8 @@ public class OrderDTO extends SuperDTO {
      */
     private String channel;
 
+    private String parentOrderNo;
+
     private String orderNo;
 
     private Long userId;
@@ -93,5 +95,12 @@ public class OrderDTO extends SuperDTO {
     private List<OrderSkuDO> skuList;
 
     private ShipTraceDTO shipTraceDTO;
+
+    private Integer activityType;
+
+    /**
+     * 活动Id
+     */
+    private Long activityId;
 
 }
