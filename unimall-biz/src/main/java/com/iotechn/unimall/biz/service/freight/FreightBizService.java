@@ -13,6 +13,7 @@ import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.mapper.AddressMapper;
 import com.iotechn.unimall.data.mapper.FreightTemplateCarriageMapper;
 import com.iotechn.unimall.data.mapper.FreightTemplateMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +35,6 @@ public class FreightBizService {
 
     @Autowired
     private FreightTemplateCarriageMapper freightTemplateCarriageMapper;
-
-    @Autowired
-    private AddressMapper addressMapper;
 
     @Autowired
     private ShipTraceQuery shipTraceQuery;
@@ -77,7 +75,10 @@ public class FreightBizService {
             }
 
             if (freightDTO.get(templateId) == null) {
-                FreightTemplateDTO tempDTO = new FreightTemplateDTO(freightTemplateDO, freightTemplateCarriageDOList);
+                // FreightTemplateDTO tempDTO = new FreightTemplateDTO(freightTemplateDO, freightTemplateCarriageDOList);
+                FreightTemplateDTO tempDTO = new FreightTemplateDTO();
+                BeanUtils.copyProperties(freightTemplateDO,tempDTO);
+                tempDTO.setCarriageDOList(freightTemplateCarriageDOList);
                 freightDTO.put(templateId, tempDTO);
             }
         }
@@ -93,7 +94,7 @@ public class FreightBizService {
     //根据传入的运费模板信息\使用同一模板商品数量\快递省份地址\使用同一模板商品总价减使用的优惠卷，计算这类商品在该订单中的运费
     private Integer getMoney(FreightTemplateDTO freightTemplateDTO, Integer num, String province, Integer moneySubDiscount) {
 
-        List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateDTO.getFreightTemplateCarriageDOList();
+        List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateDTO.getCarriageDOList();
 
         //先遍历是否是属于非默认运费规则，如果是，计算并返回值
         for (FreightTemplateCarriageDO freightTemplateCarriageDO : freightTemplateCarriageDOList) {
@@ -126,7 +127,9 @@ public class FreightBizService {
         }
 
         //如果使用默认运费规则
-        FreightTemplateDO freightTemplateDO = freightTemplateDTO.getFreightTemplateDO();
+        // FreightTemplateDO freightTemplateDO = freightTemplateDTO.getFreightTemplateDO();
+        FreightTemplateDO freightTemplateDO = new FreightTemplateDO();
+        BeanUtils.copyProperties(freightTemplateDTO,freightTemplateDO);
 
         if (freightTemplateDO.getDefaultFreePrice() == 0) {
             return 0;
@@ -161,7 +164,10 @@ public class FreightBizService {
         List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = freightTemplateCarriageMapper.selectList(new QueryWrapper<FreightTemplateCarriageDO>()
                 .eq("template_id", freightTemplateDO.getId()));
 
-        FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO(freightTemplateDO, freightTemplateCarriageDOList);
+        // FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO(freightTemplateDO, freightTemplateCarriageDOList);
+        FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO();
+        BeanUtils.copyProperties(freightTemplateDO,freightTemplateDTO);
+        freightTemplateDTO.setCarriageDOList(freightTemplateCarriageDOList);
         return freightTemplateDTO;
     }
 

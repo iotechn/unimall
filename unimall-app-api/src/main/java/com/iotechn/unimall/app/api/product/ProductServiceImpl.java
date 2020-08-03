@@ -2,6 +2,7 @@ package com.iotechn.unimall.app.api.product;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.biz.service.footpring.FootprintBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -51,6 +52,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private SpuSpecificationMapper spuSpecificationMapper;
+
+    @Autowired
+    private FootprintBizService footprintBizService;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -123,7 +127,7 @@ public class ProductServiceImpl implements ProductService {
         // spuDTO.setFreightTemplate(freightTemplateBizService.getFreightTemplateById(spuDTO.getFreightTemplateId()));
         if (userId != null) {
             // 添加用户足迹
-//            footprintBizService.addOrUpdateFootprint(spuId, userId);
+                footprintBizService.newFootprint(spuId, userId);
             // TODO 封装用户收藏信息
             // spuDTO.setFavorite(cacheComponent.getHashRaw(ShoppingConst.CA_PRODUCT_FAVORITE_HASH_BUCKET + spuId, "U" + userId) != null);
         }
