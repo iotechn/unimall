@@ -63,6 +63,7 @@
         <el-form-item label="所属类目" prop="category">
           <el-cascader
             :options="categoryList"
+            :props="{label:'title', value:'id', children:'childrenList'}"
             v-model="categoryIds"
             expand-trigger="hover"
             @change="handleCategoryChange"

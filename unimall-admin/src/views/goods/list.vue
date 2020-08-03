@@ -7,7 +7,7 @@
       <el-select v-model="listQuery.status" clearable style="width: 200px" class="filter-item" placeholder="选择商品状态" >
         <el-option v-for="(item,index) in goodsStatusMap" :key="index" :label="item.name" :value="item.value" />
       </el-select>
-      <el-cascader :options="categoryOptions" :props="{ checkStrictly: true }" placeholder="请选择类目" clearable class="filter-item" filterable style="width: 200px;" @change="handleCategoryOption" />
+      <el-cascader :props="{label:'title', value:'id', children:'childrenList', checkStrictly: true}" :options="categoryOptions" placeholder="请选择类目" clearable class="filter-item" filterable style="width: 200px;" @change="handleCategoryOption" />
       <el-button v-permission="['operation:goods:list']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
       <el-button v-permission="['operation:goods:create']" class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">添加</el-button>
       <el-button v-permission="['operation:goods:batchdelete']" :disabled="selectedIds.length === 0" class="filter-item" type="danger" icon="el-icon-delete" @click="handleBatchDelete">批量删除</el-button>

@@ -122,7 +122,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
         // 1. 检验类目是否存在,非一级类目的父类目是否存在
         if (category == null || (categoryParent == null && !parentId.equals(0L))) {
-            throw new AdminServiceException(ExceptionDefinition.NOT_FIND_PARENT_NODE_OR_NODE);
+            throw new AdminServiceException(ExceptionDefinition.CATEGORY_NOT_FIND_PARENT_NODE_OR_NODE);
         }
 
         CategoryDO updateDO = new CategoryDO();
