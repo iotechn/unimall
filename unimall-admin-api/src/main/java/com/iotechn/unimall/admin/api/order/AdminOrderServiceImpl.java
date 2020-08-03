@@ -22,11 +22,11 @@ import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.mapper.UserMapper;
 import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.data.properties.UnimallWxProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -66,14 +66,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Autowired
     private UserMapper userMapper;
 
-    @Value("${com.iotechn.unimall.wx.mini.app-id}")
-    private String wxMiNiAppid;
-
-    @Value("${com.iotechn.unimall.wx.app.app-id}")
-    private String wxAppAppid;
+    @Autowired
+    private UnimallWxProperties unimallWxProperties;
 
     @Override
-    public Page<OrderDO> list(Integer page, Integer pageSize, Integer status, String orderNo, Long adminId) throws ServiceException {
+    public Page<OrderDO> list(Integer page, Integer limit, Integer status, String orderNo, Long adminId) throws ServiceException {
         QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>();
         wrapper.orderByDesc("id");
         if (!StringUtils.isEmpty(orderNo)) {
@@ -82,7 +79,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (status != null) {
             wrapper.eq("status", status);
         }
-        return orderMapper.selectPage(Page.div(page,pageSize,OrderDO.class),wrapper);
+        return orderMapper.selectPage(Page.div(page, limit, OrderDO.class), wrapper);
     }
 
     @Override
@@ -129,7 +126,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                         refundPrice = orderDO.getPayPrice() - orderDO.getFreightPrice();
                     }
                     WxPayRefundRequest wxPayRefundRequest = new WxPayRefundRequest();
-                    wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? wxMiNiAppid : wxAppAppid);
+                    wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? unimallWxProperties.getMiniAppId() : unimallWxProperties.getMiniAppSecret());
                     wxPayRefundRequest.setOutTradeNo(orderNo);
                     wxPayRefundRequest.setOutRefundNo("refund_" + orderNo);
                     wxPayRefundRequest.setTotalFee(orderDO.getPayPrice());
@@ -188,28 +185,28 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     public List<OrderDTO> queryToExcel(Long gmtStart, Long gmtEnd, Integer status, Long adminId) throws ServiceException {
         QueryWrapper wrapper = new QueryWrapper();
-        if(gmtStart != null && gmtEnd != null){
-            if(gmtStart > gmtStart){
+        if (gmtStart != null && gmtEnd != null) {
+            if (gmtStart > gmtStart) {
                 throw new AdminServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
             }
-            wrapper.between("gmt_create",new Date(gmtStart) ,new Date(gmtEnd));
+            wrapper.between("gmt_create", new Date(gmtStart), new Date(gmtEnd));
         }
-        if(status != null){
+        if (status != null) {
             wrapper.eq("status", status);
         }
         List<OrderDO> orderDOS = orderMapper.selectList(wrapper);
-        if(orderDOS == null || orderDOS.size() == 0){
+        if (orderDOS == null || orderDOS.size() == 0) {
             return null;
         }
         List<OrderDTO> orderDTOList = new ArrayList<>();
-        for (OrderDO temp: orderDOS ) {
+        for (OrderDO temp : orderDOS) {
             OrderDTO orderDTO = new OrderDTO();
             BeanUtils.copyProperties(temp, orderDTO);
             orderDTOList.add(orderDTO);
         }
-        for (OrderDTO orderDTO:orderDTOList) {
-                List<OrderSkuDO> orderSkuDOList =  orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_no",orderDTO.getOrderNo() ));
-                orderDTO.setSkuList(orderSkuDOList);
+        for (OrderDTO orderDTO : orderDTOList) {
+            List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_no", orderDTO.getOrderNo()));
+            orderDTO.setSkuList(orderSkuDOList);
         }
         return orderDTOList;
     }
@@ -235,7 +232,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (gmtEnd == null) {
             gmtEnd = System.currentTimeMillis();
         }
-        if(gmtStart > gmtStart){
+        if (gmtStart > gmtStart) {
             throw new AdminServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
         }
         List<OrderDO> orderDOS = orderMapper.selectList(
@@ -243,7 +240,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                         .between("gmt_create", new Date(gmtStart), new Date(gmtEnd))
                         .select("id"));
         List<Long> ids = orderDOS.stream().map(item -> item.getId()).collect(Collectors.toList());
-        if(CollectionUtils.isEmpty(ids)){
+        if (CollectionUtils.isEmpty(ids)) {
             return null;
         }
 
