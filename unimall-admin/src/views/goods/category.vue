@@ -9,7 +9,7 @@
       </el-select>
       <el-cascader
         :options="options"
-        :props="{ checkStrictly: true }"
+        :props="{ checkStrictly: true,label:'title',value:'id',children:'childrenList' }"
         v-model="queryOptions"
         style="width: 200px"
         class="filter-item"
@@ -44,11 +44,11 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="类目ID" prop="value" />
+      <el-table-column align="center" label="类目ID" prop="id" />
 
-      <el-table-column align="center" label="类目名" prop="label">
+      <el-table-column align="center" label="类目名" prop="title">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.label }}</el-tag>
+          <el-tag>{{ scope.row.title }}</el-tag>
         </template>
       </el-table-column>
 
@@ -57,7 +57,7 @@
           <el-tag>{{ scope.row.fullName }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="父类目ID" prop="parent" />
+      <el-table-column align="center" label="父类目ID" prop="parentId" />
 
       <el-table-column align="center" label="级别" prop="level" >
         <template slot-scope="scope">
@@ -97,7 +97,7 @@
     <pagination
       v-show="total>0"
       :total="total"
-      :page.sync="listQuery.pageNo"
+      :page.sync="listQuery.page"
       :limit.sync="listQuery.limit"
       @pagination="getList"
     />
@@ -199,7 +199,6 @@
 import { listCategory, createCategory, updateCategory, deleteCategory } from '@/api/category'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
-import { clearTreeEmptyChildren } from '@/utils/index'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import { categorySecondLevelTree } from '@/api/category'
 
@@ -225,7 +224,7 @@ export default {
       dialogOptions: undefined,
       queryOptions: undefined,
       listQuery: {
-        pageNo: 1,
+        page: 1,
         limit: 20,
         id: undefined,
         title: undefined,
@@ -285,7 +284,7 @@ export default {
         })
     },
     handleFilter() {
-      this.listQuery.pageNo = 1
+      this.listQuery.page = 1
       if (this.listQuery.id != null && isNaN(Number(this.listQuery.id))) {
         this.$notify.error({
           title: '失败',
@@ -307,7 +306,7 @@ export default {
     },
     resetQuery() {
       this.listQuery = {
-        pageNo: 1,
+        page: 1,
         limit: 20,
         id: undefined,
         title: undefined,
@@ -478,9 +477,10 @@ export default {
     // 刷新类目选择节点
     refreshOptions() {
       categorySecondLevelTree().then(response => {
-        this.options = clearTreeEmptyChildren(response.data.data)
+        this.options = response.data.data
       })
     }
+
   }
 }
 </script>

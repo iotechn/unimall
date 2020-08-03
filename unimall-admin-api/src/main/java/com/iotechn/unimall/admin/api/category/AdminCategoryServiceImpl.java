@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -187,7 +188,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             wrapper.eq("level", level);
         }
         if (parentId != null) {
-            wrapper.eq("parent_id", parentId);
+            List<Long> categorySelfAndChildren = categoryBizService.getCategorySelfAndChildren(parentId);
+            if(!CollectionUtils.isEmpty(categorySelfAndChildren)){
+                wrapper.in("id",categorySelfAndChildren);
+            }
         }
         wrapper.orderByAsc("level");
 
@@ -221,6 +225,5 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             }
         });
     }
-    //TODO 可以做出父节点查询所有子节点
 
 }

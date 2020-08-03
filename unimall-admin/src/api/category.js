@@ -26,7 +26,7 @@ export function listCategory(query) {
     method: 'get',
     params: {
       _gp: 'admin.category',
-      _mt: 'queryCategory',
+      _mt: 'list',
       ...query
     }
   })
@@ -37,7 +37,7 @@ export function createCategory(data) {
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.category',
-      _mt: 'addCategory',
+      _mt: 'create',
       ...data
     })
   })
@@ -48,7 +48,7 @@ export function updateCategory(data) {
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.category',
-      _mt: 'updateCategory',
+      _mt: 'update',
       ...data
     })
   })
@@ -59,7 +59,7 @@ export function deleteCategory(id) {
     method: 'post',
     params: {
       _gp: 'admin.category',
-      _mt: 'deleteCategory',
+      _mt: 'delete',
       id: id
     }
   })

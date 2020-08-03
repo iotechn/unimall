@@ -54,6 +54,6 @@ public interface AdminCategoryService {
             @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,
             @HttpParam(name = "level", type = HttpParamType.COMMON, description = "类目等级") Integer level,
             @HttpParam(name = "parentId", type = HttpParamType.COMMON, description = "父类目id") Long parentId,
-            @Range(min = 1) @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer page,
+            @Range(min = 1) @HttpParam(name = "page", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer page,
             @Range(min = 1) @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页码长度", valueDef = "10") Integer limit) throws ServiceException;
 }
