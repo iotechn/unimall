@@ -8,11 +8,13 @@ import lombok.Data;
 @Data
 public class AdvertDTO extends SuperDTO {
 
-    private Integer adType;
+    private Integer type;
+
+    private Integer unionType;
 
     private String title;
 
-    private String url;
+    private String unionValue;
 
     private String imgUrl;
 

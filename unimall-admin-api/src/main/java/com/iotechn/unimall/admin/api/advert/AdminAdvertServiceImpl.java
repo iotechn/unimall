@@ -12,6 +12,8 @@ import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Date;
 
@@ -22,52 +24,63 @@ import java.util.Date;
  * Date: 2019-07-08
  * Time: 下午9:24
  */
-@Service
+@Service("adminAdvertService")
 public class AdminAdvertServiceImpl implements AdminAdvertService {
 
     @Autowired
     private AdvertMapper advertMapper;
+
     @Autowired
     private CacheComponent cacheComponent;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean create(Long adminId, Integer adType, String title, String url, String imgUrl, Integer status, String color) throws ServiceException {
-
+    public String create(Integer type, Integer unionType, String title, String unionValue, String imgUrl, Integer status, String color, Long adminId) throws ServiceException {
         Date now = new Date();
-        AdvertDO advertDO = new AdvertDO(adType,title,url,imgUrl,status,color);
+        AdvertDO advertDO = new AdvertDO();
+        advertDO.setType(type);
+        advertDO.setTitle(title);
+        advertDO.setUnionValue(unionValue);
+        advertDO.setImgUrl(imgUrl);
+        advertDO.setStatus(status);
+        advertDO.setColor(color);
         advertDO.setGmtCreate(now);
         advertDO.setGmtUpdate(now);
-
-        if(advertMapper.insert(advertDO) > 0){
-            cacheComponent.delPrefixKey(CacheConst.ADVERT_TYPE + adType);
-            return true;
+        if (advertMapper.insert(advertDO) > 0) {
+            this.clearCache(type);
+            return "ok";
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_ADD_FAILED);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean delete(Long adminId, Integer adType, Long adId) throws ServiceException {
-
-        if(advertMapper.delete(new QueryWrapper<AdvertDO>()
-                .eq("id",adId)
-                .eq("ad_type",adType)) > 0){
-            cacheComponent.delPrefixKey(CacheConst.ADVERT_TYPE + adType);
-            return true;
+    public String delete(Long adminId, Integer adType, Long adId) throws ServiceException {
+        if (advertMapper.delete(new QueryWrapper<AdvertDO>()
+                .eq("id", adId)
+                .eq("ad_type", adType)) > 0) {
+            this.clearCache(adType);
+            return "ok";
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_DELETE_FAILED);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean edit(Long adminId, Long adId, Integer adType, String title, String url, String imgUrl, Integer status, String color) throws ServiceException {
-        AdvertDO advertDO = new AdvertDO(adType,title,url,imgUrl,status,color);
+    public String edit(Long adId, Integer type, Integer unionType, String title, String unionValue, String imgUrl, Integer status, String color, Long adminId) throws ServiceException {
+        AdvertDO advertDO = new AdvertDO();
         advertDO.setId(adId);
+        advertDO.setType(type);
+        advertDO.setUnionType(unionType);
+        advertDO.setTitle(title);
+        advertDO.setUnionValue(unionValue);
+        advertDO.setImgUrl(imgUrl);
+        advertDO.setStatus(status);
+        advertDO.setColor(color);
         advertDO.setGmtUpdate(new Date());
-        if(advertMapper.updateById(advertDO)>0){
-            cacheComponent.delPrefixKey(CacheConst.ADVERT_TYPE + adType);
-            return  true;
+        if (advertMapper.updateById(advertDO) > 0) {
+            this.clearCache(type);
+            return "ok";
         }
         throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_UPDATE_FAILED);
     }
@@ -81,6 +94,15 @@ public class AdminAdvertServiceImpl implements AdminAdvertService {
         if (status != null) {
             wrapper.eq("status", status);
         }
-        return advertMapper.selectPage(Page.div(page,limit, AdvertDO.class),wrapper);
+        return advertMapper.selectPage(Page.div(page, limit, AdvertDO.class), wrapper);
+    }
+
+    public void clearCache(Integer adType) {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                cacheComponent.delPrefixKey(CacheConst.ADVERT_TYPE + adType);
+            }
+        });
     }
 }

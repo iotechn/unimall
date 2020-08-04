@@ -1,6 +1,5 @@
 package com.iotechn.unimall.data.model;
 
-import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.Data;
 
 /**
@@ -8,15 +7,21 @@ import lombok.Data;
  * Description:
  * User: rize
  * Date: 2020/3/26
- * Time: 15:57
+ * Time: 18:12
  */
 @Data
-public class OrderCalcSkuDTO extends SuperDTO {
+public class SkuStockInfoModel {
 
     private Long skuId;
 
-    private String unit;
+    /**
+     * 当前系统剩余量
+     */
+    private int surplus;
 
-    private Integer num;
+    /**
+     * 用户期望购买量
+     */
+    private int expect;
 
 }

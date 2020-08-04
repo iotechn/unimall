@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 import Qs from 'qs'
 
-export function spuTree() {
+export function getSpuBigTree() {
   return request({
     method: 'get',
     params: {

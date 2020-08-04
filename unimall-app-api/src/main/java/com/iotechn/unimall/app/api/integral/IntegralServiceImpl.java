@@ -38,12 +38,12 @@ public class IntegralServiceImpl implements IntegralService {
             AdvertDTO advertDTO = new AdvertDTO();
             BeanUtils.copyProperties(item, advertDTO);
             return advertDTO;
-        }).collect(Collectors.groupingBy(item -> "t" + item.getAdType()));
+        }).collect(Collectors.groupingBy(item -> "t" + item.getType()));
         List<AdvertDTO> categoryPickAd = adDTOMap.get("t" + AdvertType.CATEGORY_PICK.getCode());
         //封装 分类精选 商品
         if (!CollectionUtils.isEmpty(categoryPickAd)) {
             for (AdvertDTO item : categoryPickAd) {
-                Page<SpuDO> pickPage = productBizService.getProductPage(1, 10, new Long(item.getUrl().substring(item.getUrl().lastIndexOf("=") + 1)), "sales", false,null);
+                Page<SpuDO> pickPage = productBizService.getProductPage(1, 10, new Long(item.getUnionValue().substring(item.getUnionValue().lastIndexOf("=") + 1)), "sales", false,null);
                 item.setData(pickPage.getItems());
             }
         }

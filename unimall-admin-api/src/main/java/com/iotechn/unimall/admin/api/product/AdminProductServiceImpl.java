@@ -69,34 +69,37 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     /**
      * 后台低频接口，无需缓存，用于选择商品，需要
-     * TODO 优化
      * @return
      * @throws ServiceException
      */
     public List<SpuTreeNodeDTO> getSpuBigTree(Long adminId) throws ServiceException {
-        List<CategoryDO> categoryDOS = categoryMapper.selectList(new QueryWrapper<CategoryDO>().orderByAsc("level"));
-        List<SpuDO> spuDOS = spuMapper.getSpuTitleAll();
+        List<CategoryDO> categoryDOList = categoryMapper.selectList(
+                new QueryWrapper<CategoryDO>()
+                        .orderByAsc("level"));
+        Map<Long, List<SpuDO>> spuMap = spuMapper.selectList(
+                new QueryWrapper<SpuDO>()
+                        .select("id", "title", "category_id")).stream().collect(Collectors.groupingBy(SpuDO::getCategoryId));
         List<SpuTreeNodeDTO> list = new ArrayList<>();
         Integer recordLevelOne = 0;
-        Integer recordLevelTwo = 0;
-        for (int i = 0; i < categoryDOS.size(); i++) {
-            if (i != 0 && categoryDOS.get(i - 1).getLevel().equals(0) && categoryDOS.get(i).getLevel().equals(1)) {
+        for (int i = 0; i < categoryDOList.size(); i++) {
+            if (i != 0 && categoryDOList.get(i - 1).getLevel().equals(0) && categoryDOList.get(i).getLevel().equals(1)) {
                 recordLevelOne = i;
             }
-            if (i != 0 && categoryDOS.get(i - 1).getLevel().equals(1) && categoryDOS.get(i).getLevel().equals(2)) {
-                recordLevelTwo = i;
-                break;
-            }
         }
+
         for (int i = 0; i < recordLevelOne; i++) {
-            CategoryDO categoryOnI = categoryDOS.get(i);    //一级类目
+            //1. 一级分类
+            CategoryDO categoryOnI = categoryDOList.get(i);
             SpuTreeNodeDTO dtoOnI = new SpuTreeNodeDTO();
             dtoOnI.setLabel(categoryOnI.getTitle());
             dtoOnI.setValue("C_" + categoryOnI.getId());
             dtoOnI.setId(categoryOnI.getId());
-            dtoOnI.setChildren(new LinkedList<>());
-            for (int j = recordLevelOne; j < recordLevelTwo; j++) {
-                CategoryDO categoryOnJ = categoryDOS.get(j);    //二级类目
+            dtoOnI.setChildren(transSpu(spuMap.get(categoryOnI.getId())));
+            list.add(dtoOnI);
+            for (int j = recordLevelOne; j < categoryDOList.size(); j++) {
+                //2.1. 将分类商品添加上去
+                //2.2. 二级分类（一级子分类）
+                CategoryDO categoryOnJ = categoryDOList.get(j);
                 if (!categoryOnJ.getParentId().equals(dtoOnI.getId())) {
                     continue;
                 }
@@ -104,38 +107,24 @@ public class AdminProductServiceImpl implements AdminProductService {
                 dtoOnJ.setLabel(categoryOnJ.getTitle());
                 dtoOnJ.setValue("C_" + categoryOnJ.getId());
                 dtoOnJ.setId(categoryOnJ.getId());
-                dtoOnJ.setChildren(new LinkedList<>());
-                for (int p = recordLevelTwo; p < categoryDOS.size(); p++) {
-                    CategoryDO categoryOnP = categoryDOS.get(p);    //三级类目
-                    if (!categoryOnP.getParentId().equals(dtoOnJ.getId())) {
-                        continue;
-                    }
-                    SpuTreeNodeDTO dtoOnP = new SpuTreeNodeDTO();
-                    dtoOnP.setLabel(categoryOnP.getTitle());
-                    dtoOnP.setValue("C_" + categoryOnP.getId());
-                    dtoOnP.setId(categoryOnP.getId());
-                    dtoOnP.setChildren(new LinkedList<>());
-                    for (int k = 0; k < spuDOS.size(); k++) {
-                        if (k != 0 && spuDOS.get(k - 1).getCategoryId().equals(dtoOnP.getId()) && !spuDOS.get(k).getCategoryId().equals(dtoOnP.getId())) {
-                            break;
-                        }
-                        SpuDO spuDO = spuDOS.get(k);        //商品
-                        if (spuDO.getCategoryId().equals(dtoOnP.getId())) {
-                            SpuTreeNodeDTO dtoOnK = new SpuTreeNodeDTO();
-                            dtoOnK.setLabel(spuDO.getTitle());
-                            dtoOnK.setValue("G_" + spuDO.getId());
-                            dtoOnK.setId(spuDO.getId());
-                            dtoOnK.setChildren(new LinkedList<>());
-                            dtoOnP.getChildren().add(dtoOnK);
-                        }
-                    }
-                    dtoOnJ.getChildren().add(dtoOnP);
-                }
+                dtoOnJ.setChildren(transSpu(spuMap.get(categoryOnJ.getId())));
                 dtoOnI.getChildren().add(dtoOnJ);
             }
-            list.add(dtoOnI);
         }
         return list;
+    }
+
+    private List<SpuTreeNodeDTO> transSpu(List<SpuDO> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        return list.stream().map(item -> {
+            SpuTreeNodeDTO temp = new SpuTreeNodeDTO();
+            temp.setValue("G_" + item.getId());
+            temp.setId(item.getId());
+            temp.setLabel(item.getTitle());
+            return temp;
+        }).collect(Collectors.toList());
     }
 
 

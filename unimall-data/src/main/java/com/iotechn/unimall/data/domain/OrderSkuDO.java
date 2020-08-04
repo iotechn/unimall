@@ -58,8 +58,15 @@ public class OrderSkuDO extends SuperDO {
      */
     private String img;
 
-    //单位
+    /**
+     * 商品单位
+     */
     private String unit;
+
+    /**
+     * 商品重量 (g)
+     */
+    private Integer weight;
 
     /**
      * 活动类型

@@ -24,6 +24,7 @@
             k.price,
             k.vip_price AS vipPrice,
             k.stock,
+            k.weight,
             p.unit,
             p.status,
             k.gmt_update AS gmtUpdate,
@@ -71,6 +72,7 @@
             k.price,
             k.vip_price AS vipPrice,
             k.stock,
+            k.weight,
             p.unit AS unit,
             k.gmt_update AS gmtUpdate,
             k.gmt_create AS gmtCreate

@@ -10,10 +10,8 @@ package com.iotechn.unimall.data.enums;
 public enum AdvertUnionType {
     PRODUCT(1, "产品"),
     CATEGORY(2, "品类"),
-    STORE(3, "店铺"),
-    CLASSIFY(4, "分类"),
-    KEYWORDS(5, "关键字"),
-    PAGE(6, "页面"),;
+    KEYWORDS(3, "关键字"),
+    PAGE(4, "页面"),;
 
     AdvertUnionType(int code, String msg) {
         this.code = code;

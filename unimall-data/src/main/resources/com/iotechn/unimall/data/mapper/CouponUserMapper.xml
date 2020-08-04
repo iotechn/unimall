@@ -16,7 +16,7 @@
             c.`min`,
             c.discount
         FROM
-            unimall_user_coupon AS u,
+            unimall_coupon_user AS u,
             unimall_coupon AS c
             LEFT JOIN unimall_category AS y ON c.category_id = y.id
         WHERE
@@ -40,7 +40,7 @@
             c.`min`,
             c.discount
         FROM
-            unimall_user_coupon AS u,
+            unimall_coupon_user AS u,
             unimall_coupon AS c
             LEFT JOIN unimall_category AS y ON c.category_id = y.id
         WHERE

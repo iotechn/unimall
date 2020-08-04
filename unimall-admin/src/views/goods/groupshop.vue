@@ -251,7 +251,7 @@
 import { detailGoods } from '@/api/goods'
 import { queryGroupShop, createGroupShop, deleteGroupShop, editGroupShop } from '@/api/group_shop'
 import BackToTop from '@/components/BackToTop'
-import { spuTree } from '@/api/goods'
+import { getSpuBigTree } from '@/api/goods'
 import { formatDateAndTime } from '@/filters'
 import { clearTreeEmptyChildren } from '@/utils/index'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -391,7 +391,7 @@ export default {
     },
     refreshGoodsOptions() {
       if (this.goodsOptions.length === 0) {
-        spuTree().then(response => {
+        getSpuBigTree().then(response => {
           this.goodsOptions = clearTreeEmptyChildren(response.data.data)
         })
       }

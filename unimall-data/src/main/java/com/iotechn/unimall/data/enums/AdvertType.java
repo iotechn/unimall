@@ -10,7 +10,7 @@ package com.iotechn.unimall.data.enums;
 public enum AdvertType {
 
     CAROUSEL(1, AdvertUnionType.values(), "轮播"),
-    CLASSIFY_PICK(2, new AdvertUnionType[]{AdvertUnionType.CLASSIFY}, "分类精选"),
+    CLASSIFY_PICK(2, new AdvertUnionType[]{}, "分类精选"),
     BANNER(3, AdvertUnionType.values(), "横幅"),
     HOME_BUTTON(4, AdvertUnionType.values(), "首页5按钮"),
     POST_MSG(6, AdvertUnionType.values(), "公告"),

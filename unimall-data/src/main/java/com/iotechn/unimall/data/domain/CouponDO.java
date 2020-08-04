@@ -27,10 +27,12 @@ public class CouponDO extends SuperDO {
 
     private Integer surplus;
 
+    @TableField("`limit`")
     private Integer limit;
 
     private Integer discount;
 
+    @TableField("`min`")
     private Integer min;
 
     /**

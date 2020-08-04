@@ -4,6 +4,7 @@
     <div class="filter-container">
       <el-select
         v-model="listQuery.status"
+        clearable
         style="width: 200px"
         class="filter-item"
         placeholder="请选择广告状态"
@@ -11,7 +12,8 @@
         <el-option v-for="(key,index) in adStatusMap" :key="index" :label="key.name" :value="key.value" />
       </el-select>
       <el-select
-        v-model="listQuery.adType"
+        v-model="listQuery.type"
+        clearable
         style="width: 200px"
         class="filter-item"
         placeholder="请选择广告类型"
@@ -19,7 +21,7 @@
         <el-option v-for="(key,index) in adTypeMap" :key="index" :label="key.name" :value="key.value" />
       </el-select>
       <el-button
-        v-permission="['promote:advertisement:query']"
+        v-permission="['promote:advert:query']"
         class="filter-item"
         type="primary"
         icon="el-icon-search"
@@ -27,7 +29,7 @@
       >查找</el-button>
 
       <el-button
-        v-permission="['promote:advertisement:create']"
+        v-permission="['promote:advert:create']"
         class="filter-item"
         type="primary"
         icon="el-icon-edit"
@@ -45,39 +47,54 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="广告ID" prop="id" sortable />
+      <el-table-column align="center" width="80" label="广告ID" prop="id" />
 
       <el-table-column align="center" label="广告标题" prop="title" />
 
-      <el-table-column align="center" label="广告类型" prop="adType">
+      <el-table-column align="center" label="广告图片" width="120" prop="imgUrl">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.adType | adTypeFilter }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="广告状态" prop="status">
-        <template slot-scope="scope">
-          <el-tag>{{ scope.row.status | adStatusFilter }}</el-tag>
-        </template>
-      </el-table-column>
-
-      <el-table-column align="center" label="广告图片" prop="imgUrl">
-        <template slot-scope="scope">
-          <img v-if="scope.row.imgUrl" :src="scope.row.imgUrl" width="80" >
+          <el-popover placement="right" trigger="hover">
+            <!--trigger属性值：hover、click、focus 和 manual-->
+            <img :src="scope.row.imgUrl" height="230" >
+            <img slot="reference" :src="scope.row.imgUrl" height="23" >
+          </el-popover>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="活动链接" prop="url" />
+      <el-table-column align="center" label="广告类型" prop="type">
+        <template slot-scope="scope">
+          <el-tag>{{ scope.row.type | adTypeFilter }}</el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="广告状态" width="100" prop="status">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.status === 1 ? 'success' : 'info'">{{ scope.row.status | adStatusFilter }}</el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="关联类型" width="120" prop="unionType">
+        <template slot-scope="scope">
+          <el-tag type="warning">{{ scope.row.unionType | adUnionTypeFilter }}</el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="关联值[ID]" prop="unionValue" />
+
+      <el-table-column align="center" width="160" label="创建时间" prop="gmtCreate">
+        <template slot-scope="scope">{{ scope.row.gmtCreate | formatTime }}</template>
+      </el-table-column>
 
       <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
-            v-permission="['promote:advertisement:update']"
+            v-permission="['promote:advert:update']"
             type="primary"
             size="mini"
             @click="handleUpdate(scope.row)"
           >编辑</el-button>
           <el-button
-            v-permission="['promote:advertisement:delete']"
+            v-permission="['promote:advert:delete']"
             type="danger"
             size="mini"
             @click="handleDelete(scope.row)"
@@ -97,6 +114,7 @@
     <!-- 添加或修改对话框 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form
+        v-loading="dialogLoading"
         ref="dataForm"
         :rules="rules"
         :model="dataForm"
@@ -105,7 +123,7 @@
         label-width="100px"
         style="width: 400px; margin-left:50px;"
       >
-        <el-form-item label="隐藏的广告id" prop="id" hidden>
+        <el-form-item label="id" prop="id" hidden>
           <el-input v-model="dataForm.id" />
         </el-form-item>
         <el-form-item label="广告标题" prop="title">
@@ -125,32 +143,55 @@
             <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
         </el-form-item>
-        <el-form-item label="广告类型" prop="adType">
-          <el-select v-model="dataForm.adType" placeholder="请选择">
+        <el-form-item label="广告类型" prop="type">
+          <el-select v-model="dataForm.type" placeholder="请选择" @change="adTypeChange">
             <el-option v-for="(key, index) in adTypeMap" :key="index" :label="key.name" :value="key.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="广告状态" prop="status">
-          <el-select v-model="dataForm.status" placeholder="请选择">
-            <el-option v-for="(key, index) in adStatusMap" :key="index" :label="key.name" :value="key.value" />
+          <el-switch
+            v-model="dataForm.status"
+            :active-value="1"
+            :inactive-value="0"
+            active-color="#13ce66"/>
+        </el-form-item>
+        <el-form-item label="关联类型" prop="unionType">
+          <el-select :disabled="!dataForm.type" v-model="dataForm.unionType" :placeholder="dataForm.type ? '点击时跳转目标.' : '请先选择广告类型'">
+            <el-option
+              v-for="item in adUnionTypeMap"
+              :disabled="dataForm.type && (adTypeMap[dataForm.type - 1].unionTypes.indexOf(item.value) < 0)"
+              :key="item.value"
+              :label="item.name"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="关联1">
+        <el-form-item v-if="dataForm.unionType === 1" label="商品" prop="unionValue">
           <el-cascader
-            :options="options"
-            :props="{ checkStrictly: true }"
-            v-model="linkUnion"
-            placeholder="关联类目、商品"
-            filterable
-            @change="handleLink"
+            :options="spuTree"
+            v-model="cascaderData"
+            placeholder="关联至商品"
+            @change="unionValueChange"
           />
         </el-form-item>
-        <el-form-item label="关联2">
-          <el-select v-model="linkUnion2" placeholder="关联功能页面" @change="handleLink2">
+        <el-form-item v-if="dataForm.unionType === 2" label="类目" prop="unionValue">
+          <el-cascader
+            :options="categoryTree"
+            v-model="cascaderData"
+            placeholder="关联至类目"
+            filterable
+            @change="unionValueChange"
+          />
+        </el-form-item>
+        <el-form-item v-if="dataForm.unionType === 3" label="关键字" prop="unionValue">
+          <el-input v-model="dataForm.unionValue" placeholder="点击广告后，用户将得到“此关键字”的商品搜索结果" />
+        </el-form-item>
+        <el-form-item v-if="dataForm.unionType === 4" label="功能页面" prop="unionValue">
+          <el-select v-model="dataForm.unionValue" placeholder="请选择一个功能页面">
             <el-option
               v-for="item in functionPages"
               :key="item.value"
-              :label="item.label"
+              :label="item.name"
               :value="item.value"
             />
           </el-select>
@@ -167,47 +208,18 @@
   </div>
 </template>
 
-<style>
-.avatar-uploader .el-upload {
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.avatar-uploader .el-upload:hover {
-  border-color: #20a0ff;
-}
-
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 120px;
-  height: 120px;
-  line-height: 120px;
-  text-align: center;
-}
-
-.avatar {
-  width: 145px;
-  height: 145px;
-  display: block;
-}
-</style>
-
 <script>
-import { listAd, createAd, updateAd, deleteAd, getImageColor } from '@/api/merchantad'
-import { spuTree } from '@/api/goods'
+import { listAdvert, createAdvert, editAdvert, deleteAdvert, getImageColor } from '@/api/advert'
+import { getSpuBigTree } from '@/api/goods'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
-import { clearTreeEmptyChildren } from '@/utils/index'
 import Pagination from '@/components/Pagination'
 import ElOption from '../../../node_modules/element-ui/packages/select/src/option' // Secondary package based on el-pagination
 
-const adTypeMap = [{ value: 1, unionType: 3, name: '轮播' }, { value: 2, unionType: 1, name: '分类精选' }, { value: 3, unionType: 3, name: '横幅' }, { value: 4, unionType: 1, name: '首页轮播下5按钮' }, { value: '', name: '全部' }]
-const adStatusMap = [{ value: 0, name: '冻结' }, { value: 1, name: '激活' }, { value: '', name: '全部' }]
-const functionPages = [{ value: '/pages/groupshop/list', label: '团购列表' }]
+const adTypeMap = [{ value: 1, unionTypes: [1, 2, 3, 4], name: '轮播' }, { value: 2, unionTypes: [2], name: '分类精选' }, { value: 3, unionTypes: [1, 2, 3, 4], name: '横幅' }, { value: 4, unionTypes: [1, 2, 3, 4], name: '首页轮播下5按钮' }]
+const adUnionTypeMap = [{ value: 1, name: '商品' }, { value: 2, name: '类目' }, { value: 3, name: '关键字' }, { value: 4, name: '功能页面' }]
+const adStatusMap = [{ value: 0, name: '冻结' }, { value: 1, name: '激活' }]
+const functionPages = [{ value: '/pages/groupshop/list', name: '团购列表' }]
 
 export default {
   name: 'Ad',
@@ -219,36 +231,45 @@ export default {
     adTypeFilter(code) {
       return adTypeMap[code - 1]['name']
     },
+    adUnionTypeFilter(code) {
+      return adUnionTypeMap[code - 1]['name']
+    },
     adStatusFilter(code) {
       return adStatusMap[code]['name']
     }
   },
   data() {
     return {
+      // 常量 START
       uploadPath,
       functionPages,
-      options: [],
-      value: [],
+      adUnionTypeMap,
+      adTypeMap,
+      adStatusMap,
+      // 常量 END
+      dialogLoading: false,
+      spuTree: [],
+      categoryTree: [],
+      cascaderData: [],
       list: [],
       total: 0,
       listLoading: true,
       linkUnion: undefined,
       linkUnion2: undefined,
-      adTypeMap,
-      adStatusMap,
       listQuery: {
         pageNo: 1,
         limit: 20,
         status: undefined,
-        adType: undefined
+        type: undefined
       },
       dataForm: {
         id: undefined,
-        adType: undefined,
+        type: undefined,
         title: undefined,
-        url: '',
+        unionType: undefined,
+        unionValue: '',
         imgUrl: undefined,
-        status: undefined,
+        status: 1,
         color: undefined
       },
       dialogFormVisible: false,
@@ -260,8 +281,10 @@ export default {
       rules: {
         title: [{ required: true, message: '广告标题不能为空', trigger: 'blur' }],
         imgUrl: [{ required: true, message: '广告图片不能为空', trigger: 'blur' }],
-        adType: [{ required: true, message: '请选择广告类型', trigger: 'blur' }],
-        status: [{ required: true, message: '请选择广告状态', trigger: 'blur' }]
+        type: [{ required: true, message: '请选择广告类型', trigger: 'blur' }],
+        status: [{ required: true, message: '请确定广告状态', trigger: 'blur' }],
+        unionType: [{ required: true, message: '请选择广告关联类型', trigger: 'blur' }],
+        unionValue: [{ required: true, message: '请关联一个(商品、类目、页面等具体值)', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -279,7 +302,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      listAd(this.listQuery)
+      listAdvert(this.listQuery)
         .then(response => {
           this.list = response.data.data.items
           this.total = response.data.data.total
@@ -291,34 +314,6 @@ export default {
           this.listLoading = false
         })
     },
-    handleLink(e) {
-      if (e === undefined || e === null) {
-        return
-      }
-      this.linkUnion2 = undefined
-      const tag = e[e.length - 1]
-      let url = ''
-      if (tag.startsWith('C')) {
-        if (e.length < 3) {
-          this.$notify.error({
-            title: '提示',
-            message: '请关联第三级类目或者商品'
-          })
-          return
-        }
-        url = '/pages/product/list?tid=' + e[2].substring(2)
-      } else {
-        url = '/pages/product/detail?id=' + (e[3].substring(2))
-      }
-      this.dataForm.url = url
-    },
-    handleLink2(e) {
-      if (e === undefined || e === null) {
-        return
-      }
-      this.linkUnion = undefined
-      this.dataForm.url = e
-    },
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
@@ -326,20 +321,51 @@ export default {
     resetForm() {
       this.dataForm = {
         id: undefined,
-        adType: undefined,
+        type: undefined,
         title: undefined,
-        url: '',
+        unionType: undefined,
+        unionValue: '',
         imgUrl: undefined,
-        status: undefined,
+        status: 1,
         color: undefined
       }
-      this.linkUnion = undefined
     },
-    refreshOptions() {
-      if (this.options.length === 0) {
-        spuTree().then(response => {
-          this.options = clearTreeEmptyChildren(response.data.data)
+    adTypeChange() {
+      this.dataForm.unionType = undefined
+      this.dataForm.unionValue = ''
+      this.cascaderData = []
+    },
+    unionValueChange(e) {
+      this.dataForm.unionValue = e[e.length - 1].substring(2)
+    },
+    refreshOptions(row) {
+      if (this.spuTree.length === 0) {
+        this.dialogLoading = true
+        getSpuBigTree().then(response => {
+          this.dialogLoading = false
+          this.categoryTree = this.clearSpu(JSON.parse(JSON.stringify(response.data.data)))
+          this.spuTree = response.data.data
+          if (row) {
+            if (row.unionType === 1) {
+              // 产品
+              this.cascaderData = this.getCascaderData('G_' + row.unionValue)
+            } else if (row.unionType === 2) {
+              this.cascaderData = this.getCascaderData('C_' + row.unionValue)
+            }
+          }
         })
+          .catch(failres => {
+            this.dialogLoading = false
+          })
+      } else {
+        if (row) {
+          if (row.unionType === 1) {
+            // 产品
+            this.cascaderData = this.getCascaderData('G_' + row.unionValue)
+          } else if (row.unionType === 2) {
+            this.cascaderData = this.getCascaderData('C_' + row.unionValue)
+          }
+        }
       }
     },
     handleCreate() {
@@ -356,8 +382,8 @@ export default {
     },
     createData() {
       this.$refs['dataForm'].validate(valid => {
-        if (valid && this.checkAdType()) {
-          createAd(this.dataForm)
+        if (valid) {
+          createAdvert(this.dataForm)
             .then(response => {
               this.getList()
               this.dialogFormVisible = false
@@ -375,47 +401,11 @@ export default {
         }
       })
     },
-    checkAdType() {
-      if (this.linkUnion2) {
-        return true
-      }
-      // 检测关联选项是否是三级目录或商品
-      if (this.linkUnion === undefined || this.linkUnion === null || this.linkUnion.length < 3) {
-        this.$notify.error({
-          title: '失败',
-          message: '请关联三级目录或者商品'
-        })
-        return false
-      }
-
-      for (let i = 0; i < this.adTypeMap.length; i++) {
-        const item = this.adTypeMap[i]
-        if (item.value === this.dataForm.adType) {
-          if (item.unionType === 1 && this.linkUnion.length === 4) {
-            this.$notify.error({
-              title: '失败',
-              message: '此类广告只能关联三级类目'
-            })
-            return false
-          } else if (this.unionType === 2 && this.linkUnion.length === 3) {
-            this.$notify.error({
-              title: '失败',
-              message: '此类广告只能关联商品'
-            })
-            return false
-          }
-        }
-      }
-      return true
-    },
     // 点击编辑按钮时的处理
     handleUpdate(row) {
       this.dataForm = Object.assign({}, row)
-      this.refreshOptions()
+      this.refreshOptions(row)
       this.dialogStatus = 'update'
-      if (this.dataForm.url.indexOf('tid') >= 0) {
-        this.linkUnion = 'C_' + this.dataForm.url.replace(/[^0-9]/ig, '')
-      } else { this.linkUnion = 'G_' + this.dataForm.url.replace(/[^0-9]/ig, '') }
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
@@ -423,8 +413,8 @@ export default {
     },
     updateData() {
       this.$refs['dataForm'].validate(valid => {
-        if (valid && this.checkAdType()) {
-          updateAd(this.dataForm)
+        if (valid) {
+          editAdvert(this.dataForm)
             .then(() => {
               for (const v of this.list) {
                 if (v.id === this.dataForm.id) {
@@ -450,13 +440,14 @@ export default {
         }
       })
     },
+
     handleDelete(row) {
       this.$confirm('此操作将永久删除该广告--' + row.title + '--, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteAd(row.id, row.adType)
+        deleteAdvert(row.id, row.type)
           .then(response => {
             this.$notify.success({
               title: '成功',
@@ -494,7 +485,6 @@ export default {
     onBeforeUpload(file) {
       const isIMAGE = file.type === 'image/jpeg' || 'image/gif' || 'image/png' || 'image/jpg'
       const isLt1M = file.size / 1024 / 1024 < 1
-
       if (!isIMAGE) {
         this.$message.error('上传文件只能是图片格式!')
       }
@@ -502,7 +492,75 @@ export default {
         this.$message.error('上传文件大小不能超过 1MB!')
       }
       return isIMAGE && isLt1M
+    },
+    // ////// Function
+    /**
+     * 清理掉Spu 作为CategoryTree使用
+     */
+    clearSpu(data) {
+      if (data === null || data === undefined) {
+        return data
+      }
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].children.length === 0 || data[i].children[0].value.indexOf('G_') > -1) {
+          data[i].children = undefined
+        } else {
+          this.clearSpu(data[i].children)
+        }
+      }
+      return data
+    },
+    /**
+     * 传入一个Id，从树中查找出选择路径
+     */
+    getCascaderData(id) {
+      debugger
+      for (let i = 0; i < this.spuTree.length; i++) {
+        if (this.spuTree[i].value === id) {
+          return [id]
+        }
+        for (let j = 0; j < this.spuTree[i].children.length; j++) {
+          if (this.spuTree[i].children[j].value === id) {
+            return [this.spuTree[i].value, id]
+          }
+          for (let k = 0; k < this.spuTree[i].children[j].children.length; k++) {
+            if (this.spuTree[i].children[j].children[k].value === id) {
+              return [this.spuTree[i].value, this.spuTree[i].children[j].value, id]
+            }
+          }
+        }
+      }
+      return []
     }
   }
 }
 </script>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: #20a0ff;
+}
+
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 120px;
+  height: 120px;
+  line-height: 120px;
+  text-align: center;
+}
+
+.avatar {
+  width: 145px;
+  height: 145px;
+  display: block;
+}
+</style>

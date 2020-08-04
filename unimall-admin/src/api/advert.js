@@ -1,71 +1,64 @@
 import request from '@/utils/request'
 import Qs from 'qs'
 
-export function listAd(query) {
+export function listAdvert(query) {
   return request({
     method: 'get',
     params: {
-      _gp: 'admin.advertisement',
-      _mt: 'queryAdvertisement',
+      _gp: 'admin.advert',
+      _mt: 'list',
       ...query
     }
   })
 }
 
-export function createAd(data) {
+export function createAdvert(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
-      _gp: 'admin.advertisement',
-      _mt: 'addAdvertisement',
+      _gp: 'admin.advert',
+      _mt: 'create',
       ...data
     })
   })
 }
 
-// export function readAd(data) {
-//   return request({
-//     url: '/ad/read',
-//     method: 'get',
-//     data
-//   })
-// }
-
-export function updateAd(data) {
+export function editAdvert(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
-      _gp: 'admin.advertisement',
-      _mt: 'updateAdvertisement',
+      _gp: 'admin.advert',
+      _mt: 'edit',
       ...data,
       adId: data.id
     })
   })
 }
 
-export function deleteAd(id, adType) {
+export function deleteAdvert(id, adType) {
   return request({
     method: 'post',
     params: {
-      _gp: 'admin.advertisement',
-      _mt: 'deleteAdvertisement',
+      _gp: 'admin.advert',
+      _mt: 'delete',
       adId: id,
       adType: adType
     }
   })
 }
 
+/**
+ * 获取某个画布上的颜色点平均值，用于计算广告主色调
+ * @param {} canvas
+ * @param {} img
+ */
 export function getImageColor(canvas, img) {
   canvas.width = img.width
   canvas.height = img.height
-
   var context = canvas.getContext('2d')
-
   context.drawImage(img, 0, 0)
-
   // 获取像素数据
   var data = context.getImageData(0, 0, img.width, img.height).data
-
   var r, g, b
   r = g = b = 0
   // 取所有像素的平均值
@@ -80,12 +73,10 @@ export function getImageColor(canvas, img) {
   r /= (img.width * img.height)
   g /= (img.width * img.height)
   b /= (img.width * img.height)
-
   // 将最终的值取整
   r = Math.round(r)
   g = Math.round(g)
   b = Math.round(b)
-
   return 'rgb(' + r + ',' + g + ',' + b + ')'
 }
 

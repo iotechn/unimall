@@ -12,9 +12,7 @@ import java.util.List;
  */
 
 @Data
-public class FreightCalcDTO {
-
-    private String businessCode;
+public class FreightCalcModel {
 
     private String province;
 
