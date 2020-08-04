@@ -19,8 +19,8 @@
       <el-select v-model="listQuery.status" clearable style="width: 200px" class="filter-item" placeholder="请选择团购状态" >
         <el-option v-for="(item,index) in GroupShopStatusMap" :key="index" :label="item.name" :value="item.value" />
       </el-select>
-      <el-button v-permission="['operation:groupShop:query']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
-      <el-button v-permission="['operation:groupShop:create']" class="filter-item" type="primary" icon="el-icon-edit" @click="openSpuCreateDialog">添加</el-button>
+      <el-button v-permission="['operation:groupshop:query']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
+      <el-button v-permission="['operation:groupshop:create']" class="filter-item" type="primary" icon="el-icon-edit" @click="openSpuCreateDialog">添加</el-button>
     </div>
 
     <!-- 查询结果 -->
@@ -71,7 +71,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="到期人数未满,是否自动退款" prop="status">
+      <el-table-column align="center" label="未满策略" prop="status">
         <template slot-scope="scope">
           <el-tag
             :type="scope.row.automaticRefund == 1 ? 'success' : 'error' "
@@ -87,22 +87,22 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="团购开始时间" prop="gmtStart" width="85">
+      <el-table-column align="center" label="开始时间" prop="gmtStart" width="85">
         <template slot-scope="scope">{{ scope.row.gmtStart | formatGmt }}</template>
       </el-table-column>
 
-      <el-table-column align="center" label="团购结束时间" prop="gmtEnd" width="85">
+      <el-table-column align="center" label="结束时间" prop="gmtEnd" width="85">
         <template slot-scope="scope">{{ scope.row.gmtEnd | formatGmt }}</template>
       </el-table-column>
 
-      <el-table-column align="center" label="当前人数" prop="alreadyBuyNumber" />
+      <el-table-column align="center" label="当前人数" prop="buyerNum" />
 
-      <el-table-column align="center" label="目标人数" prop="minimumNumber" />
+      <el-table-column align="center" label="目标人数" prop="minNum" />
 
       <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button v-permission="['operation:groupShop:edit']" v-show="scope.row.status == 0" type="primary" size="mini" @click="openSpuUpdateDialog(scope.row)">编辑</el-button>
-          <el-button v-permission="['operation:groupShop:delete']" v-show="scope.row.status == 0" type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button v-permission="['operation:groupshop:edit']" v-show="scope.row.status == 0" type="primary" size="mini" @click="openSpuUpdateDialog(scope.row)">编辑</el-button>
+          <el-button v-permission="['operation:groupshop:delete']" v-show="scope.row.status == 0" type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -160,13 +160,13 @@
           </el-form-item>
 
           <el-form-item label="团购基础人数" >
-            <el-input-number v-model="dataForm.minimumNumber" :precision="0" controls-position="right" />
+            <el-input-number v-model="dataForm.minNum" :precision="0" controls-position="right" />
           </el-form-item>
 
-          <el-form-item label="活动结束时人数没有达到基础人数处理">
+          <el-form-item label="活动结束时人数没有达到基础人数采取：">
             <el-radio-group v-model="dataForm.automaticRefund" >
-              <el-radio-button :label="1">自动退款,我不发货</el-radio-button>
               <el-radio-button :label="0">不退款,我要发货</el-radio-button>
+              <el-radio-button :label="1">自动退款,我不发货</el-radio-button>
             </el-radio-group>
           </el-form-item>
         </el-form>
@@ -226,30 +226,9 @@
   </div>
 </template>
 
-<style>
-.table-expand {
-  font-size: 0;
-}
-
-.table-expand label {
-  width: 100px;
-  color: #99a9bf;
-}
-
-.table-expand .el-form-item {
-  margin-right: 0;
-  margin-bottom: 0;
-}
-
-.gallery {
-  width: 80px;
-  margin-right: 10px;
-}
-</style>
-
 <script>
 import { detailGoods } from '@/api/goods'
-import { queryGroupShop, createGroupShop, deleteGroupShop, editGroupShop } from '@/api/group_shop'
+import { listGroupShop, createGroupShop, deleteGroupShop, editGroupShop } from '@/api/groupshop'
 import BackToTop from '@/components/BackToTop'
 import { getSpuBigTree } from '@/api/goods'
 import { formatDateAndTime } from '@/filters'
@@ -288,8 +267,8 @@ export default {
         spuId: undefined,
         gmtStart: undefined,
         gmtEnd: undefined,
-        minimumNumber: 1,
-        automaticRefund: 1,
+        minNum: 1,
+        automaticRefund: 0,
         groupShopSkus: [],
         skuList: []
       },
@@ -305,7 +284,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      queryGroupShop(this.listQuery)
+      listGroupShop(this.listQuery)
         .then(response => {
           response.data.data.items.forEach(temp => {
             temp.groupShopSkuDTOList.forEach(item => {
@@ -334,8 +313,8 @@ export default {
         spuId: undefined,
         gmtStart: undefined,
         gmtEnd: undefined,
-        minimumNumber: 1,
-        automaticRefund: 1,
+        minNum: 1,
+        automaticRefund: 0,
         skuList: [],
         groupShopSkus: []
       }
@@ -358,7 +337,7 @@ export default {
         automaticRefund: data.automaticRefund,
         gmtStart: new Date(data.gmtStart),
         gmtEnd: new Date(data.gmtEnd),
-        minimumNumber: data.minimumNumber,
+        minNum: data.minNum,
         skuList: data.groupShopSkuDTOList,
         groupShopSkus: []
       })
@@ -459,7 +438,7 @@ export default {
         gmtStart: this.dataForm.gmtStart.getTime(),
         gmtEnd: this.dataForm.gmtEnd.getTime(),
         groupShopSkuList: this.dataForm.groupShopSkuList,
-        minimumNumber: this.dataForm.minimumNumber,
+        minNum: this.dataForm.minNum,
         spuId: this.dataForm.spuId,
         automaticRefund: this.dataForm.automaticRefund
       }
@@ -508,3 +487,24 @@ export default {
   }
 }
 </script>
+
+<style>
+.table-expand {
+  font-size: 0;
+}
+
+.table-expand label {
+  width: 100px;
+  color: #99a9bf;
+}
+
+.table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+}
+
+.gallery {
+  width: 80px;
+  margin-right: 10px;
+}
+</style>

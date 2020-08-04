@@ -1,6 +1,5 @@
 package com.iotechn.unimall.data.dto.goods;
 
-import com.iotechn.unimall.data.domain.GroupShopSkuDO;
 import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.Data;
 
@@ -38,8 +37,6 @@ public class GroupShopDTO extends SuperDTO {
      * GroupShopSkuDTO列表
      */
     private List<GroupShopSkuDTO> groupShopSkuDTOList;
-
-    private List<GroupShopSkuDO> groupShopSkuList;
 
     /**
      * spu属性

@@ -1,12 +1,12 @@
 import request from '@/utils/request'
 import Qs from 'qs'
 
-export function queryGroupShop(query) {
+export function listGroupShop(query) {
   return request({
     method: 'get',
     params: {
-      _gp: 'admin.groupShop',
-      _mt: 'queryGroupShop',
+      _gp: 'admin.groupshop',
+      _mt: 'list',
       ...query
     }
   })
@@ -16,8 +16,8 @@ export function editGroupShop(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
-      _gp: 'admin.groupShop',
-      _mt: 'editGroupShopSpu',
+      _gp: 'admin.groupshop',
+      _mt: 'edit',
       ...data
     })
   })
@@ -26,11 +26,11 @@ export function editGroupShop(data) {
 export function deleteGroupShop(id) {
   return request({
     method: 'post',
-    params: {
-      _gp: 'admin.groupShop',
-      _mt: 'deleteGroupShopSpu',
+    data: Qs.stringify({
+      _gp: 'admin.groupshop',
+      _mt: 'delete',
       id: id
-    }
+    })
   })
 }
 
@@ -38,8 +38,8 @@ export function createGroupShop(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
-      _gp: 'admin.groupShop',
-      _mt: 'addGroupShopSpu',
+      _gp: 'admin.groupshop',
+      _mt: 'create',
       ...data
     })
   })

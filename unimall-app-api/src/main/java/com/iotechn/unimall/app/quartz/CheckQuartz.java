@@ -187,7 +187,7 @@ public class CheckQuartz {
                             continue;
                         }
 
-                        if (groupShopDO.getAutomaticRefund() == GroupShopAutomaticRefundType.YES.getCode() && groupShopDO.getAlreadyBuyNumber().compareTo(groupShopDO.getMinimumNumber()) < 0) {
+                        if (groupShopDO.getAutomaticRefund() == GroupShopAutomaticRefundType.YES.getCode() && groupShopDO.getBuyerNum().compareTo(groupShopDO.getMinNum()) < 0) {
                             // 2.2.2.1.退款
                             logger.info("[团购结束] 退款逻辑 groupShopId:" + groupShopDO.getId());
                             for (OrderDO orderDO : lockOrderList) {
