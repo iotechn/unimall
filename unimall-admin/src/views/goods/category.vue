@@ -1,40 +1,51 @@
 <template>
   <div>
-    <div class="custom-tree-container">
-      <div class="block">
-        <el-tree
-          :data="list"
-          :props="defaultProps"
-          :expand-on-click-node="false">
-          <span slot-scope="{ node, data }" class="custom-tree-node">
-            <span class="titleSize">{{ data.title }}</span>
-            <span>
-              <el-button
-                type="primary"
-                size="mini"
-                round
-                @click="handleAdd">
-                添加
-              </el-button>
-              <el-button
-                type="warning"
-                size="mini"
-                round
-                @click="handleclick(data)">
-                编辑
-              </el-button>
-              <el-button
-                type="danger"
-                size="mini"
-                round
-                @click="remove(node, data)">
-                删除
-              </el-button>
+    <el-card class="card">
+      <div class="custom-tree-container">
+        <div class="block">
+          <el-tree
+            :data="list"
+            :props="{ label: 'title', children: 'childrenList' }"
+            :expand-on-click-node="false">
+            <span slot-scope="{ node, data }" class="custom-tree-node">
+              <div class="title-size">
+                <el-image v-show="data.level === 2" :src="data.picUrl" class="c-img"/>
+                {{ data.title }}
+                <el-tag v-show="data.id !== 0" :type="data.level === 0 ? 'danger' : (data.level === 1 ? 'warning' : 'success')">
+                  {{ data.level === 0 ? '一级' : (data.level === 1 ? '二级' : '三级') }}
+                </el-tag>
+              </div>
+
+              <span>
+                <el-button
+                  v-show="data.level !== 2"
+                  type="primary"
+                  size="mini"
+                  round
+                  @click="handleCreate(data)">
+                  添加
+                </el-button>
+                <el-button
+                  type="warning"
+                  size="mini"
+                  round
+                  @click="handleUpdate(data)">
+                  编辑
+                </el-button>
+                <el-button
+                  v-show="!data.childrenList || data.childrenList.length <= 0"
+                  type="danger"
+                  size="mini"
+                  round
+                  @click="remove(node, data)">
+                  删除
+                </el-button>
+              </span>
             </span>
-          </span>
-        </el-tree>
+          </el-tree>
+        </div>
       </div>
-    </div>
+    </el-card>
 
     <!-- 添加或修改对话框 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
@@ -51,22 +62,8 @@
           <el-input v-model="dataForm.id" />
         </el-form-item>
         <el-form-item label="类目名称" prop="title">
-          <el-input v-model="dataForm.title" @input="tlog" />
+          <el-input v-model="dataForm.title" />
         </el-form-item>
-        <!-- <el-form-item label="类目标签图片" prop="iconUrl">
-          <el-upload
-            :headers="headers"
-            :action="uploadPath"
-            :show-file-list="false"
-            :on-success="iconUploadSuccessHandle"
-            :before-upload="onBeforeUpload"
-            class="avatar-uploader"
-            accept=".jpg, .jpeg, .png, .gif"
-          >
-            <img v-if="dataForm.iconUrl" ref="adImg" :src="dataForm.iconUrl" class="avatar">
-            <i v-else class="el-icon-plus avatar-uploader-icon" />
-          </el-upload>
-        </el-form-item> -->
         <el-form-item label="类目图片" prop="picUrl">
           <el-upload
             :headers="headers"
@@ -81,23 +78,11 @@
             <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
         </el-form-item>
-
-        <el-form-item label="父类目">
-          <el-cascader
-            :options="options"
-            :props="{ checkStrictly: true ,label:'title',value:'id',children:'childrenList'}"
-            v-model="dialogOptions"
-            placeholder="选择父类目，默认一级类目"
-            filterable
-            clearable
-            @change="handleLink"
-          />
-        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button v-if="dialogStatus=='create'" type="primary" @click="createData">确定</el-button>
-        <el-button v-else type="primary" @click="updateData">确定</el-button>
+        <el-button v-if="dialogStatus=='create'" :loading="submiting" type="primary" @click="createData">确定</el-button>
+        <el-button v-else :loading="submiting" type="primary" @click="updateData">确定</el-button>
       </div>
     </el-dialog>
     <!-- 确定删除 -->
@@ -114,45 +99,6 @@
     </el-dialog> -->
   </div>
 </template>
-
-<style>
-.avatar-uploader .el-upload {
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader .el-upload:hover {
-  border-color: #20a0ff;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 120px;
-  height: 120px;
-  line-height: 120px;
-  text-align: center;
-}
-.avatar {
-  width: 145px;
-  height: 145px;
-  display: block;
-}
-  .custom-tree-node {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 14px;
-    padding-right: 8px;
-  }
-  .titleSize{
-    font-size: 20px;
-    padding: 5px 0;
-  }
-
-</style>
 
 <script>
 import { createCategory, updateCategory, deleteCategory, categoryTree } from '@/api/category'
@@ -175,22 +121,11 @@ export default {
   },
   data() {
     return {
-      options: [],
+      categoryLevelMap,
       uploadPath,
-      list: undefined,
-      total: 0,
-      listLoading: true,
+      options: [],
+      list: [],
       dialogOptions: undefined,
-      queryOptions: undefined,
-      listQuery: {
-        page: 1,
-        limit: 20,
-        id: undefined,
-        title: undefined,
-        level: undefined,
-        parentId: undefined
-      },
-      catL1: {},
       dataForm: {
         id: undefined,
         title: undefined,
@@ -205,17 +140,11 @@ export default {
         update: '编辑',
         create: '创建'
       },
+      currentParent: undefined,
       rules: {
         title: [{ required: true, message: '类目名不能为空', trigger: 'blur' }]
       },
-      downloadLoading: false,
-      categoryLevelMap,
-
-      defaultProps: {
-        label: 'title',
-        children: 'childrenList'
-      }
-
+      submiting: false
     }
   },
   computed: {
@@ -230,7 +159,7 @@ export default {
     this.refreshOptions()
   },
   methods: {
-    handleclick(data) {
+    handleUpdate(data) {
       this.dialogStatus = 'updata'
       this.dialogFormVisible = true
       // 对象的拷贝
@@ -238,9 +167,6 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-    },
-    handleAdd() {
-      this.handleCreate()
     },
     // 删除类目
     remove(node, data) {
@@ -250,17 +176,16 @@ export default {
         type: 'warning'
       }).then(() => {
         // 清除节点
-        const parent = node.parent
-        const children = parent.data.childrenList || parent.data
-        const index = children.findIndex(d => d.id === data.id)
-        children.splice(index, 1)
         deleteCategory(data.id)
           .then(response => {
             this.$notify.success({
               title: '成功',
               message: '删除成功'
             })
-
+            const parent = node.parent
+            const children = parent.data.childrenList || parent.data
+            const index = children.findIndex(d => d.id === data.id)
+            children.splice(index, 1)
             this.$forceUpdate()
           })
           .catch(response => {
@@ -273,30 +198,18 @@ export default {
         return false
       })
     },
-    tlog(e) {
-      // console.log(e)
-    },
     getList() {
       categoryTree().then(response => {
-        this.list = response.data.data
-
-        // this.total = response.data.data.total
+        this.list = [{
+          title: '全部类目',
+          id: 0,
+          childrenList: response.data.data
+        }]
       })
         .catch(() => {
           this.list = []
           this.total = 0
         })
-    },
-    handleFilter() {
-      this.listQuery.page = 1
-      if (this.listQuery.id != null && isNaN(Number(this.listQuery.id))) {
-        this.$notify.error({
-          title: '失败',
-          message: '请输入整数'
-        })
-        return false
-      }
-      this.getList()
     },
     resetForm() {
       this.dataForm = {
@@ -308,22 +221,12 @@ export default {
         picUrl: undefined
       }
     },
-    resetQuery() {
-      this.listQuery = {
-        page: 1,
-        limit: 20,
-        id: undefined,
-        title: undefined,
-        level: undefined,
-        parentId: undefined
-      }
-    },
-    handleCreate() {
+    handleCreate(row) {
       this.resetForm()
+      this.dataForm.parentId = row.id
+      this.currentParent = row
       this.dialogStatus = 'create'
       this.dialogOptions = undefined
-      this.queryOptions = undefined
-      this.resetQuery()
       this.refreshOptions()
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -332,19 +235,19 @@ export default {
     },
     createData() {
       this.$refs['dataForm'].validate(valid => {
+        this.submiting = true
         createCategory(this.dataForm)
           .then(response => {
-            this.resetQuery()
-            this.listQuery.title = this.dataForm.title
-            this.getList()
+            this.currentParent.childrenList.push(response.data.data)
             this.dialogFormVisible = false
             this.$notify.success({
               title: '成功',
               message: '创建成功'
             })
-            this.refreshOptions()
+            this.submiting = false
           })
           .catch(response => {
+            this.submiting = false
             this.$notify.error({
               title: '失败',
               message: response.data.errmsg
@@ -352,31 +255,11 @@ export default {
           })
       })
     },
-    handleUpdate(row) {
-      this.dataForm = Object.assign({}, {
-        id: row.value,
-        title: row.label,
-        parentId: row.parent,
-        picUrl: row.picUrl,
-        iconUrl: row.iconUrl
-      })
-      this.dialogOptions = row.parent
-      // this.queryOptions = undefined
-      // this.resetQuery()
-      this.refreshOptions()
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
     updateData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           updateCategory(this.dataForm)
             .then(() => {
-            // this.resetQuery()
-            // this.listQuery.id = this.dataForm.id
               this.getList()
               this.dialogFormVisible = false
               this.$notify.success({
@@ -442,15 +325,6 @@ export default {
       }
       this.dataForm.parentId = tag
     },
-    // 查询框选择父类目时，获得父类目的id
-    handleQuery(e) {
-      if (e == null || e === undefined) {
-        return false
-      }
-      this.refreshOptions()
-      const tag = e[e.length - 1]
-      this.listQuery.parentId = tag
-    },
     // 刷新类目选择节点
     refreshOptions() {
       categorySecondLevelTree().then(response => {
@@ -461,3 +335,50 @@ export default {
   }
 }
 </script>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #20a0ff;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 120px;
+  height: 120px;
+  line-height: 120px;
+  text-align: center;
+}
+.avatar {
+  width: 145px;
+  height: 145px;
+  display: block;
+}
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 18px;
+  padding: 8px;
+}
+.title-size {
+  padding: 5px 0;
+}
+.card {
+  margin: 10px;
+}
+.el-tree-node__content {
+  height: 40px;
+}
+.c-img {
+  width: 30px;
+  height: 30px;
+}
+</style>
