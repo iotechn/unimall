@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.favorite;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;

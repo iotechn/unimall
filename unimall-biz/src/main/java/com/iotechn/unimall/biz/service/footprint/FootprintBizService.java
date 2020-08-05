@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.service.footprint;
 
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import org.springframework.beans.factory.annotation.Autowired;

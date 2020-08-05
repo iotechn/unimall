@@ -1,7 +1,7 @@
 package com.iotechn.unimall.biz.service.user;
 
 import com.alibaba.fastjson.JSONObject;
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.mapper.UserMapper;

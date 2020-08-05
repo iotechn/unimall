@@ -1,23 +1,19 @@
 package com.iotechn.unimall.biz.config.mq.handler;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.constant.LockConst;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.OrderDO;
-import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.List;
 
 public class OrderAutoConfirmHandle implements RedisNotifyHandler{
 

@@ -1,6 +1,6 @@
 package com.iotechn.unimall.app.api.groupshop;
 
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.annotaion.AspectCommonCache;
 import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
 import com.iotechn.unimall.data.mapper.GroupShopMapper;

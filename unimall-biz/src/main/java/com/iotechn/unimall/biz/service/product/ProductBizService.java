@@ -2,7 +2,7 @@ package com.iotechn.unimall.biz.service.product;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;

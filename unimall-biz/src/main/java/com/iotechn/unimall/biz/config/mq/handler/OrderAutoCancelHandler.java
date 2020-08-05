@@ -1,7 +1,7 @@
 package com.iotechn.unimall.biz.config.mq.handler;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.constant.LockConst;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;

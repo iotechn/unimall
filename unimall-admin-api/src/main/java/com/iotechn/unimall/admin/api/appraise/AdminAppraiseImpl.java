@@ -1,6 +1,6 @@
 package com.iotechn.unimall.admin.api.appraise;
 
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AppraiseDO;

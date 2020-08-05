@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.product;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.biz.service.footprint.FootprintBizService;
 import com.iotechn.unimall.biz.service.freight.FreightTemplateBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;

@@ -1,4 +1,4 @@
-package com.iotechn.unimall.biz.constant;
+package com.iotechn.unimall.data.constant;
 
 /**
  * Description:
