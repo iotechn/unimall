@@ -64,7 +64,7 @@ public class ProductBizService {
     private CacheComponent cacheComponent;
 
     /**
-     * SPU 排除掉detail字段的其他属性
+     * SPU 排除掉detail字段的其他字段名字形成的数组
      */
     public static final String[] SPU_EXCLUDE_DETAIL_FIELDS;
 

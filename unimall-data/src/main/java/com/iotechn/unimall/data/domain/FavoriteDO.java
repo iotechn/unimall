@@ -2,9 +2,7 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /*
 @author kbq
@@ -12,10 +10,9 @@ import lombok.NoArgsConstructor;
 用户收藏商品
 */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@TableName("unimall_collect")
-public class CollectDO extends SuperDO{
+@TableName("unimall_favorite")
+public class FavoriteDO extends SuperDO{
+
     @TableField("user_id")
     private Long userId;
 

@@ -36,22 +36,22 @@
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" class="table-expand">
-            <el-form-item label="商品单位">
-              <span>{{ props.row.unit }}</span>
-            </el-form-item>
             <el-form-item label="类目ID">
               <span>{{ props.row.categoryId }}</span>
             </el-form-item>
             <el-form-item label="商品sku属性">
               <el-table :data="props.row.groupShopSkuDTOList">
-                <el-table-column align="center" prop="skuId" label="skuId"/>
-                <el-table-column align="center" prop="title" label="skuTitle"/>
+                <el-table-column align="center" prop="skuId" label="SkuId"/>
+                <el-table-column align="center" prop="title" label="规格标题"/>
                 <el-table-column align="center" prop="skuGroupShopPrice" label="团购价格(元)"/>
-                <el-table-column align="center" prop="stock" label="库存"/>
+                <el-table-column align="center" prop="stock" label="库存">
+                  <template slot-scope="scope">
+                    {{ scope.row.stock }} ({{ props.row.unit }})
+                  </template>
+                </el-table-column>
                 <el-table-column align="center" prop="originalPrice" label="原始价格(元)"/>
                 <el-table-column align="center" prop="price" label="售卖价格(元)"/>
                 <el-table-column align="center" prop="vipPrice" label="会员价格(元)"/>
-                <el-table-column align="center" prop="freezeStock" label="冻结库存"/>
                 <el-table-column align="center" prop="barCode" label="国际条码"/>
               </el-table>
             </el-form-item>
@@ -59,45 +59,45 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="团购ID" prop="id" />
+      <el-table-column align="center" label="团购ID" prop="id" width="80"/>
 
-      <el-table-column align="center" label="商品(SPU)ID" prop="spuId" />
+      <el-table-column align="center" label="商品ID" prop="spuId" width="80" />
 
-      <el-table-column align="center" min-width="100" label="名称" prop="title" />
+      <el-table-column align="center" min-width="100" label="商品名称" prop="title" />
 
-      <el-table-column align="center" property="img" label="图片">
+      <el-table-column align="center" property="img" label="商品主图" width="100">
         <template slot-scope="scope">
-          <img :src="scope.row.img" width="40" >
+          <el-popover placement="right" trigger="hover">
+            <!--trigger属性值：hover、click、focus 和 manual-->
+            <img :src="scope.row.img" height="330" >
+            <img slot="reference" :src="scope.row.img" height="30" >
+          </el-popover>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="未满策略" prop="status">
+      <el-table-column align="center" label="未满策略" prop="automaticRefund" width="100">
         <template slot-scope="scope">
-          <el-tag
-            :type="scope.row.automaticRefund == 1 ? 'success' : 'error' "
-          >{{ scope.row.automaticRefund == 1 ? '退款' : '发货' }}</el-tag>
+          <el-tag :type="scope.row.automaticRefund == 1 ? 'success' : 'warning'">{{ scope.row.automaticRefund == 1 ? '退款' : '发货' }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="活动状态" prop="status">
+      <el-table-column align="center" label="活动状态" prop="status" width="100">
         <template slot-scope="scope">
-          <el-tag
-            :type="scope.row.status == 1 ? 'success' : 'error' "
-          >{{ scope.row.status == 1 ? '进行' : '冻结' }}</el-tag>
+          <el-tag :type="scope.row.status == 1 ? 'success' : 'error' " >{{ scope.row.status == 1 ? '进行' : '冻结' }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="开始时间" prop="gmtStart" width="85">
+      <el-table-column align="center" label="开始时间" prop="gmtStart" width="120">
         <template slot-scope="scope">{{ scope.row.gmtStart | formatGmt }}</template>
       </el-table-column>
 
-      <el-table-column align="center" label="结束时间" prop="gmtEnd" width="85">
+      <el-table-column align="center" label="结束时间" prop="gmtEnd" width="120">
         <template slot-scope="scope">{{ scope.row.gmtEnd | formatGmt }}</template>
       </el-table-column>
 
-      <el-table-column align="center" label="当前人数" prop="buyerNum" />
+      <el-table-column align="center" label="当前人数" prop="buyerNum" width="80" />
 
-      <el-table-column align="center" label="目标人数" prop="minNum" />
+      <el-table-column align="center" label="目标人数" prop="minNum" width="80" />
 
       <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -232,11 +232,10 @@ import { listGroupShop, createGroupShop, deleteGroupShop, editGroupShop } from '
 import BackToTop from '@/components/BackToTop'
 import { getSpuBigTree } from '@/api/goods'
 import { formatDateAndTime } from '@/filters'
-import { clearTreeEmptyChildren } from '@/utils/index'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
-  name: 'GoodsList',
+  name: 'GroupShop',
   components: { BackToTop, Pagination },
   filters: {
     formatGmt(time) {
@@ -371,7 +370,7 @@ export default {
     refreshGoodsOptions() {
       if (this.goodsOptions.length === 0) {
         getSpuBigTree().then(response => {
-          this.goodsOptions = clearTreeEmptyChildren(response.data.data)
+          this.goodsOptions = response.data.data
         })
       }
     },

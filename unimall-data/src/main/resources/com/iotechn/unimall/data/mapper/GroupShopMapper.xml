@@ -10,8 +10,8 @@
             g.gmt_end as gmtEnd,
             g.min_price as minPrice,
             g.max_price as maxPrice,
-            g.minimum_number as minimumNumber,
-            g.already_buy_number as alreadyBuyNumber,
+            g.min_num as minNum,
+            g.buyer_num as buyerNum,
             g.automatic_refund as automaticRefund,
             g.`status`,
             g.gmt_update as gmtUpdate,
@@ -30,7 +30,6 @@
         WHERE
             g.`status` = 1
         ORDER BY id DESC
-        LIMIT #{offset}, #{limit}
     </select>
 
     <select id="detail" resultType="com.iotechn.unimall.data.dto.goods.GroupShopDTO">
@@ -41,8 +40,8 @@
             g.gmt_end as gmtEnd,
             g.min_price as minPrice,
             g.max_price as maxPrice,
-            g.minimum_number as minimumNumber,
-            g.already_buy_number as alreadyBuyNumber,
+            g.min_num as minNum,
+            g.buyer_num as buyerNum,
             g.automatic_refund as automaticRefund,
             g.`status`,
             g.gmt_update as gmtUpdate,
@@ -62,7 +61,7 @@
     </select>
 
     <update id="incCurrentNum">
-        UPDATE unimall_group_shop SET already_buy_number = already_buy_number + #{num} WHERE id = #{id}
+        UPDATE unimall_group_shop SET buyer_num = buyer_num + #{num} WHERE id = #{id}
     </update>
 
 </mapper>

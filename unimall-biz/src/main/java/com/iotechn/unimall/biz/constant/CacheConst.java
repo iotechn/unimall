@@ -25,11 +25,6 @@ public class CacheConst {
     public static final String ADVERT_TYPE = "ADVERT_TYPE:";
 
     /**
-     * 评论缓存 APPRAISE_KEY: + spuId + ":" + pageNo + ":" + pageSize
-     */
-    public static final String APPRAISE_KEY = "APPRAISE_KEY:";
-
-    /**
      * 三级类目树
      */
     public static final String CATEGORY_THREE_LEVEL_TREE = "CATEGORY_THREE_LEVEL_TREE";
@@ -49,16 +44,13 @@ public class CacheConst {
      */
     public static final String FOOTPRINT_LRU = "FOOTPRINT_LRU:";
 
-    /**
-     * 用户收藏商品缓存 COLLECT_USER:+ userID
-     */
-    public static final String COLLECT_USER = "COLLECT_USER:";
-
     public static final String USER_OFFICIAL_WECHAT_ACCESS = "USER_OFFICIAL_WECHAT_ACCESS";
 
     public static final String USER_OFFICIAL_WECHAT_TICKET = "USER_OFFICIAL_WECHAT_TICKET";
 
     public static final String USER_MINI_WECHAT_ACCESS = "USER_MINI_WECHAT_ACCESS";
+
+    /**=========================== 商品缓存 START =============================**/
 
     /**
      * 商品类目内价格排序缓存 (追加+=类目)
@@ -82,12 +74,24 @@ public class CacheConst {
     /**
      * 商品skuId - 库存缓存 (单独)
      */
-    public static final String PRT_SKU_STOCK_BUCKET = "CA_PRODUCT_SKU_DETAIL_HASH_BUCKET";
+    public static final String PRT_SKU_STOCK_BUCKET = "PRT_SKU_DETAIL_HASH_BUCKET";
 
     /**
      * 团购商品缓存
-     * GROUP_SHOP_LIST: + pageNo + ":" + pageSize
+     * PRT_GROUP_SHOP_LIST: + pageNo + ":" + pageSize
      */
-    public static final String GROUP_SHOP_LIST = "GROUP_SHOP_LIST:";
+    public static final String PRT_GROUP_SHOP_LIST = "PRT_GROUP_SHOP_LIST:";
+
+    /**
+     * 用户收藏商品缓存 此缓存用于加速判断用户是否收藏某种商品,后面拼接SPU_ID，因为一般情况下，商品数量少于用户数量
+     */
+    public static final String PRT_USER_FAVORITE_HASH_BUCKET = "PRT_USER_FAVORITE_HASH_BUCKET:";
+
+    /**
+     * 评论缓存 PRT_APPRAISE_LIST: + spuId + ":" + pageNo + ":" + pageSize
+     */
+    public static final String PRT_APPRAISE_LIST = "PRT_APPRAISE_LIST:";
+
+    /**=========================== 商品缓存 END ==============================**/
 
 }

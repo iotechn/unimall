@@ -37,4 +37,10 @@ public class LockConst {
      */
     public static final String ORDER_REFUND_LOCK = "ORDER_REFUND_LOCK:";
 
+    /**
+     * 动态配置锁
+     * DYNAMIC_CONFIG_LOCK: + key
+     */
+    public static final String DYNAMIC_CONFIG_LOCK = "DYNAMIC_CONFIG_LOCK:";
+
 }

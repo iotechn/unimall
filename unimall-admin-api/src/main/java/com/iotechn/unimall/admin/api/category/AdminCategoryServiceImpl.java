@@ -1,28 +1,21 @@
 package com.iotechn.unimall.admin.api.category;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.constant.CacheConst;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
-import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
-import com.iotechn.unimall.data.component.LockComponent;
-import com.iotechn.unimall.data.config.redis.RedisAutoConfig;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
-import com.iotechn.unimall.data.mq.DelayedMessageQueue;
-import com.iotechn.unimall.data.mq.RingDelayedMessageQueueImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -31,7 +24,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -102,7 +94,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (categoryMapper.insert(categoryDO) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.DATABASE_INSERT_FAILURE);
         }
-        publicCodeDeleteCache();
+        clearCache();
         return categoryDO;
     }
 
@@ -116,7 +108,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             throw new AppServiceException(ExceptionDefinition.CATEGORY_OUGHT_TO_EMPTY);
         }
 
-        publicCodeDeleteCache();
+        clearCache();
         return categoryMapper.deleteById(id) > 0;
     }
 
@@ -179,7 +171,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
                 break;
             }
         }
-        publicCodeDeleteCache();
+        clearCache();
         return categoryDTO;
     }
 
@@ -224,7 +216,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     /**
      * 抽取删除缓存公共代码
      */
-    private void publicCodeDeleteCache(){
+    private void clearCache(){
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {

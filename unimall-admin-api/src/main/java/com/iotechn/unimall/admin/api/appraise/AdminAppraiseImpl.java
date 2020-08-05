@@ -1,7 +1,6 @@
 package com.iotechn.unimall.admin.api.appraise;
 
 import com.iotechn.unimall.biz.constant.CacheConst;
-import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.AppraiseDO;
@@ -22,7 +21,7 @@ import java.util.List;
  * Time: 下午3:56
  */
 @Service
-public class AdminAppraiseImpl implements  AdminAppraise {
+public class AdminAppraiseImpl implements AdminAppraise {
 
     @Autowired
     private AppraiseMapper appraiseMapper;
@@ -36,19 +35,19 @@ public class AdminAppraiseImpl implements  AdminAppraise {
         AppraiseDO appraiseDO = appraiseMapper.selectById(id);
         boolean succ = appraiseMapper.deleteById(id) > 0;
         if (succ) {
-            cacheComponent.delPrefixKey(CacheConst.APPRAISE_KEY + appraiseDO.getSpuId());
+            cacheComponent.delPrefixKey(CacheConst.PRT_APPRAISE_LIST + appraiseDO.getSpuId());
         }
         return succ;
     }
 
     @Override
-    public Page<AppraiseResponseDTO> getAppraiseList(Long adminId, Long id, String userName, String spuName, Long orderId, Integer score, String content,Integer pageNo,Integer limit) throws ServiceException {
+    public Page<AppraiseResponseDTO> getAppraiseList(Long adminId, Long id, String userName, String spuName, Long orderId, Integer score, String content, Integer pageNo, Integer limit) throws ServiceException {
 
-        Integer count = appraiseMapper.countAppraiseCondition(id,userName ,spuName , orderId, score, content);
+        Integer count = appraiseMapper.countAppraiseCondition(id, userName, spuName, orderId, score, content);
 
-        List<AppraiseResponseDTO> appraiseResponseDTOList = appraiseMapper.selectAppraiseCondition(id,userName ,spuName , orderId, score, content,(pageNo-1)*limit,limit);
+        List<AppraiseResponseDTO> appraiseResponseDTOList = appraiseMapper.selectAppraiseCondition(id, userName, spuName, orderId, score, content, (pageNo - 1) * limit, limit);
 
-        Page<AppraiseResponseDTO> page = new Page<AppraiseResponseDTO>(appraiseResponseDTOList,pageNo,limit,count);
+        Page<AppraiseResponseDTO> page = new Page<AppraiseResponseDTO>(appraiseResponseDTOList, pageNo, limit, count);
 
         return page;
     }

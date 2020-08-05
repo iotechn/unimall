@@ -514,7 +514,6 @@ export default {
      * 传入一个Id，从树中查找出选择路径
      */
     getCascaderData(id) {
-      debugger
       for (let i = 0; i < this.spuTree.length; i++) {
         if (this.spuTree[i].value === id) {
           return [id]
@@ -526,6 +525,11 @@ export default {
           for (let k = 0; k < this.spuTree[i].children[j].children.length; k++) {
             if (this.spuTree[i].children[j].children[k].value === id) {
               return [this.spuTree[i].value, this.spuTree[i].children[j].value, id]
+            }
+            for (let z = 0; z < this.spuTree[i].children[j].children[k].children.length; z++) {
+              if (this.spuTree[i].children[j].children[k].children[z].value === id) {
+                return [this.spuTree[i].value, this.spuTree[i].children[j].value, this.spuTree[i].children[j].children[k].value, id]
+              }
             }
           }
         }

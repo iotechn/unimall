@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.rmi.ServerException;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,11 +24,9 @@ public class GroupShopServiceImpl implements GroupShopService {
     private GroupShopMapper groupShopMapper;
 
     @Override
-    @AspectCommonCache(value= CacheConst.GROUP_SHOP_LIST,argIndex = {0,1})
+    @AspectCommonCache(value= CacheConst.PRT_GROUP_SHOP_LIST,argIndex = {0,1})
     public Page<GroupShopDTO> getGroupShopPage(Integer pageNo, Integer pageSize) throws ServerException {
-        Integer count = groupShopMapper.selectCount(null);
-        List<GroupShopDTO> groupShopPage = groupShopMapper.getGroupShopPage((pageNo - 1) * pageSize, pageSize);
-        return new Page<>(groupShopPage, pageNo, pageSize, count);
+        return groupShopMapper.getGroupShopPage(Page.div(pageNo, pageSize, GroupShopDTO.class));
     }
 
 

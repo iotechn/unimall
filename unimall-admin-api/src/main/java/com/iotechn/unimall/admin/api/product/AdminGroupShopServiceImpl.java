@@ -336,7 +336,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                cacheComponent.delPrefixKey(CacheConst.GROUP_SHOP_LIST);
+                cacheComponent.delPrefixKey(CacheConst.PRT_GROUP_SHOP_LIST);
                 cacheComponent.delHashKey(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId);
             }
         });

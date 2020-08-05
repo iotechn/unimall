@@ -10,6 +10,7 @@ import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.model.Page;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -64,19 +65,46 @@ public class SpuDTO extends SuperDTO {
      */
     private Page<AppraiseResponseDTO> appraisePage;
 
-    /**
-     *TODO 将要删除 商品现在携带的团购信息
-     */
-    private GroupShopDTO groupShop;
-
     private String unit;
 
     private Long freightTemplateId;
 
     private FreightTemplateDTO freightTemplate;
 
-    private Boolean collect;
+    /**
+     * 用户是否是否LIKE此商品
+     */
+    private Boolean favorite;
 
     private Integer status;
+
+    /**
+     * 商品正在参加的活动类型
+     */
+    private Integer activityType;
+
+    /**
+     * 商品正在参加的活动Id
+     */
+    private Long activityId;
+
+    /**
+     * 商品活动开始时间
+     * 若此当前时间已经超过时间，即时费用系统没有通知到商品系统，商品系统也默认此活动已经结束，可覆盖创建新的活动。
+     * 若活动没有结束时间，应该将其设为巨大的值eg.Long.MAX_VALUE，否则商品系统会误判活动已经结束
+     */
+    private Date gmtActivityStart;
+
+    /**
+     * 商品活动结束时间
+     * 若此当前时间已经超过时间，即时费用系统没有通知到商品系统，商品系统也默认此活动已经结束，可覆盖创建新的活动。
+     * 若活动没有结束时间，应该将其设为巨大的值eg.Long.MAX_VALUE，否则商品系统会误判活动已经结束
+     */
+    private Date gmtActivityEnd;
+
+    /**
+     * Spu活动
+     */
+    private Object activity;
 
 }

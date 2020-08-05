@@ -11,6 +11,21 @@ export function getSpuBigTree() {
   })
 }
 
+/**
+ * 通过CategoryId， 列举出商品Id和商品标题
+ * @param {int} categoryId
+ */
+export function listProductIdAndTitleByCategoryId(categoryId) {
+  return request({
+    method: 'get',
+    params: {
+      _gp: 'admin.product',
+      _mt: 'listByCategory',
+      categoryId
+    }
+  })
+}
+
 export function listGoods(query) {
   return request({
     method: 'get',

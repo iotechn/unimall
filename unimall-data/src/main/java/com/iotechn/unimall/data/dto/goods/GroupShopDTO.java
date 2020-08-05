@@ -27,9 +27,9 @@ public class GroupShopDTO extends SuperDTO {
 
     private Date gmtEnd;
 
-    private Integer minimumNumber;
+    private Integer minNum;
 
-    private Integer alreadyBuyNumber;
+    private Integer buyerNum;
 
     private Integer automaticRefund;
 

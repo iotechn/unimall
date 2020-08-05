@@ -125,6 +125,12 @@ public class Page<T> implements Serializable, IPage<T> {
         return this;
     }
 
+    /**
+     * 将分页中的 T 数据类型转换为 R 数据类型
+     * @param transMethod
+     * @param <R>
+     * @return
+     */
     public <R> Page<R> trans(Function<T, R> transMethod) {
         this.setItems((List) this.items.stream().map(transMethod).collect(Collectors.toList()));
         return (Page<R>) this;

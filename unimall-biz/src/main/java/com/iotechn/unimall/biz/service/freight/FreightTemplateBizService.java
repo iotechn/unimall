@@ -1,6 +1,7 @@
 package com.iotechn.unimall.biz.service.freight;
 
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.mapper.FreightTemplateCarriageMapper;
 import com.iotechn.unimall.data.mapper.FreightTemplateMapper;
@@ -34,5 +35,11 @@ public class FreightTemplateBizService {
 
     public ShipTraceDTO getShipTraceList(String shipNo, String shipCode) throws ServiceException {
         return shipTraceQuery.query(shipNo, shipCode);
+    }
+
+
+    public FreightTemplateDTO getFreightTemplateById(Long templateId) throws ServiceException {
+        // TODO
+        return null;
     }
 }
