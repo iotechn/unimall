@@ -3,6 +3,7 @@ package com.iotechn.unimall.data.component;
 import com.iotechn.unimall.data.domain.DynamicConfigDO;
 import com.iotechn.unimall.data.mapper.DynamicConfigMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Description: 动态配置组件
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Date: 2020/8/5
  * Time: 11:31
  */
+@Component
 public class DynamicConfigComponent {
 
     @Autowired
