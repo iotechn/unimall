@@ -1,6 +1,7 @@
 package com.iotechn.unimall.biz.config.mq;
 
-import com.iotechn.unimall.biz.config.mq.handler.OrderCancelHandler;
+import com.iotechn.unimall.biz.config.mq.handler.OrderAutoCancelHandler;
+import com.iotechn.unimall.biz.config.mq.handler.OrderAutoConfirmHandle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,7 +9,10 @@ import org.springframework.context.annotation.Configuration;
 public class RedisNotifyHandlerConfig {
 
     @Bean
-    public OrderCancelHandler orderCancelHandler(){
-        return new OrderCancelHandler();
+    public OrderAutoCancelHandler orderAutoCancelHandler(){
+        return new OrderAutoCancelHandler();
     }
+
+    @Bean
+    public OrderAutoConfirmHandle orderAutoConfirmHandle(){ return new OrderAutoConfirmHandle();}
 }
