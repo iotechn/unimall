@@ -2,9 +2,7 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,16 +13,24 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @TableName("unimall_advert")
-@NoArgsConstructor
-@AllArgsConstructor
 public class AdvertDO extends SuperDO {
 
-    @TableField("ad_type")
-    private Integer adType;
+    @TableField("type")
+    private Integer type;
+
+    /**
+     * 广告关联类型
+     */
+    @TableField("union_type")
+    private Integer unionType;
 
     private String title;
 
-    private String url;
+    /**
+     * 广告关联值，可以是商品、类目、页面等
+     */
+    @TableField("union_value")
+    private String unionValue;
 
     @TableField("img_url")
     private String imgUrl;

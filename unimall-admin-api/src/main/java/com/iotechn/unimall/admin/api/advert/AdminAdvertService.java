@@ -22,32 +22,33 @@ import com.iotechn.unimall.data.model.Page;
 public interface AdminAdvertService {
 
     @HttpMethod(description = "创建", permission = "promote:advert:create", permissionParentName = "推广管理", permissionName = "广告管理")
-    public Boolean create(
-            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
-            @NotNull @HttpParam(name = "adType", type = HttpParamType.COMMON, description = "广告类型") Integer adType,
+    public String create(
+            @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "广告类型") Integer type,
+            @NotNull @HttpParam(name = "unionType", type = HttpParamType.COMMON, description = "关联类型") Integer unionType,
             @HttpParam(name = "title", type = HttpParamType.COMMON, description = "广告标题") String title,
-            @NotNull @HttpParam(name = "url", type = HttpParamType.COMMON, description = "广告地址") String url,
+            @HttpParam(name = "unionValue", type = HttpParamType.COMMON, description = "关联值") String unionValue,
             @NotNull @HttpParam(name = "imgUrl", type = HttpParamType.COMMON, description = "广告图片地址") String imgUrl,
             @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "广告状态") Integer status,
-            @NotNull @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色") String color) throws ServiceException;
+            @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色", valueDef = "rgb(255,255,255)") String color,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "删除", permission = "promote:advert:delete", permissionParentName = "推广管理", permissionName = "广告管理")
-    public Boolean delete(
+    public String delete(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
-            @NotNull @HttpParam(name = "adType", type = HttpParamType.COMMON, description = "广告类型") Integer adType,
+            @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "广告类型") Integer type,
             @NotNull @HttpParam(name = "adId", type = HttpParamType.COMMON, description = "广告ID") Long adId) throws ServiceException;
 
     @HttpMethod(description = "修改", permission = "promote:advert:update", permissionParentName = "推广管理", permissionName = "广告管理")
-    public Boolean edit(
-            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
+    public String edit(
             @NotNull @HttpParam(name = "adId", type = HttpParamType.COMMON, description = "广告ID") Long adId,
-            @NotNull @HttpParam(name = "adType", type = HttpParamType.COMMON, description = "广告类型") Integer adType,
+            @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "广告类型") Integer type,
+            @NotNull @HttpParam(name = "unionType", type = HttpParamType.COMMON, description = "关联类型") Integer unionType,
             @HttpParam(name = "title", type = HttpParamType.COMMON, description = "广告标题") String title,
-            @HttpParam(name = "url", type = HttpParamType.COMMON, description = "广告地址") String url,
+            @HttpParam(name = "unionValue", type = HttpParamType.COMMON, description = "关联值") String unionValue,
             @HttpParam(name = "imgUrl", type = HttpParamType.COMMON, description = "广告图片地址") String imgUrl,
             @HttpParam(name = "status", type = HttpParamType.COMMON, description = "广告状态") Integer status,
-            @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色") String color) throws ServiceException;
-
+            @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色") String color,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "查询", permission = "promote:advert:query", permissionParentName = "推广管理", permissionName = "广告管理")
     public Page<AdvertDO> list(

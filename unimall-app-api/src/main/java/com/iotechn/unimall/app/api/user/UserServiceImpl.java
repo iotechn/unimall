@@ -2,7 +2,7 @@ package com.iotechn.unimall.app.api.user;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AppServiceException;

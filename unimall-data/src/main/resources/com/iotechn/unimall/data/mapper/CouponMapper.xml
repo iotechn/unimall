@@ -11,7 +11,7 @@
             coupon_id AS `key`,
             count( coupon_id ) AS `value`
         FROM
-            unimall_user_coupon
+            unimall_coupon_user
         WHERE
             coupon_id IN
         <foreach open="(" close=")" collection="couponIds" separator="," item="cid">

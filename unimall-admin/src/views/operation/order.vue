@@ -70,7 +70,12 @@
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="right" class="table-expand">
-            <el-form-item label="联系人">
+            <el-form-item label="父单编号">
+              <span>{{ props.row.parentOrderNo }}</span>
+            </el-form-item>
+          </el-form>
+          <el-form label-position="right" class="table-expand">
+            <el-form-item label="联系人名">
               <span>{{ props.row.consignee }}</span>
             </el-form-item>
           </el-form>

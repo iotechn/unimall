@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.service.WxPayService;
-import com.iotechn.unimall.biz.constant.LockConst;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
+import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -20,7 +21,6 @@ import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
-import com.iotechn.unimall.data.mapper.UserMapper;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.properties.UnimallWxProperties;
 import org.slf4j.Logger;
@@ -64,7 +64,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private LockComponent lockComponent;
 
     @Autowired
-    private UserMapper userMapper;
+    private UserBizService userBizService;
 
     @Autowired
     private UnimallWxProperties unimallWxProperties;
@@ -88,7 +88,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (lockComponent.tryLock(LockConst.ORDER_REFUND_LOCK + orderNo, 30)) {
             try {
                 //1.校验订单状态是否处于退款中
-                OrderDO orderDO = orderBizService.checkOrderExist(orderNo, null);
+                OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, null).get(0);
                 if (orderDO.getStatus() != OrderStatusType.REFUNDING.getCode()) {
                     throw new AdminServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_REFUND);
                 }
@@ -113,7 +113,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     });
                     orderBizService.changeOrderStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
                     Long userId = orderDO.getUserId();
-                    UserDO userDO = userMapper.selectById(userId);
+                    UserDO userDO = userBizService.getUserById(userId);
                     Integer loginType = userDO.getLoginType();
                     //2.2.2 向微信支付平台发送退款请求
                     Integer refundPrice = null;
@@ -162,7 +162,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String ship(String orderNo, String shipCode, String shipNo, Long adminId) throws ServiceException {
-        orderBizService.checkOrderExist(orderNo, null);
+        orderBizService.checkOrderExistByNo(orderNo, null).get(0);
         OrderDO updateOrderDO = new OrderDO();
         Date now = new Date();
         updateOrderDO.setGmtUpdate(now);

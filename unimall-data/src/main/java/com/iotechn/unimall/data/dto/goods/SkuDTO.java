@@ -38,7 +38,11 @@ public class SkuDTO extends SuperDTO {
 
     private Integer stock;
 
+    private Long freightTemplateId;
+
     private Integer status;
+
+    private Integer weight;
 
     private String unit;
 

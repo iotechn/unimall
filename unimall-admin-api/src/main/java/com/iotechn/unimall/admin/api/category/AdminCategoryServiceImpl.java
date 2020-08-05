@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.category;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.AppServiceException;
@@ -93,7 +93,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (categoryMapper.insert(categoryDO) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.DATABASE_INSERT_FAILURE);
         }
-        publicCodeDeleteCache();
+        clearCache();
         return categoryDO;
     }
 
@@ -107,7 +107,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             throw new AppServiceException(ExceptionDefinition.CATEGORY_OUGHT_TO_EMPTY);
         }
 
-        publicCodeDeleteCache();
+        clearCache();
         return categoryMapper.deleteById(id) > 0;
     }
 
@@ -170,7 +170,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
                 break;
             }
         }
-        publicCodeDeleteCache();
+        clearCache();
         return categoryDTO;
     }
 
@@ -215,7 +215,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     /**
      * 抽取删除缓存公共代码
      */
-    private void publicCodeDeleteCache(){
+    private void clearCache(){
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {

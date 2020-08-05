@@ -270,6 +270,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition GOODS_EXIST_ADVERT =
             new ServiceExceptionDefinition(20011, "商品存在广告，请先移除广告");
 
+    public static final ServiceExceptionDefinition GOODS_SPU_EXIST_ACTIVITY =
+            new ServiceExceptionDefinition(20012, "商品已经存在活动，不能继续添加");
+
 
     public static final ServiceExceptionDefinition RECOMMEND_SPU_NO_HAS =
             new ServiceExceptionDefinition(21001, "你要加入推荐的商品不存在");

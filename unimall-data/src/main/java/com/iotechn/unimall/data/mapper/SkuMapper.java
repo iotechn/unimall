@@ -17,8 +17,6 @@ public interface SkuMapper extends IMapper<SkuDO> {
 
     public Integer returnSkuStock(@Param("skuId") Long skuId, @Param("stock") Integer stock);
 
-    public Integer decSkuFreezeStock(@Param("skuId") Long skuId, @Param("stock") Integer stock);
-
     /**
      * 删除SPUID
      * @param spuId
@@ -30,7 +28,7 @@ public interface SkuMapper extends IMapper<SkuDO> {
 
     public Integer getStockForUpdate(Long skuId);
 
-    public List<SkuDTO> getSkuDTOListByIds(List<Long> skuIds);
+    public List<SkuDTO> getSkuDTOListByIds(@Param("skuIds") List<Long> skuIds);
 
     public Integer decStock(Long skuId, Integer num);
 }

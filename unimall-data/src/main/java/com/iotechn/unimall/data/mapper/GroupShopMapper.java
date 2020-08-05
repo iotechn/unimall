@@ -1,14 +1,14 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.iotechn.unimall.data.domain.GroupShopDO;
 import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
+import com.iotechn.unimall.data.model.Page;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 public interface GroupShopMapper extends IMapper<GroupShopDO> {
 
-    public List<GroupShopDTO> getGroupShopPage(@Param("offset") Integer offset,@Param("limit") Integer limit);
+    public Page<GroupShopDTO> getGroupShopPage(IPage page);
 
     public GroupShopDTO detail(Long groupShopId);
 

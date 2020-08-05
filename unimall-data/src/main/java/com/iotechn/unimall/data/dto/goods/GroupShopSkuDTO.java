@@ -14,7 +14,7 @@ public class GroupShopSkuDTO extends SpuDTO {
 
     private Integer skuGroupShopPrice;
 
-    private Integer groupShopId;
+    private Long groupShopId;
 
     private Long skuId;
 

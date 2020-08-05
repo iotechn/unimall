@@ -1,8 +1,10 @@
 package com.iotechn.unimall.biz.service.user;
 
 import com.alibaba.fastjson.JSONObject;
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.domain.UserDO;
+import com.iotechn.unimall.data.mapper.UserMapper;
 import com.iotechn.unimall.data.properties.UnimallWxProperties;
 import com.iotechn.unimall.data.wx.WeChatCommonTemplateMessageModel;
 import okhttp3.MediaType;
@@ -28,6 +30,9 @@ public class UserBizService {
 
     @Autowired
     private CacheComponent cacheComponent;
+
+    @Autowired
+    private UserMapper userMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(UserBizService.class);
 
@@ -124,4 +129,9 @@ public class UserBizService {
         }
         return errcode;
     }
+
+    public UserDO getUserById(Long userId) {
+        return userMapper.selectById(userId);
+    }
+
 }

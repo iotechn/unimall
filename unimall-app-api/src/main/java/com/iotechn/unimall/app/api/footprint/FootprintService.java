@@ -7,7 +7,6 @@ import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.SpuDO;
-import com.iotechn.unimall.data.model.Page;
 
 import java.util.List;
 
@@ -23,16 +22,16 @@ import java.util.List;
 public interface FootprintService {
 
     @HttpMethod(description = "删除足迹")
-    public boolean deleteFootprint(
+    public boolean delete(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId,
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "足迹Id") Long spuId) throws ServiceException;
 
     @HttpMethod(description = "清空足迹")
-    public boolean deleteAllFootprint(
+    public boolean deleteAll(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
 
     @HttpMethod(description = "分页查询所有足迹,通过时间顺序")
-    public List<SpuDO> getAllFootprint(
+    public List<SpuDO> list(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
 
 }

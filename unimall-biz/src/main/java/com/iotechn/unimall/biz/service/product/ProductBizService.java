@@ -2,7 +2,7 @@ package com.iotechn.unimall.biz.service.product;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -64,7 +64,7 @@ public class ProductBizService {
     private CacheComponent cacheComponent;
 
     /**
-     * SPU 排除掉detail字段的其他属性
+     * SPU 排除掉detail字段的其他字段名字形成的数组
      */
     public static final String[] SPU_EXCLUDE_DETAIL_FIELDS;
 

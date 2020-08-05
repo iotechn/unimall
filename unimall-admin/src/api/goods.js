@@ -1,12 +1,27 @@
 import request from '@/utils/request'
 import Qs from 'qs'
 
-export function spuTree() {
+export function getSpuBigTree() {
   return request({
     method: 'get',
     params: {
       _gp: 'admin.product',
       _mt: 'getSpuBigTree'
+    }
+  })
+}
+
+/**
+ * 通过CategoryId， 列举出商品Id和商品标题
+ * @param {int} categoryId
+ */
+export function listProductIdAndTitleByCategoryId(categoryId) {
+  return request({
+    method: 'get',
+    params: {
+      _gp: 'admin.product',
+      _mt: 'listByCategory',
+      categoryId
     }
   })
 }

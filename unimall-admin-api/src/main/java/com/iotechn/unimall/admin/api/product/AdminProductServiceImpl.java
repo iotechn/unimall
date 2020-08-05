@@ -2,7 +2,7 @@ package com.iotechn.unimall.admin.api.product;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.constant.CacheConst;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
@@ -69,7 +69,6 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     /**
      * 后台低频接口，无需缓存，用于选择商品，需要
-     * TODO 优化
      * @return
      * @throws ServiceException
      */
@@ -80,14 +79,15 @@ public class AdminProductServiceImpl implements AdminProductService {
         Integer recordLevelOne = 0;
         Integer recordLevelTwo = 0;
         for (int i = 0; i < categoryDOS.size(); i++) {
-            if (i != 0 && categoryDOS.get(i - 1).getLevel().equals(0) && categoryDOS.get(i).getLevel().equals(1)) {
+            if(i != 0 && categoryDOS.get(i-1).getLevel().equals(0) && categoryDOS.get(i).getLevel().equals(1)){
                 recordLevelOne = i;
             }
-            if (i != 0 && categoryDOS.get(i - 1).getLevel().equals(1) && categoryDOS.get(i).getLevel().equals(2)) {
+            if(i != 0 && categoryDOS.get(i-1).getLevel().equals(1) && categoryDOS.get(i).getLevel().equals(2)){
                 recordLevelTwo = i;
                 break;
             }
         }
+
         for (int i = 0; i < recordLevelOne; i++) {
             CategoryDO categoryOnI = categoryDOS.get(i);    //一级类目
             SpuTreeNodeDTO dtoOnI = new SpuTreeNodeDTO();
@@ -97,35 +97,38 @@ public class AdminProductServiceImpl implements AdminProductService {
             dtoOnI.setChildren(new LinkedList<>());
             for (int j = recordLevelOne; j < recordLevelTwo; j++) {
                 CategoryDO categoryOnJ = categoryDOS.get(j);    //二级类目
-                if (!categoryOnJ.getParentId().equals(dtoOnI.getId())) {
+                if(!categoryOnJ.getParentId().equals(dtoOnI.getId())){
                     continue;
                 }
+
                 SpuTreeNodeDTO dtoOnJ = new SpuTreeNodeDTO();
                 dtoOnJ.setLabel(categoryOnJ.getTitle());
                 dtoOnJ.setValue("C_" + categoryOnJ.getId());
                 dtoOnJ.setId(categoryOnJ.getId());
                 dtoOnJ.setChildren(new LinkedList<>());
-                for (int p = recordLevelTwo; p < categoryDOS.size(); p++) {
+
+                for (int p = recordLevelTwo; p <categoryDOS.size() ; p++) {
                     CategoryDO categoryOnP = categoryDOS.get(p);    //三级类目
-                    if (!categoryOnP.getParentId().equals(dtoOnJ.getId())) {
+                    if(!categoryOnP.getParentId().equals(dtoOnJ.getId())){
                         continue;
                     }
+
                     SpuTreeNodeDTO dtoOnP = new SpuTreeNodeDTO();
                     dtoOnP.setLabel(categoryOnP.getTitle());
                     dtoOnP.setValue("C_" + categoryOnP.getId());
                     dtoOnP.setId(categoryOnP.getId());
                     dtoOnP.setChildren(new LinkedList<>());
+
                     for (int k = 0; k < spuDOS.size(); k++) {
-                        if (k != 0 && spuDOS.get(k - 1).getCategoryId().equals(dtoOnP.getId()) && !spuDOS.get(k).getCategoryId().equals(dtoOnP.getId())) {
+                        if(k != 0 && spuDOS.get(k-1).getCategoryId().equals(dtoOnP.getId()) && !spuDOS.get(k).getCategoryId().equals(dtoOnP.getId())){
                             break;
                         }
                         SpuDO spuDO = spuDOS.get(k);        //商品
-                        if (spuDO.getCategoryId().equals(dtoOnP.getId())) {
+                        if(spuDO.getCategoryId().equals(dtoOnP.getId())){
                             SpuTreeNodeDTO dtoOnK = new SpuTreeNodeDTO();
                             dtoOnK.setLabel(spuDO.getTitle());
                             dtoOnK.setValue("G_" + spuDO.getId());
                             dtoOnK.setId(spuDO.getId());
-                            dtoOnK.setChildren(new LinkedList<>());
                             dtoOnP.getChildren().add(dtoOnK);
                         }
                     }
@@ -137,7 +140,6 @@ public class AdminProductServiceImpl implements AdminProductService {
         }
         return list;
     }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -407,6 +409,29 @@ public class AdminProductServiceImpl implements AdminProductService {
             }
         });
         return "ok";
+    }
+
+    @Override
+    public String rebuildProductCache(Long adminId) throws ServiceException {
+        // 1.删除旧缓存
+        cacheComponent.delPrefixKey(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET);
+        cacheComponent.delPrefixKey(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET);
+        cacheComponent.delPrefixKey(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET);
+        cacheComponent.delPrefixKey(CacheConst.PRT_SKU_STOCK_BUCKET);
+        cacheComponent.delPrefixKey(CacheConst.PRT_SPU_DETAIL_HASH_BUCKET);
+        cacheComponent.delPrefixKey(CacheConst.PRT_SPU_HASH_BUCKET);
+        // 2.重建新缓存
+        List<SpuDO> spuDOS = spuMapper.selectList(new QueryWrapper<>());
+        for (SpuDO spuDO : spuDOS) {
+            // 2.1. 重建主表缓存
+            this.createSpuCache(spuDO);
+            // 2.2. 重建SKU缓存
+            List<SkuDO> skuList = skuMapper.selectList(new QueryWrapper<SkuDO>().eq("spu_id", spuDO.getId()));
+            for (SkuDO skuDO : skuList) {
+                cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
+            }
+        }
+        return null;
     }
 
     @Override

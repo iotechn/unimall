@@ -93,9 +93,6 @@ public class CheckQuartz {
                             updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
                             updateOrderDO.setGmtUpdate(now);
                             List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", item.getId()));
-                            orderSkuList.forEach(skuItem -> {
-                                skuMapper.decSkuFreezeStock(skuItem.getSkuId(), skuItem.getNum());
-                            });
                             orderBizService.changeOrderStatus(item.getOrderNo(), OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
                         } catch (Exception e) {
                             logger.error("[未确认检测] 异常", e);
@@ -190,7 +187,7 @@ public class CheckQuartz {
                             continue;
                         }
 
-                        if (groupShopDO.getAutomaticRefund() == GroupShopAutomaticRefundType.YES.getCode() && groupShopDO.getAlreadyBuyNumber().compareTo(groupShopDO.getMinimumNumber()) < 0) {
+                        if (groupShopDO.getAutomaticRefund() == GroupShopAutomaticRefundType.YES.getCode() && groupShopDO.getBuyerNum().compareTo(groupShopDO.getMinNum()) < 0) {
                             // 2.2.2.1.退款
                             logger.info("[团购结束] 退款逻辑 groupShopId:" + groupShopDO.getId());
                             for (OrderDO orderDO : lockOrderList) {

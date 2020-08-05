@@ -6,12 +6,12 @@ import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.executor.GlobalExecutor;
-import com.iotechn.unimall.biz.constant.CacheConst;
-import com.iotechn.unimall.biz.constant.LockConst;
+import com.iotechn.unimall.data.constant.CacheConst;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.biz.service.address.AddressBizService;
 import com.iotechn.unimall.biz.service.cart.CartBizService;
 import com.iotechn.unimall.biz.service.coupon.CouponBizService;
-import com.iotechn.unimall.biz.service.freight.FreightBizService;
+import com.iotechn.unimall.biz.service.freight.FreightTemplateBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
@@ -19,7 +19,6 @@ import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.component.LockComponent;
@@ -39,9 +38,10 @@ import com.iotechn.unimall.data.enums.*;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
-import com.iotechn.unimall.data.model.OrderCalcSkuDTO;
+import com.iotechn.unimall.data.model.FreightCalcModel;
+import com.iotechn.unimall.data.model.OrderCalcSkuModel;
 import com.iotechn.unimall.data.model.Page;
-import com.iotechn.unimall.data.model.SkuStockInfo;
+import com.iotechn.unimall.data.model.SkuStockInfoModel;
 import com.iotechn.unimall.data.properties.UnimallWxProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
 import org.slf4j.Logger;
@@ -59,6 +59,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * TODO 订单预览
  * Created by rize on 2019/7/4.
  */
 @Service
@@ -94,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
     private OrderBizService orderBizService;
 
     @Autowired
-    private FreightBizService freightBizService;
+    private FreightTemplateBizService freightTemplateBizService;
 
     @Autowired
     private GroupShopBizService groupShopBizService;
@@ -123,13 +124,14 @@ public class OrderServiceImpl implements OrderService {
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
         if (lockComponent.tryLock(LockConst.TAKE_ORDER_LOCK + userId, 20)) {
             //加上乐观锁，防止用户重复提交订单
+            List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
+            boolean calcStockFlag = false;
             try {
                 //用户会员等级
                 Integer userLevel = SessionUtil.getUser().getLevel();
                 // 对Sku排序，防止相互拿锁，两边都无法结算的情况。
                 orderRequest.getSkuList().sort((o1, o2) -> (int) (o1.getSkuId() - o2.getSkuId()));
                 //参数强校验 START
-                List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
                 if (CollectionUtils.isEmpty(skuList) || orderRequest.getTotalPrice() == null) {
                     throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
                 }
@@ -143,17 +145,17 @@ public class OrderServiceImpl implements OrderService {
                 // 收货地址对象
                 AddressDO addressDO = addressBizService.getAddressById(orderRequest.getAddressId());
                 // 库存不足列表，用于提示前端
-                List<SkuStockInfo> stockErrorSkuList = new LinkedList<>();
+                List<SkuStockInfoModel> stockErrorSkuList = new LinkedList<>();
                 // 商品状态异常列表，用于提示前端
                 List<Long> statusErrorSkuList = new LinkedList<>();
                 // 从缓存读取，用于计算的列表。属于SkuDO的部分属性。
-                List<OrderCalcSkuDTO> calcSkuList = new ArrayList<>();
+                List<OrderCalcSkuModel> calcSkuList = new ArrayList<>();
                 // 将SkuIds 查取出来
                 List<Long> skuIds = new ArrayList<>();
                 for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
                     Long skuId = orderRequestSkuDTO.getSkuId();
                     skuIds.add(skuId);
-                    OrderCalcSkuDTO orderCalcSpuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + orderRequestSkuDTO.getSpuId(), OrderCalcSkuDTO.class);
+                    OrderCalcSkuModel orderCalcSpuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + orderRequestSkuDTO.getSpuId(), OrderCalcSkuModel.class);
                     if (orderCalcSpuDTO == null) {
                         // 尝试从DB中读取
                         SpuDO spuFromDB = productBizService.getProductById(orderRequestSkuDTO.getSpuId());
@@ -162,7 +164,7 @@ public class OrderServiceImpl implements OrderService {
                             statusErrorSkuList.add(skuId);
                             continue;
                         } else {
-                            orderCalcSpuDTO = new OrderCalcSkuDTO();
+                            orderCalcSpuDTO = new OrderCalcSkuModel();
                             BeanUtils.copyProperties(spuFromDB, orderCalcSpuDTO);
                         }
 
@@ -170,7 +172,7 @@ public class OrderServiceImpl implements OrderService {
                     long surplus = cacheComponent.decrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuId, orderRequestSkuDTO.getNum());
                     if (surplus < 0) {
                         // 若余量小于0，则表示该商品不存在或库存不足。
-                        SkuStockInfo skuStockInfo = new SkuStockInfo();
+                        SkuStockInfoModel skuStockInfo = new SkuStockInfoModel();
                         skuStockInfo.setSkuId(skuId);
                         skuStockInfo.setExpect(orderRequestSkuDTO.getNum());
                         // 扣减之后的余量 + 用户期望量 = 扣减之前的余量
@@ -183,6 +185,9 @@ public class OrderServiceImpl implements OrderService {
                     orderCalcSpuDTO.setNum(orderRequestSkuDTO.getNum());
                     calcSkuList.add(orderCalcSpuDTO);
                 }
+
+                calcStockFlag = true;
+
                 // 商品库存不足列表，用于前端提示 使用异常的Attach方法
                 if (!CollectionUtils.isEmpty(stockErrorSkuList)) {
                     throw new AppServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH).attach(stockErrorSkuList);
@@ -196,20 +201,6 @@ public class OrderServiceImpl implements OrderService {
                 Date now = new Date();
                 // 若库存充足，也没下架，则获取所有sku实体对象
                 List<SkuDTO> skuDTOListOfAll = productBizService.getSkuListByIds(skuIds);
-                // TODO 计算运费模板
-//                Map<Long, OrderCalcSkuDTO> skuMapForCalcFreightPrice = calcSkuList.stream().collect(Collectors.toMap(OrderCalcSkuDTO::getSkuId, v -> v));
-//                Collection<FreightCalcDTO> values = skuDTOListOfAll.stream().map(item -> {
-//                    FreightCalcDTO freightCalcDTO = new FreightCalcDTO();
-//                    freightCalcDTO.setProvince(addressDO.getProvince());
-//                    freightCalcDTO.setBusinessCode(item.getBusinessCode());
-//                    FreightCalcDTO.FreightAndWeight freightAndWeight = new FreightCalcDTO.FreightAndWeight();
-//                    freightAndWeight.setWeight(item.getWeight());
-//                    freightAndWeight.setPrice(item.getPrice() * skuMapForCalcFreightPrice.get(item.getId()).getNum());
-//                    freightAndWeight.setId(item.getFreightTemplateId());
-//                    freightCalcDTO.setFreightAndWeights(Arrays.asList(freightAndWeight));
-//                    return freightCalcDTO;
-//                }).collect(Collectors.toMap(FreightCalcDTO::getBusinessCode, v -> v, freightCalcMergeFunction)).values();
-//                Map<String, Integer> freightPriceMap = freightTemplateBizService.computePostage(values);
                 // 优惠券实例
                 CouponUserDTO couponUserDTO = null;
                 if (orderRequest.getCouponId() != null) {
@@ -219,7 +210,7 @@ public class OrderServiceImpl implements OrderService {
                     }
                 }
 
-                List<OrderCalcSkuDTO> orderCalcSkuList = calcSkuList;
+                List<OrderCalcSkuModel> orderCalcSkuList = calcSkuList;
                 // 进行主键排序
                 orderCalcSkuList.sort((o1, o2) -> (int) (o1.getSkuId() - o2.getSkuId()));
                 // 查出来的数据是按主键排序的
@@ -234,10 +225,11 @@ public class OrderServiceImpl implements OrderService {
                 Map<Long, Integer> groupShopPriceMap = new HashMap<>();
                 Map<Long, Integer> groupShopOriginalPriceMap = new HashMap<>();
                 for (int i = 0; i < skuDTOList.size(); i++) {
-                    OrderCalcSkuDTO orderCalcSkuDTO = orderCalcSkuList.get(i);
+                    OrderCalcSkuModel orderCalcSkuDTO = orderCalcSkuList.get(i);
                     SkuDTO skuDTO = skuDTOList.get(i);
                     Integer originalPrice = skuDTO.getOriginalPrice();
-                    // FIXME 这里获取三个价格，可抽取一个方法
+                    // FIXME 对于活动价格，需要在skuDTO中覆盖掉之前价格
+                    // FIXME 对于参加活动的商品，商品的非活动价格已经无参考价值
                     if ((skuDTO.getActivityType() != null
                             && skuDTO.getActivityType() == SpuActivityType.GROUP_SHOP.getCode() && skuDTO.getGmtActivityStart() != null
                             && skuDTO.getGmtActivityEnd() != null && skuDTO.getGmtActivityStart().getTime() < now.getTime() && skuDTO.getGmtActivityEnd().getTime() > now.getTime())) {
@@ -274,11 +266,39 @@ public class OrderServiceImpl implements OrderService {
                         skuPrice += skuDTO.getPrice() * orderCalcSkuDTO.getNum();
                         totalSkuPrice += skuDTO.getPrice() * orderCalcSkuDTO.getNum();
                     }
+                    // 将DB中的价格，重量赋值给计算模型
+                    orderCalcSkuDTO.setFreightTemplateId(skuDTO.getFreightTemplateId());
+                    orderCalcSkuDTO.setWeight(skuDTO.getWeight());
+                    orderCalcSkuDTO.setPrice(skuDTO.getPrice());
+                    orderCalcSkuDTO.setVipPrice(skuDTO.getVipPrice());
                 }
                 // 拆分单序号
                 int childIndex = 1;
                 // 获取邮费
-                Integer freightPrice = 0; // freightPriceMap.get(businessCode);
+                FreightCalcModel freightCalcModel = new FreightCalcModel();
+                // 将SKU按照不同的运费模板进行分组
+                Map<Long, OrderCalcSkuModel> freightTemplateCalcMap = orderCalcSkuList
+                        .stream()
+                        .collect(Collectors.toMap(OrderCalcSkuModel::getFreightTemplateId,
+                                v -> v,
+                                (c1, c2) -> {
+                                    // 将同组的价格和重量相累加
+                                    c1.setWeight(c1.getWeight() + c2.getWeight());
+                                    c1.setPrice(c1.getPrice() + c2.getPrice());
+                                    c1.setVipPrice(c1.getVipPrice() + c2.getVipPrice());
+                                    return c1;
+                                }));
+                // 获取SKU数量映射表
+                List<FreightCalcModel.FreightAndWeight> faws = new LinkedList<>();
+                freightTemplateCalcMap.forEach((k, v) -> {
+                    FreightCalcModel.FreightAndWeight faw = new FreightCalcModel.FreightAndWeight();
+                    faw.setId(k);
+                    faw.setPrice(userLevel == UserLevelType.VIP.getCode() ? v.getVipPrice() : v.getPrice());
+                    faw.setWeight(v.getWeight());
+                    faws.add(faw);
+                });
+                freightCalcModel.setFreightAndWeights(faws);
+                Integer freightPrice = freightTemplateBizService.computePostage(freightCalcModel);
                 // 是否已经计算过单次费用，例如优惠券、运费。同一个商家只计算一次（因为团购订单可能会被拆为两单，但是邮费只应该计算一次）
                 boolean singleFee = false;
                 // 使用优惠券的订单
@@ -289,7 +309,7 @@ public class OrderServiceImpl implements OrderService {
                     // 这是普通商品
                     // 将普通商品(非团购等需要单独拆单的商品)的SkuList过滤出来
                     List<SkuDTO> commonSkuList = new ArrayList<>();
-                    List<OrderCalcSkuDTO> commonOrderCalcSkuList = new ArrayList<>();
+                    List<OrderCalcSkuModel> commonOrderCalcSkuList = new ArrayList<>();
                     for (int i = 0; i < skuDTOList.size(); i++) {
                         SkuDTO item = skuDTOList.get(i);
                         if (!(item.getActivityType() != null
@@ -315,7 +335,7 @@ public class OrderServiceImpl implements OrderService {
                         Integer groupShopSkuPrice = groupShopPriceMap.get(groupShopId);
                         // 过滤出当前团购的团购商品，即SkuDTOList
                         List<SkuDTO> groupShopSkuList = new ArrayList<>();
-                        List<OrderCalcSkuDTO> groupShopOrderCalcSkuList = new ArrayList<>();
+                        List<OrderCalcSkuModel> groupShopOrderCalcSkuList = new ArrayList<>();
                         for (int i = 0; i < skuDTOList.size(); i++) {
                             SkuDTO item = skuDTOList.get(i);
                             if (item.getActivityType() != null
@@ -365,11 +385,19 @@ public class OrderServiceImpl implements OrderService {
                     }
                 }
                 return parentOrderNo;
-            } catch (ServiceException e) {
-                throw e;
             } catch (Exception e) {
+                if (calcStockFlag) {
+                    for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
+                        cacheComponent.incrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + orderRequestSkuDTO.getSkuId(), orderRequestSkuDTO.getNum());
+                    }
+                }
+                if (e instanceof ServiceException) {
+                    // 服务异常
+                    throw e;
+                }
+                // 未知异常
                 logger.error("[提交订单] 异常", e);
-                throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+                throw e;
             } finally {
                 lockComponent.release(LockConst.TAKE_ORDER_LOCK + userId);
             }
@@ -395,15 +423,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Object wxPrepay(String orderNo, String ip, Long userId) throws ServiceException {
-        Date now = new Date();
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
-        // 检测订单状态
-        Integer status = orderDO.getStatus();
-        if (status != OrderStatusType.UNPAY.getCode()) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
-        }
-
+    public Object wxPrepay(String parentOrderNo, String orderNo, String ip, Long userId) throws ServiceException {
+        int actualPrice = this.checkPrepay(parentOrderNo, orderNo, userId);
         Integer loginType = SessionUtil.getUser().getLoginType();
         String appId;
         String tradeType;
@@ -419,26 +440,24 @@ public class OrderServiceImpl implements OrderService {
         } else {
             throw new AppServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
         }
-
-        Object result = null;
         try {
             WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
             orderRequest.setAppid(appId);
-            orderRequest.setOutTradeNo(orderNo);
+            // 区分回调 直接通过 S 来判断
+            orderRequest.setOutTradeNo(StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo);
             orderRequest.setOpenid(SessionUtil.getUser().getOpenId());
-            orderRequest.setBody("订单：" + orderNo);
-            orderRequest.setTotalFee(orderDO.getActualPrice());
+            orderRequest.setBody("buy_" + (StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo));
+            orderRequest.setTotalFee(actualPrice);
             orderRequest.setSpbillCreateIp(ip);
             orderRequest.setTradeType(tradeType);
-            result = wxPayService.createOrder(orderRequest);
+            return wxPayService.createOrder(orderRequest);
         } catch (WxPayException e) {
             logger.error("[微信支付] 异常", e);
-            throw new ThirdPartServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+            throw new AppServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
         } catch (Exception e) {
             logger.error("[预付款异常]", e);
             throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
         }
-        return result;
     }
 
     private int checkPrepay(String parentOrderNo, String orderNo, Long userId) throws ServiceException {
@@ -466,7 +485,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Object offlinePrepay(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         // 检测订单状态
         Integer status = orderDO.getStatus();
         if (status != OrderStatusType.UNPAY.getCode()) {
@@ -486,7 +505,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String refund(String orderNo, String reason, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (PayChannelType.OFFLINE.getCode().equals(orderDO.getPayChannel())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
         }
@@ -510,7 +529,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String cancel(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() != OrderStatusType.UNPAY.getCode()) {
             throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CANCEL);
         }
@@ -528,7 +547,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String confirm(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() != OrderStatusType.WAIT_CONFIRM.getCode()) {
             throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CONFIRM);
         }
@@ -536,23 +555,20 @@ public class OrderServiceImpl implements OrderService {
         updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
         updateOrderDO.setGmtUpdate(new Date());
         List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
-        orderSkuList.forEach(item -> {
-            skuMapper.decSkuFreezeStock(item.getSkuId(), item.getNum());
-        });
         orderBizService.changeOrderStatus(orderNo, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
         return "ok";
     }
 
     @Override
     public ShipTraceDTO queryShip(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() < OrderStatusType.WAIT_CONFIRM.getCode()) {
             throw new AppServiceException(ExceptionDefinition.ORDER_HAS_NOT_SHIP);
         }
         if (StringUtils.isEmpty(orderDO.getShipCode()) || StringUtils.isEmpty(orderDO.getShipNo())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_DID_NOT_SET_SHIP);
         }
-        ShipTraceDTO shipTraceList = freightBizService.getShipTraceList(orderDO.getShipNo(), orderDO.getShipCode());
+        ShipTraceDTO shipTraceList = freightTemplateBizService.getShipTraceList(orderDO.getShipNo(), orderDO.getShipCode());
         if (CollectionUtils.isEmpty(shipTraceList.getTraces())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_DO_NOT_EXIST_SHIP_TRACE);
         }
@@ -560,15 +576,36 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
+    /**
+     * 保存订单抽取接口
+     * @param skuOriginalPrice
+     * @param skuPrice
+     * @param channel
+     * @param freightPrice
+     * @param couponUserDTO
+     * @param orderRequest
+     * @param parentOrderNo
+     * @param childIndex
+     * @param userId
+     * @param now
+     * @param addressDO
+     * @param skuDTOList
+     * @param orderCalcSkuList
+     * @param userLevel
+     * @param activityType
+     * @param activityId
+     * @return
+     * @throws ServiceException
+     */
     private OrderDO save(int skuOriginalPrice, int skuPrice, String channel,
                          int freightPrice, CouponUserDTO couponUserDTO,
                          OrderRequestDTO orderRequest, String parentOrderNo, int childIndex,
                          Long userId, Date now, AddressDO addressDO, List<SkuDTO> skuDTOList,
-                         List<OrderCalcSkuDTO> orderCalcSkuList, Integer userLevel,
+                         List<OrderCalcSkuModel> orderCalcSkuList, Integer userLevel,
                          Integer activityType, Long activityId) throws ServiceException {
         OrderDO orderDO = new OrderDO();
         // 设置商品原价，总价
-        orderDO.setSkuTotalPrice(skuOriginalPrice);
+        orderDO.setSkuOriginalTotalPrice(skuOriginalPrice);
         orderDO.setSkuTotalPrice(skuPrice);
         // 下单渠道
         orderDO.setChannel(channel);
@@ -608,7 +645,7 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.insert(orderDO);
 
         for (int i = 0; i < skuDTOList.size(); i++) {
-            OrderCalcSkuDTO orderCalcSpuDTO = orderCalcSkuList.get(i);
+            OrderCalcSkuModel orderCalcSpuDTO = orderCalcSkuList.get(i);
             SkuDTO skuDTO = skuDTOList.get(i);
             Assert.isTrue(orderCalcSpuDTO.getSkuId().longValue() == skuDTO.getId().longValue(), "断言失败！");
             OrderSkuDO orderSkuDO = new OrderSkuDO();

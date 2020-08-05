@@ -37,4 +37,6 @@ public class SkuDO extends SuperDO {
 
     private Integer stock;
 
+    private Integer weight;
+
 }

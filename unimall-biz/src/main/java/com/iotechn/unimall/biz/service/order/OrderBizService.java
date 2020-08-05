@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.service.WxPayService;
-import com.iotechn.unimall.biz.constant.LockConst;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.core.exception.*;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.OrderDO;
@@ -16,11 +16,11 @@ import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.UserMapper;
+import com.iotechn.unimall.data.properties.UnimallWxProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -50,11 +50,8 @@ public class OrderBizService {
     @Autowired
     private WxPayService wxPayService;
 
-    @Value("${com.iotechn.unimall.wx.mini.app-id}")
-    private String wxMiNiAppid;
-
-    @Value("${com.iotechn.unimall.wx.app.app-id}")
-    private String wxAppAppid;
+    @Autowired
+    private UnimallWxProperties unimallWxProperties;
 
 
     public List<OrderDO> checkOrderExistByParentNo(String parentOrderNo, Long userId) throws ServiceException {
@@ -109,18 +106,6 @@ public class OrderBizService {
         }
     }
 
-    public OrderDO checkOrderExist(String orderNo, Long userId) throws ServiceException {
-        QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>().eq("order_no", orderNo);
-        if (userId != null) {
-            wrapper.eq("user_id", userId);
-        }
-        List<OrderDO> orderDOS = orderMapper.selectList(wrapper);
-        if (CollectionUtils.isEmpty(orderDOS)) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_NOT_EXIST);
-        }
-        return orderDOS.get(0);
-    }
-
     public OrderDTO getOrderDetail(Long orderId, Long userId) throws ServiceException {
         QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>()
                 .eq("id", orderId);
@@ -142,7 +127,7 @@ public class OrderBizService {
         if (lockComponent.tryLock(LockConst.ORDER_REFUND_LOCK + orderNo, 30)) {
             try {
                 //1.校验订单状态是否处于团购状态中
-                OrderDO orderDO = checkOrderExist(orderNo, null);
+                OrderDO orderDO = checkOrderExistByNo(orderNo, null).get(0);
                 if (orderDO.getStatus() != OrderStatusType.GROUP_SHOP_WAIT.getCode()) {
                     throw new AdminServiceException(ExceptionDefinition.ORDER_IS_NOT_GROUP_SHOP_STATUS);
                 }
@@ -158,7 +143,7 @@ public class OrderBizService {
 
                 //2.1.2 向微信支付平台发送退款请求
                 WxPayRefundRequest wxPayRefundRequest = new WxPayRefundRequest();
-                wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? wxMiNiAppid : wxAppAppid);
+                wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? unimallWxProperties.getMiniAppId() : unimallWxProperties.getAppId());
                 wxPayRefundRequest.setOutTradeNo(orderNo);
                 wxPayRefundRequest.setOutRefundNo("refund_" + orderNo);
                 wxPayRefundRequest.setRefundDesc("团购失败退款");
