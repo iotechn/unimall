@@ -244,7 +244,6 @@ public class AdminServiceImpl implements AdminService {
         if ("guest".equals(username)) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_GUEST_NOT_NEED_VERIFY_CODE);
         }
-        AdminDO adminDO = new AdminDO();
         AdminDO admin = adminMapper.selectOne(new QueryWrapper<AdminDO>().eq("username", username).eq("password", MD5Util.md5(password,username)));
         if(admin == null){
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXITS);

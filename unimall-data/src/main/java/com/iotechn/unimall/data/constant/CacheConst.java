@@ -92,6 +92,16 @@ public class CacheConst {
      */
     public static final String PRT_APPRAISE_LIST = "PRT_APPRAISE_LIST:";
 
-    /**=========================== 商品缓存 END ==============================**/
+    /**=========================== 商品缓存 END ===============================**/
+
+    /**=========================== 动态配置 START =============================**/
+
+    /**
+     * 动态配置缓存
+     * DYNAMIC_CACHE: + KEY
+     */
+    public static final String DYNAMIC_CACHE = "DYNAMIC_CACHE:";
+
+    /**=========================== 动态配置 END ===============================**/
 
 }

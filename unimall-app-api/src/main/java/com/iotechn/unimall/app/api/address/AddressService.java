@@ -19,7 +19,7 @@ import java.util.List;
 public interface AddressService {
 
     @HttpMethod(description = "增加收货地址")
-    public Boolean addAddress(
+    public String create(
             @NotNull @HttpParam(name = "province", type = HttpParamType.COMMON, description = "省份") String province,
             @NotNull @HttpParam(name = "city", type = HttpParamType.COMMON, description = "城市") String city,
             @NotNull @HttpParam(name = "county", type = HttpParamType.COMMON, description = "区县") String county,
@@ -30,12 +30,12 @@ public interface AddressService {
             @NotNull @HttpParam(name = "consignee", type = HttpParamType.COMMON, description = "收件人") String consignee) throws ServiceException;
 
     @HttpMethod(description = "删除收货地址")
-    public Boolean deleteAddress(
+    public String delete(
             @NotNull @HttpParam(name = "addressId", type = HttpParamType.COMMON, description = "收货地址ID") Long addressId,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
 
     @HttpMethod(description = "修改收货地址")
-    public Boolean updateAddress(
+    public String edit(
             @NotNull @HttpParam(name = "addressId", type = HttpParamType.COMMON, description = "地址Id") Long addressId,
             @NotNull @HttpParam(name = "province", type = HttpParamType.COMMON, description = "省份") String province,
             @NotNull @HttpParam(name = "city", type = HttpParamType.COMMON, description = "城市") String city,
@@ -47,7 +47,7 @@ public interface AddressService {
             @NotNull @HttpParam(name = "consignee", type = HttpParamType.COMMON, description = "收件人") String consignee) throws ServiceException;
 
     @HttpMethod(description = "查询用户所有收货地址")
-    public List<AddressDO> getAllAddress(
+    public List<AddressDO> list(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
     @HttpMethod(description = "根据地址ID，查询收货地址")

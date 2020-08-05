@@ -220,6 +220,15 @@
       "path":"/sys",
       "children":[
          {
+            "path":"config",
+            "meta":{
+               "noCache":true,
+               "title":"系统配置"
+            },
+            "name":"config",
+            "page":"/sys/config"
+         },
+         {
             "path":"user",
             "meta":{
                "noCache":true,

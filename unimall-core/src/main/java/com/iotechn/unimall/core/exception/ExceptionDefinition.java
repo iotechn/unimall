@@ -324,7 +324,7 @@ public class ExceptionDefinition {
             new ServiceExceptionDefinition(50008, "登陆验证码错误");
 
     public static final ServiceExceptionDefinition ADMIN_USER_NOT_EXITS =
-            new ServiceExceptionDefinition(50009, "管理员不存在，请输入正确账号密码");
+            new ServiceExceptionDefinition(50009, "请输入正确账号密码");
 
     public static final ServiceExceptionDefinition ADMIN_GUEST_NOT_NEED_VERIFY_CODE =
             new ServiceExceptionDefinition(50010, "游客用户无须验证码，请直接输入666666");
