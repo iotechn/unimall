@@ -7,25 +7,31 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @TableName("unimall_address")
 public class AddressDO extends SuperDO{
 
-    //省份
+    /**
+     * 省份
+     */
     private String province;
-    //市/县
+    /**
+     * 市
+     */
     private String city;
-    //行政区/镇
+    /**
+     * 行政区/镇
+     */
     private String county;
-    //详细地址
+    /**
+     * 详细地址
+     */
     private String address;
-    //是否是默认地址
+    /**
+     * 是否是默认地址
+     */
     @TableField("default_address")
     private Integer defaultAddress;
 
@@ -33,7 +39,9 @@ public class AddressDO extends SuperDO{
     private Long userId;
 
     private String phone;
-    //收件人
+    /**
+     * 收件人
+     */
     private String consignee;
 
 
