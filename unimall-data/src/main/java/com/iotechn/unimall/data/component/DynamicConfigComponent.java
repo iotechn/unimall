@@ -40,4 +40,20 @@ public class DynamicConfigComponent {
         return null;
     }
 
+    public int readInt(String key, int defaultValue) {
+        return 0;
+    }
+
+    public long readLong(String key, long defaultValue) {
+        return 0l;
+    }
+
+    public String readString(String key, String defaultValue) {
+        return "";
+    }
+
+    public <T> T readObj(String key, Class<T> clazz) {
+        return null;
+    }
+
 }
