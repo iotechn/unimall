@@ -11,6 +11,7 @@ import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
+import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
@@ -55,7 +56,6 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     /**
      * 获取三级类目树,用于商品、优惠券之类添加的使用
      */
-
     @Override
     public List<CategoryDTO> categoryTree() throws ServiceException {
         List<CategoryDTO> list = categoryBizService.categoryThreeLevelTree();

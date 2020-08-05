@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfig
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@MapperScan("com.iotechn.unimall.data")
+@MapperScan("com.iotechn.unimall.data.mapper")
 @SpringBootApplication(scanBasePackages = {"com.iotechn.unimall"}, exclude = {RedisAutoConfiguration.class, RedisReactiveAutoConfiguration.class})
 @EnableTransactionManagement
 public class UnimallLauncherApplication {
