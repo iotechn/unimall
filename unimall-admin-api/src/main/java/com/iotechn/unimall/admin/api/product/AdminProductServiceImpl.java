@@ -67,7 +67,7 @@ public class AdminProductServiceImpl implements AdminProductService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    /**
+    /** TODO 请检查一下商品删除修改时是否正在举办活动。
      * 后台低频接口，无需缓存，用于选择商品，需要
      * @return
      * @throws ServiceException
