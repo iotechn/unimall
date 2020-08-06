@@ -19,7 +19,12 @@
 
 	<dependencies>
 
-		<!-- https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-core -->
+		<dependency>
+			<groupId>com.iotechn</groupId>
+			<artifactId>unimall-core</artifactId>
+			<version>0.0.1-RELEASE</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.aliyun</groupId>
 			<artifactId>aliyun-java-sdk-core</artifactId>

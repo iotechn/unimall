@@ -1,4 +1,4 @@
-package com.iotechn.unimall.core.notify;
+package com.iotechn.unimall.data.notify;
 
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.CommonRequest;
@@ -11,9 +11,11 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.exception.ThirdPartServiceException;
+import com.iotechn.unimall.data.properties.UnimallSMSProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -21,20 +23,8 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public class AliyunSMSClient implements SMSClient, InitializingBean {
 
-    @Value("${sms.aliyun.accessId}")
-    private String accessId;
-    @Value("${sms.aliyun.accessKey}")
-    private String accessKey;
-    @Value("${sms.aliyun.register-template-id}")
-    private String registerTemplateId;
-    @Value("${sms.aliyun.bind-phone-template-id}")
-    private String bindPhoneTemplateId;
-    @Value("${sms.aliyun.reset-password-template-id}")
-    private String resetPasswordTemplateId;
-    @Value("${sms.aliyun.admin-login-template-id}")
-    private String adminLoginTemplateId;
-    @Value("${sms.aliyun.signature}")
-    private String signature;
+    @Autowired
+    private UnimallSMSProperties properties;
 
     private IAcsClient client;
 
@@ -42,27 +32,27 @@ public class AliyunSMSClient implements SMSClient, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.client = new DefaultAcsClient(DefaultProfile.getProfile("default", accessId, accessKey));
+        this.client = new DefaultAcsClient(DefaultProfile.getProfile("default", properties.getAliyunAccessKeyId(), properties.getAliyunAccessKeySecret()));
     }
 
     @Override
     public SMSResult sendRegisterVerify(String phone, String verifyCode) throws ServiceException {
-        return sendCommon(phone, verifyCode, registerTemplateId, signature);
+        return sendCommon(phone, verifyCode, properties.getAliyunRegisterTemplateId(), properties.getAliyunSignature());
     }
 
     @Override
     public SMSResult sendBindPhoneVerify(String phone, String verifyCode) throws ServiceException {
-        return sendCommon(phone, verifyCode, bindPhoneTemplateId, signature);
+        return sendCommon(phone, verifyCode, properties.getAliyunBindPhoneTemplateId(), properties.getAliyunSignature());
     }
 
     @Override
     public SMSResult sendResetPasswordVerify(String phone, String verifyCode) throws ServiceException {
-        return sendCommon(phone, verifyCode, resetPasswordTemplateId, signature);
+        return sendCommon(phone, verifyCode, properties.getAliyunResetPasswordTemplateId(), properties.getAliyunSignature());
     }
 
     @Override
     public SMSResult sendAdminLoginVerify(String phone, String verifyCode) throws ServiceException {
-        return sendCommon(phone, verifyCode, adminLoginTemplateId, signature);
+        return sendCommon(phone, verifyCode, properties.getAliyunAdminLoginTemplateId(), properties.getAliyunSignature());
     }
 
     private SMSResult sendCommon(String phone, String verifyCode, String templateId, String signature) throws ServiceException {

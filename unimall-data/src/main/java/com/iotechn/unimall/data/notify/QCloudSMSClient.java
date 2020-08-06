@@ -1,14 +1,15 @@
-package com.iotechn.unimall.core.notify;
+package com.iotechn.unimall.data.notify;
 
 import com.github.qcloudsms.SmsSingleSender;
 import com.github.qcloudsms.SmsSingleSenderResult;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.exception.ThirdPartServiceException;
+import com.iotechn.unimall.data.properties.UnimallSMSProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by rize on 2019/7/1.
@@ -17,31 +18,19 @@ public class QCloudSMSClient implements SMSClient,InitializingBean {
 
     private SmsSingleSender sender;
 
-    @Value("${sms.qcloud.app-id}")
-    private Integer appid;
-    @Value("${sms.qcloud.app-key}")
-    private String appkey;
-    @Value("${sms.qcloud.register-template-id}")
-    private Integer registerTemplateId;
-    @Value("${sms.qcloud.bind-phone-template-id}")
-    private Integer bindPhoneTemplateId;
-    @Value("${sms.qcloud.reset-password-template-id}")
-    private Integer resetPasswordTemplateId;
-    @Value("${sms.qcloud.admin-login-template-id}")
-    private Integer adminLoginTemplateId;
-    @Value("${sms.qcloud.sign}")
-    private String sign;
+    @Autowired
+    private UnimallSMSProperties properties;
 
     private static final Logger logger = LoggerFactory.getLogger(QCloudSMSClient.class);
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        sender = new SmsSingleSender(appid, appkey);
+        sender = new SmsSingleSender(properties.getQcloudAppId(), properties.getQcloudAppKey());
     }
 
     public SMSResult sendMsg(String phone, int templateId, String ...params) throws ServiceException {
         try {
-            SmsSingleSenderResult smsSingleSenderResult = sender.sendWithParam("86", phone, templateId, params, this.sign, "", "");
+            SmsSingleSenderResult smsSingleSenderResult = sender.sendWithParam("86", phone, templateId, params, properties.getQcloudSignature(), "", "");
             if (smsSingleSenderResult.result == 0) {
                 SMSResult smsResult = new SMSResult();
                 smsResult.setSucc(true);
@@ -62,21 +51,21 @@ public class QCloudSMSClient implements SMSClient,InitializingBean {
 
     @Override
     public SMSResult sendRegisterVerify(String phone, String verifyCode) throws ServiceException {
-        return sendMsg(phone, registerTemplateId, verifyCode);
+        return sendMsg(phone, properties.getQcloudRegisterTemplateId(), verifyCode);
     }
 
     @Override
     public SMSResult sendBindPhoneVerify(String phone, String verifyCode) throws ServiceException {
-        return sendMsg(phone, registerTemplateId, verifyCode);
+        return sendMsg(phone, properties.getQcloudBindPhoneTemplateId(), verifyCode);
     }
 
     @Override
     public SMSResult sendResetPasswordVerify(String phone, String verifyCode) throws ServiceException {
-        return sendMsg(phone, registerTemplateId, verifyCode);
+        return sendMsg(phone, properties.getQcloudResetPasswordTemplateId(), verifyCode);
     }
 
     @Override
     public SMSResult sendAdminLoginVerify(String phone, String verifyCode) throws ServiceException {
-        return sendMsg(phone, adminLoginTemplateId,verifyCode);
+        return sendMsg(phone, properties.getQcloudAdminLoginTemplateId(),verifyCode);
     }
 }

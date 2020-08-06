@@ -1,9 +1,9 @@
-package com.iotechn.unimall.core.config.sms;
+package com.iotechn.unimall.data.config.sms;
 
-import com.iotechn.unimall.core.notify.AliyunSMSClient;
-import com.iotechn.unimall.core.notify.MockSMSClient;
-import com.iotechn.unimall.core.notify.QCloudSMSClient;
-import com.iotechn.unimall.core.notify.SMSClient;
+import com.iotechn.unimall.data.notify.AliyunSMSClient;
+import com.iotechn.unimall.data.notify.MockSMSClient;
+import com.iotechn.unimall.data.notify.QCloudSMSClient;
+import com.iotechn.unimall.data.notify.SMSClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,7 @@
-package com.iotechn.unimall.core.notify;
+package com.iotechn.unimall.data.notify;
 
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.notify.SMSResult;
 
 /**
  * Created by rize on 2019/7/1.

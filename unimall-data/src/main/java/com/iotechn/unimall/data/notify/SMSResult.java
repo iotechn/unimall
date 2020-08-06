@@ -1,4 +1,4 @@
-package com.iotechn.unimall.core.notify;
+package com.iotechn.unimall.data.notify;
 
 import lombok.Data;
 

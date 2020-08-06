@@ -30,18 +30,18 @@ public class UnimallSMSProperties {
 
     private String aliyunAdminLoginTemplateId;
 
-    private String qcloudAppId;
+    private Integer qcloudAppId;
 
     private String qcloudAppKey;
 
     private String qcloudSignature;
 
-    private String qcloudRegisterTemplateId;
+    private Integer qcloudRegisterTemplateId;
 
-    private String qcloudBindPhoneTemplateId;
+    private Integer qcloudBindPhoneTemplateId;
 
-    private String qcloudResetPasswordTemplateId;
+    private Integer qcloudResetPasswordTemplateId;
 
-    private String qcloudAdminLoginTemplateId;
+    private Integer qcloudAdminLoginTemplateId;
 
 }
