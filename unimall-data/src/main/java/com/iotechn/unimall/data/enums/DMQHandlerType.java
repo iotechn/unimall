@@ -2,7 +2,7 @@ package com.iotechn.unimall.data.enums;
 
 public enum DMQHandlerType {
     ORDER_AUTO_CANCEL(1, "订单自动取消"),
-    ORDER_AUTO_RECEIPT(2,"订单自动收货")
+    ORDER_AUTO_CONFIRM(2,"订单自动收货")
     ;
 
     DMQHandlerType(int code, String msg) {

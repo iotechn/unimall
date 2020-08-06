@@ -4,15 +4,18 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.data.component.DynamicConfigComponent;
 import com.iotechn.unimall.data.component.LockComponent;
+import com.iotechn.unimall.data.constant.DynamicConst;
 import com.iotechn.unimall.data.domain.GroupShopDO;
 import com.iotechn.unimall.data.domain.OrderDO;
-import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.domain.SpuDO;
+import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.GroupShopAutomaticRefundType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.StatusType;
 import com.iotechn.unimall.data.mapper.*;
+import com.iotechn.unimall.data.mq.DelayedMessageQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,60 +53,44 @@ public class CheckQuartz {
     @Autowired
     private SpuMapper spuMapper;
     @Autowired
-    private SkuMapper skuMapper;
-    @Autowired
-    private OrderSkuMapper orderSkuMapper;
+    private DynamicConfigComponent dynamicConfigComponent;
     @Autowired
     private LockComponent lockComponent;
+    @Autowired
+    private DelayedMessageQueue delayedMessageQueue;
     @Autowired
     private TransactionTemplate transactionTemplate;
 
     /**
-     * 订单状态定时轮训
+     * 订单状态定时轮训,检查是否存在需要取消订单，需要收货订单
      */
     @Scheduled(cron = "0 * * * * ?")
     public void checkOrderStatus() {
-        if (lockComponent.tryLock(ORDER_STATUS_LOCK, 15)) {
-            try {
-                Date now = new Date();
-                List<OrderDO> nos = orderMapper.selectExpireOrderNos(OrderStatusType.UNPAY.getCode(), new Date(now.getTime() - 1000l * 60 * 15));
-                if (!CollectionUtils.isEmpty(nos)) {
-                    nos.forEach(no -> {
-                        try {
-                            OrderDO updateOrderDO = new OrderDO();
-                            updateOrderDO.setStatus(OrderStatusType.CANCELED_SYS.getCode());
-                            updateOrderDO.setGmtUpdate(now);
-                            List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", no.getId()));
-                            orderSkuList.forEach(item -> {
-                                skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
-                            });
-                            orderBizService.changeOrderStatus(no.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
-                        } catch (Exception e) {
-                            logger.error("[未付款检测] 异常", e);
-                        }
-                    });
-                }
-                //15分钟执行一次
-                long minutes = (now.getTime() / (1000 * 60));
-                if (minutes % 15 == 0) {
-                    List<OrderDO> waitConfirmNos = orderMapper.selectExpireOrderNos(OrderStatusType.WAIT_CONFIRM.getCode(), new Date(now.getTime() - 1000l * 60 * 60 * 24 * 7));
-                    waitConfirmNos.forEach(item -> {
-                        try {
-                            OrderDO updateOrderDO = new OrderDO();
-                            updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
-                            updateOrderDO.setGmtUpdate(now);
-                            List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", item.getId()));
-                            orderBizService.changeOrderStatus(item.getOrderNo(), OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
-                        } catch (Exception e) {
-                            logger.error("[未确认检测] 异常", e);
-                        }
-                    });
-                }
-            } catch (Exception e) {
-                logger.error("[订单状态检测定时任务] 异常", e);
-            } finally {
-                lockComponent.release(ORDER_STATUS_LOCK);
-            }
+        Date now = new Date();
+        // 1.检查是否存在需要自动取消的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
+        QueryWrapper<OrderDO> cancelWrapper = new QueryWrapper<OrderDO>();
+        cancelWrapper.select("id","order_no");
+        cancelWrapper.eq("status",OrderStatusType.UNPAY.getCode());
+        Date cancelTime = new Date(now.getTime() - dynamicConfigComponent.readLong(DynamicConst.ORDER_AUTO_CANCEL_TIME, 1000 * 60 * 15));
+        cancelWrapper.lt("gmt_update",cancelTime);
+        List<OrderDO> cancelList = orderMapper.selectList(cancelWrapper);
+        if(!CollectionUtils.isEmpty(cancelList)){
+            cancelList.stream().forEach(item ->{
+                delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(),item.getOrderNo(),1);
+            });
+        }
+
+        // 2.检查是否存在需要自动收货的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
+        QueryWrapper<OrderDO> confirmWrapper = new QueryWrapper<OrderDO>();
+        confirmWrapper.select("id","order_no");
+        confirmWrapper.eq("status",OrderStatusType.WAIT_CONFIRM.getCode());
+        Date confirmTime = new Date(now.getTime() - dynamicConfigComponent.readLong(DynamicConst.ORDER_AUTO_CONFIRM_TIME, 1000 * 60 * 60 * 24 * 15));
+        confirmWrapper.lt("gmt_update",confirmTime);
+        List<OrderDO> confirmList = orderMapper.selectList(confirmWrapper);
+        if(!CollectionUtils.isEmpty(confirmList)){
+            confirmList.stream().forEach(item ->{
+                delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CONFIRM.getCode(),item.getOrderNo(),1);
+            });
         }
     }
 

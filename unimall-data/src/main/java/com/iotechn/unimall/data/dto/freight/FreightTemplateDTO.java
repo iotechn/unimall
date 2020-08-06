@@ -26,7 +26,7 @@ public class FreightTemplateDTO extends SuperDTO {
 
     private List<FreightTemplateCarriageDO> carriageDOList;
 
-    private String templateName;
+    private String title;
 
     private String spuLocation;
 
@@ -34,12 +34,12 @@ public class FreightTemplateDTO extends SuperDTO {
 
     private Integer defaultFreePrice;
 
-    private Integer defaultFirstNum;
+    private Integer defaultFirstWeight;
 
-    private Integer defaultFirstMoney;
+    private Integer defaultFirstPrice;
 
-    private Integer defaultContinueNum;
+    private Integer defaultContinueWeight;
 
-    private Integer defaultContinueMoney;
+    private Integer defaultContinuePrice;
 
 }
