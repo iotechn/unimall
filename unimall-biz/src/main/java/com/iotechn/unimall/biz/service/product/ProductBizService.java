@@ -37,19 +37,9 @@ import java.util.stream.Collectors;
 public class ProductBizService {
 
     /**
-     * SPU 分页缓存
-     */
-    public static final String CA_SPU_PAGE_PREFIX = "CA_SPU_PAGE_";
-
-    /**
      * SPU DTO 缓存  CA_SPU_+spuId
      */
     public static final String CA_SPU_PREFIX = "CA_SPU_";
-
-    /**
-     * SPU DO 缓存，加速 getById...  hashKey = 'S' + spuId
-     */
-    private static final String CA_SPU_HASH = "CA_SPU_HASH";
 
     @Autowired
     private SpuMapper spuMapper;

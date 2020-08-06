@@ -22,7 +22,7 @@ import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.model.Page;
-import com.iotechn.unimall.data.properties.UnimallWxProperties;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -67,7 +67,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private UserBizService userBizService;
 
     @Autowired
-    private UnimallWxProperties unimallWxProperties;
+    private UnimallWxAppProperties unimallWxProperties;
 
     @Override
     public Page<OrderDO> list(Integer page, Integer limit, Integer status, String orderNo, Long adminId) throws ServiceException {

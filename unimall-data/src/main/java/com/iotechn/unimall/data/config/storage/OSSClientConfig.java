@@ -1,7 +1,8 @@
 package com.iotechn.unimall.data.config.storage;
 
 import com.aliyun.oss.OSSClient;
-import org.springframework.beans.factory.annotation.Value;
+import com.iotechn.unimall.data.properties.UnimallAliOSSProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,22 +12,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OSSClientConfig {
 
-    @Value("${oss.aliyun.oss.accessId}")
-    private String accessId;
-    @Value("${oss.aliyun.oss.accessKey}")
-    private String accessKey;
-    @Value("${oss.aliyun.oss.endpoint}")
-    private String endpoint;
-    @Value("${oss.aliyun.oss.bucket}")
-    private String bucket;
-    @Value("${oss.aliyun.oss.dir}")
-    private String dir;
-    @Value("${oss.aliyun.oss.callbackUrl}")
-    private String callbackUrl;
+    @Autowired
+    private UnimallAliOSSProperties unimallAliOSSProperties;
 
     @Bean
     public OSSClient ossClient() {
-        return new OSSClient(endpoint, accessId, accessKey);
+        return new OSSClient(unimallAliOSSProperties.getEndpoint(), unimallAliOSSProperties.getAccessKeyId(), unimallAliOSSProperties.getAccessKeySecret());
     }
 
 }

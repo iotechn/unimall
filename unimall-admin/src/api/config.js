@@ -6,7 +6,7 @@ export function save(configs, prefix) {
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.sysconfig',
-      _mt: 'create',
+      _mt: 'save',
       configs,
       prefix
     })
@@ -16,9 +16,9 @@ export function save(configs, prefix) {
 export function getData() {
   return request({
     method: 'get',
-    data: Qs.stringify({
+    params: {
       _gp: 'admin.sysconfig',
       _mt: 'getData'
-    })
+    }
   })
 }

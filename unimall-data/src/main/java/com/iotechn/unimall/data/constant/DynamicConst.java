@@ -7,4 +7,13 @@ package com.iotechn.unimall.data.constant;
  * Time: 11:46
  */
 public class DynamicConst {
+
+    public static final String WX_APP_CONFIG_PREFIX = "WX_APP_CONFIG:";
+
+    public static final String WX_PAY_CONFIG_PREFIX = "WX_PAY_CONFIG:";
+
+    public static final String SMS_CONFIG_PREFIX = "SMS_CONFIG:";
+
+    public static final String OSS_CONFIG_PREFIX = "OSS_CONFIG:";
+
 }

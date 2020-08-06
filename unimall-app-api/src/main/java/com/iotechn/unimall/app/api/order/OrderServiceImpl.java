@@ -6,8 +6,6 @@ import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.executor.GlobalExecutor;
-import com.iotechn.unimall.data.constant.CacheConst;
-import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.biz.service.address.AddressBizService;
 import com.iotechn.unimall.biz.service.cart.CartBizService;
 import com.iotechn.unimall.biz.service.coupon.CouponBizService;
@@ -22,6 +20,8 @@ import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.component.LockComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
@@ -42,7 +42,7 @@ import com.iotechn.unimall.data.model.FreightCalcModel;
 import com.iotechn.unimall.data.model.OrderCalcSkuModel;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.model.SkuStockInfoModel;
-import com.iotechn.unimall.data.properties.UnimallWxProperties;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +116,7 @@ public class OrderServiceImpl implements OrderService {
     private String ENV;
 
     @Autowired
-    private UnimallWxProperties unimallWxProperties;
+    private UnimallWxAppProperties unimallWxAppProperties;
 
 
     @Override
@@ -429,19 +429,20 @@ public class OrderServiceImpl implements OrderService {
         String appId;
         String tradeType;
         if (UserLoginType.MP_WEIXIN.getCode() == loginType) {
-            appId = unimallWxProperties.getMiniAppId();
+            appId = unimallWxAppProperties.getMiniAppId();
             tradeType = WxPayConstants.TradeType.JSAPI;
         } else if (UserLoginType.APP_WEIXIN.getCode() == loginType || UserLoginType.REGISTER.getCode() == loginType) {
-            appId = unimallWxProperties.getAppId();
+            appId = unimallWxAppProperties.getAppId();
             tradeType = WxPayConstants.TradeType.APP;
         } else if (UserLoginType.H5_WEIXIN.getCode() == loginType) {
-            appId = unimallWxProperties.getH5AppId();
+            appId = unimallWxAppProperties.getH5AppId();
             tradeType = WxPayConstants.TradeType.JSAPI;
         } else {
             throw new AppServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
         }
         try {
             WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
+            // 设置微信请求基本信息
             orderRequest.setAppid(appId);
             // 区分回调 直接通过 S 来判断
             orderRequest.setOutTradeNo(StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo);

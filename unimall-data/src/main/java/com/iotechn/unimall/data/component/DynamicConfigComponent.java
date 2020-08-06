@@ -45,7 +45,7 @@ public class DynamicConfigComponent {
         // 防止重复提交
         if (lockComponent.tryLock(LockConst.DYNAMIC_CONFIG_LOCK + key, 15)) {
             try {
-                Integer count = dynamicConfigMapper.selectCount(new QueryWrapper<DynamicConfigDO>().eq("key", key));
+                Integer count = dynamicConfigMapper.selectCount(new QueryWrapper<DynamicConfigDO>().eq("`key`", key));
                 Date now = new Date();
                 if (count == 0) {
                     // 添加一条新的记录
@@ -60,7 +60,7 @@ public class DynamicConfigComponent {
                     DynamicConfigDO updateDynamicConfigDO = new DynamicConfigDO();
                     updateDynamicConfigDO.setValue(value);
                     updateDynamicConfigDO.setGmtCreate(now);
-                    dynamicConfigMapper.update(updateDynamicConfigDO, new QueryWrapper<DynamicConfigDO>().eq("key", key));
+                    dynamicConfigMapper.update(updateDynamicConfigDO, new QueryWrapper<DynamicConfigDO>().eq("`key`", key));
                 }
                 // 由于是无事务单条写SQL，此处已经完成持久化
                 cacheComponent.del(CacheConst.DYNAMIC_CACHE + key);
@@ -72,11 +72,11 @@ public class DynamicConfigComponent {
         }
     }
 
-    public int readInt(String key, int defaultValue) {
+    public Integer readInt(String key, Integer defaultValue) {
         return this.readAction(key, defaultValue, Integer::parseInt);
     }
 
-    public long readLong(String key, long defaultValue) {
+    public Long readLong(String key, Long defaultValue) {
         return this.readAction(key, defaultValue, Long::parseLong);
     }
 
@@ -99,9 +99,9 @@ public class DynamicConfigComponent {
     public <T> T readAction(String key, T defaultValue, Function<String, T> function) {
         String raw = cacheComponent.getRaw(key);
         if (!StringUtils.isEmpty(raw)) {
-            return function.apply(key);
+            return function.apply(raw);
         }
-        DynamicConfigDO dynamicConfigDO = dynamicConfigMapper.selectOne(new QueryWrapper<DynamicConfigDO>().eq("key", key));
+        DynamicConfigDO dynamicConfigDO = dynamicConfigMapper.selectOne(new QueryWrapper<DynamicConfigDO>().eq("`key`", key));
         if (dynamicConfigDO == null) {
             return defaultValue;
         }

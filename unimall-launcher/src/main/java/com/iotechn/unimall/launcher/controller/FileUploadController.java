@@ -3,14 +3,17 @@ package com.iotechn.unimall.launcher.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.common.utils.BinaryUtil;
-import com.aliyun.oss.model.*;
+import com.aliyun.oss.model.MatchMode;
+import com.aliyun.oss.model.ObjectMetadata;
+import com.aliyun.oss.model.PolicyConditions;
+import com.aliyun.oss.model.PutObjectRequest;
 import com.iotechn.unimall.core.util.GeneratorUtil;
+import com.iotechn.unimall.data.properties.UnimallAliOSSProperties;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,31 +35,16 @@ public class FileUploadController implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(FileUploadController.class);
 
-    @Value("${oss.aliyun.oss.accessId}")
-    private String accessId;
-    @Value("${oss.aliyun.oss.accessKey}")
-    private String accessKey;
-    @Value("${oss.aliyun.oss.endpoint}")
-    private String endpoint;
-    @Value("${oss.aliyun.oss.bucket}")
-    private String bucket;
-    @Value("${oss.aliyun.oss.dir}")
-    private String dir;
-    @Value("${oss.aliyun.oss.callbackUrl}")
-    private String callbackUrl;
-    @Value("${oss.aliyun.oss.basekUrl}")
-    private String baseUrl;
+    @Autowired
+    private UnimallAliOSSProperties unimallAliOSSProperties;
     @Autowired
     private OSSClient ossClient;
 
     private String host;
 
-//    @Autowired
-//    private StringRedisTemplate stringRedisTemplate;
-
     @Override
     public void afterPropertiesSet() throws Exception {
-        host = "http://" + bucket + "." + endpoint;
+        host = "http://" + unimallAliOSSProperties.getBucket() + "." + unimallAliOSSProperties.getEndpoint();
     }
 
     /**
@@ -74,32 +62,28 @@ public class FileUploadController implements InitializingBean {
             Date expiration = new Date(expireEndTime);
             PolicyConditions policyConds = new PolicyConditions();
             policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, 1048576000);
-            policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir);
+            policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, unimallAliOSSProperties.getDir());
             String postPolicy = ossClient.generatePostPolicy(expiration, policyConds);
             byte[] binaryData = postPolicy.getBytes("utf-8");
             String encodedPolicy = BinaryUtil.toBase64String(binaryData);
             String postSignature = ossClient.calculatePostSignature(postPolicy);
             JSONObject respJsonObj = new JSONObject();
-            respJsonObj.put("accessid", accessId);
+            respJsonObj.put("accessid", unimallAliOSSProperties.getAccessKeyId());
             respJsonObj.put("policy", encodedPolicy);
             respJsonObj.put("signature", postSignature);
-            respJsonObj.put("dir", dir);
+            respJsonObj.put("dir", unimallAliOSSProperties.getDir());
             respJsonObj.put("host", host);
             respJsonObj.put("expire", String.valueOf(expireEndTime / 1000));
-            // respMap.put("expire", formatISO8601Date(expiration));
             JSONObject jasonCallback = new JSONObject();
-            jasonCallback.put("callbackUrl", callbackUrl);
             jasonCallback.put("callbackBody",
                     "filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}");
             jasonCallback.put("callbackBodyType", "application/x-www-form-urlencoded");
             String base64CallbackBody = BinaryUtil.toBase64String(jasonCallback.toString().getBytes());
             respJsonObj.put("callback", base64CallbackBody);
-
-            // System.out.println(ja1.toString());
             response.setHeader("Access-Control-Allow-Origin", "*");
             response.setHeader("Access-Control-Allow-Methods", "GET, POST");
             respJsonObj.put("code", 200);
-            respJsonObj.put("baseUrl", baseUrl);
+            respJsonObj.put("baseUrl", unimallAliOSSProperties.getBaseUrl());
             response(request, response, respJsonObj.toJSONString());
         } catch (Exception e) {
             logger.error("[上传签名] 异常", e);
@@ -120,10 +104,10 @@ public class FileUploadController implements InitializingBean {
         objectMetadata.setContentType(file.getContentType());
         String ext = FilenameUtils.getExtension(file.getOriginalFilename());
         String uuid = GeneratorUtil.genFileName();
-        PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, "bg/" + uuid+"."+ext, file.getInputStream(), objectMetadata);
+        PutObjectRequest putObjectRequest = new PutObjectRequest(unimallAliOSSProperties.getBucket(), "bg/" + uuid+"."+ext, file.getInputStream(), objectMetadata);
         ossClient.putObject(putObjectRequest);
         Map<String, Object> data = new HashMap<>();
-        data.put("url", baseUrl + "bg/" + uuid +"."+ext);
+        data.put("url", unimallAliOSSProperties.getBaseUrl() + "bg/" + uuid +"."+ext);
         data.put("errno", 200);
         data.put("errmsg", "成功");
         return data;

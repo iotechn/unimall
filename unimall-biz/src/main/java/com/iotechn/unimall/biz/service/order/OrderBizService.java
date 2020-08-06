@@ -16,7 +16,7 @@ import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.UserMapper;
-import com.iotechn.unimall.data.properties.UnimallWxProperties;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -51,7 +51,7 @@ public class OrderBizService {
     private WxPayService wxPayService;
 
     @Autowired
-    private UnimallWxProperties unimallWxProperties;
+    private UnimallWxAppProperties unimallWxProperties;
 
 
     public List<OrderDO> checkOrderExistByParentNo(String parentOrderNo, Long userId) throws ServiceException {

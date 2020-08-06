@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -13,8 +14,10 @@ import lombok.Data;
 @TableName("unimall_dynamic_config")
 public class DynamicConfigDO extends SuperDO {
 
+    @TableField("`key`")
     private String key;
 
+    @TableField("`value`")
     private String value;
 
 }

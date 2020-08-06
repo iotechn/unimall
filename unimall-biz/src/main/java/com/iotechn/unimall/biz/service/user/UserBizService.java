@@ -5,7 +5,7 @@ import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.mapper.UserMapper;
-import com.iotechn.unimall.data.properties.UnimallWxProperties;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import com.iotechn.unimall.data.wx.WeChatCommonTemplateMessageModel;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -26,7 +26,7 @@ public class UserBizService {
     private OkHttpClient okHttpClient = new OkHttpClient();
 
     @Autowired
-    private UnimallWxProperties unimallWxProperties;
+    private UnimallWxAppProperties unimallWxProperties;
 
     @Autowired
     private CacheComponent cacheComponent;

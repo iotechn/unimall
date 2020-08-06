@@ -35,7 +35,7 @@ public class AdminSysConfigServiceImpl implements AdminSysConfigService {
     public String save(String configsStr, String prefix, Long adminId) throws ServiceException {
         List<DynamicConfigDO> configs = JSONObject.parseArray(configsStr, DynamicConfigDO.class);
         for (DynamicConfigDO dynamicConfigDO : configs) {
-            dynamicConfigComponent.write(dynamicConfigDO.getKey(), dynamicConfigDO.getValue());
+            dynamicConfigComponent.write(prefix + dynamicConfigDO.getKey(), dynamicConfigDO.getValue());
         }
         return "ok";
     }

@@ -18,7 +18,7 @@ import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.UserMapper;
-import com.iotechn.unimall.data.properties.UnimallWxProperties;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     private OkHttpClient okHttpClient = new OkHttpClient();
 
     @Autowired
-    private UnimallWxProperties unimallWxProperties;
+    private UnimallWxAppProperties unimallWxProperties;
 
     @Override
     public String sendVerifyCode(String phone) throws ServiceException {
