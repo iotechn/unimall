@@ -185,6 +185,25 @@
 
     </el-card>
 
+    <el-card class="box-card">
+      <h3>订单信息配置</h3>
+      <el-form ref="orderDataForm" :model="orderDataForm" label-width="150px">
+
+        <el-form-item label="自动取消延时时间(S)" prop="autoCancelTime">
+          <el-input v-model="orderDataForm.autoCancelTime" />
+        </el-form-item>
+
+        <el-form-item label="自动收货延时时间(S)" prop="autoConfirmTime">
+          <el-input v-model="orderDataForm.autoConfirmTime" />
+        </el-form-item>
+      </el-form>
+
+      <div class="op-container">
+        <el-button :loading="submiting" type="primary" @click="handleSave('orderDataForm', prefixs.orderDataPrefix)">保存更改</el-button>
+      </div>
+
+    </el-card>
+
   </div>
 </template>
 <script>
@@ -199,12 +218,14 @@ export default {
         wxAppDataPrefix: 'WX_APP_CONFIG:',
         wxPayDataPrefix: 'WX_PAY_CONFIG:',
         smsDataPrefix: 'SMS_CONFIG:',
-        ossDataPrefix: 'OSS_CONFIG:'
+        ossDataPrefix: 'OSS_CONFIG:',
+        orderDataPrefix: 'ORDER_CONFIG:'
       },
       wxAppDataForm: {},
       wxPayDataForm: {},
       smsDataForm: {},
       ossDataForm: {},
+      orderDataForm: {},
       submiting: false
     }
   },
