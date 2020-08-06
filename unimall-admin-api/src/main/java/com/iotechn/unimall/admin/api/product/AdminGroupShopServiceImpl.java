@@ -60,7 +60,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
     @Autowired
     private CacheComponent cacheComponent;
 
-
+    // TODO 团购增加修改删除时注意商品是否正在其他活动中
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String create(Long spuId, Long gmtStart, Long gmtEnd, Integer minimumNumber, Integer automaticRefund, String groupShopSkuListStr, Long adminId) throws ServiceException {
