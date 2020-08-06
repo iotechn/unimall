@@ -16,14 +16,6 @@ public class DynamicConst {
 
     public static final String OSS_CONFIG_PREFIX = "OSS_CONFIG:";
 
-    /**
-     * 订单自动取消定时时长
-     */
-    public static final String ORDER_AUTO_CANCEL_TIME = "ORDER_AUTO_CANCEL_TIME";
-
-    /**
-     * 订单自动确认收货定时时长
-     */
-    public static final String ORDER_AUTO_CONFIRM_TIME = "ORDER_AUTO_CONFIRM_TIME";
+    public static final String ORDER_CONFIG_PREFIX = "ORDER_CONFIG:";
 
 }

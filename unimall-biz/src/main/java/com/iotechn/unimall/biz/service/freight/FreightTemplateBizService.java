@@ -57,18 +57,39 @@ public class FreightTemplateBizService {
             return item.getId();
         }).collect(Collectors.toCollection(HashSet::new));
 
-         // 统计每个模板下的重量，key为模板ID
-        Map<Long, Integer> weight = templateIds.stream().collect(Collectors.toMap(key -> key, value -> 0));
-        // 统计每个模板下的价格，key为模板ID
-        Map<Long, Integer> price = templateIds.stream().collect(Collectors.toMap(key -> key, value -> 0));
+         // 统计每个模板下的商品重量和，key为模板ID
+        Map<Long, Integer> weightMap = templateIds.stream().collect(Collectors.toMap(key -> key, value -> 0));
+        // 统计每个模板下的商品价格和，key为模板ID
+        Map<Long, Integer> priceMap = templateIds.stream().collect(Collectors.toMap(key -> key, value -> 0));
 
+        // 计算每个模板的商品重量和购买商品价格
         for (FreightCalcModel.FreightAndWeight freightAndWeight : freightAndWeights) {
-            weight.put(freightAndWeight.getId(),freightAndWeight.getWeight() + weight.get(freightAndWeight.getId()));
-            price.put(freightAndWeight.getId(),freightAndWeight.getPrice() + price.get(freightAndWeight.getId()));
+            weightMap.put(freightAndWeight.getId(),freightAndWeight.getWeight() + weightMap.get(freightAndWeight.getId()));
+            priceMap.put(freightAndWeight.getId(),freightAndWeight.getPrice() + priceMap.get(freightAndWeight.getId()));
         }
 
+        int postage = 0;
+        for (Long templateId : templateIds) {
+            FreightTemplateDTO freightTemplateById = getFreightTemplateById(templateId);
+            Integer weight = weightMap.get(templateId);
+            Integer price = priceMap.get(templateId);
 
-        return 0;
+            boolean judge = true;
+            List<FreightTemplateCarriageDO> carriageDOList = freightTemplateById.getCarriageDOList();
+            if(!CollectionUtils.isEmpty(carriageDOList)){
+                for (FreightTemplateCarriageDO carriageDO : carriageDOList) {
+                    if(carriageDO.getDesignatedArea().contains(freightCalcModel.getProvince())){
+                        postage += calcPostage(carriageDO.getFreePrice(),carriageDO.getFirstWeight(),carriageDO.getFirstPrice(),carriageDO.getContinueWeight(),carriageDO.getContinuePrice(),weight,price);
+                        judge = false;
+                        break;
+                    }
+                }
+            }
+            if(judge){
+                postage += calcPostage(freightTemplateById.getDefaultFreePrice(),freightTemplateById.getDefaultFirstWeight(),freightTemplateById.getDefaultFirstPrice(),freightTemplateById.getDefaultContinueWeight(),freightTemplateById.getDefaultContinuePrice(),weight,price);
+            }
+        }
+        return postage;
     }
 
     public ShipTraceDTO getShipTraceList(String shipNo, String shipCode) throws ServiceException {
@@ -95,5 +116,19 @@ public class FreightTemplateBizService {
 
         cacheComponent.putObj(CacheConst.FREIGHT_TEMPLATE + id , resultDTO);
         return resultDTO;
+    }
+
+    private int calcPostage(Integer freePrice,Integer firstWeight, Integer firstPrice, Integer continueWeight, Integer continuePrice, Integer weight, Integer price){
+        if(freePrice.intValue() == 0 || (freePrice.intValue() > 0 && freePrice.intValue() <= price)){
+            return 0;
+        }
+
+        int count = firstPrice;
+        weight -= firstWeight;
+        while(weight > 0){
+            count += continuePrice;
+            weight -= continueWeight;
+        }
+        return count;
     }
 }

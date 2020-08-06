@@ -16,6 +16,7 @@ import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.StatusType;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.mq.DelayedMessageQueue;
+import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class CheckQuartz {
     @Autowired
     private SpuMapper spuMapper;
     @Autowired
-    private DynamicConfigComponent dynamicConfigComponent;
+    private UnimallOrderProperties unimallOrderProperties;
     @Autowired
     private LockComponent lockComponent;
     @Autowired
@@ -71,7 +72,7 @@ public class CheckQuartz {
         QueryWrapper<OrderDO> cancelWrapper = new QueryWrapper<OrderDO>();
         cancelWrapper.select("id","order_no");
         cancelWrapper.eq("status",OrderStatusType.UNPAY.getCode());
-        Date cancelTime = new Date(now.getTime() - dynamicConfigComponent.readLong(DynamicConst.ORDER_AUTO_CANCEL_TIME, 1000 * 60 * 15));
+        Date cancelTime = new Date(now.getTime() - unimallOrderProperties.getAutoCancelTime());
         cancelWrapper.lt("gmt_update",cancelTime);
         List<OrderDO> cancelList = orderMapper.selectList(cancelWrapper);
         if(!CollectionUtils.isEmpty(cancelList)){
@@ -84,7 +85,7 @@ public class CheckQuartz {
         QueryWrapper<OrderDO> confirmWrapper = new QueryWrapper<OrderDO>();
         confirmWrapper.select("id","order_no");
         confirmWrapper.eq("status",OrderStatusType.WAIT_CONFIRM.getCode());
-        Date confirmTime = new Date(now.getTime() - dynamicConfigComponent.readLong(DynamicConst.ORDER_AUTO_CONFIRM_TIME, 1000 * 60 * 60 * 24 * 15));
+        Date confirmTime = new Date(now.getTime() - unimallOrderProperties.getAutoConfirmTime());
         confirmWrapper.lt("gmt_update",confirmTime);
         List<OrderDO> confirmList = orderMapper.selectList(confirmWrapper);
         if(!CollectionUtils.isEmpty(confirmList)){
