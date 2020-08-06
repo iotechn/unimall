@@ -40,6 +40,12 @@ public class CacheConst {
     public static final String CATEGORY_SECOND_LEVEL_TREE = "CATEGORY_SECOND_LEVEL_TREE";
 
     /**
+     * 邮费模板缓存
+     * FREIGHT_TEMPLATE: + 邮费模板id
+     */
+    public static final String FREIGHT_TEMPLATE = "FREIGHT_TEMPLATE:";
+
+    /**
      * 获取足迹列表+_用户Id (追加)
      */
     public static final String FOOTPRINT_LRU = "FOOTPRINT_LRU:";

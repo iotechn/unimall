@@ -24,7 +24,6 @@ public class FootprintServiceImpl implements FootprintService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    //TODO 前端没有了单个删除足迹的功能,需要修改
     @Override
     public boolean delete(Long userId, Long spuId) throws ServiceException {
         cacheComponent.delZSet(CacheConst.FOOTPRINT_LRU + userId, "P" + spuId);
