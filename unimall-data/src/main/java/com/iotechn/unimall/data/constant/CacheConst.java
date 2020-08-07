@@ -8,6 +8,21 @@ package com.iotechn.unimall.data.constant;
  */
 public class CacheConst {
 
+    /**=========================== 广告缓存 START =============================**/
+
+    /**
+     * 广告缓存 (ADVERT_TYPE: + 广告类型(adType))
+     */
+    public static final String ADVERT_TYPE = "ADVERT_TYPE:";
+
+
+    /**
+     * 首页聚合数据缓存， 存储周期 5 分钟
+     */
+    public static final String INTEGRAL_INDEX = "INTEGRAL_INDEX";
+
+    /**=========================== 广告缓存 END ===============================**/
+
     /**
      *  用户验证码
      */
@@ -18,11 +33,6 @@ public class CacheConst {
      * ADMIN_MSG_CODE: + 电话
      */
     public final static String ADMIN_MSG_CODE = "ADMIN_MSG_CODE:";
-
-    /**
-     * 广告缓存 (ADVERT_TYPE: + 广告类型(adType))
-     */
-    public static final String ADVERT_TYPE = "ADVERT_TYPE:";
 
     /**
      * 三级类目树

@@ -8,9 +8,12 @@ import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.domain.AdvertDO;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
+import com.iotechn.unimall.data.enums.AdvertUnionType;
+import com.iotechn.unimall.data.mapper.AdvertMapper;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
@@ -34,6 +37,9 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private AdvertMapper advertMapper;
 
     @Autowired
     private SpuMapper spuMapper;
@@ -63,7 +69,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public CategoryDO create(Long adminId, String title, Long parentId, String iconUrl, String picUrl) throws ServiceException {
+    public CategoryDO create(String title, Long parentId, String iconUrl, String picUrl, Long adminId) throws ServiceException {
         CategoryDO parent = null;
         CategoryDO categoryDO = new CategoryDO();
         if (!parentId.equals(0l)) {
@@ -93,27 +99,32 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (categoryMapper.insert(categoryDO) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.DATABASE_INSERT_FAILURE);
         }
-        clearCache();
+        this.clearCache();
         return categoryDO;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean delete(Long adminId, Long id) throws ServiceException {
+    public String delete(Long id, Long adminId) throws ServiceException {
         Integer count_category = categoryMapper.selectCount(new QueryWrapper<CategoryDO>().eq("parent_id", id));
         Integer count_spu = spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("category_id", id));
-
+        advertMapper.selectCount(
+                new QueryWrapper<AdvertDO>()
+                        .eq("union_type", AdvertUnionType.CATEGORY.getCode())
+                        .eq("union_value", id.toString()));
         if (count_category != 0 || count_spu != 0) {
             throw new AppServiceException(ExceptionDefinition.CATEGORY_OUGHT_TO_EMPTY);
         }
-
-        clearCache();
-        return categoryMapper.deleteById(id) > 0;
+        if (categoryMapper.deleteById(id) > 0) {
+            this.clearCache();
+            return "ok";
+        }
+        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public CategoryDTO update(Long adminId, Long id, String title, Long parentId, String iconUrl, String picUrl) throws ServiceException {
+    public CategoryDTO update(Long id, String title, Long parentId, String iconUrl, String picUrl, Long adminId) throws ServiceException {
         if (id == null || parentId == null) {
             throw new AdminServiceException(ExceptionDefinition.CATEGORY_OR_PARENT_NODE_IS_EMPTY);
         }
@@ -170,13 +181,13 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
                 break;
             }
         }
-        clearCache();
+        this.clearCache();
         return categoryDTO;
     }
 
     //首先的到所有的类目的List<CategoryDTO>,在根据SQL查询得到的数据转化成传往前端的数据
     @Override
-    public Page<CategoryDTO> list(Long adminId, Long id, String title, Integer level, Long parentId, Integer page, Integer limit) throws ServiceException {
+    public Page<CategoryDTO> list(Long id, String title, Integer level, Long parentId, Integer page, Integer limit, Long adminId) throws ServiceException {
         QueryWrapper wrapper = new QueryWrapper();
         if (id != null) {
             wrapper.eq("id", id);

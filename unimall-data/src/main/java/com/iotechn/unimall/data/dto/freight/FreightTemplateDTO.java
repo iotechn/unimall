@@ -1,8 +1,6 @@
 package com.iotechn.unimall.data.dto.freight;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
-import com.iotechn.unimall.data.domain.FreightTemplateDO;
 import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -2,7 +2,7 @@
 	<view class="container">
 		<view class="carousel">
 			<swiper indicator-dots circular=true duration="400">
-				<swiper-item class="swiper-item" v-for="(item,index) in goods.imgList" :key="index">
+				<swiper-item class="swiper-item" v-for="(item,index) in product.imgList" :key="index">
 					<view class="image-wrapper">
 						<image :src="item + '?x-oss-process=style/600px'" class="loaded" mode="aspectFill"></image>
 					</view>
@@ -11,28 +11,28 @@
 		</view>
 
 		<view class="introduce-section">
-			<text class="title">{{goods.title}}</text>
+			<text class="title">{{product.title}}</text>
 			<view class="price-box">
 				<text class="price-tip">¥</text>
-				<text class="price">{{isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) / 100.0  + ' [VIP]': (selectedSku.price ? selectedSku.price : goods.price) / 100.0 }}</text>
-				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) : (selectedSku.price ? selectedSku.price : goods.price)) < (selectedSku.price ? selectedSku.originalPrice : goods.originalPrice)"
-				 class="m-price">¥{{(selectedSku.price ? selectedSku.originalPrice : goods.originalPrice) / 100}}</text>
-				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice) : (selectedSku.price ? selectedSku.price : goods.price)) < (selectedSku.price ? selectedSku.originalPrice : goods.originalPrice)"
-				 class="coupon-tip">{{parseInt((isVip? (selectedSku.vipPrice ? selectedSku.vipPrice : goods.vipPrice): (selectedSku.price ? selectedSku.price : goods.price)) / (selectedSku.originalPrice ? selectedSku.originalPrice : goods.originalPrice) * 100) / 10}}折</text>
+				<text class="price">{{isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice) / 100.0  + ' [VIP]': (selectedSku.price ? selectedSku.price : product.price) / 100.0 }}</text>
+				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice) : (selectedSku.price ? selectedSku.price : product.price)) < (selectedSku.price ? selectedSku.originalPrice : product.originalPrice)"
+				 class="m-price">¥{{(selectedSku.price ? selectedSku.originalPrice : product.originalPrice) / 100}}</text>
+				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice) : (selectedSku.price ? selectedSku.price : product.price)) < (selectedSku.price ? selectedSku.originalPrice : product.originalPrice)"
+				 class="coupon-tip">{{parseInt((isVip? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice): (selectedSku.price ? selectedSku.price : product.price)) / (selectedSku.originalPrice ? selectedSku.originalPrice : product.originalPrice) * 100) / 10}}折</text>
 			</view>
 			<view class="bot-row">
-				<text>销量: {{goods.sales}}</text>
-				<text>库存: {{goods.stock}}</text>
+				<text>销量: {{product.sales}}</text>
+				<text>库存: {{product.stock}}</text>
 			</view>
 		</view>
 
 		<!-- 团购分享 -->
-		<button v-if="goods.groupShop" class="share-section" open-type="share">
+		<button v-if="product.groupShop" class="share-section" open-type="share">
 			<view class="share-icon">
 				<text class="yticon icon-xingxing"></text>
 				团
 			</view>
-			<text class="tit">{{goods.groupShop.minimumNumber}}人成团，已有{{goods.groupShop.alreadyBuyNumber}}人参团</text>
+			<text class="tit">{{product.groupShop.minNum}}人成团，已有{{product.groupShop.buyerNum}}人参团</text>
 			<text class="yticon icon-bangzhu1"></text>
 			<view class="share-btn">
 				告诉TA
@@ -57,13 +57,13 @@
 			</view>
 			<view class="c-row b-b">
 				<text class="tit">配送费用</text>
-				<view v-if="goods.freightTemplate" class="con-list">
-					<text>单笔购买满¥{{goods.freightTemplate.freightTemplateDO.defaultFreePrice / 100.0}}元免邮费</text>
-					<text v-if="goods.freightTemplate.freightTemplateDO.defaultContinueMoney > 0">每增加{{goods.freightTemplate.freightTemplateDO.defaultFirstNum}}件，增加运费¥{{goods.freightTemplate.freightTemplateDO.defaultContinueMoney / 100.0}}元</text>
-					<text v-if="goods.freightTemplate.freightTemplateCarriageDOList.length > 0">TODO 特殊情况说明页面</text>
+				<view v-if="product.freightTemplate" class="con-list">
+					<text>单笔购买满¥{{product.freightTemplate.freightTemplateDO.defaultFreePrice / 100.0}}元免邮费</text>
+					<text v-if="product.freightTemplate.freightTemplateDO.defaultContinueMoney > 0">每增加{{product.freightTemplate.freightTemplateDO.defaultFirstNum}}件，增加运费¥{{product.freightTemplate.freightTemplateDO.defaultContinueMoney / 100.0}}元</text>
+					<text v-if="product.freightTemplate.freightTemplateCarriageDOList.length > 0">TODO 特殊情况说明页面</text>
 				</view>
 			</view>
-			<view v-for="(item, index) in goods.attributeList" :key="index" class="c-row b-b">
+			<view v-for="(item, index) in product.attributeList" :key="index" class="c-row b-b">
 				<text class="tit">{{item.attribute}}</text>
 				<view class="bz-list con">
 					<text>{{item.value}}</text>
@@ -72,22 +72,22 @@
 		</view>
 
 		<!-- 评价 -->
-		<view v-if="goods.appraisePage && goods.appraisePage.items.length > 0" class="eva-section">
+		<view v-if="product.appraisePage && product.appraisePage.items.length > 0" class="eva-section">
 			<view class="e-header">
 				<text class="tit">评价</text>
-				<text>({{goods.appraisePage.count}})</text>
+				<text>({{product.appraisePage.count}})</text>
 				<text @click="navAllAppraise" class="tip">全部评论</text>
 				<text class="yticon icon-you"></text>
 			</view>
 			<view class="eva-box">
-				<image class="portrait" :src="goods.appraisePage.items[0].userAvatarUrl ? goods.appraisePage.items[0].userAvatarUrl : '/static/missing-face.png'"
+				<image class="portrait" :src="product.appraisePage.items[0].userAvatarUrl ? product.appraisePage.items[0].userAvatarUrl : '/static/missing-face.png'"
 				 mode="aspectFill"></image>
 				<view class="right">
-					<text class="name">{{goods.appraisePage.items[0].userNickName?goods.appraisePage.items[0].userNickName:('用户' + goods.appraisePage.items[0].userId)}}</text>
-					<text class="con">{{goods.appraisePage.items[0].content}}</text>
+					<text class="name">{{product.appraisePage.items[0].userNickName?product.appraisePage.items[0].userNickName:('用户' + product.appraisePage.items[0].userId)}}</text>
+					<text class="con">{{product.appraisePage.items[0].content}}</text>
 					<view class="bot">
-						<text class="attr">购买类型：{{goods.appraisePage.items[0].skuTitle}}</text>
-						<text class="time">{{goods.appraisePage.items[0].gmtCreate}}</text>
+						<text class="attr">购买类型：{{product.appraisePage.items[0].skuTitle}}</text>
+						<text class="time">{{product.appraisePage.items[0].gmtCreate}}</text>
 					</view>
 				</view>
 			</view>
@@ -98,7 +98,7 @@
 			<view class="d-header">
 				<text>图文详情</text>
 			</view>
-			<u-parse className="rich-img" :content="goods.detail"></u-parse>
+			<u-parse className="rich-img" :content="product.detail"></u-parse>
 		</view>
 
 		<!-- 底部操作菜单 -->
@@ -112,12 +112,12 @@
 				<text>购物车</text>
 			</navigator>
 
-			<view class="p-b-btn" :class="{active: goods.collect}" @click="toFavorite">
+			<view class="p-b-btn" :class="{active: product.collect}" @click="toFavorite">
 				<text class="yticon icon-shoucang"></text>
 				<text>收藏</text>
 			</view>
 			<view class="action-btn-group">
-				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">{{ goods.groupShop ? '立即参团' : '立即购买'}}</button>
+				<button type="primary" class=" action-btn no-border buy-now-btn" @click="buy">{{ product.groupShop ? '立即参团' : '立即购买'}}</button>
 				<button type="primary" class=" action-btn no-border add-cart-btn" @click="addCart">加入购物车</button>
 			</view>
 		</view>
@@ -150,7 +150,7 @@
 			<view class="mask"></view>
 			<view class="layer attr-content" @click.stop="stopPrevent">
 				<view class="a-t">
-					<image v-if="goods.img" :src="(selectedSku.img?selectedSku.img:goods.img) + '?x-oss-process=style/200px'"></image>
+					<image v-if="product.img" :src="(selectedSku.img?selectedSku.img:product.img) + '?x-oss-process=style/200px'"></image>
 					<view class="right">
 						<text class="price">¥{{isVip ? (selectedSku.vipPrice / 100.0 + ' [VIP]') : selectedSku.price / 100.0}}</text>
 						<text class="stock">库存：{{selectedSku.stock}}件</text>
@@ -165,7 +165,7 @@
 				<view class="attr-list">
 					<text>规格</text>
 					<view class="item-list">
-						<text v-for="(skuItem, skuIndex) in goods.skuList" :key="skuIndex" class="tit" :class="{selected: skuIndex === selectedSkuIndex}"
+						<text v-for="(skuItem, skuIndex) in product.skuList" :key="skuIndex" class="tit" :class="{selected: skuIndex === selectedSkuIndex}"
 						 @click="selectSpec(skuItem, skuIndex)">
 							{{skuItem.title}}
 						</text>
@@ -191,7 +191,7 @@
 		},
 		data() {
 			return {
-				goods: {
+				product: {
 					freightTemplate: undefined,
 					skuList: [],
 					categoryList: [],
@@ -225,17 +225,17 @@
 				that.$api.msg(failres.errmsg)
 				uni.hideLoading()
 			}).then(res => {
-				that.goods = res.data
-				if (that.goods.groupShop) {
+				that.product = res.data
+				if (that.product.groupShop) {
 					//若存在团购信息，将价格更新到团购价格
-					that.goods.price = that.goods.groupShop.minPrice
-					that.goods.vipPrice = that.goods.groupShop.minPrice
+					that.product.price = that.product.groupShop.minPrice
+					that.product.vipPrice = that.product.groupShop.minPrice
 					//更新各个SKU的价格
-					for (let i = 0; i < that.goods.skuList.length; i++) {
-						for (let j = 0; j < that.goods.groupShop.groupShopSkuList.length; j++) {
-							if (that.goods.skuList[i].id === that.goods.groupShop.groupShopSkuList[j].skuId) {
-								that.goods.skuList[i].price = that.goods.groupShop.groupShopSkuList[j].skuGroupShopPrice
-								that.goods.skuList[i].vipPrice = that.goods.groupShop.groupShopSkuList[j].skuGroupShopPrice
+					for (let i = 0; i < that.product.skuList.length; i++) {
+						for (let j = 0; j < that.product.groupShop.groupShopSkuList.length; j++) {
+							if (that.product.skuList[i].id === that.product.groupShop.groupShopSkuList[j].skuId) {
+								that.product.skuList[i].price = that.product.groupShop.groupShopSkuList[j].skuGroupShopPrice
+								that.product.skuList[i].vipPrice = that.product.groupShop.groupShopSkuList[j].skuGroupShopPrice
 							}
 						}
 					}
@@ -248,9 +248,10 @@
 		},
 		onShareAppMessage() {
 			return {
-				title: (this.goods.groupShop ? '立即拼团-' : '好货分享-') + this.goods.title,
+				title: (this.product.groupShop ? '立即拼团-' : '好货分享-') + this.product.title,
 				imageUrl: 'https://easycampus-asset.oss-cn-shenzhen.aliyuncs.com/sharebg.png',
-				path: '/pages/product/detail?id=' + this.goods.id + (this.goods.groupShop ? '&gid=' + this.goods.groupShop.id : '')
+				path: '/pages/product/detail?id=' + this.product.id + (this.product.groupShop ? '&gid=' + this.product.groupShop.id :
+					'')
 			}
 		},
 		methods: {
@@ -291,7 +292,7 @@
 				} else if (this.specClass === 'none') {
 					this.specClass = 'show';
 					if (!this.selectedSku.title) {
-						this.selectedSku = this.goods.skuList[0]
+						this.selectedSku = this.product.skuList[0]
 						this.selectedSkuIndex = 0
 					}
 				}
@@ -314,7 +315,7 @@
 						skuId: that.selectedSku.id,
 						num: that.buyNum ? that.buyNum : 1
 					}).then(res => {
-						if (that.goods.groupShop) {
+						if (that.product.groupShop) {
 							that.$api.msg('从购物车结算不会参加团购')
 						} else {
 							that.$api.msg('添加购物车成功')
@@ -326,19 +327,19 @@
 			//收藏
 			toFavorite() {
 				const that = this
-				if (that.goods.collect) {
+				if (that.product.collect) {
 					//取消收藏
-					that.goods.collect = false
+					that.product.collect = false
 					this.$api.request('collect', 'deleteCollect', {
-						spuId: that.goods.id
+						spuId: that.product.id
 					}).then(res => {
 
 					})
 				} else {
 					//添加收藏
-					that.goods.collect = true
+					that.product.collect = true
 					this.$api.request('collect', 'addCollect', {
-						spuId: that.goods.id
+						spuId: that.product.id
 					})
 				}
 			},
@@ -352,20 +353,20 @@
 					let skuItem = {
 						skuId: that.selectedSku.id,
 						num: that.buyNum,
-						title: that.goods.title,
+						title: that.product.title,
 						originalPrice: that.selectedSku.originalPrice,
 						price: that.selectedSku.price,
 						vipPrice: that.selectedSku.vipPrice,
 						skuTitle: that.selectedSku.title,
-						spuImg: that.goods.img,
+						spuImg: that.product.img,
 						skuImg: that.selectedSku.img,
 						stock: that.selectedSku.stock,
-						spuId: that.goods.id,
-						categoryId: that.goods.categoryId,
-						categoryIdList: that.goods.categoryIds
+						spuId: that.product.id,
+						categoryId: that.product.categoryId,
+						categoryIdList: that.product.categoryIds
 					}
-					if (that.goods.groupShop) {
-						skuItem['groupShopId'] = that.goods.groupShop.id
+					if (that.product.groupShop) {
+						skuItem['groupShopId'] = that.product.groupShop.id
 					}
 					let skuList = [1]
 					skuList[0] = skuItem
@@ -378,7 +379,7 @@
 			//查看所有评价
 			navAllAppraise() {
 				uni.navigateTo({
-					url: `/pages/product/appraise?spuid=${this.goods.id}&firstpage=${JSON.stringify(this.goods.appraisePage)}`
+					url: `/pages/product/appraise?spuid=${this.product.id}&firstpage=${JSON.stringify(this.product.appraisePage)}`
 				})
 			},
 			stopPrevent() {}

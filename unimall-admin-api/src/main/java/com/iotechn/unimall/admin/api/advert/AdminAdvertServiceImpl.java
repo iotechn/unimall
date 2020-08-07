@@ -40,6 +40,7 @@ public class AdminAdvertServiceImpl implements AdminAdvertService {
         AdvertDO advertDO = new AdvertDO();
         advertDO.setType(type);
         advertDO.setTitle(title);
+        advertDO.setUnionType(unionType);
         advertDO.setUnionValue(unionValue);
         advertDO.setImgUrl(imgUrl);
         advertDO.setStatus(status);
@@ -101,7 +102,9 @@ public class AdminAdvertServiceImpl implements AdminAdvertService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                cacheComponent.delPrefixKey(CacheConst.ADVERT_TYPE + adType);
+                cacheComponent.del(CacheConst.ADVERT_TYPE + null);
+                cacheComponent.del(CacheConst.ADVERT_TYPE + adType);
+                cacheComponent.del(CacheConst.INTEGRAL_INDEX);
             }
         });
     }

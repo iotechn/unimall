@@ -11,4 +11,5 @@ public class UnimallOrderProperties {
     private Long autoCancelTime;
 
     private Long autoConfirmTime;
+
 }

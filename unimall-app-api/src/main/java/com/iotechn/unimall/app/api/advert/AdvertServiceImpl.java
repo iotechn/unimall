@@ -26,7 +26,7 @@ public class AdvertServiceImpl implements AdvertService {
     private AdvertMapper advertMapper;
 
     @Override
-    @AspectCommonCache(value = CacheConst.ADVERT_TYPE, argIndex = {0}, second = 100)
+    @AspectCommonCache(value = CacheConst.ADVERT_TYPE, argIndex = {0}, second = 100, arrayClass = AdvertDO.class)
     public List<AdvertDO> getActiveAd(Integer adType) throws ServiceException {
         QueryWrapper<AdvertDO> wrapper = new QueryWrapper<AdvertDO>()
                 .eq("status", StatusType.ACTIVE.getCode());

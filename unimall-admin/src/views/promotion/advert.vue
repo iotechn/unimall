@@ -53,11 +53,12 @@
 
       <el-table-column align="center" label="广告图片" width="120" prop="imgUrl">
         <template slot-scope="scope">
-          <el-popover placement="right" trigger="hover">
+          <el-popover v-if="scope.row.imgUrl !== USELESS_PIC" placement="right" trigger="hover">
             <!--trigger属性值：hover、click、focus 和 manual-->
             <img :src="scope.row.imgUrl" height="230" >
             <img slot="reference" :src="scope.row.imgUrl" height="23" >
           </el-popover>
+          <el-tag v-else type="info">类型无需图片</el-tag>
         </template>
       </el-table-column>
 
@@ -129,7 +130,12 @@
         <el-form-item label="广告标题" prop="title">
           <el-input v-model="dataForm.title" />
         </el-form-item>
-        <el-form-item label="广告图片" prop="imgUrl">
+        <el-form-item label="广告类型" prop="type">
+          <el-select v-model="dataForm.type" placeholder="请选择" @change="adTypeChange">
+            <el-option v-for="(key, index) in adTypeMap" :key="index" :label="key.name" :value="key.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item :hidden="currentType && !currentType.picRequire" label="广告图片" prop="imgUrl">
           <el-upload
             :headers="headers"
             :action="uploadPath"
@@ -143,11 +149,6 @@
             <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
         </el-form-item>
-        <el-form-item label="广告类型" prop="type">
-          <el-select v-model="dataForm.type" placeholder="请选择" @change="adTypeChange">
-            <el-option v-for="(key, index) in adTypeMap" :key="index" :label="key.name" :value="key.value" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="广告状态" prop="status">
           <el-switch
             v-model="dataForm.status"
@@ -156,10 +157,11 @@
             active-color="#13ce66"/>
         </el-form-item>
         <el-form-item label="关联类型" prop="unionType">
+          <!-- dataForm.type && (adTypeMap[dataForm.type - 1].unionTypes.indexOf(item.value) < 0) -->
           <el-select :disabled="!dataForm.type" v-model="dataForm.unionType" :placeholder="dataForm.type ? '点击时跳转目标.' : '请先选择广告类型'">
             <el-option
               v-for="item in adUnionTypeMap"
-              :disabled="dataForm.type && (adTypeMap[dataForm.type - 1].unionTypes.indexOf(item.value) < 0)"
+              :disabled="currentType && currentType.unionTypes.indexOf(item.value) < 0"
               :key="item.value"
               :label="item.name"
               :value="item.value"
@@ -199,11 +201,11 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button v-if="dialogStatus=='create'" type="primary" @click="createData">确定</el-button>
-        <el-button v-else type="primary" @click="updateData">确定</el-button>
+        <el-button v-if="dialogStatus=='create'" :loading="submiting" type="primary" @click="createData">确定</el-button>
+        <el-button v-else :loading="submiting" type="primary" @click="updateData">确定</el-button>
       </div>
     </el-dialog>
-
+    <!-- 用于计算颜色均值的画布 -->
     <canvas ref="canvas" hidden/>
   </div>
 </template>
@@ -216,23 +218,43 @@ import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination'
 import ElOption from '../../../node_modules/element-ui/packages/select/src/option' // Secondary package based on el-pagination
 
-const adTypeMap = [{ value: 1, unionTypes: [1, 2, 3, 4], name: '轮播' }, { value: 2, unionTypes: [2], name: '分类精选' }, { value: 3, unionTypes: [1, 2, 3, 4], name: '横幅' }, { value: 4, unionTypes: [1, 2, 3, 4], name: '首页轮播下5按钮' }]
-const adUnionTypeMap = [{ value: 1, name: '商品' }, { value: 2, name: '类目' }, { value: 3, name: '关键字' }, { value: 4, name: '功能页面' }]
+const adTypeMap = [
+  { value: 1, unionTypes: [1, 2, 3, 4], picRequire: true, name: '轮播' },
+  { value: 2, unionTypes: [2], picRequire: true, name: '分类精选' },
+  { value: 3, unionTypes: [1, 2, 3, 4], picRequire: true, name: '横幅' },
+  { value: 4, unionTypes: [1, 2, 3, 4], picRequire: true, name: '首页轮播下5按钮' },
+  { value: 6, unionTypes: [1, 2, 3, 4], picRequire: false, name: '公告' },
+  { value: 9, unionTypes: [1], picRequire: false, name: '商品推荐' }]
+const adUnionTypeMap = [
+  { value: 1, name: '商品' },
+  { value: 2, name: '类目' },
+  { value: 3, name: '关键字' },
+  { value: 4, name: '功能页面' }]
 const adStatusMap = [{ value: 0, name: '冻结' }, { value: 1, name: '激活' }]
 const functionPages = [{ value: '/pages/groupshop/list', name: '团购列表' }]
 
 export default {
-  name: 'Ad',
+  name: 'Advert',
   components: {
     ElOption,
     Pagination
   },
   filters: {
     adTypeFilter(code) {
-      return adTypeMap[code - 1]['name']
+      for (let i = 0; i < adTypeMap.length; i++) {
+        if (adTypeMap[i].value === code) {
+          return adTypeMap[i].name
+        }
+      }
+      return '无效'
     },
     adUnionTypeFilter(code) {
-      return adUnionTypeMap[code - 1]['name']
+      for (let i = 0; i < adUnionTypeMap.length; i++) {
+        if (adUnionTypeMap[i].value === code) {
+          return adUnionTypeMap[i].name
+        }
+      }
+      return '无效'
     },
     adStatusFilter(code) {
       return adStatusMap[code]['name']
@@ -246,6 +268,7 @@ export default {
       adUnionTypeMap,
       adTypeMap,
       adStatusMap,
+      USELESS_PIC: 'https://www.baidu.com/img/flexible/logo/pc/result.png',
       // 常量 END
       dialogLoading: false,
       spuTree: [],
@@ -254,8 +277,6 @@ export default {
       list: [],
       total: 0,
       listLoading: true,
-      linkUnion: undefined,
-      linkUnion2: undefined,
       listQuery: {
         pageNo: 1,
         limit: 20,
@@ -272,6 +293,8 @@ export default {
         status: 1,
         color: undefined
       },
+      oldPic: '',
+      currentType: undefined,
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
@@ -286,7 +309,7 @@ export default {
         unionType: [{ required: true, message: '请选择广告关联类型', trigger: 'blur' }],
         unionValue: [{ required: true, message: '请关联一个(商品、类目、页面等具体值)', trigger: 'blur' }]
       },
-      downloadLoading: false
+      submiting: false
     }
   },
   computed: {
@@ -330,10 +353,30 @@ export default {
         color: undefined
       }
     },
-    adTypeChange() {
+    adTypeChange(type) {
       this.dataForm.unionType = undefined
       this.dataForm.unionValue = ''
       this.cascaderData = []
+      for (let i = 0; i < this.adTypeMap.length; i++) {
+        if (this.adTypeMap[i].value === type) {
+          this.currentType = adTypeMap[i]
+          if (!this.adTypeMap[i].picRequire) {
+            // 随便填一张图片
+            const defalutPic = this.USELESS_PIC
+            if (this.dataForm.imgUrl && this.dataForm.imgUrl !== defalutPic) {
+              this.oldPic = this.dataForm.imgUrl
+            }
+            this.dataForm.imgUrl = defalutPic
+          } else {
+            // 若需要图片，将旧图片赋值给他
+            if (this.oldPic) {
+              this.dataForm.imgUrl = this.oldPic
+            } else {
+              this.dataForm.imgUrl = ''
+            }
+          }
+        }
+      }
     },
     unionValueChange(e) {
       this.dataForm.unionValue = e[e.length - 1].substring(2)
@@ -383,6 +426,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
+          this.submiting = true
           createAdvert(this.dataForm)
             .then(response => {
               this.getList()
@@ -391,12 +435,14 @@ export default {
                 title: '成功',
                 message: '创建成功'
               })
+              this.submiting = false
             })
             .catch(response => {
               this.$notify.error({
                 title: '失败',
                 message: response.data.errmsg
               })
+              this.submiting = false
             })
         }
       })
@@ -407,9 +453,15 @@ export default {
       this.refreshOptions(row)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
+      this.oldPic = this.dataForm.imgUrl
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
+      for (let i = 0; i < adTypeMap.length; i++) {
+        if (adTypeMap[i].value === row.dataForm.type) {
+          this.currentType = adTypeMap[i]
+        }
+      }
     },
     updateData() {
       this.$refs['dataForm'].validate(valid => {
@@ -423,8 +475,6 @@ export default {
                   break
                 }
               }
-              this.linkUnion = undefined
-              this.linkUnion2 = undefined
               this.dialogFormVisible = false
               this.$notify.success({
                 title: '成功',

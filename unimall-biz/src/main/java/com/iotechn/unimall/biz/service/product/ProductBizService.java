@@ -195,12 +195,32 @@ public class ProductBizService {
     }
 
     /**
-     * 从数据库中获取SPU
+     * 从数据库中获取SPU,并且不查出detail字段
      * @param id
      * @return
      */
-    public SpuDO getProductById(Long id) {
-        return spuMapper.selectById(id);
+    public SpuDO getProductByIdFromDB(Long id) {
+        return spuMapper.selectOne(new QueryWrapper<SpuDO>().select(SPU_EXCLUDE_DETAIL_FIELDS).eq("id", id));
+    }
+
+    /**
+     * 从缓存中查出SPU，不带detail字段
+     * @param spuId
+     * @return
+     */
+    public SpuDTO getProductByIdFromCache(Long spuId) throws ServiceException {
+        SpuDTO spuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, SpuDTO.class);
+        if (spuDTO == null) {
+            SpuDO spuDO = spuMapper.selectOne(new QueryWrapper<SpuDO>().select(ProductBizService.SPU_EXCLUDE_DETAIL_FIELDS).eq("id", spuId));
+            if (spuDO != null) {
+                cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, spuDO);
+                spuDTO = new SpuDTO();
+                BeanUtils.copyProperties(spuDO, spuDTO);
+            } else {
+                throw new AppServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+            }
+        }
+        return spuDTO;
     }
 
     /**

@@ -28,7 +28,7 @@
 
         <el-form-item label="运费模板" prop="freightTemplate">
           <el-select v-model="product.freightTemplateId" placeholder="选择商品运费模板">
-            <el-option v-for="(item, index) in freightList" :key="index" :label="item.freightTemplateDO.templateName" :value="item.freightTemplateDO.id"/>
+            <el-option v-for="(item, index) in freightList" :key="index" :label="item.title" :value="item.id"/>
           </el-select>
         </el-form-item>
 
@@ -284,7 +284,6 @@ export default {
       skuTableData: [],
       product: {
         imgList: [],
-        priceRaw: 0,
         type: 0,
         skuCombineList: []
       },
@@ -376,7 +375,7 @@ export default {
           // 深拷贝
           this.product = JSON.parse(JSON.stringify(response.data.data))
           this.attributes = response.data.data.attributeList ? response.data.data.attributeList : []
-          this.categoryIds = response.data.data.categoryIds.reverse()
+          this.categoryIds = response.data.data.categoryIds
           this.skuList = response.data.data.skuList
           for (let i = 0; i < response.data.data.specificationList.length; i++) {
             response.data.data.specificationList[i].values = []
@@ -472,7 +471,7 @@ export default {
           } else if (this.categoryIds.length !== 3) {
             this.$notify.error({
               title: '失败',
-              message: '请选择类目'
+              message: '请选择（第三级）类目'
             })
           } else if (this.product.imgList.length === 0) {
             this.$notify.error({

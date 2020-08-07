@@ -158,7 +158,7 @@ public class OrderServiceImpl implements OrderService {
                     OrderCalcSkuModel orderCalcSpuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + orderRequestSkuDTO.getSpuId(), OrderCalcSkuModel.class);
                     if (orderCalcSpuDTO == null) {
                         // 尝试从DB中读取
-                        SpuDO spuFromDB = productBizService.getProductById(orderRequestSkuDTO.getSpuId());
+                        SpuDO spuFromDB = productBizService.getProductByIdFromDB(orderRequestSkuDTO.getSpuId());
                         if (spuFromDB == null || (spuFromDB.getStatus() == SpuStatusType.STOCK.getCode())) {
                             // 不存在的或下架的商品
                             statusErrorSkuList.add(skuId);
