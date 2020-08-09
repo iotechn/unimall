@@ -78,7 +78,7 @@ public class AppraiseServiceImpl implements AppraiseService {
         if (CollectionUtils.isEmpty(appraiseRequestDTO.getAppraiseDTOList())) {
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setStatus(OrderStatusType.COMPLETE.getCode());
-            orderBizService.changeOrderStatus(orderDO.getOrderNo(), OrderStatusType.COMPLETE.getCode(), updateOrderDO);
+            orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.COMPLETE.getCode(), updateOrderDO);
         }
 
         // 3. 循环读取订单评价中所有商品的评价
@@ -122,7 +122,7 @@ public class AppraiseServiceImpl implements AppraiseService {
         // 4. 改变订单状态
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.COMPLETE.getCode());
-        orderBizService.changeOrderStatus(orderDO.getOrderNo(), OrderStatusType.COMPLETE.getCode(), updateOrderDO);
+        orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.COMPLETE.getCode(), updateOrderDO);
         // 5. 清理缓存
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override

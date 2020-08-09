@@ -231,4 +231,13 @@ public class ProductBizService {
         skuStockMap.forEach((k, v) -> skuMapper.decStock(k, v));
     }
 
+    /**
+     * 增加商品销量
+     * @param skuSalesMap
+     */
+    public void incSpuSales(Map<Long, Integer> skuSalesMap) {
+        // TODO 增加销量，需要更新缓存
+        skuSalesMap.forEach((k, v) -> spuMapper.incSales(k, v));
+    }
+
 }

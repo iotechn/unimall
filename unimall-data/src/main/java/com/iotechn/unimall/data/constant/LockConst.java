@@ -26,10 +26,16 @@ public class LockConst {
     public static final String TAKE_ORDER_LOCK = "TAKE_ORDER_LOCK:";
 
     /**
-     * 订单状态修改锁
+     * 子订单状态修改锁
      * ORDER_STATUS_LOCK: + orderNO
      */
-    public static final String ORDER_STATUS_LOCK = "ORDER_STATUS_LOCK:";
+    public static final String ORDER_SUB_STATUS_LOCK = "ORDER_STATUS_LOCK:";
+
+    /**
+     * 父订单状态修改锁
+     * ORDER_PARENT_STATUS_LOCK: + parentOrderNo
+     */
+    public static final String ORDER_PARENT_STATUS_LOCK = "ORDER_PARENT_STATUS_LOCK:";
 
     /**
      * 订单退款乐观锁

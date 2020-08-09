@@ -293,8 +293,7 @@ export default {
       skuTableData: [],
       product: {
         imgList: [],
-        type: 0,
-        skuCombineList: []
+        type: 0
       },
       skuCombineTempModel: [],
       attributeVisiable: false,
@@ -492,6 +491,7 @@ export default {
             this.product.price = parseInt(this.product.priceRaw * 100)
             this.product.originalPrice = parseInt(this.product.originalPriceRaw * 100)
             this.product.vipPrice = parseInt(this.product.vipPriceRaw * 100)
+            this.product.specificationList = this.specList
             const skuList = []
             for (let i = 0; i < this.skuTableData.length; i++) {
               let title = ''
@@ -759,6 +759,7 @@ export default {
     },
     randonBarcode(row) {
       row.barCode = new Date().getTime() + ''
+      this.$forceUpdate()
     }
 
   }

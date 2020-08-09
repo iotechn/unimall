@@ -9,15 +9,14 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
-import com.iotechn.unimall.biz.service.user.UserBizService;
+import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.mapper.GroupShopMapper;
+import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
-import com.iotechn.unimall.data.mapper.SpuMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -30,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by rize on 2019/7/10.
@@ -44,22 +45,16 @@ public class CallbackController {
     private OrderBizService orderBizService;
 
     @Autowired
-    private UserBizService userBizService;
-
-    @Autowired
-    private SpuMapper spuMapper;
-
-    @Autowired
     private OrderSkuMapper orderSkuMapper;
-
-    @Autowired
-    private GroupShopMapper groupShopMapper;
 
     @Autowired
     private WxPayService wxPayService;
 
     @Autowired
     private OrderMapper orderMapper;
+
+    @Autowired
+    private ProductBizService productBizService;
 
     @Autowired
     private AdminNotifyBizService adminNotifyBizService;
@@ -78,67 +73,108 @@ public class CallbackController {
         logger.info(JSONObject.toJSONString(result));
 
         /* 之前传过去的我们系统的订单ID */
-        String orderNo = result.getOutTradeNo();
+        // 现在是不知道是父订单还是普通订单
+        String orderAbstractNo = result.getOutTradeNo();
+        boolean isParent = !orderAbstractNo.contains("S");
         String payId = result.getTransactionId();
 
-        List<OrderDO> orderDOList = orderMapper.selectList(
-                new QueryWrapper<OrderDO>()
-                        .eq("order_no", orderNo));
-
-        if (CollectionUtils.isEmpty(orderDOList)) {
-            return WxPayNotifyResponse.fail("订单不存在 orderNo=" + orderNo);
+        List<OrderDO> orderDOList;
+        if (isParent) {
+            orderDOList = orderMapper.selectList(
+                    new QueryWrapper<OrderDO>()
+                            .eq("parent_order_no", orderAbstractNo));
+        } else {
+            orderDOList = orderMapper.selectList(
+                    new QueryWrapper<OrderDO>()
+                            .eq("order_no", orderAbstractNo));
         }
 
-        OrderDO order = orderDOList.get(0);
+        if (CollectionUtils.isEmpty(orderDOList)) {
+            return WxPayNotifyResponse.fail("订单不存在 orderNo=" + orderAbstractNo);
+        }
 
-        // 检查这个订单是否已经处理过
-        if (order.getStatus() != OrderStatusType.UNPAY.getCode()) {
-            return WxPayNotifyResponse.success("订单已经处理成功!");
+        int status = orderDOList.get(0).getStatus().intValue();
+        int actualPrice = 0;
+
+        for (OrderDO orderDO : orderDOList) {
+            actualPrice += orderDO.getActualPrice();
+            if (orderDO.getStatus().intValue() != status) {
+                return WxPayNotifyResponse.fail("订单子单状态不一致");
+            }
+        }
+
+        if (status != OrderStatusType.UNPAY.getCode()) {
+            return WxPayNotifyResponse.success("订单已经处理过了");
         }
 
         Integer totalFee = result.getTotalFee();
 
         // 检查支付订单金额
-        if (!totalFee.equals(order.getActualPrice())) {
-            return WxPayNotifyResponse.fail(order.getOrderNo() + " : 支付金额不符合 totalFee=" + totalFee);
+        if (!totalFee.equals(actualPrice)) {
+            return WxPayNotifyResponse.fail(orderAbstractNo + " : 支付金额不符合 totalFee=" + totalFee);
         }
 
         //**************** 在此之前都没有 数据库修改 操作 所以前面是直接返回错误的 **********************//
 
+        //1. 更新订单状态
+        Date now = new Date();
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setPayId(payId);
         updateOrderDO.setPayChannel("WX");
         updateOrderDO.setPayPrice(result.getTotalFee());
-        updateOrderDO.setGmtPay(new Date());
-        updateOrderDO.setGmtUpdate(order.getGmtPay());
-        if (order.getGroupShopId() != null) {
-            updateOrderDO.setStatus(OrderStatusType.GROUP_SHOP_WAIT.getCode());
-        } else {
-            updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
-        }
-        orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
-        List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(
-                new QueryWrapper<OrderSkuDO>()
-                        .eq("order_no", orderNo));
-        orderSkuDOList.forEach(item -> {
-            //增加销量
-            spuMapper.incSales(item.getSpuId(), item.getNum());
-            if (order.getGroupShopId() != null) {
-                //增加团购人数, 若想算商品数这里就获取orderSku的数量，若想算人数，这里就写1
-                groupShopMapper.incCurrentNum(order.getGroupShopId(), item.getNum());
+        updateOrderDO.setGmtPay(now);
+        updateOrderDO.setGmtUpdate(now);
+        updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+        List<OrderSkuDO> orderSkuDOList;
+
+        if (isParent) {
+            // 父单支付
+            updateOrderDO.setSubPay(0);
+            List<String> orderNos = orderDOList.stream().map(item -> item.getOrderNo()).collect(Collectors.toList());
+            orderSkuDOList = orderSkuMapper.selectList(
+                    new QueryWrapper<OrderSkuDO>()
+                            .in("order_no", orderNos));
+            // TODO 检测是否有团购等需要将各个子单 转换到不同的状态 eg.团购子单需要将状态转换到OrderStatusType.GROUP_SHOP_WAIT。而普通订单需要转换到OrderStatusTyp.UNPAY
+            if (orderSkuDOList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).count() > 0) {
+
+            } else {
+                // 走普通商品
+                orderBizService.changeOrderParentStatus(orderAbstractNo, OrderStatusType.UNPAY.getCode(), updateOrderDO, orderDOList.size());
             }
-        });
+        } else {
+            // 子单支付
+            updateOrderDO.setSubPay(1);
+            orderSkuDOList = orderSkuMapper.selectList(
+                    new QueryWrapper<OrderSkuDO>()
+                            .eq("order_no", orderAbstractNo));
+            List<OrderSkuDO> groupShopSkuList = orderSkuDOList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).collect(Collectors.toList());
+            if (groupShopSkuList.size() > 0) {
+                // TODO 团购
+            } else {
+                orderBizService.changeOrderSubStatus(orderAbstractNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
+            }
+        }
 
-        OrderDTO orderDTO = new OrderDTO();
-        BeanUtils.copyProperties(order, orderDTO);
-        orderDTO.setPayChannel(updateOrderDO.getPayChannel());
-        orderDTO.setSkuList(orderSkuDOList);
+        //2. 增加商品销量
+        // 可能存在两个相同的Spu，不同的Sku的情况
+        Map<Long, Integer> salesMap = orderSkuDOList.stream().collect(Collectors.toMap(OrderSkuDO::getSpuId, OrderSkuDO::getNum, (k1, k2) -> k1.intValue() + k2.intValue()));
+        productBizService.incSpuSales(salesMap);
 
-        //通知管理员发货
-        OrderDTO finalOrderDTO = orderDTO;
-        GlobalExecutor.execute(() -> {
-            adminNotifyBizService.newOrder(finalOrderDTO);
-        });
+
+        //3. 通知管理员发货
+        Map<String, List<OrderSkuDO>> orderSkuMap = orderSkuDOList.stream().collect(Collectors.groupingBy(OrderSkuDO::getOrderNo));
+        Map<String, List<OrderDO>> orderMap = orderDOList.stream().collect(Collectors.groupingBy(OrderDO::getOrderNo));
+        for (String subOrderNo : orderSkuMap.keySet()) {
+            OrderDTO finalOrderDTO = new OrderDTO();
+            OrderDO orderDO = orderMap.get(subOrderNo).get(0);
+            BeanUtils.copyProperties(orderDO, finalOrderDTO);
+            finalOrderDTO.setPayChannel("WX");
+            finalOrderDTO.setSkuList(orderSkuMap.get(subOrderNo));
+            GlobalExecutor.execute(() -> {
+                adminNotifyBizService.newOrder(finalOrderDTO);
+            });
+            logger.info("[订单微信支付成功] orderNo:" + subOrderNo);
+        }
         return WxPayNotifyResponse.success("支付成功");
     }
 

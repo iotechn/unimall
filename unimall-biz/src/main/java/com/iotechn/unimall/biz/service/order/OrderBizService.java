@@ -78,14 +78,16 @@ public class OrderBizService {
         return orderDOS;
     }
 
-    public boolean changeOrderStatus(String orderNo, int nowStatus, OrderDO orderDO) throws ServiceException {
+    public boolean changeOrderSubStatus(String orderNo, int nowStatus, OrderDO orderDO) throws ServiceException {
+        String parentOrderNo = orderNo.substring(0, orderNo.indexOf('S') + 1);
         try {
             // 防止传入值为空,导致其余订单被改变
             if(orderNo == null || orderDO == null){
                 throw new BizServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
             }
-
-            if (lockComponent.tryLock(LockConst.ORDER_STATUS_LOCK + orderNo, 30)) {
+            // 同时拿到父单锁和子单锁，才能对子单进行操作
+            if (lockComponent.tryLock(LockConst.ORDER_SUB_STATUS_LOCK + orderNo, 30)
+                    && lockComponent.tryLock(LockConst.ORDER_PARENT_STATUS_LOCK + parentOrderNo, 30)) {
                 if (orderMapper.update(orderDO,
                         new QueryWrapper<OrderDO>()
                                 .eq("order_no", orderNo)
@@ -102,7 +104,36 @@ public class OrderBizService {
             logger.error("[订单状态扭转] 异常", e);
             throw new BizServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
         } finally {
-            lockComponent.release(LockConst.ORDER_STATUS_LOCK + orderNo);
+            lockComponent.release(LockConst.ORDER_SUB_STATUS_LOCK + orderNo);
+            lockComponent.release(LockConst.ORDER_PARENT_STATUS_LOCK + parentOrderNo);
+        }
+    }
+
+    public boolean changeOrderParentStatus(String parentOrderNo, int nowStatus, OrderDO orderDO, int length) throws ServiceException {
+        try {
+            // 防止传入值为空,导致其余订单被改变
+            if (parentOrderNo == null || orderDO == null) {
+                throw new BizServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+            }
+            if (lockComponent.tryLock(LockConst.ORDER_PARENT_STATUS_LOCK + parentOrderNo, 30)) {
+                int updateRes = orderMapper.update(orderDO,
+                        new QueryWrapper<OrderDO>()
+                                .eq("parent_order_no", parentOrderNo)
+                                .eq("status", nowStatus));
+                if (updateRes == length) {
+                    return true;
+                }
+                throw new BizServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+            } else {
+                throw new BizServiceException(ExceptionDefinition.ORDER_SYSTEM_BUSY);
+            }
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("[订单状态扭转] 异常", parentOrderNo, e);
+            throw new BizServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+        } finally {
+            lockComponent.release(LockConst.ORDER_PARENT_STATUS_LOCK + parentOrderNo);
         }
     }
 
@@ -136,7 +167,7 @@ public class OrderBizService {
                 OrderDO updateOrderDO = new OrderDO();
                 updateOrderDO.setStatus(OrderStatusType.REFUNDED.getCode());
                 updateOrderDO.setGmtUpdate(new Date());
-                changeOrderStatus(orderNo, OrderStatusType.GROUP_SHOP_WAIT.getCode(), updateOrderDO);
+                changeOrderSubStatus(orderNo, OrderStatusType.GROUP_SHOP_WAIT.getCode(), updateOrderDO);
                 Long userId = orderDO.getUserId();
                 UserDO userDO = userMapper.selectById(userId);
                 Integer loginType = userDO.getLoginType();

@@ -97,7 +97,7 @@ public class DynamicConfigComponent {
      * @return
      */
     public <T> T readAction(String key, T defaultValue, Function<String, T> function) {
-        String raw = cacheComponent.getRaw(key);
+        String raw = cacheComponent.getRaw(CacheConst.DYNAMIC_CACHE + key);
         if (!StringUtils.isEmpty(raw)) {
             return function.apply(raw);
         }
@@ -106,7 +106,7 @@ public class DynamicConfigComponent {
             return defaultValue;
         }
         // 放入缓存
-        cacheComponent.putRaw(key, dynamicConfigDO.getValue());
+        cacheComponent.putRaw(CacheConst.DYNAMIC_CACHE + key, dynamicConfigDO.getValue());
         return function.apply(dynamicConfigDO.getValue());
     }
 

@@ -215,24 +215,26 @@
 				if (that.submiting) {
 					return
 				}
-				that.submiting = true
-				if (that.addressData.id) {
-					that.orderReqeust.addressId = that.addressData.id
-				}
-				that.$api.request('order', 'takeOrder', {
-					orderRequest : JSON.stringify(that.orderReqeust),
-					channel: uni.getSystemInfoSync().platform
-				}, failres => {
-					that.submiting = false
-					that.$api.msg(failres.errmsg)
-				}).then(res => {
-					//提交订单成功后，无需再让用户提交订单
-					// that.submiting = false
-					uni.redirectTo({
-						url: '/pages/pay/pay?parentorderno='+ res.data + '&price=' + ((that.orderReqeust.totalPrice - (that.orderReqeust.coupon?that.orderReqeust.coupon.discount:0) + that.orderReqeust.freightPrice))
+				that.$api.request('user', 'checkLogin')
+					.then(res => {
+						that.submiting = true
+						if (that.addressData.id) {
+							that.orderReqeust.addressId = that.addressData.id
+						}
+						that.$api.request('order', 'takeOrder', {
+							orderRequest : JSON.stringify(that.orderReqeust),
+							channel: uni.getSystemInfoSync().platform
+						}, failres => {
+							that.submiting = false
+							that.$api.msg(failres.errmsg)
+						}).then(res => {
+							//提交订单成功后，无需再让用户提交订单
+							// that.submiting = false
+							uni.redirectTo({
+								url: '/pages/pay/pay?parentorderno='+ res.data + '&price=' + ((that.orderReqeust.totalPrice - (that.orderReqeust.coupon?that.orderReqeust.coupon.discount:0) + that.orderReqeust.freightPrice))
+							})
+						})
 					})
-				})
-				
 			},
 			selectCoupon(couponItem) {
 				this.orderReqeust.coupon = couponItem
