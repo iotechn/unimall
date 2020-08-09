@@ -1,6 +1,6 @@
 module.exports = {
 	NODE_ENV: '"development"',
   ENV_CONFIG: '"dev"',
-  HOST: '"http://localhost:8080"',
+  HOST: '"http://192.168.31.84:15150"',
   TEMPLATE_CODE: '"mix"'
 }

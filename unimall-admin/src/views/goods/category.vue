@@ -18,7 +18,7 @@
 
               <span>
                 <el-button
-                  v-show="data.level !== 2"
+                  v-show="data.level !== 2 "
                   type="primary"
                   size="mini"
                   round
@@ -26,6 +26,7 @@
                   添加
                 </el-button>
                 <el-button
+                  v-show="data.id !== 0"
                   type="warning"
                   size="mini"
                   round

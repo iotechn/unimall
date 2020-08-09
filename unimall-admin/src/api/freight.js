@@ -1,12 +1,13 @@
 import request from '@/utils/request'
 import Qs from 'qs'
 
-export function listFreight(query) {
+export function listFreight() {
   return request({
     method: 'get',
     params: {
       _gp: 'admin.freight',
-      _mt: 'list'
+      _mt: 'list',
+      adminId: 'guest'
     }
   })
 }
@@ -18,7 +19,7 @@ export function createFreight(query) {
       _gp: 'admin.freight',
       _mt: 'create',
       ...query,
-      freightTemplateCarriageDOList: JSON.stringify(query.freightTemplateCarriageDOList)
+      carriageDOList: JSON.stringify(query.carriageDOList)
     })
   })
 }
@@ -29,7 +30,7 @@ export function deleteFreight(query) {
     data: Qs.stringify({
       _gp: 'admin.freight',
       _mt: 'delete',
-      templateId: query
+      id: query
     })
   })
 }
@@ -41,7 +42,7 @@ export function updateFreight(query) {
       _gp: 'admin.freight',
       _mt: 'edit',
       ...query,
-      freightTemplateCarriageDOList: JSON.stringify(query.freightTemplateCarriageDOList)
+      carriageDOList: JSON.stringify(query.carriageDOList)
     })
   })
 }
