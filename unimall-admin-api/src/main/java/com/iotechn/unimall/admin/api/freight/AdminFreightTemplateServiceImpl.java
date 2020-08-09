@@ -52,19 +52,19 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean create(String title, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstWeight, Integer defaultFirstPrice, Integer defaultContinueWeight, Integer defaultContinuePrice, List carriageDOList, Long adminId) throws ServiceException {
+    public String create(String title, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstWeight, Integer defaultFirstPrice, Integer defaultContinueWeight, Integer defaultContinuePrice, List carriageDOList, Long adminId) throws ServiceException {
         FreightTemplateDO freightTemplateDO = newFreightTemplateDO(null,title,spuLocation,deliveryDeadline,defaultFreePrice,defaultFirstWeight,defaultFirstPrice,defaultContinueWeight,defaultContinuePrice);
 
         if (templateMapper.insert(freightTemplateDO) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_INSERT_FAILED);
         }
         insertCarriage(freightTemplateDO, carriageDOList);
-        return true;
+        return "ok";
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean delete(Long id, Long adminId) throws ServiceException {
+    public String delete(Long id, Long adminId) throws ServiceException {
         if (spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("freight_template_id", id)) > 0) {
             throw new AdminServiceException(ExceptionDefinition.FREIGHT_SPU_QUERY_HAS);
         }
@@ -76,14 +76,14 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
                         .eq("template_id", id)) >= 0) {
 
             clearCache(id);
-            return true;
+            return "ok";
         }
         throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean edit(Long id, String title, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstWeight, Integer defaultFirstPrice, Integer defaultContinueWeight, Integer defaultContinuePrice, List carriageDOList, Long adminId) throws ServiceException {
+    public String edit(Long id, String title, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstWeight, Integer defaultFirstPrice, Integer defaultContinueWeight, Integer defaultContinuePrice, List carriageDOList, Long adminId) throws ServiceException {
 
         FreightTemplateDO freightTemplateDO = newFreightTemplateDO(id,title,spuLocation,deliveryDeadline,defaultFreePrice,defaultFirstWeight,defaultFirstPrice,defaultContinueWeight,defaultContinuePrice);
         if (templateMapper.updateById(freightTemplateDO) <= 0) {    //如果主表修改失败
@@ -92,7 +92,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         carriageMapper.delete(new QueryWrapper<FreightTemplateCarriageDO>().eq("template_id", id));
         insertCarriage(freightTemplateDO, carriageDOList);
         clearCache(id);
-        return true;
+        return "ok";
     }
 
     @Override

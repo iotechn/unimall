@@ -204,6 +204,21 @@
 
     </el-card>
 
+    <el-card class="box-card">
+      <h3>广告配置</h3>
+      <el-form ref="advertDataForm" :model="advertDataForm" label-width="150px">
+
+        <el-form-item label="首页热销推荐商品数" prop="topSalesNum">
+          <el-input v-model="advertDataForm.topSalesNum" />
+        </el-form-item>
+      </el-form>
+
+      <div class="op-container">
+        <el-button :loading="submiting" type="primary" @click="handleSave('advertDataForm', prefixs.advertDataPrefix)">保存更改</el-button>
+      </div>
+
+    </el-card>
+
   </div>
 </template>
 <script>
@@ -219,13 +234,15 @@ export default {
         wxPayDataPrefix: 'WX_PAY_CONFIG:',
         smsDataPrefix: 'SMS_CONFIG:',
         ossDataPrefix: 'OSS_CONFIG:',
-        orderDataPrefix: 'ORDER_CONFIG:'
+        orderDataPrefix: 'ORDER_CONFIG:',
+        advertDataPrefix: 'ADVERT_CONFIG:'
       },
       wxAppDataForm: {},
       wxPayDataForm: {},
       smsDataForm: {},
       ossDataForm: {},
       orderDataForm: {},
+      advertDataForm: {},
       submiting: false
     }
   },

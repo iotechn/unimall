@@ -6,7 +6,7 @@ export function listFreight(query) {
     method: 'get',
     params: {
       _gp: 'admin.freight',
-      _mt: 'getAllFreightTemplate'
+      _mt: 'list'
     }
   })
 }
@@ -16,7 +16,7 @@ export function createFreight(query) {
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.freight',
-      _mt: 'addFreightTemplate',
+      _mt: 'create',
       ...query,
       freightTemplateCarriageDOList: JSON.stringify(query.freightTemplateCarriageDOList)
     })
@@ -28,7 +28,7 @@ export function deleteFreight(query) {
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.freight',
-      _mt: 'deleteFreightTemplate',
+      _mt: 'delete',
       templateId: query
     })
   })
@@ -39,7 +39,7 @@ export function updateFreight(query) {
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.freight',
-      _mt: 'updateFreightTemplate',
+      _mt: 'edit',
       ...query,
       freightTemplateCarriageDOList: JSON.stringify(query.freightTemplateCarriageDOList)
     })

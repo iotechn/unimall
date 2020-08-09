@@ -8,6 +8,7 @@ import com.iotechn.unimall.data.annotaion.AspectCommonCache;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
+import com.iotechn.unimall.data.enums.CategoryLevelType;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,19 +123,6 @@ public class CategoryBizService {
     }
 
     /**
-     * 将 叶子类目 的 Key 做为键 parentId_parent.parentId 作为值放入一个hash表中。查询familyId直接查一次hash表即可查出来。Hash表Size就等于叶子类目数量
-     *
-     * @param categoryId 仅可传入叶子节点
-     * @return
-     * @throws ServiceException
-     */
-    public List<Long> getCategoryFamily(Long categoryId) {
-        CategoryDO categoryDO = categoryMapper.selectById(categoryId);
-        List<Long> ids = Arrays.asList(categoryDO.getFirstLevelId(), categoryDO.getSecondLevelId(), categoryDO.getId());
-        return ids;
-    }
-
-    /**
      * 获得所有类目list,类中有调用，不能使用切面
      *
      */
@@ -160,6 +148,24 @@ public class CategoryBizService {
 
         cacheComponent.putObj(CacheConst.CATEGORY_ALL_LIST, resultList, Const.CACHE_ONE_DAY);
         return resultList;
+    }
+
+    /**
+     * 将 节点传入 获取其 父节点ID 和 父父节点ID 组成List
+     *
+     * @param categoryId 节点ID
+     * @return
+     * @throws ServiceException
+     */
+    public List<Long> getCategoryFamily(Long categoryId) {
+        CategoryDO categoryDO = categoryMapper.selectById(categoryId);
+        if (categoryDO.getLevel() == CategoryLevelType.THREE.getCode()) {
+            return Arrays.asList(categoryDO.getFirstLevelId(), categoryDO.getSecondLevelId(), categoryDO.getId());
+        } else if (categoryDO.getLevel() == CategoryLevelType.TWO.getCode()) {
+            return Arrays.asList(categoryDO.getFirstLevelId(), categoryDO.getId());
+        } else {
+            return Arrays.asList(categoryDO.getId());
+        }
     }
 
     /**

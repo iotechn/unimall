@@ -20,4 +20,6 @@ public class DynamicConst {
 
     public static final String ORDER_CONFIG_PREFIX = "ORDER_CONFIG:";
 
+    public static final String ADVERT_CONFIG_PREFIX = "ADVERT_CONFIG:";
+
 }

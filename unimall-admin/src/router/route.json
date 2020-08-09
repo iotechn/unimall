@@ -140,21 +140,6 @@
             "page":"/promotion/advert"
          },
          {
-            "path":"recommend",
-            "meta":{
-               "noCache":true,
-               "perms":[
-                  "promote:recommend:create",
-                  "promote:recommend:delete",
-                  "promote:recommend:update",
-                  "promote:recommend:query"
-               ],
-               "title":"推荐管理"
-            },
-            "name":"recommend",
-            "page":"/promotion/recommend"
-         },
-         {
             "path":"coupon",
             "meta":{
                "noCache":true,
@@ -168,20 +153,6 @@
             },
             "name":"coupon",
             "page":"/promotion/coupon"
-         },
-         {
-            "path":"merchant",
-            "meta":{
-               "noCache":true,
-               "perms":[
-                  "promote:merchant:create",
-                  "promote:merchant:update",
-                  "promote:merchant:query"
-               ],
-               "title":"商铺信息"
-            },
-            "name":"merchant",
-            "page":"/promotion/merchant"
          }
       ],
       "meta":{

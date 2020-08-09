@@ -7,7 +7,6 @@ import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.List;
 public interface AdminFreightTemplateService {
 
     @HttpMethod(description = "创建", permission = "operation:freight:create", permissionParentName = "运营管理", permissionName = "运费模板管理")
-    public boolean create(
+    public String create(
             @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "模板名称") String title,
             @HttpParam(name = "spuLocation", type = HttpParamType.COMMON, description = "宝贝地址") String spuLocation,
             @NotNull @HttpParam(name = "deliveryDeadline", type = HttpParamType.COMMON, description = "发货期限") Integer deliveryDeadline,
@@ -37,12 +36,12 @@ public interface AdminFreightTemplateService {
     ) throws ServiceException;
 
     @HttpMethod(description = "删除", permission = "operation:freight:delete", permissionParentName = "运营管理", permissionName = "运费模板管理")
-    public boolean delete(
+    public String delete(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "模板ID") Long id,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "更新", permission = "operation:freight:update", permissionParentName = "运营管理", permissionName = "运费模板管理")
-    public boolean edit(
+    public String edit(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "模板名称") Long id,
             @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "模板名称") String title,
             @HttpParam(name = "spuLocation", type = HttpParamType.COMMON, description = "宝贝地址") String spuLocation,

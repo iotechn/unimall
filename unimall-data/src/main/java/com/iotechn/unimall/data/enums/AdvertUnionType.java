@@ -9,7 +9,7 @@ package com.iotechn.unimall.data.enums;
  */
 public enum AdvertUnionType {
     PRODUCT(1, "产品"),
-    CATEGORY(2, "品类"),
+    CATEGORY(2, "类目"),
     KEYWORDS(3, "关键字"),
     PAGE(4, "页面"),;
 

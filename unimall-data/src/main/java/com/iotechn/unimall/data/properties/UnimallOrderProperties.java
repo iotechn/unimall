@@ -17,4 +17,5 @@ public class UnimallOrderProperties {
      * 单位是s
      */
     private Long autoConfirmTime;
+
 }

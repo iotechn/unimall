@@ -1,15 +1,13 @@
 package com.iotechn.unimall.app.api.product;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.biz.service.footprint.FootprintBizService;
 import com.iotechn.unimall.biz.service.freight.FreightTemplateBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
-import com.iotechn.unimall.core.exception.AppServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
 import com.iotechn.unimall.data.domain.SpuDO;
@@ -77,17 +75,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public SpuDTO getProduct(Long spuId, Long userId) throws ServiceException {
         // 1. 获取基本信息
-        SpuDTO spuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, SpuDTO.class);
-        if (spuDTO == null) {
-            SpuDO spuDO = spuMapper.selectOne(new QueryWrapper<SpuDO>().select(ProductBizService.SPU_EXCLUDE_DETAIL_FIELDS).eq("id", spuId));
-            if (spuDO != null) {
-                cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, spuDO);
-                spuDTO = new SpuDTO();
-                BeanUtils.copyProperties(spuDO, spuDTO);
-            } else {
-                throw new AppServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
-            }
-        }
+        SpuDTO spuDTO = productBizService.getProductByIdFromCache(spuId);
         // 2.
         // 2.1. 封装其他信息，此类属性只能在管理员编辑界面统一编辑改变，不能由用户行为改变
         SpuDTO detailSpuInfo = cacheComponent.getHashObj(CacheConst.PRT_SPU_DETAIL_HASH_BUCKET, "P" + spuId, SpuDTO.class);

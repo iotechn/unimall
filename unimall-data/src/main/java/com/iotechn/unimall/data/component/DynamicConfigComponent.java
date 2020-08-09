@@ -73,11 +73,11 @@ public class DynamicConfigComponent {
     }
 
     public Integer readInt(String key, Integer defaultValue) {
-        return this.readAction(key, defaultValue, Integer::parseInt);
+        return catchNumberFormatException(this.readAction(key, defaultValue, Integer::parseInt), defaultValue);
     }
 
     public Long readLong(String key, Long defaultValue) {
-        return this.readAction(key, defaultValue, Long::parseLong);
+        return catchNumberFormatException(this.readAction(key, defaultValue, Long::parseLong), defaultValue);
     }
 
     public String readString(String key, String defaultValue) {
@@ -108,6 +108,21 @@ public class DynamicConfigComponent {
         // 放入缓存
         cacheComponent.putRaw(key, dynamicConfigDO.getValue());
         return function.apply(dynamicConfigDO.getValue());
+    }
+
+    /**
+     * 捕获调数字格式化
+     * @param value
+     * @param defaultValue
+     * @param <T>
+     * @return
+     */
+    private <T extends Number> T catchNumberFormatException(T value, T defaultValue) {
+        try {
+            return value;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
 }
