@@ -55,13 +55,13 @@ public class OrderAutoCancelHandler implements RedisNotifyHandler {
             orderSkuList.forEach(item -> {
                 skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
             });
-            orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
+            orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
             logger.info("[订单自动取消] 订单号：" + orderNo);
         } catch (Exception e) {
             logger.error("[订单自动取消任务] 异常", e);
             return 0;
         } finally {
-            lockComponent.release(LockConst.ORDER_STATUS_LOCK + orderNo);
+            lockComponent.release(LockConst.ORDER_SUB_STATUS_LOCK + orderNo);
         }
         return 1;
     }

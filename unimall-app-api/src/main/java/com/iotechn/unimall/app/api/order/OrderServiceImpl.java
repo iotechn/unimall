@@ -519,7 +519,7 @@ public class OrderServiceImpl implements OrderService {
             updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
             updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
             updateOrderDO.setGmtUpdate(new Date());
-            boolean succ = orderBizService.changeOrderStatus(orderDO.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
+            boolean succ = orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
             if (!succ) {
                 throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
             }
@@ -538,7 +538,7 @@ public class OrderServiceImpl implements OrderService {
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setRefundReason(reason);
             updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());
-            orderBizService.changeOrderStatus(orderNo, orderDO.getStatus(), updateOrderDO);
+            orderBizService.changeOrderSubStatus(orderNo, orderDO.getStatus(), updateOrderDO);
             GlobalExecutor.execute(() -> {
                 OrderDTO orderDTO = new OrderDTO();
                 BeanUtils.copyProperties(orderDO, orderDTO);
@@ -565,7 +565,7 @@ public class OrderServiceImpl implements OrderService {
         orderSkuList.forEach(item -> {
             skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
         });
-        orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
+        orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
         return "ok";
     }
 
@@ -580,7 +580,7 @@ public class OrderServiceImpl implements OrderService {
         updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
         updateOrderDO.setGmtUpdate(new Date());
         List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
-        orderBizService.changeOrderStatus(orderNo, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
+        orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
         return "ok";
     }
 

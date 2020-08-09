@@ -98,7 +98,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     OrderDO updateOrderDO = new OrderDO();
                     updateOrderDO.setStatus(OrderStatusType.WAIT_CONFIRM.getCode());
                     updateOrderDO.setGmtUpdate(new Date());
-                    orderBizService.changeOrderStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
+                    orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
                     return "ok";
                 } else if (type == 1) {
                     //2.2 店主同意退款
@@ -111,7 +111,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     orderSkuList.forEach(item -> {
                         skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
                     });
-                    orderBizService.changeOrderStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
+                    orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
                     Long userId = orderDO.getUserId();
                     UserDO userDO = userBizService.getUserById(userId);
                     Integer loginType = userDO.getLoginType();
@@ -173,7 +173,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             updateOrderDO.setShipNo(shipNo);
         }
         //流转订单状态
-        orderBizService.changeOrderStatus(orderNo, OrderStatusType.WAIT_STOCK.getCode(), updateOrderDO);
+        orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.WAIT_STOCK.getCode(), updateOrderDO);
         return "ok";
     }
 

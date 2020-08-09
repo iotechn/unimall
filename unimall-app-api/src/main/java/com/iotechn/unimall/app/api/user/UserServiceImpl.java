@@ -309,6 +309,11 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public Boolean checkLogin(String accessToken) throws ServiceException {
+        return userRedisTemplate.hasKey(Const.USER_REDIS_PREFIX + accessToken);
+    }
+
 
     /*************************第三方登录 START******************************/
 

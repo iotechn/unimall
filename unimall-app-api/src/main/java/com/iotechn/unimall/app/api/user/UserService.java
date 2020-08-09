@@ -79,4 +79,8 @@ public interface UserService {
     public Object getH5Sign(
             @NotNull @HttpParam(name = "url", type = HttpParamType.COMMON, description = "url") String url) throws ServiceException;
 
+    @HttpMethod(description = "检测登录")
+    public Boolean checkLogin(
+            @NotNull @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "token") String accessToken) throws ServiceException;
+
 }
