@@ -43,4 +43,9 @@ public class LockConst {
      */
     public static final String DYNAMIC_CONFIG_LOCK = "DYNAMIC_CONFIG_LOCK:";
 
+    /**
+     * 定时任务中：审查订单状态的锁
+     * 集群时，一台执行就够了
+     */
+    public static final String SCHEDULED_ORDER_STATUS_CHECK_LOCK = "SCHEDULED_ORDER_STATUS_CHECK_LOCK";
 }

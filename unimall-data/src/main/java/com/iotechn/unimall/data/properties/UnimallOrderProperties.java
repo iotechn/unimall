@@ -8,8 +8,14 @@ import lombok.Data;
 @DynamicConfigProperties(prefix = DynamicConst.ORDER_CONFIG_PREFIX)
 public class UnimallOrderProperties {
 
+    /**
+     * 单位是s
+     */
     private Long autoCancelTime;
 
+    /**
+     * 单位是s
+     */
     private Long autoConfirmTime;
 
 }
