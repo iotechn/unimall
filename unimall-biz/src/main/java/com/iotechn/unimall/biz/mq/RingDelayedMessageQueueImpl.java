@@ -108,6 +108,16 @@ public class RingDelayedMessageQueueImpl implements DelayedMessageQueue {
         throw new RuntimeException();
     }
 
+    @Override
+    public Boolean deleteTask(Integer code, String value) {
+        throw new RuntimeException();
+    }
+
+    @Override
+    public Long getTaskTime(Integer code, String value) {
+        throw new RuntimeException();
+    }
+
     public static class Slot {
 
         /**

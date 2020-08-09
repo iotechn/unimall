@@ -394,5 +394,15 @@ public class CacheComponent {
         }
     }
 
+    /**
+     * 获取redis中键的过期时间
+     * 返回秒
+     * @param key
+     * @return
+     */
+    public Long getKeyExpire(String key){
+        return stringRedisTemplate.getExpire(key);
+    }
+
 
 }

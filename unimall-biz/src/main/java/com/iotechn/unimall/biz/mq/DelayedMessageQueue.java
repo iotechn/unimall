@@ -22,4 +22,19 @@ public interface DelayedMessageQueue {
      */
     public Boolean publishTask(Integer code,String value,Integer delay);
 
+    /**
+     * 删除已有任务
+     * @param code
+     * @param value
+     * @return
+     */
+    public Boolean deleteTask(Integer code,String value);
+
+    /**
+     * 获取指定任务还有多少时间执行，如果不存在，返回-2
+     * @param code
+     * @param value
+     * @return
+     */
+    public Long getTaskTime(Integer code,String value);
 }

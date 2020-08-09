@@ -20,19 +20,20 @@ public class RedisExpiredListener implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] bytes) {
         String expiredKey = message.toString();
-        // TASK:UUID:CODE:VALUE结构
+        System.out.println("=========================>" + expiredKey);
+        // TASK:CODE:VALUE结构
         String[] split = expiredKey.split(":");
-        if (split.length < 3 || !expiredKey.startsWith("TASK:")) {
+        if (split.length < 2 || !expiredKey.startsWith("TASK:")) {
             return;
         }
         StringBuilder value = new StringBuilder();
-        for (int i = 3; i < split.length; i++) {
+        for (int i = 2; i < split.length; i++) {
             value.append(split[i]);
             if (i != split.length - 1) {
                 value.append(":");
             }
         }
-        int code = Integer.parseInt(split[2]);
+        int code = Integer.parseInt(split[1]);
         RedisNotifyHandler handler = handlerRouter.get(code);
         if (handler != null) {
             handler.handle(value.toString());
