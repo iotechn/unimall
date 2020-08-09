@@ -7,6 +7,7 @@ import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.component.DynamicConfigComponent;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.constant.DynamicConst;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.GroupShopDO;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.SpuDO;
@@ -67,31 +68,36 @@ public class CheckQuartz {
      */
     @Scheduled(cron = "0 * * * * ?")
     public void checkOrderStatus() {
-        Date now = new Date();
-        // 1.检查是否存在需要自动取消的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
-        QueryWrapper<OrderDO> cancelWrapper = new QueryWrapper<OrderDO>();
-        cancelWrapper.select("id","order_no");
-        cancelWrapper.eq("status",OrderStatusType.UNPAY.getCode());
-        Date cancelTime = new Date(now.getTime() - unimallOrderProperties.getAutoCancelTime());
-        cancelWrapper.lt("gmt_update",cancelTime);
-        List<OrderDO> cancelList = orderMapper.selectList(cancelWrapper);
-        if(!CollectionUtils.isEmpty(cancelList)){
-            cancelList.stream().forEach(item ->{
-                delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(),item.getOrderNo(),1);
-            });
-        }
+        if (lockComponent.tryLock(LockConst.SCHEDULED_ORDER_STATUS_CHECK_LOCK, 5)) {
 
-        // 2.检查是否存在需要自动收货的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
-        QueryWrapper<OrderDO> confirmWrapper = new QueryWrapper<OrderDO>();
-        confirmWrapper.select("id","order_no");
-        confirmWrapper.eq("status",OrderStatusType.WAIT_CONFIRM.getCode());
-        Date confirmTime = new Date(now.getTime() - unimallOrderProperties.getAutoConfirmTime());
-        confirmWrapper.lt("gmt_update",confirmTime);
-        List<OrderDO> confirmList = orderMapper.selectList(confirmWrapper);
-        if(!CollectionUtils.isEmpty(confirmList)){
-            confirmList.stream().forEach(item ->{
-                delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CONFIRM.getCode(),item.getOrderNo(),1);
-            });
+            Date now = new Date();
+            // 1.检查是否存在需要自动取消的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
+            QueryWrapper<OrderDO> cancelWrapper = new QueryWrapper<OrderDO>();
+            cancelWrapper.select("id", "order_no");
+            cancelWrapper.eq("status", OrderStatusType.UNPAY.getCode());
+            Date cancelTime = new Date(now.getTime() - unimallOrderProperties.getAutoCancelTime() * 1000);
+            cancelWrapper.lt("gmt_update", cancelTime);
+            List<OrderDO> cancelList = orderMapper.selectList(cancelWrapper);
+            System.out.println(cancelList.size());
+            if (!CollectionUtils.isEmpty(cancelList)) {
+                cancelList.stream().forEach(item -> {
+                    delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), item.getOrderNo(), 1);
+                });
+            }
+
+            // 2.检查是否存在需要自动收货的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
+            QueryWrapper<OrderDO> confirmWrapper = new QueryWrapper<OrderDO>();
+            confirmWrapper.select("id", "order_no");
+            confirmWrapper.eq("status", OrderStatusType.WAIT_CONFIRM.getCode());
+            Date confirmTime = new Date(now.getTime() - unimallOrderProperties.getAutoConfirmTime() * 1000);
+            confirmWrapper.lt("gmt_update", confirmTime);
+            List<OrderDO> confirmList = orderMapper.selectList(confirmWrapper);
+            System.out.println(confirmList.size());
+            if (!CollectionUtils.isEmpty(confirmList)) {
+                confirmList.stream().forEach(item -> {
+                    delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CONFIRM.getCode(), item.getOrderNo(), 1);
+                });
+            }
         }
     }
 
@@ -151,7 +157,7 @@ public class CheckQuartz {
                  */
                 QueryWrapper<GroupShopDO> wrapper = new QueryWrapper<GroupShopDO>()
                         .eq("status", StatusType.ACTIVE.getCode())
-                        .and(i->i
+                        .and(i -> i
                                 .gt("gmt_start", now)
                                 .or()
                                 .le("gmt_end", now));

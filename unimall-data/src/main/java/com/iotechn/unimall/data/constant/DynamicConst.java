@@ -16,6 +16,8 @@ public class DynamicConst {
 
     public static final String OSS_CONFIG_PREFIX = "OSS_CONFIG:";
 
+    public static final String OPEN_SEARCH_CONFIG_PREFIX = "OPEN_SEARCH_CONFIG_CONFIG:";
+
     public static final String ORDER_CONFIG_PREFIX = "ORDER_CONFIG:";
 
 }
