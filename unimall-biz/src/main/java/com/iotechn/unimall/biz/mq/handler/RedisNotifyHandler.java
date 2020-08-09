@@ -1,4 +1,4 @@
-package com.iotechn.unimall.biz.config.mq.handler;
+package com.iotechn.unimall.biz.mq.handler;
 
 
 public interface RedisNotifyHandler {

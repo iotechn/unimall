@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.data.component.DynamicConfigComponent;
 import com.iotechn.unimall.data.component.LockComponent;
-import com.iotechn.unimall.data.constant.DynamicConst;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.GroupShopDO;
 import com.iotechn.unimall.data.domain.OrderDO;
@@ -16,7 +14,7 @@ import com.iotechn.unimall.data.enums.GroupShopAutomaticRefundType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.StatusType;
 import com.iotechn.unimall.data.mapper.*;
-import com.iotechn.unimall.data.mq.DelayedMessageQueue;
+import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
 import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +66,7 @@ public class CheckQuartz {
      */
     @Scheduled(cron = "0 * * * * ?")
     public void checkOrderStatus() {
-        if (lockComponent.tryLock(LockConst.SCHEDULED_ORDER_STATUS_CHECK_LOCK, 5)) {
+        if (lockComponent.tryLock(LockConst.SCHEDULED_ORDER_STATUS_CHECK_LOCK, 30)) {
 
             Date now = new Date();
             // 1.检查是否存在需要自动取消的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
@@ -78,7 +76,6 @@ public class CheckQuartz {
             Date cancelTime = new Date(now.getTime() - unimallOrderProperties.getAutoCancelTime() * 1000);
             cancelWrapper.lt("gmt_update", cancelTime);
             List<OrderDO> cancelList = orderMapper.selectList(cancelWrapper);
-            System.out.println(cancelList.size());
             if (!CollectionUtils.isEmpty(cancelList)) {
                 cancelList.stream().forEach(item -> {
                     delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), item.getOrderNo(), 1);
@@ -92,7 +89,6 @@ public class CheckQuartz {
             Date confirmTime = new Date(now.getTime() - unimallOrderProperties.getAutoConfirmTime() * 1000);
             confirmWrapper.lt("gmt_update", confirmTime);
             List<OrderDO> confirmList = orderMapper.selectList(confirmWrapper);
-            System.out.println(confirmList.size());
             if (!CollectionUtils.isEmpty(confirmList)) {
                 confirmList.stream().forEach(item -> {
                     delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CONFIRM.getCode(), item.getOrderNo(), 1);

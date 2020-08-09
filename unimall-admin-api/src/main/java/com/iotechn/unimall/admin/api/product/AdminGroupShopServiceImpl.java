@@ -23,7 +23,6 @@ import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -42,7 +41,6 @@ import java.util.stream.Collectors;
 @date 19-11-13下午4:21
 */
 @Service
-@EnableScheduling
 public class AdminGroupShopServiceImpl implements AdminGroupShopService {
 
     @Autowired

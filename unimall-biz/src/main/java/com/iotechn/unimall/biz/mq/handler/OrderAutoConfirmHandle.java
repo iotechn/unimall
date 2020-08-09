@@ -1,4 +1,4 @@
-package com.iotechn.unimall.biz.config.mq.handler;
+package com.iotechn.unimall.biz.mq.handler;
 
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.biz.service.order.OrderBizService;

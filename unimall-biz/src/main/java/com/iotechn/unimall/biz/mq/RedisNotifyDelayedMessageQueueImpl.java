@@ -1,11 +1,10 @@
-package com.iotechn.unimall.data.mq;
+package com.iotechn.unimall.biz.mq;
 
 import com.iotechn.unimall.data.component.CacheComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 
 public class RedisNotifyDelayedMessageQueueImpl implements DelayedMessageQueue {
@@ -27,5 +26,10 @@ public class RedisNotifyDelayedMessageQueueImpl implements DelayedMessageQueue {
         sb.append(value);
         cacheComponent.putRaw(sb.toString(),"",delay);
         return true;
+    }
+
+    @Override
+    public Boolean publishTask(Callable task, Integer delay) {
+        throw new RuntimeException();
     }
 }

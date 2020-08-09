@@ -1,6 +1,5 @@
-package com.iotechn.unimall.data.mq;
+package com.iotechn.unimall.biz.mq;
 
-import lombok.Data;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -104,7 +103,11 @@ public class RingDelayedMessageQueueImpl implements DelayedMessageQueue {
         return true;
     }
 
-    @Data
+    @Override
+    public Boolean publishTask(Integer code, String value, Integer delay) {
+        throw new RuntimeException();
+    }
+
     public static class Slot {
 
         /**
@@ -116,5 +119,21 @@ public class RingDelayedMessageQueueImpl implements DelayedMessageQueue {
          * 实现了的执行任务
          */
         private Callable task;
+
+        public void setCycleNum(int cycleNum) {
+            this.cycleNum = cycleNum;
+        }
+
+        public void setTask(Callable task) {
+            this.task = task;
+        }
+
+        public int getCycleNum() {
+            return cycleNum;
+        }
+
+        public Callable getTask() {
+            return task;
+        }
     }
 }

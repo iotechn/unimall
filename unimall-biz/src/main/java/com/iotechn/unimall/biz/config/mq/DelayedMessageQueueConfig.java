@@ -1,8 +1,8 @@
 package com.iotechn.unimall.biz.config.mq;
 
-import com.iotechn.unimall.biz.config.mq.handler.RedisNotifyHandler;
-import com.iotechn.unimall.data.mq.DelayedMessageQueue;
-import com.iotechn.unimall.data.mq.RedisNotifyDelayedMessageQueueImpl;
+import com.iotechn.unimall.biz.mq.handler.RedisNotifyHandler;
+import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
+import com.iotechn.unimall.biz.mq.RedisNotifyDelayedMessageQueueImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

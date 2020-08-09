@@ -11,11 +11,11 @@ public class UnimallOrderProperties {
     /**
      * 单位是s
      */
-    private Long autoCancelTime;
+    private Integer autoCancelTime;
 
     /**
      * 单位是s
      */
-    private Long autoConfirmTime;
+    private Integer autoConfirmTime;
 
 }

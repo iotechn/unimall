@@ -1,4 +1,4 @@
-package com.iotechn.unimall.biz.config.mq.handler;
+package com.iotechn.unimall.biz.mq.handler;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.data.constant.LockConst;
@@ -49,7 +49,7 @@ public class OrderAutoCancelHandler implements RedisNotifyHandler {
                 throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CANCEL);
             }
             OrderDO updateOrderDO = new OrderDO();
-            updateOrderDO.setStatus(OrderStatusType.CANCELED.getCode());
+            updateOrderDO.setStatus(OrderStatusType.CANCELED_SYS.getCode());
             updateOrderDO.setGmtUpdate(new Date());
             List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
             orderSkuList.forEach(item -> {

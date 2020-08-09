@@ -1,7 +1,7 @@
 package com.iotechn.unimall.biz.config.mq;
 
-import com.iotechn.unimall.biz.config.mq.handler.OrderAutoCancelHandler;
-import com.iotechn.unimall.biz.config.mq.handler.OrderAutoConfirmHandle;
+import com.iotechn.unimall.biz.mq.handler.OrderAutoCancelHandler;
+import com.iotechn.unimall.biz.mq.handler.OrderAutoConfirmHandle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

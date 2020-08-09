@@ -43,7 +43,7 @@ import com.iotechn.unimall.data.model.FreightCalcModel;
 import com.iotechn.unimall.data.model.OrderCalcSkuModel;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.model.SkuStockInfoModel;
-import com.iotechn.unimall.data.mq.DelayedMessageQueue;
+import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
 import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
