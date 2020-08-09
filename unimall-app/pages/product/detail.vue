@@ -21,8 +21,8 @@
 				 class="coupon-tip">{{parseInt((isVip? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice): (selectedSku.price ? selectedSku.price : product.price)) / (selectedSku.originalPrice ? selectedSku.originalPrice : product.originalPrice) * 100) / 10}}折</text>
 			</view>
 			<view class="bot-row">
-				<text>销量: {{product.sales}}</text>
-				<text>库存: {{product.stock}}</text>
+				<text>销量: {{ product.sales }}</text>
+				<text>库存: {{ product.stock }}</text>
 			</view>
 		</view>
 
@@ -58,9 +58,9 @@
 			<view class="c-row b-b">
 				<text class="tit">配送费用</text>
 				<view v-if="product.freightTemplate" class="con-list">
-					<text>单笔购买满¥{{product.freightTemplate.freightTemplateDO.defaultFreePrice / 100.0}}元免邮费</text>
-					<text v-if="product.freightTemplate.freightTemplateDO.defaultContinueMoney > 0">每增加{{product.freightTemplate.freightTemplateDO.defaultFirstNum}}件，增加运费¥{{product.freightTemplate.freightTemplateDO.defaultContinueMoney / 100.0}}元</text>
-					<text v-if="product.freightTemplate.freightTemplateCarriageDOList.length > 0">TODO 特殊情况说明页面</text>
+					<text>单笔购买满¥{{product.freightTemplate.defaultFreePrice / 100.0}}元免邮费</text>
+					<text v-if="product.freightTemplate.defaultContinueMoney > 0">每增加{{product.freightTemplate.defaultFirstNum}}件，增加运费¥{{product.freightTemplate.freightTemplateDO.defaultContinueMoney / 100.0}}元</text>
+					<text v-if="product.freightTemplate.carriageDOList.length > 0">TODO 特殊情况说明页面</text>
 				</view>
 			</view>
 			<view v-for="(item, index) in product.attributeList" :key="index" class="c-row b-b">
@@ -76,7 +76,7 @@
 			<view class="e-header">
 				<text class="tit">评价</text>
 				<text>({{product.appraisePage.count}})</text>
-				<text @click="navAllAppraise" class="tip">全部评论</text>
+				<text @click="navAppraisePage" class="tip">全部评论</text>
 				<text class="yticon icon-you"></text>
 			</view>
 			<view class="eva-box">
@@ -112,7 +112,7 @@
 				<text>购物车</text>
 			</navigator>
 
-			<view class="p-b-btn" :class="{active: product.collect}" @click="toFavorite">
+			<view class="p-b-btn" :class="{active: product.favorite}" @click="likeIt">
 				<text class="yticon icon-shoucang"></text>
 				<text>收藏</text>
 			</view>
@@ -145,38 +145,47 @@
 
 
 		<!-- 规格-模态层弹窗 -->
-		<view class="popup spec" :class="specClass" @touchmove.stop.prevent="stopPrevent">
+		<view class="popup spec" :class="specClass" @touchmove.stop.prevent="stopPrevent" @click="closeSpec">
 			<!-- 遮罩层 -->
-			<view class="mask"></view>
-			<view class="layer attr-content" @click.stop="stopPrevent">
+			<view class="mask" />
+			<view class="layer attr-content">
 				<view class="a-t">
-					<image v-if="product.img" :src="(selectedSku.img?selectedSku.img:product.img) + '?x-oss-process=style/200px'"></image>
+					<image v-if="product.img" :src="(selectedSku.img?selectedSku.img:product.img) + '?x-oss-process=style/200px'" />
 					<view class="right">
-						<text class="price">¥{{isVip ? (selectedSku.vipPrice / 100.0 + ' [VIP]') : selectedSku.price / 100.0}}</text>
-						<text class="stock">库存：{{selectedSku.stock}}件</text>
+						<text class="price">
+							¥{{ isVip ? (selectedSku.vipPrice / 100.0 + ' [VIP]') : selectedSku.price / 100.0 }}
+						</text>
+						<text class="stock">
+							库存：{{ selectedSku.stock }}件
+						</text>
 						<view class="selected">
 							已选：
 							<text>
-								{{selectedSku.title}}
+								{{ selectedSku.title }}
 							</text>
 						</view>
 					</view>
 				</view>
-				<view class="attr-list">
-					<text>规格</text>
-					<view class="item-list">
-						<text v-for="(skuItem, skuIndex) in product.skuList" :key="skuIndex" class="tit" :class="{selected: skuIndex === selectedSkuIndex}"
-						 @click="selectSpec(skuItem, skuIndex)">
-							{{skuItem.title}}
-						</text>
+				<scroll-view scroll-y="true"  @click.stop="stopPrevent">
+					<view v-for="(specItem, specIndex) in product.specificationList" :key="specIndex" class="attr-list">
+						<text>{{ specItem.title }}</text>
+						<view class="item-list">
+							<text v-for="(valueItem, valueIndex) in specItem.values" :key="valueIndex" class="tit" :class="{selected: valueIndex === specItem.selectedIndex}"
+							 @click="selectSpec(specIndex, valueIndex)">
+								{{ valueItem }}
+							</text>
+						</view>
 					</view>
 					<text>数量</text>
 					<view style="height: 70upx; margin-bottom: 100upx; margin-top: 15upx; position: relative;">
-						<uni-number-box class="step" :min="1" :value="buyNum" :isMin="buyNum===1" :index="index" @eventChange="numberChange"></uni-number-box>
+						<uni-number-box class="step" :min="1" :value="buyNum" :is-min="buyNum===1" :index="index" @eventChange="numberChange" />
 					</view>
-				</view>
-				<button class="btn" @click="toggleSpec">完成</button>
+					<button class="btn" @click="toggleSpec">
+						完成
+					</button>
+				</scroll-view>
 			</view>
+			
 		</view>
 	</view>
 </template>
@@ -191,6 +200,7 @@
 		},
 		data() {
 			return {
+				spuId: undefined,
 				product: {
 					freightTemplate: undefined,
 					skuList: [],
@@ -215,58 +225,66 @@
 		},
 		onLoad(options) {
 			const that = this
-			uni.showLoading({
-				title: '正在加载'
-			})
-			that.$api.request('product', 'getProduct', {
-				spuId: options.id,
-				groupShopId: options.gid ? options.gid : ''
-			}, failres => {
-				that.$api.msg(failres.errmsg)
-				uni.hideLoading()
-			}).then(res => {
-				that.product = res.data
-				if (that.product.groupShop) {
-					//若存在团购信息，将价格更新到团购价格
-					that.product.price = that.product.groupShop.minPrice
-					that.product.vipPrice = that.product.groupShop.minPrice
-					//更新各个SKU的价格
-					for (let i = 0; i < that.product.skuList.length; i++) {
-						for (let j = 0; j < that.product.groupShop.groupShopSkuList.length; j++) {
-							if (that.product.skuList[i].id === that.product.groupShop.groupShopSkuList[j].skuId) {
-								that.product.skuList[i].price = that.product.groupShop.groupShopSkuList[j].skuGroupShopPrice
-								that.product.skuList[i].vipPrice = that.product.groupShop.groupShopSkuList[j].skuGroupShopPrice
-							}
-						}
-					}
-				}
-				uni.hideLoading()
-			})
-			that.$api.request('coupon', 'getObtainableCoupon').then(res => {
-				that.couponList = res.data
-			})
+			that.spuId = options.id
+			that.loadData()
 		},
 		onShareAppMessage() {
 			return {
 				title: (this.product.groupShop ? '立即拼团-' : '好货分享-') + this.product.title,
 				imageUrl: 'https://easycampus-asset.oss-cn-shenzhen.aliyuncs.com/sharebg.png',
-				path: '/pages/product/detail?id=' + this.product.id + (this.product.groupShop ? '&gid=' + this.product.groupShop.id :
-					'')
+				path: '/pages/product/detail?id=' + this.product.id + (this.product.groupShop ? '&gid=' + this.product.groupShop.id : '')
 			}
 		},
 		methods: {
-			numberChange(e) {
-				this.buyNum = e.number
+			/**
+			 * 从后端请求数据并加载
+			 */ 
+			async loadData() {
+				const that = this
+				uni.showLoading({
+					title: '正在加载'
+				})
+				that.$api.request('product', 'getProduct', {
+					spuId: that.spuId
+				}, failres => {
+					uni.hideLoading()
+					that.$api.msg(failres.errmsg)
+				}).then(res => {
+					let stock = 0
+					// 分组specification & 计算总库存
+					for (let i = 0; i < res.data.skuList.length; i++) {
+						// 1. 计算总库存
+						stock += res.data.skuList[i].stock
+						// 2. 分组
+						const tempArray = res.data.skuList[i].specification.split(',')
+						for (let j = 0; j < tempArray.length; j++) {
+							const singleArray = tempArray[j].split('_')
+							const key = singleArray[0]
+							for (let z = 0; z < res.data.specificationList.length; z++) {
+								if (res.data.specificationList[z].title === key) {
+									if (res.data.specificationList[z].values) {
+										if (res.data.specificationList[z].values.indexOf(singleArray[1]) < 0) {
+											res.data.specificationList[z].values.push(singleArray[1])
+										}
+									} else {
+										res.data.specificationList[z].values = [singleArray[1]]
+									}
+								}
+							}
+						}
+					}
+					res.data.stock = stock
+					that.product = JSON.parse(JSON.stringify(res.data))
+					uni.hideLoading()
+				})
+				that.$api.request('coupon', 'getObtainableCoupon').then(res => {
+					that.couponList = res.data
+				})
 			},
-			toggleMask(type) {
-				let timer = type === 'show' ? 10 : 300;
-				let state = type === 'show' ? 1 : 0;
-				this.maskState = 2;
-				setTimeout(() => {
-					this.maskState = state;
-				}, timer)
-			},
-			//领取优惠券
+			/**
+			 * 领取优惠券
+			 * @param {Number} index
+			 */
 			obtainCoupon(index) {
 				const that = this
 				that.$api.request('coupon', 'obtainCoupon', {
@@ -277,33 +295,63 @@
 					that.toggleMask()
 				})
 			},
-			//规格弹窗开关
-			toggleSpec(e) {
-				if (this.specClass === 'show') {
-					this.specClass = 'hide';
-
+			/**
+			 * 规格弹窗开关
+			 */
+			toggleSpec() {
+				const that = this
+				if (that.specClass === 'show') {
+					that.specClass = 'hide';
 					setTimeout(() => {
-						this.specClass = 'none';
-						if (this.toggleCallback) {
-							this.toggleCallback()
-							this.toggleCallback = undefined
+						that.specClass = 'none';
+						if (that.toggleCallback) {
+							that.toggleCallback()
+							that.toggleCallback = undefined
 						}
 					}, 150);
-				} else if (this.specClass === 'none') {
-					this.specClass = 'show';
-					if (!this.selectedSku.title) {
-						this.selectedSku = this.product.skuList[0]
-						this.selectedSkuIndex = 0
+				} else if (that.specClass === 'none') {
+					that.specClass = 'show';
+					for (let i = 0; i < that.product.specificationList.length; i++) {
+						if (i !== that.product.specificationList.length - 1) {
+							that.product.specificationList[i].selectedIndex = 0
+						} else {
+							that.selectSpec(i, 0)
+						}
 					}
 				}
 			},
-			//选择规格
-			selectSpec(skuItem, skuIndex) {
-				this.selectedSku = skuItem
-				this.selectedSkuIndex = skuIndex
+			/**
+			 * 选择规格
+			 * @param {Object} specIndex 选择规格维度索引，例如：颜色，内存容量
+			 * @param {Object} valueIndex 规格的第N个选择
+			 */
+			selectSpec(specIndex, valueIndex) {
+				const that = this
+				// 1.设置索引
+				that.product.specificationList[specIndex].selectedIndex = valueIndex
+				// 2.选中Sku
+				// 2.1 构建SkuAttr
+				let attr = ''
+				for (let i = 0; i < that.product.specificationList.length; i++) {
+					const spec = that.product.specificationList[i]
+					attr += spec.title + '_' + spec.values[spec.selectedIndex]
+					if (i !== that.product.specificationList.length - 1) {
+						attr += ','
+					}
+				}
+				// 3.遍历SkuList
+				for (let i = 0; i < that.product.skuList.length; i++) {
+					if (that.product.skuList[i].specification === attr) {
+						that.selectedSku = that.product.skuList[i]
+						break
+					}
+				}
+				that.$forceUpdate()
 			},
-			//加入购物车
-			addCart(e) {
+			/**
+			 * 加入购物车
+			 */
+			addCart() {
 				const that = this
 				if (!that.selectedSku.id) {
 					that.specClass = 'none'
@@ -324,25 +372,28 @@
 					})
 				}
 			},
-			//收藏
-			toFavorite() {
+			/**
+			 * 收藏 OR 取消收藏
+			 */
+			likeIt() {
 				const that = this
-				if (that.product.collect) {
-					//取消收藏
-					that.product.collect = false
-					this.$api.request('collect', 'deleteCollect', {
+				if (that.product.favorite) {
+					that.product.favorite = false
+					this.$api.request('favorite', 'delete', {
 						spuId: that.product.id
 					}).then(res => {
 
 					})
 				} else {
-					//添加收藏
-					that.product.collect = true
-					this.$api.request('collect', 'addCollect', {
+					that.product.favorite = true
+					this.$api.request('favorite', 'create', {
 						spuId: that.product.id
 					})
 				}
 			},
+			/**
+			 * 购买，单品提交订单
+			 */
 			buy() {
 				const that = this
 				if (!that.selectedSku.id) {
@@ -354,6 +405,7 @@
 						skuId: that.selectedSku.id,
 						num: that.buyNum,
 						title: that.product.title,
+						freightTemplateId: that.product.freightTemplateId,
 						originalPrice: that.selectedSku.originalPrice,
 						price: that.selectedSku.price,
 						vipPrice: that.selectedSku.vipPrice,
@@ -363,8 +415,10 @@
 						stock: that.selectedSku.stock,
 						spuId: that.product.id,
 						categoryId: that.product.categoryId,
-						categoryIdList: that.product.categoryIds
+						categoryIdList: that.product.categoryIds,
+						weight: that.selectedSku.weight
 					}
+					debugger
 					if (that.product.groupShop) {
 						skuItem['groupShopId'] = that.product.groupShop.id
 					}
@@ -376,13 +430,31 @@
 					})
 				}
 			},
-			//查看所有评价
-			navAllAppraise() {
+			/**
+			 * 前往评论页面 
+			 */
+			navAppraisePage() {
 				uni.navigateTo({
-					url: `/pages/product/appraise?spuid=${this.product.id}&firstpage=${JSON.stringify(this.product.appraisePage)}`
+					url: `/pages/product/appraise?spuid=${this.product.id}`
 				})
 			},
-			stopPrevent() {}
+			/******* 以下非业务方法 *******/
+			stopPrevent() {},
+			numberChange(e) {
+				this.buyNum = e.number
+			},
+			toggleMask(type) {
+				let timer = type === 'show' ? 10 : 300;
+				let state = type === 'show' ? 1 : 0;
+				this.maskState = 2;
+				setTimeout(() => {
+					this.maskState = state;
+				}, timer)
+			},
+			closeSpec() {
+				this.toggleCallback = undefined
+				this.toggleSpec()
+			}
 		},
 
 	}

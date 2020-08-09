@@ -27,6 +27,7 @@ import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.CouponUserDTO;
+import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
 import com.iotechn.unimall.data.dto.goods.GroupShopSkuDTO;
@@ -42,6 +43,8 @@ import com.iotechn.unimall.data.model.FreightCalcModel;
 import com.iotechn.unimall.data.model.OrderCalcSkuModel;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.model.SkuStockInfoModel;
+import com.iotechn.unimall.data.mq.DelayedMessageQueue;
+import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
 import org.slf4j.Logger;
@@ -66,7 +69,7 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
-    
+
     @Autowired
     private SkuMapper skuMapper;
 
@@ -109,6 +112,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private ProductBizService productBizService;
 
+    @Autowired
+    private DelayedMessageQueue delayedMessageQueue;
+
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;
 
@@ -117,6 +123,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private UnimallWxAppProperties unimallWxAppProperties;
+
+    @Autowired
+    private UnimallOrderProperties unimallOrderProperties;
 
 
     @Override
@@ -369,10 +378,6 @@ public class OrderServiceImpl implements OrderService {
                 if (couponUserDTO != null) {
                     couponBizService.useCoupon(orderRequest.getCouponId(), useCouponOrderId);
                 }
-                // 日志
-                for (int i = 1; i <= childIndex; i++) {
-                    logger.info("订单创建成功", parentOrderNo + "S" + ((1000) + i));
-                }
                 // 若购物车结算，删除这些购物车的商品
                 if (orderRequest.getTakeWay().equals("cart")) {
                     cartBizService.deleteBySkuId(skuIds, userId);
@@ -384,6 +389,13 @@ public class OrderServiceImpl implements OrderService {
                         throw new AppServiceException(ExceptionDefinition.ORDER_PRODUCT_PRICE_HAS_BEEN_CHANGED);
                     }
                 }
+                // 日志 & 发送一个订单自动取消定时任务
+                for (int i = 1; i <= childIndex; i++) {
+                    String childOrderNo = parentOrderNo + "S" + ((1000) + i);
+                    logger.info("订单创建成功:" + childOrderNo);
+                    delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), childOrderNo, unimallOrderProperties.getAutoCancelTime().intValue());
+                }
+
                 return parentOrderNo;
             } catch (Exception e) {
                 if (calcStockFlag) {
@@ -485,22 +497,34 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Object offlinePrepay(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
+    public Object offlinePrepay(String parentOrderNo, String orderNo, Long userId) throws ServiceException {
+        // 两个都为空 和 两个都不为空是不合法的
+        if ((StringUtils.isEmpty(parentOrderNo) && StringUtils.isEmpty(orderNo)) || (!StringUtils.isEmpty(parentOrderNo) && !StringUtils.isEmpty(orderNo))) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_PARAM_CHECK_FAILED);
+        }
+        List<OrderDO> orderList;
+        if (!StringUtils.isEmpty(parentOrderNo))
+            orderList = orderBizService.checkOrderExistByParentNo(parentOrderNo, userId);
+        else
+            orderList = orderBizService.checkOrderExistByNo(orderNo, userId);
         // 检测订单状态
-        Integer status = orderDO.getStatus();
-        if (status != OrderStatusType.UNPAY.getCode()) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+        for (OrderDO orderDO : orderList) {
+            Integer status = orderDO.getStatus();
+            if (status != OrderStatusType.UNPAY.getCode()) {
+                throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+            }
         }
-        OrderDO updateOrderDO = new OrderDO();
-        updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
-        updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
-        updateOrderDO.setGmtUpdate(new Date());
-        boolean succ = orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
-        if (succ) {
-            return "ok";
+        for (OrderDO orderDO : orderList) {
+            OrderDO updateOrderDO = new OrderDO();
+            updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
+            updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+            updateOrderDO.setGmtUpdate(new Date());
+            boolean succ = orderBizService.changeOrderStatus(orderDO.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
+            if (!succ) {
+                throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+            }
         }
-        throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+        return "ok";
     }
 
     @Override
@@ -514,7 +538,7 @@ public class OrderServiceImpl implements OrderService {
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setRefundReason(reason);
             updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());
-            orderBizService.changeOrderStatus(orderNo, orderDO.getStatus() , updateOrderDO);
+            orderBizService.changeOrderStatus(orderNo, orderDO.getStatus(), updateOrderDO);
             GlobalExecutor.execute(() -> {
                 OrderDTO orderDTO = new OrderDTO();
                 BeanUtils.copyProperties(orderDO, orderDTO);
@@ -576,9 +600,47 @@ public class OrderServiceImpl implements OrderService {
         return shipTraceList;
     }
 
+    @Override
+    public Integer previewFreight(OrderRequestDTO orderRequest, Long userId) throws ServiceException {
+        List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
+        AddressDO addressDO = null;
+        if (orderRequest.getAddressId() != null) {
+            addressDO = addressBizService.getAddressById(orderRequest.getAddressId());
+        }
+        FreightCalcModel calcModel = new FreightCalcModel();
+        if (addressDO == null) {
+            // 若没穿省份，则传一个不存在的省份。系统会默认他是全国。
+            calcModel.setProvince("一个不存在的地址");
+        } else {
+            calcModel.setProvince(addressDO.getProvince());
+        }
+        // 由于是预览，此处可详细用户从前端传入进来的 商品运费模板Id 重量 价格等信息
+        UserDTO user = SessionUtil.getUser();
+        // 将SKU按照运费模板分组
+        Map<Long, List<OrderRequestSkuDTO>> calcMap = skuList.stream().collect(Collectors.groupingBy(OrderRequestSkuDTO::getFreightTemplateId));
+        List<FreightCalcModel.FreightAndWeight> faws = new LinkedList<>();
+        calcMap.forEach((k, v) -> {
+            FreightCalcModel.FreightAndWeight faw = new FreightCalcModel.FreightAndWeight();
+            faw.setId(k);
+            int weight = 0;
+            int price = 0;
+            for (OrderRequestSkuDTO skuDTO : v) {
+                weight += skuDTO.getWeight();
+                price += user.getLevel() == UserLevelType.VIP.getCode() ? skuDTO.getVipPrice() : skuDTO.getPrice();
+            }
+            faw.setWeight(weight);
+            faw.setPrice(price);
+            faws.add(faw);
+        });
+        calcModel.setFreightAndWeights(faws);
+        int sum = freightTemplateBizService.computePostage(calcModel);
+        return sum;
+    }
+
 
     /**
      * 保存订单抽取接口
+     *
      * @param skuOriginalPrice
      * @param skuPrice
      * @param channel

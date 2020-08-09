@@ -2,6 +2,8 @@ package com.iotechn.unimall.data.mapper;
 
 import com.iotechn.unimall.data.domain.SpuSpecificationDO;
 
+import java.util.List;
+
 /**
  * Description:
  * User: rize
@@ -9,4 +11,7 @@ import com.iotechn.unimall.data.domain.SpuSpecificationDO;
  * Time: 17:35
  */
 public interface SpuSpecificationMapper extends IMapper<SpuSpecificationDO> {
+
+    public Integer batchInsert(List<SpuSpecificationDO> list);
+
 }

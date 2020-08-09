@@ -146,8 +146,8 @@
 		},
 		onLoad(option) {
 			//商品数据
-			this.isVip = this.$api.isVip()
 			const that = this
+			that.isVip = that.$api.isVip()
 			if (option.takeway) {
 				that.orderReqeust.takeWay = option.takeway
 			}
@@ -167,6 +167,7 @@
 					}
 				})
 			})
+			// 不同类目价格映射表
 			that.skuCategoryPriceMap = skuCategoryPriceMap
 			that.orderReqeust.totalOriginalPrice = totalOriginalPrice
 			that.orderReqeust.totalPrice = totalPrice
@@ -200,8 +201,8 @@
 				if (that.addressData) {
 					that.orderReqeust.addressId = that.addressData.id
 				}
-				that.$api.request('freight', 'getFreightMoney', {
-					orderRequestDTO: JSON.stringify(that.orderReqeust)
+				that.$api.request('order', 'previewFreight', {
+					orderRequest: JSON.stringify(that.orderReqeust)
 				}).then(res => {
 					that.orderReqeust.freightPrice = res.data
 				})
@@ -228,7 +229,7 @@
 					//提交订单成功后，无需再让用户提交订单
 					// that.submiting = false
 					uni.redirectTo({
-						url: '/pages/pay/pay?orderno='+ res.data + '&price=' + ((that.orderReqeust.totalPrice - (that.orderReqeust.coupon?that.orderReqeust.coupon.discount:0) + that.orderReqeust.freightPrice))
+						url: '/pages/pay/pay?parentorderno='+ res.data + '&price=' + ((that.orderReqeust.totalPrice - (that.orderReqeust.coupon?that.orderReqeust.coupon.discount:0) + that.orderReqeust.freightPrice))
 					})
 				})
 				

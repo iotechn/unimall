@@ -245,10 +245,19 @@
           </template>
         </el-table-column>
         <el-table-column
+          label="重量(克)"
+          prop="stock">
+          <template slot-scope="scope">
+            <el-input-number v-model="scope.row.weight" :precision="0" :max="2147483647" :min="0" size="small" />
+          </template>
+        </el-table-column>
+        <el-table-column
           prop="barCode"
           label="条形码">
           <template slot-scope="scope">
-            <el-input v-model="scope.row.barCode" maxlength="200" show-word-limit/>
+            <el-input v-model="scope.row.barCode" maxlength="200" show-word-limit>
+              <el-button slot="append" @click="randonBarcode(scope.row)">随机</el-button>
+            </el-input>
           </template>
         </el-table-column>
       </el-table>
@@ -501,6 +510,7 @@ export default {
                 vipPrice: parseInt(this.skuTableData[i].vipPriceRaw * 100),
                 stock: this.skuTableData[i].stock,
                 barCode: this.skuTableData[i].barCode,
+                weight: this.skuTableData[i].weight,
                 title,
                 specification
               }
@@ -746,6 +756,9 @@ export default {
     handleSpecDelete(row) {
       const index = this.specList.indexOf(row)
       this.specList.splice(index, 1)
+    },
+    randonBarcode(row) {
+      row.barCode = new Date().getTime() + ''
     }
 
   }

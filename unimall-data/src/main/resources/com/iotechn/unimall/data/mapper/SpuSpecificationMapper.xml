@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.SpuSpecificationMapper">
+
+    <insert id="batchInsert">
+        INSERT INTO
+            unimall_spu_specification
+            (spu_id,title,gmt_update,gmt_create)
+        VALUES
+        <foreach collection="list" separator="," item="specDO" index="i">
+            (
+            #{specDO.spuId},
+            #{specDO.title},
+            #{specDO.gmtUpdate},
+            #{specDO.gmtCreate}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

@@ -69,7 +69,7 @@ public class CacheConst {
     /**=========================== 商品缓存 START =============================**/
 
     /**
-     * 商品类目内价格排序缓存 (追加+=类目)
+     * 商品类目内价格排序缓存 (追加+=类目) HashKey="P" + SpuId
      */
     public static final String PRT_CATEGORY_ORDER_PRICE_ZSET = "PRT_CATEGORY_ORDER_PRICE:";
 
@@ -78,7 +78,8 @@ public class CacheConst {
     public static final String PRT_CATEGORY_ORDER_SALES_ZSET = "PRT_CATEGORY_ORDER_SALES:";
 
     /**
-     * 商品spuId - SpuDO 映射表不包括detail字段 (单独)
+     * 商品spuId - SpuDTO  映射表不包括detail字段 (单独)   HashKey="P" + SpuId
+     * FIXME SpuDTO 中是包括 categoryIds （即商品完整类目族）
      */
     public static final String PRT_SPU_HASH_BUCKET = "PRT_SPU_HASH_BUCKET";
 

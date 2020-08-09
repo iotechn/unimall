@@ -18,7 +18,7 @@ public class OrderRequestSkuDTO {
 
     private Integer price;
 
-    private String businessCode;
+    private Integer vipPrice;
 
     private Integer weight;
 
