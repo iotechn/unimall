@@ -92,9 +92,20 @@ public class OrderDTO extends SuperDTO {
      */
     private Date gmtConfirm;
 
+    /**
+     * 自动取消订单还有多少秒
+     */
+    private Integer cancelSec;
+
+    /**
+     * 自动确认收货还有多少秒
+     */
+    private Integer confirmSec;
+
     private List<OrderSkuDO> skuList;
 
     private ShipTraceDTO shipTraceDTO;
+
 
     private Integer activityType;
 
@@ -102,5 +113,6 @@ public class OrderDTO extends SuperDTO {
      * 活动Id
      */
     private Long activityId;
+
 
 }

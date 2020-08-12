@@ -524,6 +524,8 @@ public class OrderServiceImpl implements OrderService {
                 throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
             }
         }
+        // 删除自动取消订单消息
+        delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), orderNo);
         return "ok";
     }
 
@@ -566,6 +568,7 @@ public class OrderServiceImpl implements OrderService {
             skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
         });
         orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
+        delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), orderNo);
         return "ok";
     }
 
@@ -579,8 +582,8 @@ public class OrderServiceImpl implements OrderService {
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
         updateOrderDO.setGmtUpdate(new Date());
-        List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
         orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
+        delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CONFIRM.getCode(), orderNo);
         return "ok";
     }
 

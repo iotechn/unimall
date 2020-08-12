@@ -12,6 +12,17 @@ export function listAdmin(query) {
   })
 }
 
+export function listAdminLog(query) {
+  return request({
+    method: 'get',
+    params: {
+      _gp: 'admin.log',
+      _mt: 'list',
+      ...query
+    }
+  })
+}
+
 export function createAdmin(data) {
   return request({
     method: 'post',

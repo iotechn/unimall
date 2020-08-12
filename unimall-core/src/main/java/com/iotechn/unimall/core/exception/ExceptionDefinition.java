@@ -344,6 +344,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ADMIN_GENERATOR_TEMPLATE_EXCEPTION =
             new ServiceExceptionDefinition(50013, "代码生成模板异常");
 
+    public static final ServiceExceptionDefinition ADMIN_ROLE_UNION_ADMIN =
+            new ServiceExceptionDefinition(50014, "角色关联仍有管理员关联");
+
 
 
     public static final ServiceExceptionDefinition CATEGORY_OUGHT_TO_EMPTY =

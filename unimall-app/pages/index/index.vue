@@ -33,6 +33,13 @@
 			</view>
 		</view>
 		
+		<!-- 店铺公告 -->
+		<view v-if="postMsgs && postMsgs.length > 0" class="post-section">
+			<swiper style="height: 100%;" :circular="true" :autoplay="true" :vertical="true">
+				<swiper-item v-for="(item, index) in postMsgs"><view class="yticon icon-xiaoxi content">: {{ item }}</view></swiper-item>
+			</swiper>
+		</view>
+		
 		<view v-if="banner" @click="navToAdvertTargetPage(banner)" class="ad-1">
 			<image :src="banner.imgUrl" mode="scaleToFill"></image>
 		</view>
@@ -185,7 +192,8 @@
 				categoryButtomList: [],
 				salesTop: [],
 				banner: undefined,
-				isVip: false
+				isVip: false,
+				postMsgs: []
 			};
 		},
 		onShow() {
@@ -266,6 +274,10 @@
 					if (data.advertisement.t9) {
 						this.windowSpuList = data.advertisement.t9.map(item => item.data)
 						console.log(this.windowSpuList)
+					}
+					//公告
+					if (data.advertisement.t6) {
+						this.postMsgs = data.advertisement.t6.map(item => item.title)
 					}
 					uni.hideLoading()
 				})
@@ -360,6 +372,24 @@
 			.swiper-dots{
 				left:45upx;
 				bottom:40upx;
+			}
+		}
+		
+		.post-section {
+			margin-top: 16upx;
+			height: 60upx;
+			line-height: 60upx;
+			background-color: white;
+			padding-left: 20upx;
+
+			.content {
+				height: 60upx;
+				line-height: 60upx;
+				font-size: 28upx;
+				text-overflow: ellipsis;
+				overflow: hidden;
+				color: $uni-color-primary;
+				white-space: nowrap;
 			}
 		}
 	}

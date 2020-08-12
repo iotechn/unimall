@@ -36,7 +36,7 @@
 						</view>
 						<view class="item-right">
 							<text class="clamp title">{{item.title}}</text>
-							<text class="attr">{{item.skuTitle}}{{item.num > item.stock?(' (库存不足 剩余:' + item.stock + ')') : ''}}</text>
+							<text class="attr">{{item.skuTitle}} <text style="color: #FF570A;" v-show="item.num > item.stock">{{ ' (库存不足 剩余:' + item.stock + ')' }}</text></text>
 							<text class="price"><text v-if="item.originalPrice > item.price" style="text-decoration:line-through">¥{{isVip ? (item.vipPrice / 100 + '[VIP]') : item.originalPrice / 100.0}}</text> ¥{{item.price / 100.0}}</text>
 							<uni-number-box 
 								class="step"

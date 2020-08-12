@@ -1,11 +1,11 @@
 package com.iotechn.unimall.app.api.favorite;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.FavoriteDO;
 import com.iotechn.unimall.data.dto.FavoriteDTO;
 import com.iotechn.unimall.data.mapper.FavoriteMapper;
@@ -74,13 +74,13 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
 
     @Override
-    public FavoriteDTO getCollectById(Long userId, Long collectId, Long spuId) throws ServiceException {
-        return favoriteMapper.getCollectById(userId, collectId, spuId);
+    public FavoriteDTO getFavoriteById(Long userId, Long collectId, Long spuId) throws ServiceException {
+        return favoriteMapper.getFavoriteById(userId, collectId, spuId);
     }
 
     @Override
-    public Boolean getCollectBySpuId(Long spuId, Long userId) throws ServiceException {
-//        return collectBizService.getCollectBySpuId(spuId, userId);
-        return false;
+    public Boolean getFavoriteBySpuId(Long spuId, Long userId) throws ServiceException {
+        String hashRaw = cacheComponent.getHashRaw(CacheConst.PRT_USER_FAVORITE_HASH_BUCKET + spuId, "U" + userId);
+        return hashRaw != null && "1".equals(hashRaw);
     }
 }

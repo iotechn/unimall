@@ -34,8 +34,24 @@
 		</view>
 
 		
-		<!-- 金额明细 -->
+		<!-- 明细 -->
 		<view class="yt-list">
+			<view class="yt-list-cell b-b">
+				<text class="cell-tit clamp">订单编号</text>
+				<text class="cell-tip">{{orderDetail.orderNo}}</text>
+			</view>
+			<view class="yt-list-cell b-b">
+				<text class="cell-tit clamp">订单状态</text>
+				<text class="cell-tip">{{orderDetail.status | statusFilter}}</text>
+			</view>
+			<view v-if="orderDetail.status === 10" class="yt-list-cell b-b">
+				<text class="cell-tit clamp">即将取消</text>
+				<text class="cell-tip red">{{ cancelTime ? cancelTime : 'loading' }}</text>
+			</view>
+			<view v-if="orderDetail.status === 30" class="yt-list-cell b-b">
+				<text class="cell-tit clamp">自动确认</text>
+				<text class="cell-tip red">{{ confirmTime ? confirmTime : 'loading' }}</text>
+			</view>
 			<view class="yt-list-cell b-b">
 				<text class="cell-tit clamp">商品金额</text>
 				<text class="cell-tip">￥{{orderDetail.skuOriginalTotalPrice | priceFormat}}</text>
@@ -45,41 +61,61 @@
 				<text class="cell-tip red">-￥{{(orderDetail.skuOriginalTotalPrice - orderDetail.skuTotalPrice) | priceFormat}}</text>
 			</view>
 			<view v-if="orderDetail.couponPrice" class="yt-list-cell b-b">
-				<text class="cell-tit clamp">优惠券立减</text>
+				<text class="cell-tit clamp">优惠券减</text>
 				<text class="cell-tip red">-￥{{orderDetail.couponPrice | priceFormat}}</text>
 			</view>
 			<view class="yt-list-cell b-b">
-				<text class="cell-tit clamp">运费</text>
+				<text class="cell-tit clamp">配送费用</text>
 				<text class="cell-tip">{{orderDetail.freightPrice > 0 ?( '+¥' + (orderDetail.freightPrice / 100.0)) : '免运费'}}</text>
+			</view>
+			<view class="yt-list-cell b-b">
+				<text class="cell-tit clamp">创建时间</text>
+				<text class="cell-tip">{{orderDetail.gmtCreate | dateFormat}}</text>
+			</view>
+			<view v-if="orderDetail.payChannel" class="yt-list-cell b-b">
+				<text class="cell-tit clamp">支付渠道</text>
+				<text class="cell-tip">{{orderDetail.payChannel | payChannelFilter}}</text>
+			</view>
+			<view v-if="orderDetail.gmtPay" class="yt-list-cell b-b">
+				<text class="cell-tit clamp">支付时间</text>
+				<text class="cell-tip">￥{{orderDetail.gmtPay | dateFormat}}</text>
 			</view>
 			<view class="yt-list-cell desc-cell">
 				<text class="cell-tit clamp">备注</text>
 				<input class="desc" type="text" v-model="orderDetail.mono" disabled="true" />
 			</view>
 		</view>
-
-		<!-- 底部 -->
-		<!-- <view class="footer">
-			<view class="price-content">
-				<text>实付款</text>
-				<text class="price-tip">￥</text>
-				<text class="price">{{orderDetail.actualPrice | priceFormat}}</text>
-			</view>
-			<text class="submit" @click="submit">提交订单</text>
-		</view> -->
-
 	</view>
 </template>
 
 <script>
+	const payChannelMap = {
+		'WX': '微信支付',
+		'ALI': '支付宝',
+		'OFFLINE': '线下支付'
+	}
+	const statusMap = {
+		10: '未付款',
+		12: '正在拼团',
+		20: '待出库',
+		30: '待收货',
+		40: '待评价',
+		50: '已完成',
+		60: '退款中',
+		70: '已退款',
+		80: '已取消',
+		90: '已取消(系统)'
+	}
 	export default {
 		filters: {
 			priceFormat(price) {
 				return price / 100.0
 			},
-			dateFormat(time) {
-				return 'temp'
-				//return formatDate(new Date(time),'yyyy-MM-dd HH:mm')
+			payChannelFilter(channel) {
+				return payChannelMap[channel]
+			},
+			statusFilter(status) {
+				return statusMap[status]
 			}
 		},
 		data() {
@@ -91,7 +127,10 @@
 					totalPrice: 0, //商品折扣（仅算VIP和限时打折）后总价
 					coupon: undefined,
 					mono: ''
-				}
+				},
+				cancelTime: '',
+				confirmTime: '',
+				reloadPageFlag: false
 			}
 		},
 		onLoad(option) {
@@ -105,8 +144,56 @@
 				that.$api.request('order', 'getOrderDetail', {
 					orderId: that.orderId
 				}).then(res => {
-					that.orderDetail = res.data
+					// 深拷贝
+					that.orderDetail = JSON.parse(JSON.stringify(res.data))
+					if (that.orderDetail.status === 10 && that.orderDetail.cancelSec > 0) {
+						that.cancelTime = that.secondsToDays(that.orderDetail.cancelSec)
+						const interval = setInterval(() => {
+							that.orderDetail.cancelSec--
+							if (that.orderDetail.cancelSec < 0) {
+								clearInterval(interval)
+								that.reloadPageFlag = true
+								that.loadData()
+								if (that.$api.prePage().lodaData) {
+									that.$api.prePage().loadData()
+								}
+								return
+							}
+							that.cancelTime = that.secondsToDays(that.orderDetail.cancelSec)
+						}, 1000)
+					} else if (that.orderDetail.status === 30 && that.orderDetail.confirmSec > 0) {
+						that.confirmTime = that.secondsToDays(that.orderDetail.confirmSec)
+						const interval = setInterval(() => {
+							that.orderDetail.confirmSec--
+							if (that.orderDetail.confirmSec < 0) {
+								clearInterval(interval)
+								that.reloadPageFlag = true
+								that.loadData()
+								if (that.$api.prePage().lodaData) {
+									that.$api.prePage().loadData()
+								}
+								return
+							}
+							that.confirmTime = that.secondsToDays(that.orderDetail.confirmSec)
+						}, 1000)
+					}
 				})
+			},
+			secondsToDays(sec) {
+				// 对一天取模
+				let days = parseInt(sec / (60 * 60 * 24))
+				// 对一小时取模
+				let hours = parseInt((sec % (60 * 60 * 24)) / (60 * 60))
+				// 对一分钟取模
+				let minutes = parseInt((sec % (60 * 60 * 24)) % (60 * 60) / 60)
+				// 剩下的为秒钟
+				let seconds = parseInt((sec % (60 * 60 * 24)) % (60 * 60) % 60)
+				let res = ''
+				res += (days?(days + '天'):'')
+				res += (hours?(hours + '小时'):'')
+				res += (minutes?(minutes + '分'):'')
+				res += (seconds+'秒')
+				return res
 			}
 		}
 	}

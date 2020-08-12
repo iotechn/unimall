@@ -7,13 +7,16 @@ import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.executor.GlobalExecutor;
+import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
+import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
+import com.iotechn.unimall.data.enums.PayChannelType;
 import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
@@ -55,6 +58,9 @@ public class CallbackController {
 
     @Autowired
     private ProductBizService productBizService;
+
+    @Autowired
+    private DelayedMessageQueue delayedMessageQueue;
 
     @Autowired
     private AdminNotifyBizService adminNotifyBizService;
@@ -114,13 +120,13 @@ public class CallbackController {
             return WxPayNotifyResponse.fail(orderAbstractNo + " : 支付金额不符合 totalFee=" + totalFee);
         }
 
-        //**************** 在此之前都没有 数据库修改 操作 所以前面是直接返回错误的 **********************//
+        /**************** 在此之前都没有 数据库修改 操作 所以前面是直接返回错误的 **********************/
 
         //1. 更新订单状态
         Date now = new Date();
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setPayId(payId);
-        updateOrderDO.setPayChannel("WX");
+        updateOrderDO.setPayChannel(PayChannelType.WEPAY.getCode());
         updateOrderDO.setPayPrice(result.getTotalFee());
         updateOrderDO.setGmtPay(now);
         updateOrderDO.setGmtUpdate(now);
@@ -161,18 +167,19 @@ public class CallbackController {
         productBizService.incSpuSales(salesMap);
 
 
-        //3. 通知管理员发货
+        //3. 通知管理员发货 & 删除延迟消息队列取消订单消息
         Map<String, List<OrderSkuDO>> orderSkuMap = orderSkuDOList.stream().collect(Collectors.groupingBy(OrderSkuDO::getOrderNo));
         Map<String, List<OrderDO>> orderMap = orderDOList.stream().collect(Collectors.groupingBy(OrderDO::getOrderNo));
         for (String subOrderNo : orderSkuMap.keySet()) {
             OrderDTO finalOrderDTO = new OrderDTO();
             OrderDO orderDO = orderMap.get(subOrderNo).get(0);
             BeanUtils.copyProperties(orderDO, finalOrderDTO);
-            finalOrderDTO.setPayChannel("WX");
+            finalOrderDTO.setPayChannel(PayChannelType.WEPAY.getCode());
             finalOrderDTO.setSkuList(orderSkuMap.get(subOrderNo));
             GlobalExecutor.execute(() -> {
                 adminNotifyBizService.newOrder(finalOrderDTO);
             });
+            delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), subOrderNo);
             logger.info("[订单微信支付成功] orderNo:" + subOrderNo);
         }
         return WxPayNotifyResponse.success("支付成功");
