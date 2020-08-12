@@ -47,7 +47,7 @@
 				"navigationBarTitleText": "收货地址"
 			}
 		}, {
-			"path": "pages/address/create",
+			"path": "pages/address/upsert",
 			"style": {
 				"navigationBarTitleText": "",
 				"disableScroll" : true

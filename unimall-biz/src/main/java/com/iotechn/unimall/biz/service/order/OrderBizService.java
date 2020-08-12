@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.core.exception.*;
 import com.iotechn.unimall.data.component.LockComponent;
@@ -11,6 +12,7 @@ import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
+import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
@@ -49,6 +51,9 @@ public class OrderBizService {
 
     @Autowired
     private WxPayService wxPayService;
+
+    @Autowired
+    private DelayedMessageQueue delayedMessageQueue;
 
     @Autowired
     private UnimallWxAppProperties unimallWxProperties;
@@ -150,6 +155,19 @@ public class OrderBizService {
         OrderDTO orderDTO = new OrderDTO();
         BeanUtils.copyProperties(orderDOS.get(0), orderDTO);
         orderDTO.setSkuList(orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderId)));
+        // 封装两个 自动取消 & 自动确认 剩余时间
+        if (orderDTO.getStatus().intValue() == OrderStatusType.UNPAY.getCode()) {
+            Long taskTime = delayedMessageQueue.getTaskTime(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), orderDTO.getOrderNo());
+            if (taskTime != null && taskTime > 0) {
+                orderDTO.setCancelSec(taskTime.intValue());
+            }
+        }
+        if (orderDTO.getStatus().intValue() == OrderStatusType.WAIT_CONFIRM.getCode()) {
+            Long taskTime = delayedMessageQueue.getTaskTime(DMQHandlerType.ORDER_AUTO_CONFIRM.getCode(), orderDTO.getOrderNo());
+            if (taskTime != null && taskTime > 0) {
+                orderDTO.setConfirmSec(taskTime.intValue());
+            }
+        }
         return orderDTO;
     }
 

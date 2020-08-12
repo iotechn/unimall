@@ -76,7 +76,7 @@
 					<text>浏览历史</text>
 				</view>
 				<scroll-view v-if="footprintList.length > 0" scroll-x class="h-list">
-					<image v-for="(item, index ) in footprintList" :key="index" @longpress="deleteFootprint(item)" @click="navTo('/pages/product/detail?id=' + item.spuId)" :src="item.spuImg + '?x-oss-process=style/200px'" mode="aspectFill"></image>
+					<image v-for="(item, index ) in footprintList" :key="index" @longpress="deleteFootprint(item)" @click="navTo('/pages/product/detail?id=' + item.id)" :src="item.img + '?x-oss-process=style/200px'" mode="aspectFill"></image>
 				</scroll-view>
 				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/list')"></list-cell>
 				<list-cell icon="icon-shoucang_xuanzhongzhuangtai" iconColor="#54b4ef" title="我的收藏" @eventClick="navTo('/pages/product/favorite')"></list-cell>
@@ -142,7 +142,7 @@
         methods: {
 			async loadFootprint() {
 				const that = this
-				that.$api.request('footprint', 'getAllFootprint').then(res => {
+				that.$api.request('footprint', 'list').then(res => {
 					that.footprintList = res.data
 				})
 			},
@@ -154,7 +154,7 @@
 					content: '您确定要删除此足迹吗？',
 					success : (e) => {
 						if (e.confirm) {
-							that.$api.request('footprint', 'deleteFootprint', {
+							that.$api.request('footprint', 'delete', {
 								footprintId: item.id
 							}).then(res => {
 								that.loadFootprint()

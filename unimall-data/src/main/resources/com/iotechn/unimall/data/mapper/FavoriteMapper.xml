@@ -27,7 +27,7 @@
             AND c.spu_id = s.id
     </select>
 
-    <select id="getCollectById" resultType="com.iotechn.unimall.data.dto.FavoriteDTO">
+    <select id="getFavoriteById" resultType="com.iotechn.unimall.data.dto.FavoriteDTO">
      SELECT
             c.id,
             c.user_id AS userId,
@@ -49,13 +49,13 @@
     WHERE
             c.user_id = #{userId}
             and c.spu_id = s.id
-            and c.id = #{collectId}
+            and c.id = #{favoriteId}
             <if test="spuId != null">
                 and c.spu_id = #{spuId}
             </if>
     </select>
 
-    <select id="getUserCollectSpuIds" resultType="java.lang.String">
+    <select id="getUserFavoriteSpuIds" resultType="java.lang.String">
       SELECT spu_id FROM  unimall_favorite WHERE user_id = #{userId}
     </select>
 

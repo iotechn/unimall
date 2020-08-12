@@ -1,14 +1,17 @@
 package com.iotechn.unimall.admin.api.role;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
 import com.iotechn.unimall.data.domain.RolePermissionDO;
 import com.iotechn.unimall.data.dto.PermissionPointDTO;
 import com.iotechn.unimall.data.dto.RoleSetPermissionDTO;
 import com.iotechn.unimall.data.enums.RoleStatusType;
+import com.iotechn.unimall.data.mapper.AdminMapper;
 import com.iotechn.unimall.data.mapper.RoleMapper;
 import com.iotechn.unimall.data.mapper.RolePermissionMapper;
 import com.iotechn.unimall.data.model.Page;
@@ -19,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by rize on 2019/4/11.
@@ -28,6 +32,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Autowired
     private RoleMapper roleMapper;
+
+    @Autowired
+    private AdminMapper adminMapper;
 
     @Autowired
     private RolePermissionMapper rolePermissionMapper;
@@ -58,7 +65,17 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String delete(Long roleId, Long adminId) throws ServiceException {
+        // 列举出所有管理员，并校验是否存在关联此角色的管理员
+        List<List<Long>> roleIds = adminMapper.selectList(new QueryWrapper<AdminDO>().select("role_ids")).stream().map(item -> JSONObject.parseArray(item.getRoleIds(), Long.class)).collect(Collectors.toList());
+        for (List<Long> list : roleIds) {
+            for (Long id : list) {
+                if (roleId.longValue() == id.longValue()) {
+                    throw new AdminServiceException(ExceptionDefinition.ADMIN_ROLE_UNION_ADMIN);
+                }
+            }
+        }
         if (roleMapper.deleteById(roleId) > 0) {
             return "ok";
         }

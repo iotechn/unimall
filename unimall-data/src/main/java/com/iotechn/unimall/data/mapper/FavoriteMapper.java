@@ -25,12 +25,12 @@ public interface FavoriteMapper extends IMapper<FavoriteDO> {
     /**
      * 获得某一收藏
      * @param userId
-     * @param collectId
+     * @param favoriteId
      * @param spuId
      * @return
      */
-    public FavoriteDTO getCollectById(@Param("userId") Long userId, @Param("collectId")Long collectId, @Param("spuId")Long spuId);
+    public FavoriteDTO getFavoriteById(@Param("userId") Long userId, @Param("favoriteId")Long favoriteId, @Param("spuId")Long spuId);
 
-    public List<String> getUserCollectSpuIds(Long userId);
+    public List<String> getUserFavoriteSpuIds(Long userId);
 
 }

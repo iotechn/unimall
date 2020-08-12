@@ -33,13 +33,13 @@ public interface FavoriteService {
             @HttpParam(name = "pageSize", valueDef = "10", type = HttpParamType.COMMON, description = "分页查询长度") Integer pageSize) throws ServiceException;
 
     @HttpMethod(description = "查询某一条收藏记录")
-    public FavoriteDTO getCollectById(
+    public FavoriteDTO getFavoriteById(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId,
             @NotNull @HttpParam(name = "collectId", type = HttpParamType.COMMON, description = "收藏记录id") Long collectId,
             @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "商品ID") Long spuId) throws ServiceException;
 
     @HttpMethod(description = "判断用户是否收藏")
-    public Boolean getCollectBySpuId(
+    public Boolean getFavoriteBySpuId(
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "商品Id") Long spuId,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 

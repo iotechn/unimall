@@ -43,7 +43,6 @@
 					that.flist = res.data
 					that.currentId = res.data[0].id
 					that.slist = res.data[0].childrenList
-					
 				})
 				
 			},

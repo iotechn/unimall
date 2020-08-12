@@ -1,6 +1,7 @@
 package com.iotechn.unimall.launcher.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.iotechn.unimall.biz.service.admin.AdminBizService;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.annotation.HttpMethod;
 import com.iotechn.unimall.core.annotation.HttpParam;
@@ -10,6 +11,7 @@ import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.annotation.param.TextFormat;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.domain.AdminLogDO;
 import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.util.SessionUtil;
@@ -33,6 +35,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.*;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -49,11 +52,12 @@ public class ApiController {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiController.class);
 
-
     @Autowired
     private ApplicationContext applicationContext;
     @Autowired
     private StringRedisTemplate userRedisTemplate;
+    @Autowired
+    private AdminBizService adminBizService;
 
     @Value("${com.iotechn.unimall.env}")
     private String ENV;
@@ -63,17 +67,14 @@ public class ApiController {
     public String invoke(HttpServletRequest req, HttpServletResponse res) {
         long invokeTime = System.currentTimeMillis();
         try {
-            logger.info("[用户请求] request=" + JSONObject.toJSONString(req.getParameterMap()));
+            logger.info("[HTTP] requestId={}; request={}", invokeTime, JSONObject.toJSONString(req.getParameterMap()));
             Object obj = process(req, res, invokeTime);
             if(Const.IGNORE_PARAM_LIST.contains(obj.getClass())){
                 return obj.toString();
             }
             String result = JSONObject.toJSONString(obj);
             long during = System.currentTimeMillis() - invokeTime;
-//            if (during > 1000) {
-//                logger.info("[用户请求] 慢接口");
-//            }
-            logger.info("[用户请求] 用时 " + during + "ms, response=" + JSONObject.toJSONString(result));
+            logger.info("[HTTP] requestId={}; response={}; during={}ms", invokeTime, JSONObject.toJSONString(result), during);
             return result;
         } catch (ServiceException e) {
             GatewayResponse gatewayResponse = new GatewayResponse();
@@ -82,7 +83,7 @@ public class ApiController {
             gatewayResponse.setErrmsg(e.getMessage());
             String result = JSONObject.toJSONString(gatewayResponse);
             long during = System.currentTimeMillis() - invokeTime;
-            logger.info("[用户请求] 用时 " + during + "ms, response=" + JSONObject.toJSONString(result));
+            logger.info("[HTTP] requestId={}; response={}; during={}ms", invokeTime, JSONObject.toJSONString(result), during);
             return result;
         }
     }
@@ -126,7 +127,14 @@ public class ApiController {
                 if (!SessionUtil.hasPerm(permission)) {
                     throw new LauncherServiceException(LauncherExceptionDefinition.LAUNCHER_ADMIN_PERMISSION_DENY);
                 }
-
+                // 对有权限的方法进行日志记录
+                AdminLogDO adminLogDO = new AdminLogDO();
+                adminLogDO.setAdminId(adminDTO.getId());
+                adminLogDO.setGroup(_gp);
+                adminLogDO.setMethod(_mt);
+                adminLogDO.setRequestId(invokeTime);
+                adminLogDO.setGmtCreate(new Date());
+                adminBizService.saveLog(adminLogDO);
             }
             Object serviceBean = applicationContext.getBean(method.getDeclaringClass());
             Parameter[] methodParameters = method.getParameters();
