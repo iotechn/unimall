@@ -18,6 +18,9 @@ import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.data.properties.UnimallOpenSearchProperties;
+import com.iotechn.unimall.data.search.SearchInfo;
+import com.iotechn.unimall.data.search.SpuSearchInfoImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -67,9 +71,27 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    private UnimallOpenSearchProperties unimallOpenSearchProperties;
+
+    @Autowired
+    private SearchInfo spuSearchInfoImpl;
+
     @Override
     public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
-        return productBizService.getProductPage(pageNo, pageSize, categoryId, orderBy, isAsc, title);
+        if(unimallOpenSearchProperties.getEnable().equals("search")){
+            HashMap hashMap = new HashMap<>();
+            hashMap.put("page",pageNo);
+            hashMap.put("limit",pageSize);
+            hashMap.put("categoryId",categoryId);
+            hashMap.put("orderBy",orderBy);
+            hashMap.put("isAsc",isAsc);
+            hashMap.put("title",title);
+            Page<SpuDO> search = spuSearchInfoImpl.search(hashMap);
+            return search;
+        }else {
+            return productBizService.getProductPage(pageNo, pageSize, categoryId, orderBy, isAsc, title);
+        }
     }
 
     @Override
