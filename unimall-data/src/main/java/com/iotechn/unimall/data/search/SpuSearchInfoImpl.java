@@ -20,6 +20,8 @@ import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.domain.SuperDO;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.util.SearchUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
@@ -27,6 +29,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SpuSearchInfoImpl implements SearchInfo {
+
+    private static final Logger logger = LoggerFactory.getLogger(SpuSearchInfoImpl.class);
 
     private String accesskey;
 
@@ -96,9 +100,9 @@ public class SpuSearchInfoImpl implements SearchInfo {
                 //判断数据是否推送成功，主要通过判断2处，第一处判断用户方推送是否成功，第二处是应用控制台中有无报错日志
                 //用户方推送成功后，也有可能在应用端执行失败，此错误会直接在应用控制台错误日志中生成，比如字段内容转换失败
                 if (osr.getResult().equalsIgnoreCase("true")) {
-                    System.out.println("用户方推送无报错！\n以下为getTraceInfo推送请求Id:" + osr.getTraceInfo().getRequestId());
+                    logger.info("用户方推送无报错！\n以下为getTraceInfo推送请求Id:" + osr.getTraceInfo().getRequestId());
                 } else {
-                    System.out.println("用户方推送报错！" + osr.getTraceInfo());
+                    logger.error("用户方推送报错！" + osr.getTraceInfo());
                 }
             } catch (OpenSearchException e) {
                 e.printStackTrace();
@@ -158,7 +162,7 @@ public class SpuSearchInfoImpl implements SearchInfo {
             title.replace("\"","");
             title.replace("\'","");
             if(searchParams.isSetQuery()){
-                searchParams.setQuery(searchParams.getQuery() + " AND " + "title: \'" + title + "\'");
+                searchParams.setQuery(searchParams.getQuery() + " AND " + "default: \'" + title + "\'");
             }else {
                 searchParams.setQuery("default:\'" + title + "\'");
             }
@@ -186,13 +190,14 @@ public class SpuSearchInfoImpl implements SearchInfo {
             if(items != null && items.length() != 0){
                 List<SpuDO> spuDOList = parseJson(items);
                 Page<SpuDO> spuDOPage = new Page<>(spuDOList,page,limit,total);
+                return spuDOPage;
             }
         } catch (OpenSearchException e) {
             e.printStackTrace();
         } catch (OpenSearchClientException e) {
             e.printStackTrace();
         }
-        return null;
+        return new Page<SpuDO>(null,0,10,0);
     }
 
     private List<SpuDO> parseJson(JSONArray items){
@@ -257,7 +262,6 @@ public class SpuSearchInfoImpl implements SearchInfo {
             if(jsonObject.has("gmt_update")){
                 String gmtUpdate = jsonObject.getString("gmt_update");
                 if(gmtUpdate != null){
-                    System.out.println("-------------------------------------------------");
                     spuDO.setGmtUpdate(new Date(Long.valueOf(gmtUpdate)));
                 }
             }

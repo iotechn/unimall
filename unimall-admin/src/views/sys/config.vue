@@ -223,23 +223,36 @@
       <h3>开放搜索配置</h3>
       <el-form ref="searchDataForm" :model="searchDataForm" label-width="150px">
 
-        <el-form-item label="AccessKeyId" prop="autoCancelTime">
+        <el-form-item label="启用" prop="enable">
+          <el-select v-model="searchDataForm.enable" placeholder="请选择短信通知平台">
+            <el-option
+              :value="'db'"
+              :label="'数据库'"
+            />
+            <el-option
+              :value="'search'"
+              :label="'开放搜索'"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item v-if="searchDataForm.enable == 'search'" label="AccessKeyId" prop="autoCancelTime">
           <el-input v-model="searchDataForm.accessKeyId" />
         </el-form-item>
 
-        <el-form-item label="AccessKeySecret" prop="autoConfirmTime">
+        <el-form-item v-if="searchDataForm.enable == 'search'" label="AccessKeySecret" prop="autoConfirmTime">
           <el-input v-model="searchDataForm.accessKeySecret" />
         </el-form-item>
 
-        <el-form-item label="商品搜索应用名" prop="autoConfirmTime">
+        <el-form-item v-if="searchDataForm.enable == 'search'" label="商品搜索应用名" prop="autoConfirmTime">
           <el-input v-model="searchDataForm.spuAppName" />
         </el-form-item>
 
-        <el-form-item label="商品搜索API地址" prop="autoConfirmTime">
+        <el-form-item v-if="searchDataForm.enable == 'search'" label="商品搜索API地址" prop="autoConfirmTime">
           <el-input v-model="searchDataForm.spuHost" />
         </el-form-item>
 
-        <el-form-item label="商品搜索表名" prop="autoConfirmTime">
+        <el-form-item v-if="searchDataForm.enable == 'search'" label="商品搜索表名" prop="autoConfirmTime">
           <el-input v-model="searchDataForm.spuTableName" />
         </el-form-item>
 

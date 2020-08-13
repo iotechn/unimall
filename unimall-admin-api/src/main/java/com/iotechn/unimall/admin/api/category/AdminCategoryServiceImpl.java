@@ -62,14 +62,9 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     /**
      * 获取三级类目树,用于商品、优惠券之类添加的使用
      */
-    @Autowired
-    private SearchInfo spuSearchInfoImpl;
     @Override
     public List<CategoryDTO> categoryTree() throws ServiceException {
         List<CategoryDTO> list = categoryBizService.categoryThreeLevelTree();
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put("title","美年达");
-        spuSearchInfoImpl.search(hashMap);
         return list;
     }
 
