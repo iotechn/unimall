@@ -50,8 +50,25 @@ public class LockConst {
     public static final String DYNAMIC_CONFIG_LOCK = "DYNAMIC_CONFIG_LOCK:";
 
     /**
-     * 定时任务中：审查订单状态的锁
-     * 集群时，一台执行就够了
+     * 定时任务中：审查订单状态的锁 集群时，一台执行就够了
+     * SCHEDULED_ORDER_STATUS_CHECK_LOCK
      */
     public static final String SCHEDULED_ORDER_STATUS_CHECK_LOCK = "SCHEDULED_ORDER_STATUS_CHECK_LOCK";
+
+    /**
+     * 团购开始定时任务
+     * GROUP_SHOP_START_LOCK
+     */
+    public static final String GROUP_SHOP_START_LOCK = "GROUP_SHOP_START_LOCK";
+
+    /**
+     * 团购结束定时任务
+     * GROUP_SHOP_END_LOCK
+     */
+    public static final String GROUP_SHOP_END_LOCK = "GROUP_SHOP_END_LOCK";
+
+    /**
+     *
+     */
+    public static final String GROUP_SHOP_LOCK_LOCK = "GROUP_SHOP_LOCK_LOCK";
 }

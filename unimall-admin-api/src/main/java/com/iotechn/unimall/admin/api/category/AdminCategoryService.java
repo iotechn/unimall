@@ -47,6 +47,18 @@ public interface AdminCategoryService {
             @HttpParam(name = "picUrl", type = HttpParamType.COMMON, description = "类目图片") String picUrl,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
+    /**
+     * 首先的到所有的类目的List<CategoryDTO>,在根据SQL查询得到的数据转化成传往前端的数据
+     * @param id
+     * @param title
+     * @param level
+     * @param parentId
+     * @param page
+     * @param limit
+     * @param adminId
+     * @return
+     * @throws ServiceException
+     */
     @HttpMethod(description = "查询", permission = "operation:category:query", permissionParentName = "商品管理", permissionName = "类目管理")
     public Page<CategoryDTO> list(
             @HttpParam(name = "id", type = HttpParamType.COMMON, description = "类目ID") Long id,

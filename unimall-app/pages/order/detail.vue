@@ -154,7 +154,7 @@
 								clearInterval(interval)
 								that.reloadPageFlag = true
 								that.loadData()
-								if (that.$api.prePage().lodaData) {
+								if (that.$api.prePage().loadData) {
 									that.$api.prePage().loadData()
 								}
 								return
@@ -169,7 +169,7 @@
 								clearInterval(interval)
 								that.reloadPageFlag = true
 								that.loadData()
-								if (that.$api.prePage().lodaData) {
+								if (that.$api.prePage().loadData) {
 									that.$api.prePage().loadData()
 								}
 								return

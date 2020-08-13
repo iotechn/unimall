@@ -76,6 +76,7 @@ public class ProductBizService {
 
     /**
      * 若搜索关键字为空，则从缓存中获取商品列表，此列表不包含detail(商品详情)字段
+     *
      * @param pageNo
      * @param pageSize
      * @param categoryId
@@ -104,6 +105,7 @@ public class ProductBizService {
         if (page.getTotal() == 0) {
             // 若没有缓存，则尝试从DB读取
             List<SpuDO> productIdsFromDB = getProductIdsOnSaleFromDB(categoryId);
+            // 传入一个categoryId，将所有该Category(包括子节点) 的全部商品Id和销量查询出来。若传入的CategoryId为null，则查出所有的商品
             if (!CollectionUtils.isEmpty(productIdsFromDB)) {
                 // 若非空，则全部放入ZSet中
                 Set<ZSetOperations.TypedTuple<String>> set = productIdsFromDB.stream().map(item -> (ZSetOperations.TypedTuple<String>) (new DefaultTypedTuple("P" + item.getId(), item.getSales().doubleValue()))).collect(Collectors.toSet());
@@ -181,12 +183,17 @@ public class ProductBizService {
      * @return
      */
     private List<SpuDO> getProductIdsOnSaleFromDB(Long categoryId) throws ServiceException {
-        List<Long> categoryFamily = categoryBizService.getCategoryFamily(categoryId);
-        return spuMapper.selectList(new QueryWrapper<SpuDO>().select("id", "sales").in("category_id", categoryFamily));
+        if (categoryId != null) {
+            List<Long> categoryFamily = categoryBizService.getCategorySelfAndChildren(categoryId);
+            return spuMapper.selectList(new QueryWrapper<SpuDO>().select("id", "sales").in("category_id", categoryFamily));
+        } else {
+            return spuMapper.selectList(new QueryWrapper<SpuDO>().select("id", "sales"));
+        }
     }
 
     /**
      * 从数据库中获取SKU详细信息
+     *
      * @param skuIds
      * @return
      */
@@ -196,6 +203,7 @@ public class ProductBizService {
 
     /**
      * 从数据库中获取SPU,并且不查出detail字段
+     *
      * @param id
      * @return
      */
@@ -205,6 +213,7 @@ public class ProductBizService {
 
     /**
      * 从缓存中查出SPU，不带detail字段
+     *
      * @param spuId
      * @return
      */
@@ -225,6 +234,7 @@ public class ProductBizService {
 
     /**
      * 扣减库存
+     *
      * @param skuStockMap
      */
     public void decSkuStock(Map<Long, Integer> skuStockMap) {
@@ -233,6 +243,7 @@ public class ProductBizService {
 
     /**
      * 增加商品销量
+     *
      * @param skuSalesMap
      */
     public void incSpuSales(Map<Long, Integer> skuSalesMap) {

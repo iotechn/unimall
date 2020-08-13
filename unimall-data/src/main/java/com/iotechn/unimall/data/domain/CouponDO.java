@@ -2,9 +2,7 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -13,8 +11,6 @@ import java.util.Date;
  */
 @Data
 @TableName("unimall_coupon")
-@AllArgsConstructor
-@NoArgsConstructor
 public class CouponDO extends SuperDO {
 
     private String title;

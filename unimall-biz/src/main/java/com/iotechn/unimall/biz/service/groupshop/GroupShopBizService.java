@@ -61,4 +61,8 @@ public class GroupShopBizService {
         return groupShopDTO;
     }
 
+    public Integer incGroupShopNum(Long groupShopId, Integer num) {
+        return groupShopMapper.incCurrentNum(groupShopId, num);
+    }
+
 }

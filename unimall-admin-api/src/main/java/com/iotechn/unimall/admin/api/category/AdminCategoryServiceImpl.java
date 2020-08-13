@@ -1,13 +1,12 @@
 package com.iotechn.unimall.admin.api.category;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
-import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.AdvertDO;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.domain.SpuDO;
@@ -75,7 +74,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (!parentId.equals(0l)) {
             parent = categoryMapper.selectById(parentId);
             if (parent == null || parent.getLevel().intValue() >= 2) {
-                throw new AdminServiceException(ExceptionDefinition.PARENT_NODE_INFORMATION_ERROR);
+                throw new AdminServiceException(ExceptionDefinition.CATEGORY_PARENT_NODE_INFORMATION_ERROR);
             }
             categoryDO.setLevel(parent.getLevel() + 1);
 
@@ -106,14 +105,22 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String delete(Long id, Long adminId) throws ServiceException {
-        Integer count_category = categoryMapper.selectCount(new QueryWrapper<CategoryDO>().eq("parent_id", id));
-        Integer count_spu = spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("category_id", id));
-        advertMapper.selectCount(
+        /**
+         *  删除类目时 不允许类目有子类目
+         *  删除类目时 不允许类目有商品
+         *  删除类目时 不允许有广告关联类目
+         */
+        Integer countCategory = categoryMapper.selectCount(new QueryWrapper<CategoryDO>().eq("parent_id", id));
+        Integer countSpu = spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("category_id", id));
+        Integer countAdvert = advertMapper.selectCount(
                 new QueryWrapper<AdvertDO>()
                         .eq("union_type", AdvertUnionType.CATEGORY.getCode())
                         .eq("union_value", id.toString()));
-        if (count_category != 0 || count_spu != 0) {
-            throw new AppServiceException(ExceptionDefinition.CATEGORY_OUGHT_TO_EMPTY);
+        if (countCategory != 0 || countSpu != 0) {
+            throw new AdminServiceException(ExceptionDefinition.CATEGORY_OUGHT_TO_EMPTY);
+        }
+        if (countAdvert != 0) {
+            throw new AdminServiceException(ExceptionDefinition.CATEGORY_EXIST_ADVERT);
         }
         if (categoryMapper.deleteById(id) > 0) {
             this.clearCache();
@@ -185,7 +192,6 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         return categoryDTO;
     }
 
-    //首先的到所有的类目的List<CategoryDTO>,在根据SQL查询得到的数据转化成传往前端的数据
     @Override
     public Page<CategoryDTO> list(Long id, String title, Integer level, Long parentId, Integer page, Integer limit, Long adminId) throws ServiceException {
         QueryWrapper wrapper = new QueryWrapper();

@@ -37,7 +37,7 @@
 				}
 			}
 		}, {
-			"path": "pages/groupshop/list",
+			"path": "pages/product/groupshop",
 			"style": {
 				"navigationBarTitleText": "团购"
 			}
@@ -198,6 +198,14 @@
             "path" : "pages/category/category",
             "style" : {
 				"navigationBarTitleText": "分类",
+				"app-plus": {
+					"bounce": "none"
+				}
+			}
+        }, {
+            "path" : "pages/coupon/list",
+            "style" : {
+				"navigationBarTitleText": "我的优惠券",
 				"app-plus": {
 					"bounce": "none"
 				}

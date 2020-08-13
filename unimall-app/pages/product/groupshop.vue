@@ -2,25 +2,25 @@
 	<view class="container">
 		<!-- 空白页 -->
 		<empty v-if="loadingType === 'nomore' && groupShopList.length === 0"></empty>
-		<view class="favorite-list">
+		<view class="groupshop-list">
 			<block v-for="(item, index) in groupShopList" :key="index">
-				<navigator class="favorite-item" :class="{'b-b': index!==groupShopList.length-1}" :url="'/pages/product/detail?id=' + item.spuId + '&gid=' + item.id">
+				<navigator class="groupshop-item" :class="{'b-b': index!==groupShopList.length-1}" :url="'/pages/product/detail?id=' + item.spuId + '&gid=' + item.id">
 					<view class="image-wrapper">
 						<image :src="item.img + '?x-oss-process=style/200px'" :class="[item.loaded]" mode="aspectFill" lazy-load @load="onImageLoad('groupShopList', index)"
 						 @error="onImageError('groupShopList', index)"></image>
 					</view>
 					<view class="item-right">
-						<text class="clamp title">{{item.title}}</text>
+						<text class="clamp-title">{{item.title}}</text>
 						<view class="pro-box">
 						  	<view class="progress-box">
-						  		<progress :percent="100 * item.alreadyBuyNumber / item.minimumNumber" activeColor="#fa436a" active stroke-width="6" />
+						  		<progress :percent="100 * item.buyerNum / item.minNum" activeColor="#fa436a" active stroke-width="6" />
 						  	</view>
-							<text>{{item.minimumNumber}}人成团</text>
+							<text>{{item.minNum}}人成团</text>
 						</view>
-						<text class="attr">已拼团{{item.alreadyBuyNumber}}件</text>
-						<text class="price">
-							<text style="text-decoration:line-through;color: #6B6B6B;">¥{{item.originalPrice / 100.0}}</text>
-							<text style="color: #fa436a; font-size: 36upx;">¥{{item.minPrice / 100.0}}</text>
+						<text class="bottom">
+							<!-- <text style="text-decoration:line-through;color: #6B6B6B;">¥{{item.originalPrice / 100.0}}</text> -->
+							<text class="price">¥{{item.minPrice / 100.0}}</text>
+							<text class="attr info">已拼团{{item.buyerNum}}件</text>
 						</text>
 					</view>
 				</navigator>
@@ -131,50 +131,43 @@
 		}
 	}
 
-	/* 收藏列表项 */
-	.favorite-item {
+	/* 团购列表项 */
+	.groupshop-item {
 		display: flex;
-		position: relative;
 		padding: 30upx 40upx;
 
 		.image-wrapper {
 			width: 230upx;
 			height: 230upx;
-			flex-shrink: 0;
-			position: relative;
-
 			image {
 				border-radius: 8upx;
 			}
 		}
 
-		.checkbox {
-			position: absolute;
-			left: -16upx;
-			top: -16upx;
-			z-index: 8;
-			font-size: 44upx;
-			line-height: 1;
-			padding: 4upx;
-			color: $font-color-disabled;
-			background: #fff;
-			border-radius: 50px;
-		}
-
 		.item-right {
-			display: flex;
-			flex-direction: column;
 			flex: 1;
-			overflow: hidden;
 			position: relative;
 			padding-left: 30upx;
-
-			.title,
-			.price {
+			.clamp-title{
+				width: 410upx;
+				display: -webkit-box;
+				-webkit-line-clamp: 3;
+				-webkit-box-orient: vertical;
+			}
+			.bottom {
 				font-size: $font-base + 2upx;
 				color: $font-color-dark;
 				height: 40upx;
 				line-height: 40upx;
+				position: absolute;
+				bottom: 10upx;
+				left: 30upx;
+				
+			}
+			
+			.price {
+				color: $uni-color-primary;
+				font-size: 18px;
 			}
 
 			.attr {
@@ -182,6 +175,10 @@
 				color: $font-color-light;
 				height: 50upx;
 				line-height: 50upx;
+			}
+			
+			.info {
+				margin-left: 10upx;
 			}
 			
 			.pro-box{

@@ -1,7 +1,5 @@
 package com.iotechn.unimall.app.api.groupshop;
 
-import com.iotechn.unimall.data.constant.CacheConst;
-import com.iotechn.unimall.data.annotaion.AspectCommonCache;
 import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
 import com.iotechn.unimall.data.mapper.GroupShopMapper;
 import com.iotechn.unimall.data.model.Page;
@@ -24,7 +22,6 @@ public class GroupShopServiceImpl implements GroupShopService {
     private GroupShopMapper groupShopMapper;
 
     @Override
-    @AspectCommonCache(value= CacheConst.PRT_GROUP_SHOP_LIST,argIndex = {0,1})
     public Page<GroupShopDTO> getGroupShopPage(Integer pageNo, Integer pageSize) throws ServerException {
         return groupShopMapper.getGroupShopPage(Page.div(pageNo, pageSize, GroupShopDTO.class));
     }

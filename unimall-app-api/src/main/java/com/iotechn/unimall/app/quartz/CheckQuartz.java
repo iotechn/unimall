@@ -40,10 +40,7 @@ import java.util.stream.Collectors;
 public class CheckQuartz {
 
     private static final Logger logger = LoggerFactory.getLogger(CheckQuartz.class);
-    private static final String ORDER_STATUS_LOCK = "ORDER_STATUS_QUARTZ_LOCK";
-    private static final String GROUP_SHOP_START_LOCK = "GROUP_SHOP_START_LOCK";
-    private static final String GROUP_SHOP_END_LOCK = "GROUP_SHOP_END_LOCK";
-    private static final String GROUP_SHOP_LOCK_LOCK = "GROUP_SHOP_LOCK_LOCK";
+
     @Autowired
     private OrderMapper orderMapper;
     @Autowired
@@ -62,12 +59,12 @@ public class CheckQuartz {
     private TransactionTemplate transactionTemplate;
 
     /**
+     * 此定时任务是算是保险，防止Redis延迟消息丢失的情况
      * 订单状态定时轮训,检查是否存在需要取消订单，需要收货订单
      */
     @Scheduled(cron = "0 * * * * ?")
     public void checkOrderStatus() {
         if (lockComponent.tryLock(LockConst.SCHEDULED_ORDER_STATUS_CHECK_LOCK, 30)) {
-
             Date now = new Date();
             // 1.检查是否存在需要自动取消的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
             QueryWrapper<OrderDO> cancelWrapper = new QueryWrapper<OrderDO>();
@@ -103,7 +100,7 @@ public class CheckQuartz {
     @Scheduled(cron = "10 * * * * ?")
     @Transactional(rollbackFor = Exception.class)
     public void groupShopStart() throws Exception {
-        if (lockComponent.tryLock(GROUP_SHOP_START_LOCK, 30)) {
+        if (lockComponent.tryLock(LockConst.GROUP_SHOP_START_LOCK, 30)) {
             try {
                 Date now = new Date();
                 /**
@@ -135,7 +132,7 @@ public class CheckQuartz {
                 logger.error("[团购开始 定时任务] 异常", e);
                 throw e;
             } finally {
-                lockComponent.release(GROUP_SHOP_START_LOCK);
+                lockComponent.release(LockConst.GROUP_SHOP_START_LOCK);
             }
         }
 
@@ -145,7 +142,7 @@ public class CheckQuartz {
     @Scheduled(cron = "10 * * * * ?")
     @Transactional(rollbackFor = Exception.class)
     public void groupShopEnd() throws Exception {
-        if (lockComponent.tryLock(GROUP_SHOP_END_LOCK, 30)) {
+        if (lockComponent.tryLock(LockConst.GROUP_SHOP_END_LOCK, 30)) {
             try {
                 Date now = new Date();
                 /**
@@ -213,49 +210,9 @@ public class CheckQuartz {
                 logger.error("[团购结束 定时任务] 异常", e);
                 throw e;
             } finally {
-                lockComponent.release(GROUP_SHOP_END_LOCK);
+                lockComponent.release(LockConst.GROUP_SHOP_END_LOCK);
             }
         }
-
-    }
-
-    @Scheduled(cron = "10 * * * * ?")
-    @Transactional(rollbackFor = Exception.class)
-    public void groupShopLock() throws Exception {
-        if (lockComponent.tryLock(GROUP_SHOP_LOCK_LOCK, 30)) {
-            try {
-                Date now = new Date();
-                /**
-                 * 3 冻结 团购活动期间却被下架的商品
-                 */
-                QueryWrapper<GroupShopDO> groupShopDOEntityWrapper = new QueryWrapper<>();
-
-                // 3.1 从团购中查询活动期间的商品
-                groupShopDOEntityWrapper.eq("status", StatusType.ACTIVE.getCode())
-                        .le("gmt_start", now)
-                        .gt("gmt_end", now);
-                List<GroupShopDO> groupShopDOS = groupShopMapper.selectList(groupShopDOEntityWrapper);
-                if (!CollectionUtils.isEmpty(groupShopDOS)) {
-                    List<Long> spuIdList = groupShopDOS.stream().map(t -> t.getSpuId()).collect(Collectors.toList());
-
-                    // 3.2 在团购中查询给出spuID,是否有被下架的商品
-                    List<SpuDO> spuDOS = spuMapper.selectList(new QueryWrapper<SpuDO>().in("id", spuIdList).eq("status", StatusType.LOCK.getCode()));
-                    if (!CollectionUtils.isEmpty(spuDOS)) {
-                        List<Long> collect = spuDOS.stream().map(t -> t.getId()).collect(Collectors.toList());
-                        GroupShopDO groupShopDO = new GroupShopDO();
-                        groupShopDO.setStatus(StatusType.LOCK.getCode());
-                        groupShopDO.setGmtUpdate(now);
-                        groupShopMapper.update(groupShopDO, (new QueryWrapper<GroupShopDO>().in("spu_id", collect)));
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("[团购锁定 定时任务] 异常", e);
-                throw e;
-            } finally {
-                lockComponent.release(GROUP_SHOP_LOCK_LOCK);
-            }
-        }
-
     }
 
 }

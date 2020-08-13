@@ -232,6 +232,7 @@
 					this.$api.msg('您没有选中任何商品')
 					return
 				}
+				console.log(selectedItems)
 				this.$api.globalData.skuList = selectedItems
 				uni.navigateTo({
 					url: `/pages/order/create?takeway=cart`

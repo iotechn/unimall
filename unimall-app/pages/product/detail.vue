@@ -14,10 +14,11 @@
 			<text class="title">{{product.title}}</text>
 			<view class="price-box">
 				<text class="price-tip">¥</text>
-				<text class="price">{{isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice) / 100.0  + ' [VIP]': (selectedSku.price ? selectedSku.price : product.price) / 100.0 }}</text>
+				<text class="price">{{isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice) / 100.0 : (selectedSku.price ? selectedSku.price : product.price) / 100.0 }}</text>
 				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice) : (selectedSku.price ? selectedSku.price : product.price)) < (selectedSku.price ? selectedSku.originalPrice : product.originalPrice)"
 				 class="m-price">¥{{(selectedSku.price ? selectedSku.originalPrice : product.originalPrice) / 100}}</text>
-				<text v-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice) : (selectedSku.price ? selectedSku.price : product.price)) < (selectedSku.price ? selectedSku.originalPrice : product.originalPrice)"
+				<text v-if="product.priceTag" class="coupon-tip">{{ product.priceTag }}</text>
+				<text v-else-if="(isVip ? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice) : (selectedSku.price ? selectedSku.price : product.price)) < (selectedSku.price ? selectedSku.originalPrice : product.originalPrice)"
 				 class="coupon-tip">{{parseInt((isVip? (selectedSku.vipPrice ? selectedSku.vipPrice : product.vipPrice): (selectedSku.price ? selectedSku.price : product.price)) / (selectedSku.originalPrice ? selectedSku.originalPrice : product.originalPrice) * 100) / 10}}折</text>
 			</view>
 			<view class="bot-row">
@@ -27,12 +28,12 @@
 		</view>
 
 		<!-- 团购分享 -->
-		<button v-if="product.groupShop" class="share-section" open-type="share">
+		<button v-if="activityType === 1" class="share-section" open-type="share">
 			<view class="share-icon">
 				<text class="yticon icon-xingxing"></text>
 				团
 			</view>
-			<text class="tit">{{product.groupShop.minNum}}人成团，已有{{product.groupShop.buyerNum}}人参团</text>
+			<text class="tit">{{product.activity.minNum}}人成团，已有{{product.activity.buyerNum}}人参团</text>
 			<text class="yticon icon-bangzhu1"></text>
 			<view class="share-btn">
 				告诉TA
@@ -153,7 +154,7 @@
 					<image v-if="product.img" :src="(selectedSku.img?selectedSku.img:product.img) + '?x-oss-process=style/200px'" />
 					<view class="right">
 						<text class="price">
-							¥{{ isVip ? (selectedSku.vipPrice / 100.0 + ' [VIP]') : selectedSku.price / 100.0 }}
+							¥{{ isVip ? (selectedSku.vipPrice / 100.0) : selectedSku.price / 100.0 }} <text v-if="selectedSku && selectedSku.priceTag" class="coupon-tip">{{ selectedSku.priceTag }}</text>
 						</text>
 						<text class="stock">
 							库存：{{ selectedSku.stock }}件
@@ -217,6 +218,10 @@
 				maskState: 0, //优惠券面板显示状态
 				couponList: [],
 				submiting: false,
+				// 有效activity, 若activity未开始或已经结束，此三个值将为 undefined
+				activityType: undefined,
+				activityId: undefined,
+				activity: undefined
 
 			};
 		},
@@ -230,8 +235,8 @@
 		},
 		onShareAppMessage() {
 			return {
-				title: (this.product.groupShop ? '立即拼团-' : '好货分享-') + this.product.title,
-				imageUrl: 'https://easycampus-asset.oss-cn-shenzhen.aliyuncs.com/sharebg.png',
+				title: (this.activityType === 1 ? '立即拼团-' : '好货分享-') + this.product.title,
+				imageUrl: this.product.img,
 				path: '/pages/product/detail?id=' + this.product.id + (this.product.groupShop ? '&gid=' + this.product.groupShop.id : '')
 			}
 		},
@@ -252,11 +257,12 @@
 				}).then(res => {
 					let stock = 0
 					// 分组specification & 计算总库存
-					for (let i = 0; i < res.data.skuList.length; i++) {
+					const skuList = res.data.skuList
+					for (let i = 0; i < skuList.length; i++) {
 						// 1. 计算总库存
-						stock += res.data.skuList[i].stock
+						stock += skuList[i].stock
 						// 2. 分组
-						const tempArray = res.data.skuList[i].specification.split(',')
+						const tempArray = skuList[i].specification.split(',')
 						for (let j = 0; j < tempArray.length; j++) {
 							const singleArray = tempArray[j].split('_')
 							const key = singleArray[0]
@@ -274,6 +280,35 @@
 						}
 					}
 					res.data.stock = stock
+					// 解析活动
+					const activityType = res.data.activityType
+					const activity = res.data.activity
+					const timestamp = res.timestamp
+					if (activityType && activity && activity.gmtStart < timestamp && activity.gmtEnd > timestamp) {
+						if (activityType === 1) {
+							that.activityType = activityType
+							that.activityId = res.data.activityId
+							that.activity = activity
+							// 团购活动
+							res.data.priceTag = '团购价'
+							let lowestPrice = skuList[0].price
+							for (let i = 0; i < skuList.length; i++) {
+								skuList[i].priceTag = '团购价'
+								for (let j = 0; j < activity.groupShopSkuDTOList.length; j++) {
+									const groupshop = activity.groupShopSkuDTOList[j]
+									if (groupshop.skuId === skuList[i].id) {
+										skuList[i].price = groupshop.skuGroupShopPrice
+										skuList[i].vipPrice = groupshop.skuGroupShopPrice
+										if (skuList[i].price < lowestPrice) {
+											lowestPrice = skuList[i].price
+										}
+									}
+								}
+							}
+							res.data.price = lowestPrice
+							res.data.vipPrice = lowestPrice
+						}
+					}
 					that.product = JSON.parse(JSON.stringify(res.data))
 					uni.hideLoading()
 				})
@@ -418,7 +453,6 @@
 						categoryIdList: that.product.categoryIds,
 						weight: that.selectedSku.weight
 					}
-					debugger
 					if (that.product.groupShop) {
 						skuItem['groupShopId'] = that.product.groupShop.id
 					}
@@ -601,6 +635,10 @@
 		.tit {
 			font-size: $font-base;
 			margin-left: 10upx;
+			width: 450rpx;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
 		}
 
 		.icon-bangzhu1 {
@@ -801,11 +839,25 @@
 					font-size: $font-lg;
 					color: $uni-color-primary;
 					margin-bottom: 10upx;
+					
+					.coupon-tip {
+						align-items: center;
+						margin-left: 8upx;
+						padding: 4upx 10upx;
+						background: $uni-color-primary;
+						font-size: $font-sm;
+						color: #fff;
+						border-radius: 6upx;
+						line-height: 1;
+						transform: translateY(-4upx);
+					}
 				}
 
 				.selected-text {
 					margin-right: 10upx;
 				}
+				
+				
 			}
 		}
 
