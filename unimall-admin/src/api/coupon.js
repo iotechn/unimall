@@ -47,12 +47,12 @@ export function activeCoupon(data) {
 
 export function deleteCoupon(data) {
   return request({
-    method: 'get',
-    params: {
+    method: 'post',
+    data: Qs.stringify({
       _gp: 'admin.coupon',
       _mt: 'delete',
       ...data
-    }
+    })
   })
 }
 

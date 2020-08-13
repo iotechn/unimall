@@ -23,7 +23,7 @@ import java.util.Date;
 @HttpOpenApi(group = "admin.coupon", description = "优惠卷")
 public interface AdminCouponService {
 
-    @HttpMethod(description = "创建", permission = "promote:coupon:create", permissionParentName = "推广管理", permissionName = "优惠管理")
+    @HttpMethod(description = "创建", permission = "promotion:coupon:create", permissionParentName = "推广管理", permissionName = "优惠管理")
     public CouponDO create(
             @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "优惠卷标题") String title,
             @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "优惠卷类别，如满减") Integer type,
@@ -39,12 +39,12 @@ public interface AdminCouponService {
             @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "优惠结束时间") Long gmtEnd,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "删除", permission = "promote:coupon:delete", permissionParentName = "推广管理", permissionName = "优惠管理")
+    @HttpMethod(description = "删除", permission = "promotion:coupon:delete", permissionParentName = "推广管理", permissionName = "优惠管理")
     public Boolean delete(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "优惠卷ID") Long id,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "修改", permission = "promote:coupon:update", permissionParentName = "推广管理", permissionName = "优惠管理")
+    @HttpMethod(description = "修改", permission = "promotion:coupon:edit", permissionParentName = "推广管理", permissionName = "优惠管理")
     public Boolean edit(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "优惠卷ID") Long id,
             @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "优惠卷标题") String title,
@@ -62,14 +62,14 @@ public interface AdminCouponService {
             @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "优惠结束时间") Date gmtEnd,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "修改", permission = "promote:coupon:update", permissionParentName = "推广管理", permissionName = "优惠管理")
+    @HttpMethod(description = "修改", permission = "promotion:coupon:edit", permissionParentName = "推广管理", permissionName = "优惠管理")
     public Boolean updateCouponStatus(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "优惠卷ID") Long id,
             @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "优惠卷状态") Integer status,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
 
-    @HttpMethod(description = "查询", permission = "promote:coupon:query", permissionParentName = "推广管理", permissionName = "优惠管理")
+    @HttpMethod(description = "查询", permission = "promotion:coupon:list", permissionParentName = "推广管理", permissionName = "优惠管理")
     public Page<CouponAdminDTO> list(
             @HttpParam(name = "title", type = HttpParamType.COMMON, description = "优惠卷标题") String title,
             @HttpParam(name = "type", type = HttpParamType.COMMON, description = "优惠卷类型") Integer type,

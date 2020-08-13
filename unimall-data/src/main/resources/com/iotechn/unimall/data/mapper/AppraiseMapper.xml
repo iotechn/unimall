@@ -84,7 +84,7 @@
             and a.id = #{appraiseId}
     </select>
 
-    <select id="selectAppraiseCondition" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
+    <select id="selectAppraisePage" resultType="com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO">
         select
         a.id as id,
         a.gmt_create as gmtCreate,
@@ -125,36 +125,6 @@
           AND  a.content LIKE concat("%",#{content},"%")
         </if>
         order by a.id desc
-        limit #{offset},#{limit}
     </select>
 
-    <select id="countAppraiseCondition" resultType="java.lang.Integer">
-        select
-        count(1)
-        from
-        unimall_appraise a
-        LEFT JOIN unimall_user u ON a.user_id = u.id
-        LEFT JOIN unimall_sku sk ON a.sku_id = sk.id
-        LEFT JOIN unimall_spu sp ON a.spu_id = sp.id
-        where
-        1 = 1
-        <if test="id != null">
-          AND  a.id = #{id}
-        </if>
-        <if test="userName != null">
-          AND  u.nickname LIKE concat("%",#{userName},"%")
-        </if>
-        <if test="spuName != null">
-          AND  sp.title LIKE concat("%",#{spuName},"%")
-        </if>
-        <if test="orderId != null">
-          AND  a.order_id = #{orderId}
-        </if>
-        <if test="score != null">
-          AND  a.score = #{score}
-        </if>
-        <if test="content != null">
-          AND  a.content LIKE concat("%",#{content},"%")
-        </if>
-    </select>
 </mapper>

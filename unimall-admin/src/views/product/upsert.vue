@@ -272,7 +272,7 @@
 </template>
 
 <script>
-import { detailGoods, editGoods, createGoods } from '@/api/goods'
+import { detailProduct, editProduct, createProduct } from '@/api/product'
 import { categoryTree } from '@/api/category'
 import { listFreight } from '@/api/freight'
 import { uploadPath, createStorage } from '@/api/storage'
@@ -375,7 +375,7 @@ export default {
     init: function() {
       const productId = this.$route.query.id
       if (productId) {
-        detailGoods(productId).then(response => {
+        detailProduct(productId).then(response => {
           // 将分转换为元
           response.data.data.priceRaw = response.data.data.price / 100
           response.data.data.originalPriceRaw = response.data.data.originalPrice / 100
@@ -525,10 +525,10 @@ export default {
               attributeList: this.attributes,
               skuList: skuList
             }
-            let method = createGoods
+            let method = createProduct
             let successWords = '创建成功'
             if (action === 'edit') {
-              method = editGoods
+              method = editProduct
               successWords = '编辑成功'
             }
             method(finalProduct)

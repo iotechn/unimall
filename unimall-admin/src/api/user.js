@@ -1,11 +1,12 @@
 import request from '@/utils/request'
+import Qs from 'qs'
 
-export function fetchList(query) {
+export function listUser(query) {
   return request({
     method: 'get',
     params: {
       _gp: 'admin.user',
-      _mt: 'getUser',
+      _mt: 'list',
       ...query
     }
   })
@@ -14,45 +15,44 @@ export function fetchList(query) {
 export function activeUser(data) {
   return request({
     method: 'post',
-    params: {
+    data: Qs.stringify({
       _gp: 'admin.user',
-      _mt: 'updateStatus',
+      _mt: 'editStatus',
       userId: data.id,
       status: data.status
-    }
+    })
   })
 }
 
 export function createUser(data) {
   return request({
     method: 'post',
-    params: {
+    data: Qs.stringify({
       _gp: 'admin.user',
-      _mt: 'addUser',
+      _mt: 'create',
       user: JSON.stringify(data)
-    }
+    })
   })
 }
 
 export function updateUser(data) {
   return request({
     method: 'post',
-    params: {
+    data: Qs.stringify({
       _gp: 'admin.user',
-      _mt: 'updateUser',
+      _mt: 'edit',
       user: JSON.stringify(data)
-    }
+    })
   })
 }
 
 export function deleteUser(id, nickname) {
   return request({
     method: 'post',
-    params: {
+    data: Qs.stringify({
       _gp: 'admin.user',
-      _mt: 'deleteUser',
-      id: id,
-      nickname: nickname
-    }
+      _mt: 'delete',
+      id: id
+    })
   })
 }

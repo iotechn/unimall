@@ -24,7 +24,7 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="管理员ID" prop="id" sortable />
+      <el-table-column align="center" label="管理员ID" prop="id" />
 
       <el-table-column align="center" label="管理员名称" prop="username" />
 
@@ -104,32 +104,6 @@
   </div>
 </template>
 
-<style>
-.avatar-uploader .el-upload {
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader .el-upload:hover {
-  border-color: #20a0ff;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 120px;
-  height: 120px;
-  line-height: 120px;
-  text-align: center;
-}
-.avatar {
-  width: 145px;
-  height: 145px;
-  display: block;
-}
-</style>
-
 <script>
 import {
   listAdmin,
@@ -155,13 +129,7 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        username: undefined,
-        sort: 'add_time',
-        order: 'desc'
-      },
-      tenementForm: {
-        title: undefined,
-        tenementCode: undefined
+        username: undefined
       },
       dataForm: {
         id: undefined,
@@ -335,3 +303,29 @@ export default {
   }
 }
 </script>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #20a0ff;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 120px;
+  height: 120px;
+  line-height: 120px;
+  text-align: center;
+}
+.avatar {
+  width: 145px;
+  height: 145px;
+  display: block;
+}
+</style>

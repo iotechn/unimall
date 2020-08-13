@@ -176,7 +176,7 @@ public class CheckQuartz {
 
                         if (groupShopDO.getAutomaticRefund() == GroupShopAutomaticRefundType.YES.getCode() && groupShopDO.getBuyerNum().compareTo(groupShopDO.getMinNum()) < 0) {
                             // 2.2.2.1.退款
-                            logger.info("[团购结束] 退款逻辑 groupShopId:" + groupShopDO.getId());
+                            logger.info("[团购结束] 退款逻辑 GroupShopId:" + groupShopDO.getId());
                             for (OrderDO orderDO : lockOrderList) {
                                 transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                                     @Override
@@ -193,7 +193,7 @@ public class CheckQuartz {
                                 });
                             }
                         } else {
-                            logger.info("[团购结束] 发货逻辑 groupShopId:" + groupShopDO.getId());
+                            logger.info("[团购结束] 发货逻辑 GroupShopId:" + groupShopDO.getId());
                             // 2.2.2.2 转换订单为待出货状态 (非自动退款场景)
                             List<Long> collect = lockOrderList.stream().map(s -> s.getId()).collect(Collectors.toList());
                             OrderDO orderDO = new OrderDO();

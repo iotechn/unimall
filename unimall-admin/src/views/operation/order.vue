@@ -97,19 +97,19 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" width="180" label="订单编号" prop="orderNo" />
+      <el-table-column align="center" width="210" label="订单编号" prop="orderNo" />
 
       <el-table-column align="center" width="80" label="用户ID" prop="userId" />
 
       <el-table-column align="center" width="120" label="订单状态" prop="status">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.status | orderStatusFilter }}</el-tag>
+          <el-tag :type="statusColor(scope.row.status)">{{ scope.row.status | orderStatusFilter }}</el-tag>
         </template>
       </el-table-column>
 
       <el-table-column align="center" width="110" label="支付渠道" prop="payChannel">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.payChannel | payChannelFilter }}</el-tag>
+          <el-tag :type="payChannelColor(scope.row.payChannel)">{{ scope.row.payChannel | payChannelFilter }}</el-tag>
         </template>
       </el-table-column>
 
@@ -125,7 +125,8 @@
 
       <el-table-column align="center" width="140" label="物流渠道" prop="shipCode">
         <template slot-scope="scope">
-          <el-tag>{{ scope.row.shipCode | shipCodeFilter }}</el-tag>
+          <el-tag v-if="scope.row.status <= 20 || scope.row.status >= 80" type="info">未发货</el-tag>
+          <el-tag v-else>{{ scope.row.shipCode | shipCodeFilter }}</el-tag>
         </template>
       </el-table-column>
 
@@ -310,20 +311,6 @@
   </div>
 </template>
 
-<style>
-  .el-table .danger-row {
-    background: rgb(201, 143, 143);
-  }
-
-  .el-table .warning-row {
-    background: rgb(197, 175, 142);
-  }
-
-  .el-table .success-row {
-    background: rgb(166, 202, 149);
-  }
-</style>
-
 <script>
 import { listOrder, shipOrder, refundOrder, detailOrder, getExcelInfo, editAdminMono, getExcelStatistics } from '@/api/order'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
@@ -384,11 +371,13 @@ export default {
       if (shipCode) {
         return shipCodeMap[shipCode]
       }
-      return '未发货'
+      return '无需物流公司'
     }
   },
   data() {
     return {
+      statusMap,
+      shipCodeMap,
       excelData: {
         barcode: undefined,
         name: undefined,
@@ -403,7 +392,6 @@ export default {
         gmtStart: undefined,
         gmtEnd: undefined
       },
-      shipCodeMap,
       list: undefined,
       total: 0,
       listLoading: true,
@@ -411,12 +399,8 @@ export default {
         page: 1,
         limit: 20,
         id: undefined,
-        name: undefined,
-        orderStatusArray: [],
-        sort: 'id',
-        order: 'desc'
+        name: undefined
       },
-      statusMap,
       orderDialogVisible: false,
       orderDetail: {},
       refundForm: {
@@ -484,17 +468,19 @@ export default {
     handleShip(row) {
       this.shipDialogVisible = true
       this.shipForm.orderNo = row.orderNo
+      this.shipForm.shipCode = ''
+      this.shipForm.shipNo = ''
     },
     confirmShip() {
       this.$refs['shipForm'].validate(valid => {
         if (valid) {
-          this.shipSubmiting = true
           if (this.shipForm.shipCode !== 'NONE' && !this.shipForm.shipNo) {
             this.$notify.error({
               title: '失败',
               message: '请填写运单号'
             })
           } else {
+            this.shipSubmiting = true
             shipOrder(this.shipForm)
               .then(response => {
                 this.shipSubmiting = false
@@ -663,6 +649,38 @@ export default {
           })
         })
     },
+    statusColor(status) {
+      switch (status) {
+        case 10:
+        case 80:
+        case 90:
+          return 'info'
+        case 30:
+        case 40:
+        case 50:
+          return 'success'
+        case 20:
+          return 'warning'
+        case 60:
+        case 70:
+          return 'danger'
+      }
+      return 'primary'
+    },
+    payChannelColor(channel) {
+      if (!channel) {
+        return 'info'
+      }
+      if (channel === 'WX') {
+        return 'success'
+      } else if (channel === 'OFFLINE') {
+        return 'warning'
+      } else if (channel === 'ALI') {
+        return 'primary'
+      } else {
+        return 'danger'
+      }
+    },
     handleDownload(data) {
       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = [
@@ -761,3 +779,16 @@ export default {
   }
 }
 </script>
+<style>
+  .el-table .danger-row {
+    background: rgb(201, 143, 143);
+  }
+
+  .el-table .warning-row {
+    background: rgb(197, 175, 142);
+  }
+
+  .el-table .success-row {
+    background: rgb(166, 202, 149);
+  }
+</style>

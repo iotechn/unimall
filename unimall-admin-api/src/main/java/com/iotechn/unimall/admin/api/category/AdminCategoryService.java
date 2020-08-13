@@ -25,7 +25,7 @@ public interface AdminCategoryService {
     @HttpMethod(description = "获取类目树")
     public List<CategoryDTO> categoryTree() throws ServiceException;
 
-    @HttpMethod(description = "创建", permission = "operation:category:create", permissionParentName = "商品管理", permissionName = "类目管理")
+    @HttpMethod(description = "创建", permission = "product:category:create", permissionParentName = "商品管理", permissionName = "类目管理")
     public CategoryDO create(
             @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,
             @HttpParam(name = "parentId", type = HttpParamType.COMMON, description = "类目父节点", valueDef = "0") Long parentId,
@@ -33,12 +33,12 @@ public interface AdminCategoryService {
             @HttpParam(name = "picUrl", type = HttpParamType.COMMON, description = "类目图片") String picUrl,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "删除", permission = "operation:category:delete", permissionParentName = "商品管理", permissionName = "类目管理")
+    @HttpMethod(description = "删除", permission = "product:category:delete", permissionParentName = "商品管理", permissionName = "类目管理")
     public String delete(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "类目ID") Long id,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "修改", permission = "operation:category:update", permissionParentName = "商品管理", permissionName = "类目管理")
+    @HttpMethod(description = "修改", permission = "product:category:edit", permissionParentName = "商品管理", permissionName = "类目管理")
     public CategoryDTO update(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "类目ID") Long id,
             @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,
@@ -59,7 +59,7 @@ public interface AdminCategoryService {
      * @return
      * @throws ServiceException
      */
-    @HttpMethod(description = "查询", permission = "operation:category:query", permissionParentName = "商品管理", permissionName = "类目管理")
+    @HttpMethod(description = "查询", permission = "product:category:list", permissionParentName = "商品管理", permissionName = "类目管理")
     public Page<CategoryDTO> list(
             @HttpParam(name = "id", type = HttpParamType.COMMON, description = "类目ID") Long id,
             @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,

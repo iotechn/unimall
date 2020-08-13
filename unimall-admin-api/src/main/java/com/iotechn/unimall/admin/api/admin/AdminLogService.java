@@ -18,7 +18,7 @@ import com.iotechn.unimall.data.model.Page;
 @HttpOpenApi(group = "admin.log", description = "操作日志服务")
 public interface AdminLogService {
 
-    @HttpMethod(description = "管理员日志", permission = "admin:log:list", permissionParentName = "系统管理", permissionName = "操作日志")
+    @HttpMethod(description = "管理员日志", permission = "sys:log:list", permissionParentName = "系统管理", permissionName = "操作日志")
     public Page<AdminLogDO> list(
             @HttpParam(name = "targetAdminId", type = HttpParamType.COMMON, description = "管理员Id") Long targetAdminId,
             @HttpParam(name = "page", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer page,

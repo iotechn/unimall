@@ -5,7 +5,6 @@ import com.iotechn.unimall.core.annotation.HttpOpenApi;
 import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.annotation.param.Range;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
@@ -47,7 +46,7 @@ public interface AdminOrderService {
             @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单Id") Long orderNo,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "根据传入时间和订单状态查询订单信息")
+    @HttpMethod(description = "根据传入时间和订单状态查询订单信息", permission = "operation:order:querytoexcel", permissionParentName = "运营管理", permissionName = "订单管理")
     public List<OrderDTO> queryToExcel(
             @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "查询开始时间") Long gmtStart,
             @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "查询结束时间") Long gmtEnd,

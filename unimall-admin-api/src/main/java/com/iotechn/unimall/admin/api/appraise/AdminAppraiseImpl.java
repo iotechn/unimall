@@ -1,8 +1,10 @@
 package com.iotechn.unimall.admin.api.appraise;
 
-import com.iotechn.unimall.data.constant.CacheConst;
+import com.iotechn.unimall.core.exception.AdminServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.mapper.AppraiseMapper;
@@ -10,8 +12,8 @@ import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,24 +33,22 @@ public class AdminAppraiseImpl implements AdminAppraise {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteAppraise(Long adminId, Long id) throws ServiceException {
+    public String delete(Long id, Long adminId) throws ServiceException {
         AppraiseDO appraiseDO = appraiseMapper.selectById(id);
-        boolean succ = appraiseMapper.deleteById(id) > 0;
-        if (succ) {
-            cacheComponent.delPrefixKey(CacheConst.PRT_APPRAISE_LIST + appraiseDO.getSpuId());
+        if (appraiseMapper.deleteById(id) > 0) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    cacheComponent.delPrefixKey(CacheConst.PRT_APPRAISE_LIST + appraiseDO.getSpuId());
+                }
+            });
+            return "ok";
         }
-        return succ;
+        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
-    public Page<AppraiseResponseDTO> getAppraiseList(Long adminId, Long id, String userName, String spuName, Long orderId, Integer score, String content, Integer pageNo, Integer limit) throws ServiceException {
-
-        Integer count = appraiseMapper.countAppraiseCondition(id, userName, spuName, orderId, score, content);
-
-        List<AppraiseResponseDTO> appraiseResponseDTOList = appraiseMapper.selectAppraiseCondition(id, userName, spuName, orderId, score, content, (pageNo - 1) * limit, limit);
-
-        Page<AppraiseResponseDTO> page = new Page<AppraiseResponseDTO>(appraiseResponseDTOList, pageNo, limit, count);
-
-        return page;
+    public Page<AppraiseResponseDTO> list(Long id, String userName, String spuName, Long orderId, Integer score, String content, Integer pageNo, Integer limit, Long adminId) throws ServiceException {
+        return appraiseMapper.selectAppraisePage(Page.div(pageNo, limit, AppraiseResponseDTO.class), id, userName, spuName, orderId, score, content);
     }
 }

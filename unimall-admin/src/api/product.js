@@ -26,7 +26,7 @@ export function listProductIdAndTitleByCategoryId(categoryId) {
   })
 }
 
-export function listGoods(query) {
+export function listProduct(query) {
   return request({
     method: 'get',
     params: {
@@ -37,7 +37,7 @@ export function listGoods(query) {
   })
 }
 
-export function editGoods(data) {
+export function editProduct(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
@@ -48,7 +48,7 @@ export function editGoods(data) {
   })
 }
 
-export function deleteGoods(id) {
+export function deleteProduct(id) {
   return request({
     method: 'post',
     params: {
@@ -59,7 +59,7 @@ export function deleteGoods(id) {
   })
 }
 
-export function batchDeleteGoods(ids) {
+export function batchDeleteProduct(ids) {
   return request({
     method: 'post',
     data: Qs.stringify({
@@ -70,7 +70,7 @@ export function batchDeleteGoods(ids) {
   })
 }
 
-export function createGoods(data) {
+export function createProduct(data) {
   return request({
     method: 'post',
     data: Qs.stringify({
@@ -81,7 +81,7 @@ export function createGoods(data) {
   })
 }
 
-export function detailGoods(id) {
+export function detailProduct(id) {
   return request({
     method: 'get',
     params: {
@@ -95,11 +95,11 @@ export function detailGoods(id) {
 export function freezeOrActivtion(id, status) {
   return request({
     method: 'post',
-    params: {
+    data: Qs.stringify({
       _gp: 'admin.product',
       _mt: 'freezeOrActivation',
       spuId: id,
       status: status
-    }
+    })
   })
 }

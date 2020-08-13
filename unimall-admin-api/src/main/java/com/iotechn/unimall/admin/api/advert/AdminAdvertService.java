@@ -21,7 +21,7 @@ import com.iotechn.unimall.data.model.Page;
 @HttpOpenApi(group = "admin.advert", description = "广告推销")
 public interface AdminAdvertService {
 
-    @HttpMethod(description = "创建", permission = "promote:advert:create", permissionParentName = "推广管理", permissionName = "广告管理")
+    @HttpMethod(description = "创建", permission = "promotion:advert:create", permissionParentName = "推广管理", permissionName = "广告管理")
     public String create(
             @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "广告类型") Integer type,
             @NotNull @HttpParam(name = "unionType", type = HttpParamType.COMMON, description = "关联类型") Integer unionType,
@@ -32,13 +32,13 @@ public interface AdminAdvertService {
             @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色", valueDef = "rgb(255,255,255)") String color,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "删除", permission = "promote:advert:delete", permissionParentName = "推广管理", permissionName = "广告管理")
+    @HttpMethod(description = "删除", permission = "promotion:advert:delete", permissionParentName = "推广管理", permissionName = "广告管理")
     public String delete(
             @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "广告类型") Integer type,
             @NotNull @HttpParam(name = "adId", type = HttpParamType.COMMON, description = "广告ID") Long adId,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "修改", permission = "promote:advert:update", permissionParentName = "推广管理", permissionName = "广告管理")
+    @HttpMethod(description = "修改", permission = "promotion:advert:edit", permissionParentName = "推广管理", permissionName = "广告管理")
     public String edit(
             @NotNull @HttpParam(name = "adId", type = HttpParamType.COMMON, description = "广告ID") Long adId,
             @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "广告类型") Integer type,
@@ -50,7 +50,7 @@ public interface AdminAdvertService {
             @HttpParam(name = "color", type = HttpParamType.COMMON, description = "广告图片颜色") String color,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "查询", permission = "promote:advert:query", permissionParentName = "推广管理", permissionName = "广告管理")
+    @HttpMethod(description = "查询", permission = "promotion:advert:list", permissionParentName = "推广管理", permissionName = "广告管理")
     public Page<AdvertDO> list(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
             @HttpParam(name = "adType", type = HttpParamType.COMMON, description = "广告类型") Integer adType,

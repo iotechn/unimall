@@ -13,7 +13,7 @@ import com.iotechn.unimall.data.model.Page;
 @HttpOpenApi(group = "admin.groupshop", description = "管理团购商品服务")
 public interface AdminGroupShopService {
 
-    @HttpMethod(description = "增加", permission = "operation:groupShop:create", permissionParentName = "商品管理", permissionName = "团购商品管理")
+    @HttpMethod(description = "增加", permission = "product:groupshop:create", permissionParentName = "商品管理", permissionName = "团购商品管理")
     public String create(
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "spuId") Long spuId,
             @NotNull @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "团购开始时间戳") Long gmtStart,
@@ -23,12 +23,12 @@ public interface AdminGroupShopService {
             @NotNull @HttpParam(name = "groupShopSkuList", type = HttpParamType.COMMON, description = "团购sku链表") String groupShopSkuListStr,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "删除", permission = "operation:groupShop:delete", permissionParentName = "商品管理", permissionName = "团购商品管理")
+    @HttpMethod(description = "删除", permission = "product:groupshop:delete", permissionParentName = "商品管理", permissionName = "团购商品管理")
     public String delete(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "团购商品的Id") Long id,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws  ServiceException;
 
-    @HttpMethod(description = "修改", permission = "operation:groupShop:update", permissionParentName = "商品管理", permissionName = "团购商品管理")
+    @HttpMethod(description = "修改", permission = "product:groupshop:edit", permissionParentName = "商品管理", permissionName = "团购商品管理")
     public GroupShopDTO edit(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "团购商品spuID") Long id,
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "spuId") Long spuId,
@@ -39,7 +39,7 @@ public interface AdminGroupShopService {
             @NotNull @HttpParam(name = "groupShopSkuList", type = HttpParamType.COMMON, description = "团购sku链表") String groupShopSkuDOListStr,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "查询", permission = "operation:groupShop:query", permissionParentName = "商品管理", permissionName = "团购商品管理")
+    @HttpMethod(description = "查询", permission = "product:groupshop:list", permissionParentName = "商品管理", permissionName = "团购商品管理")
     public Page<GroupShopDTO> list(
             @HttpParam(name = "id", type = HttpParamType.COMMON, description = "团购商品的ID") Long id,
             @HttpParam(name = "spuName", type = HttpParamType.COMMON, description = "团购商品的名称") String spuName,

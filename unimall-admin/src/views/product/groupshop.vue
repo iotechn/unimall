@@ -227,10 +227,9 @@
 </template>
 
 <script>
-import { detailGoods } from '@/api/goods'
+import { detailProduct, getSpuBigTree } from '@/api/product'
 import { listGroupShop, createGroupShop, deleteGroupShop, editGroupShop } from '@/api/groupshop'
 import BackToTop from '@/components/BackToTop'
-import { getSpuBigTree } from '@/api/goods'
 import { formatDateAndTime } from '@/filters'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
@@ -388,7 +387,7 @@ export default {
 
         // 2. 向后台根据商品ID获取商品信息
         this.dataForm.spuId = tag.substring(2)
-        detailGoods(this.dataForm.spuId).then(response => {
+        detailProduct(this.dataForm.spuId).then(response => {
           response.data.data.skuList.forEach(item => {
             item.price = item.price / 100
             item.originalPrice = item.originalPrice / 100

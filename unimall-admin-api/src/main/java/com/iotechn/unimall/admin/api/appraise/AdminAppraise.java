@@ -20,14 +20,12 @@ import com.iotechn.unimall.data.model.Page;
 public interface AdminAppraise {
 
     @HttpMethod(description = "删除", permission = "operation:appraise:delete", permissionParentName = "运营管理", permissionName = "评论管理")
-    public boolean deleteAppraise(
-            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
-            @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "评论id") Long id) throws ServiceException;
+    public String delete(
+            @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "评论id") Long id,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-
-    @HttpMethod(description = "查询", permission = "operation:appraise:query", permissionParentName = "运营管理", permissionName = "评论管理")
-    public Page<AppraiseResponseDTO> getAppraiseList(
-            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
+    @HttpMethod(description = "查询", permission = "operation:appraise:list", permissionParentName = "运营管理", permissionName = "评论管理")
+    public Page<AppraiseResponseDTO> list(
             @HttpParam(name = "id", type = HttpParamType.COMMON, description = "评论id") Long id,
             @HttpParam(name = "userName", type = HttpParamType.COMMON, description = "用户姓名") String userName,
             @HttpParam(name = "spuName", type = HttpParamType.COMMON, description = "商品名字") String spuName,
@@ -35,6 +33,7 @@ public interface AdminAppraise {
             @HttpParam(name = "score", type = HttpParamType.COMMON, description = "评论id") Integer score,
             @HttpParam(name = "content", type = HttpParamType.COMMON, description = "评论id") String content,
             @HttpParam(name = "pageNo", type = HttpParamType.COMMON, description = "页码") Integer pageNo,
-            @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页码长度") Integer limit) throws ServiceException;
+            @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页码长度") Integer limit,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
 }
