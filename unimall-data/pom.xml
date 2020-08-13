@@ -78,6 +78,13 @@
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 
+		<!-- 阿里云开放搜索 -->
+		<dependency>
+			<groupId>com.aliyun.opensearch</groupId>
+			<artifactId>aliyun-sdk-opensearch</artifactId>
+			<version>3.2.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>

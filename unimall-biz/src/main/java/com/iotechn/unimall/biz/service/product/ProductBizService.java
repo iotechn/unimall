@@ -36,11 +36,6 @@ import java.util.stream.Collectors;
 @Service
 public class ProductBizService {
 
-    /**
-     * SPU DTO 缓存  CA_SPU_+spuId
-     */
-    public static final String CA_SPU_PREFIX = "CA_SPU_";
-
     @Autowired
     private SpuMapper spuMapper;
 
