@@ -1,6 +1,6 @@
 package com.iotechn.unimall.data.mapper;
 
-import com.iotechn.unimall.data.domain.ConfigDO;
+import com.iotechn.unimall.data.domain.MerchantInfoDO;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,5 +9,5 @@ import com.iotechn.unimall.data.domain.ConfigDO;
  * Date: 2019-07-20
  * Time: 上午10:57
  */
-public interface ConfigMapper extends IMapper<ConfigDO> {
+public interface MerchantInfoMapper extends IMapper<MerchantInfoDO> {
 }

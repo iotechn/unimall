@@ -1,6 +1,7 @@
 package com.iotechn.unimall.biz.service.config;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.storage.StorageBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.core.Const;
@@ -8,15 +9,20 @@ import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
+import com.iotechn.unimall.data.annotaion.AspectCommonCache;
 import com.iotechn.unimall.data.component.CacheComponent;
-import com.iotechn.unimall.data.domain.ConfigDO;
-import com.iotechn.unimall.data.dto.ConfigDTO;
-import com.iotechn.unimall.data.mapper.ConfigMapper;
+import com.iotechn.unimall.data.constant.CacheConst;
+import com.iotechn.unimall.data.domain.MerchantInfoDO;
+import com.iotechn.unimall.data.dto.MerchantInfoDTO;
+import com.iotechn.unimall.data.mapper.MerchantInfoMapper;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,10 +32,10 @@ import java.util.List;
  * Created by rize on 2019/7/21.
  */
 @Service
-public class ConfigBizService {
+public class MerchantInfoBizService {
 
     @Autowired
-    private ConfigMapper configMapper;
+    private MerchantInfoMapper merchantInfoMapper;
 
     @Autowired
     private CacheComponent cacheComponent;
@@ -42,47 +48,57 @@ public class ConfigBizService {
 
     private OkHttpClient okHttpClient = new OkHttpClient();
 
-    private static final String CA_CONFIG_DTO_KEY = "CA_CONFIG_DTO_KEY";
-
     private static final String GEN_QR_CODE_URL = "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode?access_token=";
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigBizService.class);
+    private static final Logger logger = LoggerFactory.getLogger(MerchantInfoBizService.class);
 
-    public ConfigDTO getMerchantConfig() {
-        ConfigDTO obj = cacheComponent.getObj(CA_CONFIG_DTO_KEY, ConfigDTO.class);
-        if (obj != null) {
-            return obj;
-        }
-        List<ConfigDO> list = configMapper.selectList(null);
-        ConfigDTO configDTO = new ConfigDTO();
-        for (ConfigDO configDO : list) {
-            switch (configDO.getKeyWord()) {
+    @AspectCommonCache(value = CacheConst.MERCHANT_INFO,arrayClass = MerchantInfoDTO.class,second = -1)
+    public MerchantInfoDTO getMerchantInfo() {
+        List<MerchantInfoDO> list = merchantInfoMapper.selectList(null);
+        MerchantInfoDTO configDTO = new MerchantInfoDTO();
+        for (MerchantInfoDO storeInfoDO : list) {
+            switch (storeInfoDO.getKeyWord()) {
                 case "title":
-                    configDTO.setTitle(configDO.getValueWorth());
+                    configDTO.setTitle(storeInfoDO.getValueWorth());
                     break;
                 case "logoUrl":
-                    configDTO.setLogoUrl(configDO.getValueWorth());
+                    configDTO.setLogoUrl(storeInfoDO.getValueWorth());
                     break;
                 case "description":
-                    configDTO.setDescription(configDO.getValueWorth());
+                    configDTO.setDescription(storeInfoDO.getValueWorth());
                     break;
                 case "address":
-                    configDTO.setAddress(configDO.getValueWorth());
+                    configDTO.setAddress(storeInfoDO.getValueWorth());
                     break;
                 case "showType":
-                    configDTO.setShowType(Integer.parseInt(configDO.getValueWorth()));
+                    configDTO.setShowType(Integer.parseInt(storeInfoDO.getValueWorth()));
                     break;
                 case "status":
-                    configDTO.setStatus(Integer.parseInt(configDO.getValueWorth()));
+                    configDTO.setStatus(Integer.parseInt(storeInfoDO.getValueWorth()));
                     break;
             }
         }
-        cacheComponent.putObj(CA_CONFIG_DTO_KEY, configDTO, Const.CACHE_ONE_DAY);
         return configDTO;
     }
 
-    public void clearMerchantConfigCache() {
-        cacheComponent.del(CA_CONFIG_DTO_KEY);
+    public boolean createOrUpdate(String key, String value){
+        QueryWrapper<MerchantInfoDO> wrapper = new QueryWrapper<>();
+        wrapper.eq("key_word",key);
+        List<MerchantInfoDO> merchantInfoDOS = merchantInfoMapper.selectList(wrapper);
+        if(CollectionUtils.isEmpty(merchantInfoDOS)){
+            return merchantInfoMapper.insert(new MerchantInfoDO(key,value)) > 0;
+        }else {
+            return merchantInfoMapper.update(new MerchantInfoDO(key,value),new QueryWrapper<MerchantInfoDO>().eq("key_word",key)) > 0;
+        }
+    }
+
+    public void clearMerchantInfoCache() {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                cacheComponent.del(CacheConst.MERCHANT_INFO);
+            }
+        });
     }
 
     /**

@@ -11,7 +11,7 @@ import lombok.Data;
  */
 
 @Data
-public class ConfigDTO extends SuperDTO {
+public class MerchantInfoDTO extends SuperDTO {
     private String title;
     private String logoUrl;
     private String description;

@@ -165,6 +165,19 @@
             },
             "name":"coupon",
             "page":"/promotion/coupon"
+         },
+         {
+            "path":"merchant",
+            "meta":{
+               "noCache":true,
+               "perms":[
+                  "promote:merchant:create",
+                  "promote:merchant:list"
+               ],
+               "title":"商户信息管理"
+            },
+            "name":"coupon",
+            "page":"/promotion/merchant"
          }
       ],
       "meta":{

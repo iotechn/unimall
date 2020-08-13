@@ -34,6 +34,7 @@ public class CacheConst {
      */
     public final static String ADMIN_MSG_CODE = "ADMIN_MSG_CODE:";
 
+    /**=========================== 类目缓存 START =============================**/
     /**
      * 三级类目树
      */
@@ -48,17 +49,30 @@ public class CacheConst {
      * 二级类目树
      */
     public static final String CATEGORY_SECOND_LEVEL_TREE = "CATEGORY_SECOND_LEVEL_TREE";
+    /**=========================== 类目缓存 END =============================**/
 
+    /**=========================== 邮费模板缓存 START =============================**/
     /**
      * 邮费模板缓存
      * FREIGHT_TEMPLATE: + 邮费模板id
      */
     public static final String FREIGHT_TEMPLATE = "FREIGHT_TEMPLATE:";
+    /**=========================== 邮费模板缓存 END =============================**/
 
+    /**=========================== 足迹缓存 START =============================**/
     /**
      * 获取足迹列表+_用户Id (追加)
      */
     public static final String FOOTPRINT_LRU = "FOOTPRINT_LRU:";
+    /**=========================== 足迹缓存 END =============================**/
+
+    /**=========================== 商铺信息缓存 START =============================**/
+    /**
+     * 存储商铺信息
+     */
+    public static final String MERCHANT_INFO = "MERCHANT_INFO";
+    /**=========================== 商铺信息缓存 END =============================**/
+
 
     public static final String USER_OFFICIAL_WECHAT_ACCESS = "USER_OFFICIAL_WECHAT_ACCESS";
 
