@@ -10,7 +10,7 @@
               </div>
               <div class="card-panel-description">
                 <div class="card-panel-text">商品数量</div>
-                <count-to :start-val="0" :end-val="goodsCount" :duration="2600" class="card-panel-num" />
+                <count-to :start-val="0" :end-val="productCount" :duration="2600" class="card-panel-num" />
               </div>
             </div>
           </el-col>
@@ -66,7 +66,7 @@ export default {
   },
   data() {
     return {
-      goodsCount: 0,
+      productCount: 0,
       waitStockCount: 0
     }
   },
@@ -77,7 +77,7 @@ export default {
       const areaChart = echarts.init(document.getElementById('areaChart'))
       const channelChart = echarts.init(document.getElementById('channelChart'))
       this.waitStockCount = response.data.data.waitStockCount
-      this.goodsCount = response.data.data.goodsCount
+      this.productCount = response.data.data.productCount
       // 每日订单走势
       orderChart.setOption({
         title: { text: '7日订单' },

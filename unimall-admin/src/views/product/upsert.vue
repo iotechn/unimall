@@ -215,8 +215,9 @@
         <el-table-column
           prop="id"
           label="SkuId"
-          width="100"/>
+          width="80"/>
         <el-table-column
+          width="155"
           prop="price"
           label="￥价格(元)">
           <template slot-scope="scope">
@@ -225,20 +226,23 @@
         </el-table-column>
         <el-table-column
           prop="originalPrice"
+          width="155"
           label="￥VIP价(元)">
           <template slot-scope="scope">
-            <el-input-number v-model="scope.row.vipPriceRaw" :precision="2" :max="2147483647" :min="0.01" size="small" />
+            <el-input-number v-model="scope.row.vipPriceRaw" :precision="2" :min="0.01" :max="2147483647" size="small" />
           </template>
         </el-table-column>
         <el-table-column
           prop="originalPrice"
+          width="155"
           label="￥吊牌价(元)">
           <template slot-scope="scope">
-            <el-input-number v-model="scope.row.originalPriceRaw" :precision="2" :max="2147483647" :min="0.01" size="small" />
+            <el-input-number v-model="scope.row.originalPriceRaw" :precision="2" :min="0.01" :max="2147483647" size="small" />
           </template>
         </el-table-column>
         <el-table-column
           :label="'库存(' + (product.unit ? product.unit : '件') + ')'"
+          width="155"
           prop="stock">
           <template slot-scope="scope">
             <el-input-number v-model="scope.row.stock" :precision="0" :max="2147483647" :min="0" size="small" />
@@ -246,20 +250,41 @@
         </el-table-column>
         <el-table-column
           label="重量(克)"
+          width="155"
           prop="stock">
           <template slot-scope="scope">
             <el-input-number v-model="scope.row.weight" :precision="0" :max="2147483647" :min="0" size="small" />
           </template>
         </el-table-column>
         <el-table-column
+          prop="img"
+          width="85"
+          label="SKU图片">
+          <template slot-scope="scope">
+            <el-upload
+              :show-file-list="false"
+              :on-success="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload"
+              class="sku-uploader"
+              action="https://jsonplaceholder.typicode.com/posts/">
+              <img v-if="imageUrl" :src="imageUrl" class="sku">
+              <i v-else class="el-icon-plus sku-uploader-icon"/>
+            </el-upload>
+          </template>
+        </el-table-column>
+        <el-table-column
           prop="barCode"
+          width="210"
           label="条形码">
           <template slot-scope="scope">
-            <el-input v-model="scope.row.barCode" maxlength="200" show-word-limit>
+            <el-input v-model="scope.row.barCode" maxlength="200">
               <el-button slot="append" @click="randonBarcode(scope.row)">随机</el-button>
             </el-input>
           </template>
         </el-table-column>
+        <el-table-column
+          prop=""
+          label=""/>
       </el-table>
     </el-card>
 
@@ -452,7 +477,7 @@ export default {
       this.product.categoryId = value[value.length - 1]
     },
     handleCancel: function() {
-      this.$router.push({ path: '/goods/list' })
+      this.$router.push({ path: '/product/list' })
     },
     handleCreate: function() {
       this.handleUpsert('create')
@@ -537,7 +562,7 @@ export default {
                   title: '成功',
                   message: successWords
                 })
-                this.$router.push({ path: '/goods/list' })
+                this.$router.push({ path: '/product/list' })
               })
               .catch(response => {
                 MessageBox.alert('业务错误：' + response.data.errmsg, '警告', {
@@ -796,11 +821,38 @@ export default {
   line-height: 120px;
   text-align: center;
 }
+
 .avatar {
   width: 145px;
   height: 145px;
   display: block;
 }
+
+.sku-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.sku-uploader .el-upload:hover {
+  border-color: #20a0ff;
+}
+.sku-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+}
+
+.sku {
+  width: 72px;
+  height: 72px;
+  display: block;
+}
+
 .input-new-tag {
   width: 90px;
   margin-left: 10px;

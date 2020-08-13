@@ -6,7 +6,8 @@
           <el-tree
             :data="list"
             :props="{ label: 'title', children: 'childrenList' }"
-            :expand-on-click-node="false">
+            :expand-on-click-node="false"
+            default-expand-all>
             <span slot-scope="{ node, data }" class="custom-tree-node">
               <div class="title-size">
                 <el-image v-show="data.level === 2" :src="data.picUrl" class="c-img"/>
@@ -86,18 +87,6 @@
         <el-button v-else :loading="submiting" type="primary" @click="updateData">确定</el-button>
       </div>
     </el-dialog>
-    <!-- 确定删除 -->
-    <!-- <el-dialog
-      :visible.sync="dialogVisible"
-      :before-close="handleClose"
-      title="提示"
-      width="30%">
-      <span>确定删除吗？</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="remove(node,data)">确 定</el-button>
-      </span>
-    </el-dialog> -->
   </div>
 </template>
 
@@ -106,7 +95,6 @@ import { createCategory, updateCategory, deleteCategory, categoryTree } from '@/
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
-import { categorySecondLevelTree } from '@/api/category'
 
 const categoryLevelMap = [{ text: '一级类目', value: 0 }, { text: '二级类目', value: 1 }, { text: '三级类目', value: 2 }]
 export default {
@@ -124,7 +112,6 @@ export default {
     return {
       categoryLevelMap,
       uploadPath,
-      options: [],
       list: [],
       dialogOptions: undefined,
       dataForm: {
@@ -142,6 +129,7 @@ export default {
         create: '创建'
       },
       currentParent: undefined,
+      current: undefined,
       rules: {
         title: [{ required: true, message: '类目名不能为空', trigger: 'blur' }]
       },
@@ -157,14 +145,14 @@ export default {
   },
   created() {
     this.getList()
-    this.refreshOptions()
   },
   methods: {
-    handleUpdate(data) {
-      this.dialogStatus = 'updata'
+    handleUpdate(row) {
+      this.dialogStatus = 'update'
       this.dialogFormVisible = true
+      this.current = row
       // 对象的拷贝
-      this.dataForm = Object.assign({}, data)
+      this.dataForm = Object.assign({}, row)
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
@@ -201,6 +189,20 @@ export default {
     },
     getList() {
       categoryTree().then(response => {
+        const l = response.data.data
+        // 为一二级添加空子树
+        for (let i = 0; i < l.length; i++) {
+          if (!l[i].childrenList) {
+            l[i].childrenList = []
+          } else {
+            const c = l[i].childrenList
+            for (let j = 0; j < c.length; j++) {
+              if (!c[j].childrenList) {
+                c[j].childrenList = []
+              }
+            }
+          }
+        }
         this.list = [{
           title: '全部类目',
           id: 0,
@@ -228,7 +230,6 @@ export default {
       this.currentParent = row
       this.dialogStatus = 'create'
       this.dialogOptions = undefined
-      this.refreshOptions()
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
@@ -239,6 +240,9 @@ export default {
         this.submiting = true
         createCategory(this.dataForm)
           .then(response => {
+            if (response.data.data.level < 2) {
+              response.data.data.childrenList = []
+            }
             this.currentParent.childrenList.push(response.data.data)
             this.dialogFormVisible = false
             this.$notify.success({
@@ -260,14 +264,16 @@ export default {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           updateCategory(this.dataForm)
-            .then(() => {
-              this.getList()
+            .then((res) => {
+              this.current.title = res.data.data.title
+              this.current.iconUrl = res.data.data.iconUrl
+              this.current.picUrl = res.data.data.picUrl
+              debugger
               this.dialogFormVisible = false
               this.$notify.success({
                 title: '成功',
                 message: '更新成功'
               })
-              this.refreshOptions()
             })
             .catch(response => {
               this.$notify.error({
@@ -325,14 +331,7 @@ export default {
         }
       }
       this.dataForm.parentId = tag
-    },
-    // 刷新类目选择节点
-    refreshOptions() {
-      categorySecondLevelTree().then(response => {
-        this.options = response.data.data
-      })
     }
-
   }
 }
 </script>

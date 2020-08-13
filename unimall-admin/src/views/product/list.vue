@@ -177,10 +177,10 @@ export default {
       this.getList()
     },
     handleCreate() {
-      this.$router.push({ path: '/goods/upsert' })
+      this.$router.push({ path: '/product/upsert' })
     },
     handleUpdate(row) {
-      this.$router.push({ path: '/goods/upsert', query: { id: row.id }})
+      this.$router.push({ path: '/product/upsert', query: { id: row.id }})
     },
     showDetail(row) {
       if (!this.detailDialogVisible) {

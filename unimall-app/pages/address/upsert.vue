@@ -128,7 +128,7 @@
 						uni.navigateBack()
 					})
 				} else {
-					that.$api.request('address', 'addAddress', that.addressData).then(res => {
+					that.$api.request('address', 'create', that.addressData).then(res => {
 						that.$api.prePage().refreshList(data, that.manageType);
 						uni.navigateBack()
 					})

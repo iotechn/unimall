@@ -191,7 +191,7 @@
                ],
                "title":"会员管理"
             },
-            "name":"user",
+            "name":"userlist",
             "page":"/user/user"
          }, {
             "path":"address",
@@ -246,7 +246,7 @@
             "meta":{
                "noCache":true,
                "perms":[
-                  "admin:log:list"
+                  "sys:log:list"
                ],
                "title":"操作日志"
             },
@@ -258,12 +258,12 @@
             "meta":{
                "noCache":true,
                "perms":[
-                  "admin:role:list",
-                  "admin:role:create",
-                  "admin:role:delete",
-                  "admin:role:update",
-                  "admin:role:permissionList",
-                  "admin:permission:list"
+                  "sys:role:list",
+                  "sys:role:create",
+                  "sys:role:delete",
+                  "sys:role:update",
+                  "sys:role:permissionlist",
+                  "sys:permission:list"
                ],
                "title":"角色管理"
             },

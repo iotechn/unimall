@@ -16,7 +16,6 @@ import com.iotechn.unimall.data.mapper.AdvertMapper;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
-import com.iotechn.unimall.data.search.SearchInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -183,6 +181,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         }
 
         CategoryDTO categoryDTO = new CategoryDTO();
+        BeanUtils.copyProperties(updateDO, categoryDTO);
         List<CategoryDTO> list = categoryBizService.getCategoryList();
         for (CategoryDTO temp : list) {
             if (updateDO.getId().equals(temp.getId())) {
