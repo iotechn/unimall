@@ -36,4 +36,8 @@ public class CartDTO extends SuperDTO {
 
     private List<Long> categoryIdList;
 
+    private Integer weight;
+
+    private Long freightTemplateId;
+
 }

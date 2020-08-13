@@ -59,8 +59,7 @@
               AND unix_timestamp(c.gmt_end) &lt; unix_timestamp(#{now})
           </if>
         </if>
-        order BY c.id DESC
-        limit #{offset},#{limit}
+        ORDER BY c.id DESC
     </select>
 
     <select id="getActiveCoupons" resultType="com.iotechn.unimall.data.dto.CouponDTO">

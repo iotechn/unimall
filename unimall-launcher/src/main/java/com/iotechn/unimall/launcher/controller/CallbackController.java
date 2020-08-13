@@ -8,6 +8,7 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.app.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
+import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
@@ -58,6 +59,9 @@ public class CallbackController {
 
     @Autowired
     private ProductBizService productBizService;
+
+    @Autowired
+    private GroupShopBizService groupShopBizService;
 
     @Autowired
     private DelayedMessageQueue delayedMessageQueue;
@@ -142,9 +146,35 @@ public class CallbackController {
                             .in("order_no", orderNos));
             // TODO 检测是否有团购等需要将各个子单 转换到不同的状态 eg.团购子单需要将状态转换到OrderStatusType.GROUP_SHOP_WAIT。而普通订单需要转换到OrderStatusTyp.UNPAY
             if (orderSkuDOList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).count() > 0) {
-
+                // 走团购商品逻辑 更新状态只能按单独子单更新
+                List<OrderDO> subOrderList = orderBizService.checkOrderExistByParentNo(orderAbstractNo, null);
+                // 将orderSkuList转换为以子单为Key的Map
+                Map<String, List<OrderSkuDO>> orderSkuMap = orderSkuDOList.stream().collect(Collectors.groupingBy(OrderSkuDO::getOrderNo));
+                // 各个认领自己的skuList
+                for (OrderDO subOrder : subOrderList) {
+                    List<OrderSkuDO> subOrderSkuList = orderSkuMap.get(subOrder.getOrderNo());
+                    List<OrderSkuDO> groupShopSkuList = subOrderSkuList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).collect(Collectors.toList());
+                    if (groupShopSkuList.size() > 0) {
+                        // 若存在团购商品
+                        OrderDO groupShopUpdateDO = new OrderDO();
+                        groupShopUpdateDO.setPayId(payId);
+                        groupShopUpdateDO.setPayChannel("WX");
+                        groupShopUpdateDO.setPayPrice(result.getTotalFee());
+                        groupShopUpdateDO.setGmtPay(now);
+                        groupShopUpdateDO.setGmtUpdate(now);
+                        groupShopUpdateDO.setStatus(OrderStatusType.GROUP_SHOP_WAIT.getCode());
+                        groupShopUpdateDO.setSubPay(1);
+                        // 增加buyer count
+                        for (OrderSkuDO orderSkuDO : groupShopSkuList) {
+                            groupShopBizService.incGroupShopNum(orderSkuDO.getActivityId(), orderSkuDO.getNum());
+                        }
+                        orderBizService.changeOrderSubStatus(subOrder.getOrderNo(), OrderStatusType.UNPAY.getCode(), groupShopUpdateDO);
+                    } else {
+                        orderBizService.changeOrderSubStatus(subOrder.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
+                    }
+                }
             } else {
-                // 走普通商品
+                // 走普通商品 并且更新状态 可以打包更新
                 orderBizService.changeOrderParentStatus(orderAbstractNo, OrderStatusType.UNPAY.getCode(), updateOrderDO, orderDOList.size());
             }
         } else {
@@ -155,7 +185,20 @@ public class CallbackController {
                             .eq("order_no", orderAbstractNo));
             List<OrderSkuDO> groupShopSkuList = orderSkuDOList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).collect(Collectors.toList());
             if (groupShopSkuList.size() > 0) {
-                // TODO 团购
+                // 若存在团购商品
+                OrderDO groupShopUpdateDO = new OrderDO();
+                groupShopUpdateDO.setPayId(payId);
+                groupShopUpdateDO.setPayChannel("WX");
+                groupShopUpdateDO.setPayPrice(result.getTotalFee());
+                groupShopUpdateDO.setGmtPay(now);
+                groupShopUpdateDO.setGmtUpdate(now);
+                groupShopUpdateDO.setStatus(OrderStatusType.GROUP_SHOP_WAIT.getCode());
+                groupShopUpdateDO.setSubPay(1);
+                // 增加buyer count
+                for (OrderSkuDO orderSkuDO : groupShopSkuList) {
+                    groupShopBizService.incGroupShopNum(orderSkuDO.getActivityId(), orderSkuDO.getNum());
+                }
+                orderBizService.changeOrderSubStatus(orderAbstractNo, OrderStatusType.UNPAY.getCode(), groupShopUpdateDO);
             } else {
                 orderBizService.changeOrderSubStatus(orderAbstractNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
             }

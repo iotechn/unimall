@@ -176,7 +176,6 @@ public class CategoryBizService {
      * @throws ServiceException
      */
     public List<Long> getCategorySelfAndChildren(Long categoryId) throws ServiceException {
-
         // 利用冗余数据实现
         List<CategoryDTO> categoryList = getCategoryList();
         CategoryDTO categoryDTO = new CategoryDTO();

@@ -231,7 +231,7 @@ const adUnionTypeMap = [
   { value: 3, name: '关键字' },
   { value: 4, name: '功能页面' }]
 const adStatusMap = [{ value: 0, name: '冻结' }, { value: 1, name: '激活' }]
-const functionPages = [{ value: '/pages/groupshop/list', name: '团购列表' }]
+const functionPages = [{ value: '/pages/product/groupshop', name: '团购列表' }]
 
 export default {
   name: 'Advert',

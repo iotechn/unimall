@@ -34,9 +34,9 @@ public interface AdminAdvertService {
 
     @HttpMethod(description = "删除", permission = "promote:advert:delete", permissionParentName = "推广管理", permissionName = "广告管理")
     public String delete(
-            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId,
             @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "广告类型") Integer type,
-            @NotNull @HttpParam(name = "adId", type = HttpParamType.COMMON, description = "广告ID") Long adId) throws ServiceException;
+            @NotNull @HttpParam(name = "adId", type = HttpParamType.COMMON, description = "广告ID") Long adId,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "修改", permission = "promote:advert:update", permissionParentName = "推广管理", permissionName = "广告管理")
     public String edit(

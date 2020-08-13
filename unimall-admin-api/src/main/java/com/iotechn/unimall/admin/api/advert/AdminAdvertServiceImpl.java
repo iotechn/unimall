@@ -56,7 +56,7 @@ public class AdminAdvertServiceImpl implements AdminAdvertService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String delete(Long adminId, Integer adType, Long adId) throws ServiceException {
+    public String delete(Integer adType, Long adId, Long adminId) throws ServiceException {
         if (advertMapper.delete(new QueryWrapper<AdvertDO>()
                 .eq("id", adId)
                 .eq("ad_type", adType)) > 0) {

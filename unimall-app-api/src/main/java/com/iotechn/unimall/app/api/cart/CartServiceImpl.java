@@ -11,7 +11,6 @@ import com.iotechn.unimall.data.mapper.CartMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -33,16 +32,16 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addCartItem(Long skuId, Integer num, Long userId) throws ServiceException {
-        List<CartDO> cartDOS = cartMapper.selectList(
+        CartDO cartFromDB = cartMapper.selectOne(
                 new QueryWrapper<CartDO>()
                         .eq("sku_id", skuId)
                         .eq("user_id", userId));
         CartDO cartDO = new CartDO();
         Date now = new Date();
-        if (!CollectionUtils.isEmpty(cartDOS)) {
+        if (cartFromDB != null) {
             //若非空
-            cartDO.setId(cartDOS.get(0).getId());
-            cartDO.setNum(cartDOS.get(0).getNum() + num);
+            cartDO.setId(cartFromDB.getId());
+            cartDO.setNum(cartFromDB.getNum() + num);
             cartDO.setGmtUpdate(now);
             return cartMapper.updateById(cartDO) > 0;
         } else {
@@ -59,15 +58,15 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean subCartItem(Long skuId, Integer num, Long userId) throws ServiceException {
-        List<CartDO> cartDOS = cartMapper.selectList(
+        CartDO cartFromDB = cartMapper.selectOne(
                 new QueryWrapper<CartDO>()
                         .eq("sku_id", skuId)
                         .eq("user_id", userId));
 
         CartDO cartDO = new CartDO();
-        if (!CollectionUtils.isEmpty(cartDOS)) {
-            cartDO.setId(cartDOS.get(0).getId());
-            cartDO.setNum(cartDOS.get(0).getNum() - num);
+        if (cartDO != null) {
+            cartDO.setId(cartFromDB.getId());
+            cartDO.setNum(cartFromDB.getNum() - num);
             if (cartDO.getNum() <= 0) {
                 //直接删除此商品
                 return cartMapper.deleteById(cartDO.getId()) > 0;
@@ -99,7 +98,7 @@ public class CartServiceImpl implements CartService {
         }
         List<Long> array = new ArrayList<>(split.length);
         for (String idRaw : split) {
-            array.add(new Long(idRaw));
+            array.add(Long.parseLong(idRaw));
         }
         return cartMapper.delete(
                 new QueryWrapper<CartDO>()

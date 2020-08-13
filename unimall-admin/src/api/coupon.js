@@ -6,7 +6,7 @@ export function listCoupon(query) {
     method: 'get',
     params: {
       _gp: 'admin.coupon',
-      _mt: 'queryCouponByTitle',
+      _mt: 'list',
       ...query
     }
   })
@@ -17,7 +17,7 @@ export function createCoupon(data) {
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.coupon',
-      _mt: 'addCoupon',
+      _mt: 'create',
       ...data
     })
   })
@@ -28,7 +28,7 @@ export function updateCoupon(data) {
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.coupon',
-      _mt: 'updateCoupon',
+      _mt: 'edit',
       ...data
     })
   })
@@ -50,7 +50,7 @@ export function deleteCoupon(data) {
     method: 'get',
     params: {
       _gp: 'admin.coupon',
-      _mt: 'deleteCoupon',
+      _mt: 'delete',
       ...data
     }
   })

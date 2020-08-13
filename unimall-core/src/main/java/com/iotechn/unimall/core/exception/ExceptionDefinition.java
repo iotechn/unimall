@@ -364,7 +364,7 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition CATEGORY_UPDATE_FAILURE =
             new ServiceExceptionDefinition(51005, "类目数据库修改失败");
 
-    public static final ServiceExceptionDefinition PARENT_NODE_INFORMATION_ERROR =
+    public static final ServiceExceptionDefinition CATEGORY_PARENT_NODE_INFORMATION_ERROR =
             new ServiceExceptionDefinition(51006, "父节点信息不准确");
 
     public static final ServiceExceptionDefinition DATABASE_INSERT_FAILURE =
@@ -372,7 +372,6 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition UPDATE_ONLY_HORIZONTAL_MOVE =
             new ServiceExceptionDefinition(51008, "修改只能平级移动");
-
 
 
 
