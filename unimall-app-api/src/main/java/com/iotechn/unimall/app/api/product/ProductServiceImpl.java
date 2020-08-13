@@ -19,6 +19,7 @@ import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.properties.UnimallOpenSearchProperties;
+import com.iotechn.unimall.data.search.SearchInfo;
 import com.iotechn.unimall.data.search.SpuSearchInfoImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,7 @@ public class ProductServiceImpl implements ProductService {
     private UnimallOpenSearchProperties unimallOpenSearchProperties;
 
     @Autowired
-    private SpuSearchInfoImpl spuSearchInfo;
+    private SearchInfo spuSearchInfoImpl;
 
     @Override
     public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
@@ -86,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
             hashMap.put("orderBy",orderBy);
             hashMap.put("isAsc",isAsc);
             hashMap.put("title",title);
-            Page<SpuDO> search = spuSearchInfo.search(hashMap);
+            Page<SpuDO> search = spuSearchInfoImpl.search(hashMap);
             return search;
         }else {
             return productBizService.getProductPage(pageNo, pageSize, categoryId, orderBy, isAsc, title);
