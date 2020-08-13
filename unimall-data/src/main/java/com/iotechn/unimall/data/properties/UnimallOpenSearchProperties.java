@@ -12,4 +12,10 @@ public class UnimallOpenSearchProperties {
 
     private String accessKeySecret;
 
+    private String spuAppName;
+
+    private String spuHost;
+
+    private String spuTableName;
+
 }

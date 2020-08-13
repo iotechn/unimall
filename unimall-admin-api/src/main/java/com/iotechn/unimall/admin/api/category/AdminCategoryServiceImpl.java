@@ -17,6 +17,7 @@ import com.iotechn.unimall.data.mapper.AdvertMapper;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.data.search.SearchInfo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,9 +63,14 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     /**
      * 获取三级类目树,用于商品、优惠券之类添加的使用
      */
+    @Autowired
+    private SearchInfo spuSearchInfoImpl;
     @Override
     public List<CategoryDTO> categoryTree() throws ServiceException {
         List<CategoryDTO> list = categoryBizService.categoryThreeLevelTree();
+        HashMap<String, String> hashMap = new HashMap<>();
+        hashMap.put("title","美年达");
+        spuSearchInfoImpl.search(hashMap);
         return list;
     }
 

@@ -219,6 +219,38 @@
 
     </el-card>
 
+    <el-card class="box-card">
+      <h3>开放搜索配置</h3>
+      <el-form ref="searchDataForm" :model="searchDataForm" label-width="150px">
+
+        <el-form-item label="AccessKeyId" prop="autoCancelTime">
+          <el-input v-model="searchDataForm.accessKeyId" />
+        </el-form-item>
+
+        <el-form-item label="AccessKeySecret" prop="autoConfirmTime">
+          <el-input v-model="searchDataForm.accessKeySecret" />
+        </el-form-item>
+
+        <el-form-item label="商品搜索应用名" prop="autoConfirmTime">
+          <el-input v-model="searchDataForm.spuAppName" />
+        </el-form-item>
+
+        <el-form-item label="商品搜索API地址" prop="autoConfirmTime">
+          <el-input v-model="searchDataForm.spuHost" />
+        </el-form-item>
+
+        <el-form-item label="商品搜索表名" prop="autoConfirmTime">
+          <el-input v-model="searchDataForm.spuTableName" />
+        </el-form-item>
+
+      </el-form>
+
+      <div class="op-container">
+        <el-button :loading="submiting" type="primary" @click="handleSave('searchDataForm', prefixs.searchDataPrefix)">保存更改</el-button>
+      </div>
+
+    </el-card>
+
   </div>
 </template>
 <script>
@@ -235,7 +267,8 @@ export default {
         smsDataPrefix: 'SMS_CONFIG:',
         ossDataPrefix: 'OSS_CONFIG:',
         orderDataPrefix: 'ORDER_CONFIG:',
-        advertDataPrefix: 'ADVERT_CONFIG:'
+        advertDataPrefix: 'ADVERT_CONFIG:',
+        searchDataPrefix: 'OPEN_SEARCH_CONFIG:'
       },
       wxAppDataForm: {},
       wxPayDataForm: {},
@@ -243,6 +276,7 @@ export default {
       ossDataForm: {},
       orderDataForm: {},
       advertDataForm: {},
+      searchDataForm: {},
       submiting: false
     }
   },
