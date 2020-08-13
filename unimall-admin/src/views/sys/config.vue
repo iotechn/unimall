@@ -190,11 +190,11 @@
       <el-form ref="orderDataForm" :model="orderDataForm" label-width="150px">
 
         <el-form-item label="自动取消延时时间(S)" prop="autoCancelTime">
-          <el-input v-model="orderDataForm.autoCancelTime" />
+          <el-input-number :precision="0" v-model="orderDataForm.autoCancelTime" />
         </el-form-item>
 
         <el-form-item label="自动收货延时时间(S)" prop="autoConfirmTime">
-          <el-input v-model="orderDataForm.autoConfirmTime" />
+          <el-input-number :precision="0" v-model="orderDataForm.autoConfirmTime" />
         </el-form-item>
       </el-form>
 
@@ -209,7 +209,7 @@
       <el-form ref="advertDataForm" :model="advertDataForm" label-width="150px">
 
         <el-form-item label="首页热销推荐商品数" prop="topSalesNum">
-          <el-input v-model="advertDataForm.topSalesNum" />
+          <el-input-number :precision="0" v-model="advertDataForm.topSalesNum" />
         </el-form-item>
       </el-form>
 

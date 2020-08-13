@@ -3,7 +3,7 @@ package com.iotechn.unimall.app.api.config;
 import com.iotechn.unimall.core.annotation.HttpMethod;
 import com.iotechn.unimall.core.annotation.HttpOpenApi;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.dto.ConfigDTO;
+import com.iotechn.unimall.data.dto.MerchantInfoDTO;
 
 /**
  * Created by rize on 2019/7/21.
@@ -12,6 +12,6 @@ import com.iotechn.unimall.data.dto.ConfigDTO;
 public interface ConfigService {
 
     @HttpMethod(description = "获取商户配置")
-    public ConfigDTO getMerchantConfig() throws ServiceException;
+    public MerchantInfoDTO getMerchantConfig() throws ServiceException;
 
 }

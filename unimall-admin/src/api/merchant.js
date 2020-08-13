@@ -6,7 +6,7 @@ export function listMerchant(query) {
     method: 'get',
     params: {
       _gp: 'admin.merchant',
-      _mt: 'getMerchant',
+      _mt: 'list',
       ...query
     }
   })
@@ -17,7 +17,7 @@ export function updateMerchant(data) {
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.merchant',
-      _mt: 'updateMerchant',
+      _mt: 'createOrUpdate',
       ...data
     })
   })

@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
  */
 
 @Data
-@TableName("unimall_config")
+@TableName("unimall_merchant_info")
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConfigDO extends SuperDO {
+public class MerchantInfoDO extends SuperDO {
 
     @TableField("key_word")
     private String keyWord;
