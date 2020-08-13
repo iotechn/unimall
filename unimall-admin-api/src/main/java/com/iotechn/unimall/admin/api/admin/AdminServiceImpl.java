@@ -191,7 +191,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String update(AdminDTO adminDTO, Long adminId) throws ServiceException {
+    public String edit(AdminDTO adminDTO, Long adminId) throws ServiceException {
         Long id = adminDTO.getId();
         if (id == null) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);

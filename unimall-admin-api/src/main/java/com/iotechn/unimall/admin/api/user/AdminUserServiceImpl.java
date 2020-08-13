@@ -29,7 +29,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean addUser(Long adminId, UserDO user) throws ServiceException {
+    public Boolean create(Long adminId, UserDO user) throws ServiceException {
         if (user == null){
             throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
@@ -49,15 +49,14 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean deleteUser(Long adminId, Long id, String nickname) throws ServiceException {
+    public Boolean delete(Long adminId, Long id, String nickname) throws ServiceException {
         return userMapper.delete(new QueryWrapper<UserDO>()
-                .eq("id", id)
-                .eq("nickname",nickname)) > 0;
+                .eq("id", id)) > 0;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean updateUser(Long adminId, UserDO user) throws ServiceException {
+    public Boolean edit(Long adminId, UserDO user) throws ServiceException {
         if (user == null || user.getId() == null){
             throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
@@ -77,7 +76,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public Boolean updateStatus(Long adminId, Long userId,Integer status) throws ServiceException {
+    public Boolean editStatus(Long adminId, Long userId, Integer status) throws ServiceException {
         if(userId == null || status == null || (status != 0 && status != 1)){
             throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
@@ -92,7 +91,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public Page<UserDO> getUser(Long adminId, Long id, String nickname, Integer level, Integer gender, Integer status,Integer pageNo,Integer limit) throws ServiceException {
+    public Page<UserDO> list(Long adminId, Long id, String nickname, Integer level, Integer gender, Integer status, Integer pageNo, Integer limit) throws ServiceException {
         return userMapper.getUserList(Page.div(pageNo, limit, UserDO.class), id,nickname,level,gender,status);
     }
     

@@ -212,7 +212,7 @@
 
 <script>
 import { listAdvert, createAdvert, editAdvert, deleteAdvert, getImageColor } from '@/api/advert'
-import { getSpuBigTree } from '@/api/goods'
+import { getSpuBigTree } from '@/api/product'
 import { uploadPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination'

@@ -182,7 +182,7 @@
 </template>
 
 <script>
-import { fetchList, activeUser, createUser, updateUser, deleteUser } from '@/api/user'
+import { listUser, activeUser, createUser, updateUser, deleteUser } from '@/api/user'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 const genderDic = [{ value: 1, name: '女' }, { value: 2, name: '男' }, { value: '', name: '全部' }]
@@ -254,7 +254,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery)
+      listUser(this.listQuery)
         .then(response => {
           this.list = response.data.data.items
           this.total = response.data.data.total

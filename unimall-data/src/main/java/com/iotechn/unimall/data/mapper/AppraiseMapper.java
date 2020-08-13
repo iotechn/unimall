@@ -34,8 +34,13 @@ public interface AppraiseMapper extends IMapper<AppraiseDO> {
     public AppraiseResponseDTO selectOneById(@Param("appraiseId") Long appraiseId);
 
     //根据传入条件，查询
-    public List<AppraiseResponseDTO> selectAppraiseCondition(@Param("id") Long id,@Param("userName") String userName,@Param("spuName") String spuName,@Param("orderId") Long orderId,@Param("score") Integer score,@Param("content") String content,@Param("offset") Integer offset,@Param("limit")Integer limit);
+    public Page<AppraiseResponseDTO> selectAppraisePage(
+            IPage page,
+            @Param("id") Long id,
+            @Param("userName") String userName,
+            @Param("spuName") String spuName,
+            @Param("orderId") Long orderId,
+            @Param("score") Integer score,
+            @Param("content") String content);
 
-    //根据传入条件，查询符合条件总数
-    public Integer countAppraiseCondition(@Param("id") Long id,@Param("userName") String userName,@Param("spuName") String spuName,@Param("orderId") Long orderId,@Param("score") Integer score,@Param("content") String content);
 }

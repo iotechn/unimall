@@ -47,7 +47,7 @@ export function updateAdmin(data) {
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin',
-      _mt: 'update',
+      _mt: 'edit',
       adminDTO: JSON.stringify(data)
     })
   })
@@ -56,20 +56,20 @@ export function updateAdmin(data) {
 export function deleteAdmin(id) {
   return request({
     method: 'post',
-    params: {
+    data: Qs.stringify({
       _gp: 'admin',
       _mt: 'delete',
       id: id
-    }
+    })
   })
 }
 
 export function bindUniNotify() {
   return request({
     method: 'post',
-    params: {
+    data: Qs.stringify({
       _gp: 'admin',
       _mt: 'bindUniNotify'
-    }
+    })
   })
 }

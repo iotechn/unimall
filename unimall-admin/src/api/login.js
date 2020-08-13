@@ -2,18 +2,15 @@ import request from '@/utils/request'
 import Qs from 'qs'
 
 export function loginByUsername(username, password, verifyCode) {
-  const data = {
-    username,
-    password,
-    verifyCode
-  }
   return request({
     method: 'post',
-    params: {
+    data: Qs.stringify({
       _gp: 'admin',
       _mt: 'login',
-      ...data
-    }
+      username,
+      password,
+      verifyCode
+    })
   })
 }
 
@@ -31,16 +28,16 @@ export function sendMsg(data) {
 export function logout() {
   return request({
     method: 'post',
-    params: {
+    data: Qs.stringify({
       _gp: 'admin',
       _mt: 'logout'
-    }
+    })
   })
 }
 
 export function getUserInfo() {
   return request({
-    method: 'post',
+    method: 'get',
     params: {
       _gp: 'admin',
       _mt: 'info'

@@ -1,7 +1,7 @@
 [
    {
       "redirect":"noredirect",
-      "path":"/mall",
+      "path":"/operation",
       "children":[
          {
             "path":"order",
@@ -10,7 +10,11 @@
                "perms":[
                   "operation:order:list",
                   "operation:order:detail",
-                  "operation:order:ship"
+                  "operation:order:ship",
+                  "operation:order:refund",
+                  "operation:order:querytoexcel",
+                  "operation:order:editadminmono",
+                  "operation:order:statistics"
                ],
                "title":"订单管理"
             },
@@ -23,7 +27,7 @@
                "noCache":true,
                "perms":[
                   "operation:appraise:delete",
-                  "operation:appraise:query"
+                  "operation:appraise:list"
                ],
                "title":"评论管理"
             },
@@ -35,11 +39,12 @@
             "meta":{
                "noCache":true,
                "perms":[
-                  "operation:freight:query",
-                  "operation:freight:update",
-                  "operation:freight:create"
+                  "operation:freight:list",
+                  "operation:freight:edit",
+                  "operation:freight:create",
+                  "operation:freight:delete"
                ],
-               "title":"运费模板管理"
+               "title":"运费管理"
             },
             "name":"freight",
             "page":"/operation/freight"
@@ -49,54 +54,61 @@
          "icon":"chart",
          "title":"运营管理"
       },
-      "name":"mallManage",
+      "name":"operationManage",
       "alwaysShow":true
    },
    {
       "redirect":"noredirect",
-      "path":"/goods",
+      "path":"/product",
       "children":[
          {
             "path":"list",
             "meta":{
                "noCache":true,
                "perms":[
-                  "operation:goods:list",
-                  "operation:goods:create"
+                  "product:product:create",
+                  "product:product:edit",
+                  "product:product:list",
+                  "product:product:detail",
+                  "product:product:edit",
+                  "product:product:delete",
+                  "product:product:batchdelete",
+                  "product:product:rebuild"
                ],
                "title":"商品列表"
             },
-            "name":"goodsList",
-            "page":"/goods/list"
+            "name":"productList",
+            "page":"/product/list"
          },
          {
             "path":"groupshop",
             "meta":{
                "noCache":true,
                "perms":[
-                  "operation:groupShop:query",
-                        "operation:groupShop:create",
-                        "operation:groupShop:delete"
+                  "product:groupshop:create",
+                  "product:groupshop:delete",
+                  "product:groupshop:edit",
+                  "product:groupshop:list"
                ],
                "title":"团购商品"
             },
-            "name":"groupShop",
-            "page":"/goods/groupshop"
+            "name":"groupshop",
+            "page":"/product/groupshop"
          },
          {
             "path":"category",
             "meta":{
                "noCache":true,
                "perms":[
-                  "operation:category:create",
-                  "operation:category:query",
-                  "admin:category:update",
-                  "operation:category:delete"
+                  "product:category:create",
+                  "product:category:delete",
+                  "product:category:edit",
+                  "product:category:list"
                ],
-               "title":"商品类目"
+               "title":"类目管理"
             },
-            "name":"goodsCategory",
-            "page":"/goods/category"
+            "name":"productCategory",
+            "page":"/product/category"
          },
          {
             "path":"upsert",
@@ -104,20 +116,20 @@
             "meta":{
                "noCache":true,
                "perms":[
-                  "operation:goods:create",
-                  "operation:goods:edit"
+                  "product:product:create",
+                  "product:product:edit"
                ],
                "title":"商品编辑"
             },
-            "name":"goodsUpsert",
-            "page":"/goods/upsert"
+            "name":"productUpsert",
+            "page":"/product/upsert"
          }
       ],
       "meta":{
          "icon":"shopping",
          "title":"商品管理"
       },
-      "name":"goodsManage",
+      "name":"productManage",
       "alwaysShow":true
    },
    {
@@ -129,12 +141,12 @@
             "meta":{
                "noCache":true,
                "perms":[
-                  "promote:advertisement:create",
-                  "promote:advertisement:delete",
-                  "promote:advertisement:update",
-                  "promote:advertisement:query"
+                  "promotion:advert:create",
+                  "promotion:advert:delete",
+                  "promotion:advert:edit",
+                  "promotion:advert:list"
                ],
-               "title":"商铺广告"
+               "title":"广告管理"
             },
             "name":"advert",
             "page":"/promotion/advert"
@@ -144,10 +156,10 @@
             "meta":{
                "noCache":true,
                "perms":[
-                  "promote:coupon:create",
-                  "promote:coupon:delete",
-                  "promote:coupon:update",
-                  "promote:coupon:query"
+                  "promotion:coupon:create",
+                  "promotion:coupon:delete",
+                  "promotion:coupon:edit",
+                  "promotion:coupon:list"
                ],
                "title":"优惠卷管理"
             },
@@ -162,28 +174,43 @@
       "name":"promotionManage",
       "alwaysShow":true
    },
+   
    {
       "redirect":"noredirect",
-      "path":"/tools",
+      "path":"/user",
       "children":[
          {
-            "path":"generator",
+            "path":"user",
             "meta":{
                "noCache":true,
                "perms":[
-                  ""
+                  "user:user:list",
+                  "user:user:delete",
+                  "user:user:create",
+                  "user:user:edit"
                ],
-               "title":"代码生成器"
+               "title":"会员管理"
             },
-            "name":"tools",
-            "page":"/tools/generator"
+            "name":"user",
+            "page":"/user/user"
+         }, {
+            "path":"address",
+            "meta":{
+               "noCache":true,
+               "perms":[
+                  "user:address:list"
+               ],
+               "title":"地址管理"
+            },
+            "name":"user",
+            "page":"/user/address"
          }
       ],
       "meta":{
-         "icon":"tools",
-         "title":"实用工具"
+         "icon":"user",
+         "title":"用户管理"
       },
-      "name":"toolsManage",
+      "name":"userManage",
       "alwaysShow":true
    },
    {
@@ -200,29 +227,14 @@
             "page":"/sys/config"
          },
          {
-            "path":"user",
-            "meta":{
-               "noCache":true,
-               "perms":[
-                  "system:user:query",
-                  "system:user:delete",
-                  "system:user:create",
-                  "system:user:update"
-               ],
-               "title":"会员管理"
-            },
-            "name":"user",
-            "page":"/user/user"
-         },
-         {
             "path":"admin",
             "meta":{
                "noCache":true,
                "perms":[
-                  "admin:admin:list",
-                  "admin:admin:create",
-                  "admin:admin:update",
-                  "admin:admin:delete"
+                  "sys:admin:list",
+                  "sys:admin:create",
+                  "sys:admin:edit",
+                  "sys:admin:delete"
                ],
                "title":"管理员"
             },
@@ -260,10 +272,34 @@
          }
       ],
       "meta":{
-         "icon":"chart",
+         "icon":"system",
          "title":"系统管理"
       },
       "name":"sysManage",
+      "alwaysShow":true
+   },
+   {
+      "redirect":"noredirect",
+      "path":"/tools",
+      "children":[
+         {
+            "path":"generator",
+            "meta":{
+               "noCache":true,
+               "perms":[
+                  ""
+               ],
+               "title":"代码生成器"
+            },
+            "name":"tools",
+            "page":"/tools/generator"
+         }
+      ],
+      "meta":{
+         "icon":"tools",
+         "title":"实用工具"
+      },
+      "name":"toolsManage",
       "alwaysShow":true
    },
    {

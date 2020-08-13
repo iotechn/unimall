@@ -120,13 +120,13 @@
 </template>
 
 <script>
-import { listGoods, deleteGoods, detailGoods, freezeOrActivtion, batchDeleteGoods } from '@/api/goods'
+import { listProduct, deleteProduct, detailProduct, freezeOrActivtion, batchDeleteProduct } from '@/api/product'
 import BackToTop from '@/components/BackToTop'
 import { categoryTree } from '@/api/category'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
-  name: 'GoodsList',
+  name: 'ProductList',
   components: { BackToTop, Pagination },
   data() {
     return {
@@ -155,7 +155,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      listGoods(this.listQuery)
+      listProduct(this.listQuery)
         .then(response => {
           response.data.data.items.forEach(item => {
             item.price = item.price / 100
@@ -184,7 +184,7 @@ export default {
     },
     showDetail(row) {
       if (!this.detailDialogVisible) {
-        detailGoods(row.id)
+        detailProduct(row.id)
           .then(response => {
             this.goodsDetail = response.data.data.detail.replace(/<img/g, "<img style='max-width:100%;height:auto;line-height:0px'")
             this.detailDialogVisible = true
@@ -197,7 +197,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteGoods(row.id)
+        deleteProduct(row.id)
           .then(response => {
             this.$notify.success({
               title: '成功',
@@ -280,7 +280,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        batchDeleteGoods(this.selectedIds)
+        batchDeleteProduct(this.selectedIds)
           .then(response => {
             this.$notify.success({
               title: '成功',

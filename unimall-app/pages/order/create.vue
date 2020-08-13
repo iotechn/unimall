@@ -163,7 +163,7 @@
 					if (skuCategoryPriceMap[catItem]) {
 						skuCategoryPriceMap[catItem] += that.isVip ? (item.vipPrice*item.num) :  (item.price*item.num)
 					} else {
-						skuCategoryPriceMap[catItem] = that.isVip ? (item.vipPrice) :  (item.price)
+						skuCategoryPriceMap[catItem] = that.isVip ? (item.vipPrice*item.num) :  (item.price*item.num)
 					}
 				})
 			})

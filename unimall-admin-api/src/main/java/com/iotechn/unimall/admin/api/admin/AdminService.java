@@ -32,24 +32,24 @@ public interface AdminService {
     public AdminDTO info(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "列表", permission = "admin:admin:list", permissionParentName = "系统管理", permissionName = "管理员")
+    @HttpMethod(description = "列表", permission = "sys:admin:list", permissionParentName = "系统管理", permissionName = "管理员")
     public Page<AdminDTO> list(
             @HttpParam(name = "username", type = HttpParamType.COMMON, description = "管理员名称搜索") String name,
             @HttpParam(name = "page", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer page,
             @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页长度", valueDef = "20") Integer limit,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "创建", permission = "admin:admin:create", permissionParentName = "系统管理", permissionName = "管理员")
+    @HttpMethod(description = "创建", permission = "sys:admin:create", permissionParentName = "系统管理", permissionName = "管理员")
     public AdminDTO create(
             @NotNull @HttpParam(name = "adminDTO", type = HttpParamType.COMMON, description = "欲创建的admin对象JSON") AdminDTO adminDTO,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "修改", permission = "admin:admin:update", permissionParentName = "系统管理", permissionName = "管理员")
-    public String update(
+    @HttpMethod(description = "修改", permission = "sys:admin:edit", permissionParentName = "系统管理", permissionName = "管理员")
+    public String edit(
             @NotNull @HttpParam(name = "adminDTO", type = HttpParamType.COMMON, description = "欲修改的admin对象JSON") AdminDTO adminDTO,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "删除", permission = "admin:admin:delete", permissionParentName = "系统管理", permissionName = "管理员")
+    @HttpMethod(description = "删除", permission = "sys:admin:delete", permissionParentName = "系统管理", permissionName = "管理员")
     public String delete(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "目标删除Id") Long id,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
