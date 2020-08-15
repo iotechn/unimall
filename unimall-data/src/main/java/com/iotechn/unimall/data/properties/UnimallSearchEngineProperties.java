@@ -6,22 +6,21 @@ import lombok.Data;
 
 @Data
 @DynamicConfigProperties(prefix = DynamicConst.OPEN_SEARCH_CONFIG_PREFIX)
-public class UnimallOpenSearchProperties {
+public class UnimallSearchEngineProperties {
 
     /**
-     * db : 数据库
-     *  search: 开放搜索
+     *  db : 不使用
+     *  opensearch: 阿里云OpenSearch
      */
     private String enable;
 
-    private String accessKeyId;
+    private String openSearchAccessKeyId;
 
-    private String accessKeySecret;
+    private String openSearchAccessKeySecret;
 
-    private String spuAppName;
-
-    private String spuHost;
-
-    private String spuTableName;
+    /**
+     * API 网关地址
+     */
+    private String openSearchHost;
 
 }

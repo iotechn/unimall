@@ -117,6 +117,13 @@
 				<version>1.2.31</version>
 			</dependency>
 
+			<!-- 阿里云开放搜索 -->
+			<dependency>
+				<groupId>com.aliyun.opensearch</groupId>
+				<artifactId>aliyun-sdk-opensearch</artifactId>
+				<version>3.2.0</version>
+			</dependency>
+
 			<!-- 微信第三方封装Api -->
 			<dependency>
 				<groupId>com.github.binarywang</groupId>

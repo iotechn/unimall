@@ -82,7 +82,12 @@
 		<dependency>
 			<groupId>com.aliyun.opensearch</groupId>
 			<artifactId>aliyun-sdk-opensearch</artifactId>
-			<version>3.2.0</version>
+		</dependency>
+
+		<!-- http客户端 -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
 		</dependency>
 
 		<dependency>

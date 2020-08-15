@@ -297,7 +297,7 @@ public class UserServiceImpl implements UserService {
             sb.append(url);
             //明文
             String content = sb.toString();
-            String signature = SHAUtil.shaEncode(content);
+            String signature = SHAUtil.sha256Encode(content);
             Map<String, Object> obj = new HashMap<>();
             obj.put("noncestr", noncestr);
             obj.put("timestamp", timestamp);

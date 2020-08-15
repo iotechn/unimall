@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Set;
 import java.util.TreeSet;
@@ -91,6 +90,6 @@ public class UniNotifyAdminNotifyBizServiceImpl implements AdminNotifyBizService
             sortSet.add(formBody.value(i));
         }
         sortSet.add(this.appSecret);
-        return SHAUtil.shaEncode(URLEncoder.encode(sortSet.stream().collect(Collectors.joining()), "utf-8"));
+        return SHAUtil.sha256Encode(URLEncoder.encode(sortSet.stream().collect(Collectors.joining()), "utf-8"));
     }
 }

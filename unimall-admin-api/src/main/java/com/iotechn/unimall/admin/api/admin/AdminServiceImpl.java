@@ -273,7 +273,7 @@ public class AdminServiceImpl implements AdminService {
                     .newCall(new Request.Builder()
                             .get()
                             .url(this.uniNotifyUrl + "?_gp=developer&_mt=getRegisterUrl&userId=" + SessionUtil.getAdmin().getUsername()
-                                    + "&appId=" + this.uniNotifyAppId + "&timestamp=" + timestamp + "&sign=" + SHAUtil.shaEncode(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
+                                    + "&appId=" + this.uniNotifyAppId + "&timestamp=" + timestamp + "&sign=" + SHAUtil.sha256Encode(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
                             .build()).execute().body().string();
             JSONObject jsonObject = JSONObject.parseObject(json);
             Integer errcode = jsonObject.getInteger("errno");

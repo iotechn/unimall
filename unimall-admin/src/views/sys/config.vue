@@ -68,7 +68,7 @@
       <h3>短信通知配置</h3>
       <el-form ref="smsDataForm" :model="smsDataForm" label-width="150px">
 
-        <el-form-item label="启用" prop="enable">
+        <el-form-item label="启用(需要重启)" prop="enable">
           <el-select v-model="smsDataForm.enable" placeholder="请选择短信通知平台">
             <el-option
               :value="'mock'"
@@ -150,7 +150,7 @@
     </el-card>
 
     <el-card class="box-card">
-      <h3>阿里云OSS配置</h3>
+      <h3>阿里云OSS配置(需要重启)</h3>
       <el-form ref="ossDataForm" :model="ossDataForm" label-width="150px">
 
         <el-form-item label="AccessKeyId" prop="accessKeyId">
@@ -220,46 +220,40 @@
     </el-card>
 
     <el-card class="box-card">
-      <h3>开放搜索配置</h3>
+      <h3>搜索引擎</h3>
       <el-form ref="searchDataForm" :model="searchDataForm" label-width="150px">
 
-        <el-form-item label="启用" prop="enable">
-          <el-select v-model="searchDataForm.enable" placeholder="请选择短信通知平台">
+        <el-form-item label="启用(需要重启)" prop="enable">
+          <el-select v-model="searchDataForm.enable" placeholder="请选择搜索引擎">
             <el-option
               :value="'db'"
-              :label="'数据库'"
+              :label="'不使用'"
             />
             <el-option
-              :value="'search'"
-              :label="'开放搜索'"
+              :value="'opensearch'"
+              :label="'阿里云OpenSearch'"
             />
           </el-select>
         </el-form-item>
 
-        <el-form-item v-if="searchDataForm.enable == 'search'" label="AccessKeyId" prop="autoCancelTime">
-          <el-input v-model="searchDataForm.accessKeyId" />
+        <el-form-item v-if="searchDataForm.enable == 'opensearch'" label="AccessKeyId" prop="openSearchAccessKeyId">
+          <el-input v-model="searchDataForm.openSearchAccessKeyId" />
         </el-form-item>
 
-        <el-form-item v-if="searchDataForm.enable == 'search'" label="AccessKeySecret" prop="autoConfirmTime">
-          <el-input v-model="searchDataForm.accessKeySecret" />
+        <el-form-item v-if="searchDataForm.enable == 'opensearch'" label="AccessKeySecret" prop="openSearchAccessKeySecret">
+          <el-input v-model="searchDataForm.openSearchAccessKeySecret" />
         </el-form-item>
 
-        <el-form-item v-if="searchDataForm.enable == 'search'" label="商品搜索应用名" prop="autoConfirmTime">
-          <el-input v-model="searchDataForm.spuAppName" />
-        </el-form-item>
-
-        <el-form-item v-if="searchDataForm.enable == 'search'" label="商品搜索API地址" prop="autoConfirmTime">
-          <el-input v-model="searchDataForm.spuHost" />
-        </el-form-item>
-
-        <el-form-item v-if="searchDataForm.enable == 'search'" label="商品搜索表名" prop="autoConfirmTime">
-          <el-input v-model="searchDataForm.spuTableName" />
+        <el-form-item v-if="searchDataForm.enable == 'opensearch'" label="API 网关地址" prop="openSearchHost">
+          <el-input v-model="searchDataForm.openSearchHost" />
         </el-form-item>
 
       </el-form>
 
       <div class="op-container">
         <el-button :loading="submiting" type="primary" @click="handleSave('searchDataForm', prefixs.searchDataPrefix)">保存更改</el-button>
+        <el-button :loading="submiting" type="primary" @click="handleSearchEngineInit()">初始化</el-button>
+        <el-button :loading="submiting" type="primary" @click="handleSearchEngineRebuild()">重建引擎数据</el-button>
       </div>
 
     </el-card>
@@ -268,6 +262,7 @@
 </template>
 <script>
 
+import { initSearchEngine, rebuildSearchEngine, reloadPropertiesSearchEngine } from '@/api/search'
 import { getData, save } from '@/api/config'
 export default {
   name: 'SysConfig',
@@ -345,15 +340,53 @@ export default {
           this.$notify.success({
             type: 'success',
             title: '成功',
-            text: '保存成功'
+            message: '保存成功'
           })
+          if (prefix === this.prefixs.searchDataPrefix) {
+            // 重新加载属性
+            this.$notify.warning({
+              type: 'warning',
+              title: '注意！Attention！',
+              message: '若更换搜索引擎实现，请重启后端服务以使IoC加载实例',
+              position: 'bottom-left',
+              duration: 0
+            })
+            reloadPropertiesSearchEngine().then(reloadRes => {
+
+            })
+          }
         })
         .catch(failres => {
           this.submiting = false
         })
     },
-    handleUpdate() {
-
+    handleSearchEngineInit() {
+      this.submiting = true
+      initSearchEngine().then(res => {
+        this.$notify.success({
+          type: 'success',
+          title: '成功',
+          message: '初始化引擎成功'
+        })
+        this.submiting = false
+      })
+        .catch(failres => {
+          this.submiting = false
+        })
+    },
+    handleSearchEngineRebuild() {
+      this.submiting = true
+      rebuildSearchEngine().then(res => {
+        this.$notify.success({
+          type: 'success',
+          title: '成功',
+          message: '重建搜索引擎数据成功!'
+        })
+        this.submiting = false
+      })
+        .catch(failres => {
+          this.submiting = false
+        })
     }
   }
 }

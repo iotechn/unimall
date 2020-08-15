@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.aspect;
 
+import com.iotechn.unimall.core.util.ReflectUtil;
 import com.iotechn.unimall.data.annotaion.DynamicConfigProperties;
 import com.iotechn.unimall.data.component.DynamicConfigComponent;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -34,22 +35,14 @@ public class DynamicConfigAspect {
         // 去对应的分组读取配置
         Class returnType = signature.getReturnType();
         if (returnType == String.class) {
-            return dynamicConfigComponent.readString(prefix + getField(signature.getName()), null);
+            return dynamicConfigComponent.readString(prefix + ReflectUtil.getField(signature.getName()), null);
         } else if (returnType == Integer.class) {
-            return dynamicConfigComponent.readInt(prefix + getField(signature.getName()), null);
+            return dynamicConfigComponent.readInt(prefix + ReflectUtil.getField(signature.getName()), null);
         } else if (returnType == Long.class) {
-            return dynamicConfigComponent.readLong(prefix + getField(signature.getName()), null);
+            return dynamicConfigComponent.readLong(prefix + ReflectUtil.getField(signature.getName()), null);
         }
         return joinPoint.proceed();
     }
 
-    private String getField(String name) {
-        char[] dst = new char[name.length() - 3];
-        name.getChars(3, name.length(), dst, 0);
-        if ('A' <= dst[0] && 'Z' >= dst[0]) {
-            dst[0] = (char) (dst[0] + 32);
-        }
-        return new String(dst);
-    }
 
 }

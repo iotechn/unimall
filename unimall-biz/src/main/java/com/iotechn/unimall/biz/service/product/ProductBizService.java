@@ -2,18 +2,20 @@ package com.iotechn.unimall.biz.service.product;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.goods.SkuDTO;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.data.search.SearchEngine;
+import com.iotechn.unimall.data.search.exception.SearchEngineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -47,6 +49,9 @@ public class ProductBizService {
 
     @Autowired
     private CacheComponent cacheComponent;
+
+    @Autowired
+    private SearchEngine searchEngine;
 
     /**
      * SPU 排除掉detail字段的其他字段名字形成的数组
@@ -83,6 +88,14 @@ public class ProductBizService {
      */
     public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         if (!StringUtils.isEmpty(title)) {
+            try {
+                if (this.searchEngine != null) {
+                    // TODO 使用搜索引擎逻辑
+                }
+            } catch (SearchEngineException e) {
+                logger.error("[获取商品列表] 搜素引擎 异常", e);
+            }
+            // 使用DB逻辑
             return this.getProductPageFromDB(pageNo, pageSize, categoryId, orderBy, isAsc, title);
         }
         // 1. 从商品列表缓存中取出Id

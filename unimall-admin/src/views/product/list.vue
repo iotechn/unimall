@@ -38,7 +38,6 @@
             <el-table-column align="center" label="商品条码" prop="barCode" />
             <el-table-column align="center" label="商品规格" prop="title" />
             <el-table-column align="center" label="商品库存" prop="stock" />
-            <el-table-column align="center" label="商品冻结库存" prop="freezeStock" />
             <el-table-column align="center" label="原价" prop="originalPrice" >
               <template slot-scope="scope">{{ scope.row.originalPrice /100 }}</template>
             </el-table-column>

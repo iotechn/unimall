@@ -96,7 +96,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         categoryDO.setGmtUpdate(now);
 
         if (categoryMapper.insert(categoryDO) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.DATABASE_INSERT_FAILURE);
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
         }
         this.clearCache();
         return categoryDO;
@@ -149,7 +149,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         if (!category.getParentId().equals(0L) && !category.getParentId().equals(parentId)) {
             // 节点只能平级变更
             if(category.getLevel().intValue() != categoryParent.getLevel().intValue() + 1){
-                throw new AdminServiceException(ExceptionDefinition.UPDATE_ONLY_HORIZONTAL_MOVE);
+                throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
             }
             if(categoryParent.getLevel().intValue() == 0){
                 updateDO.setFirstLevelId(parentId);
