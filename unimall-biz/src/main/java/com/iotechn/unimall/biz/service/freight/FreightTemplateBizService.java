@@ -1,11 +1,9 @@
 package com.iotechn.unimall.biz.service.freight;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.iotechn.unimall.core.exception.BizServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.annotaion.AspectCommonCache;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
@@ -23,7 +21,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**

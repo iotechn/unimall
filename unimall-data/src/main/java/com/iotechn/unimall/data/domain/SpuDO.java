@@ -2,8 +2,9 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.iotechn.unimall.data.annotaion.SearchField;
-import com.iotechn.unimall.data.annotaion.SearchTable;
+import com.iotechn.unimall.data.annotation.SearchField;
+import com.iotechn.unimall.data.annotation.SearchTable;
+import com.iotechn.unimall.data.enums.SearchEngineTokenizerType;
 import lombok.Data;
 
 import java.util.Date;
@@ -43,7 +44,7 @@ public class SpuDO extends SuperDO {
     /**
      * 商品标题
      */
-    @SearchField("title")
+    @SearchField(value = "title", tokenizer = SearchEngineTokenizerType.STAND)
     private String title;
 
     /**
@@ -66,7 +67,7 @@ public class SpuDO extends SuperDO {
     /**
      * 商品一句话描述
      */
-    @SearchField("description")
+    @SearchField(value = "description", tokenizer = SearchEngineTokenizerType.STAND)
     private String description;
 
     /**

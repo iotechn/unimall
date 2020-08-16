@@ -50,12 +50,18 @@ public interface SearchEngine {
     public void dataTransmissionList(List list);
 
     /**
+     * 删除一个文档 SearchTable 的对象 此对象必须包含主键
+     * @param obj
+     */
+    public void deleteData(Object obj);
+
+    /**
      * 去搜索引擎搜索信息
      * @param wrapperModel 搜索条件wrapper
      * @param clazz 搜索结果 映射的被SearchTable注解的 Java Pojo'class
      * @param <T>
      * @return
      */
-    public <T> Page<T> search(SearchWrapperModel wrapperModel, Class<?> clazz);
+    public <T> Page<T> search(SearchWrapperModel wrapperModel, Class<T> clazz);
 
 }

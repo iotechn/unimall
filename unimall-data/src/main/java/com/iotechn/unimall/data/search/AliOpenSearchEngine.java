@@ -7,6 +7,8 @@ import com.aliyun.opensearch.OpenSearchClient;
 import com.aliyun.opensearch.SearcherClient;
 import com.aliyun.opensearch.sdk.dependencies.com.google.common.collect.Lists;
 import com.aliyun.opensearch.sdk.generated.OpenSearch;
+import com.aliyun.opensearch.sdk.generated.commons.OpenSearchClientException;
+import com.aliyun.opensearch.sdk.generated.commons.OpenSearchException;
 import com.aliyun.opensearch.sdk.generated.commons.OpenSearchResult;
 import com.aliyun.opensearch.sdk.generated.document.Command;
 import com.aliyun.opensearch.sdk.generated.document.DocumentConstants;
@@ -14,7 +16,9 @@ import com.aliyun.opensearch.sdk.generated.search.*;
 import com.aliyun.opensearch.sdk.generated.search.general.SearchResult;
 import com.iotechn.unimall.core.util.ReflectUtil;
 import com.iotechn.unimall.core.util.SHAUtil;
-import com.iotechn.unimall.data.annotaion.SearchField;
+import com.iotechn.unimall.data.annotation.SearchField;
+import com.iotechn.unimall.data.annotation.SearchTable;
+import com.iotechn.unimall.data.enums.SearchEngineTokenizerType;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.model.SearchEngineInitModel;
 import com.iotechn.unimall.data.model.SearchWrapperModel;
@@ -30,6 +34,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -101,8 +106,8 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
         String url = "/v4/openapi/app-groups?type=enhanced&sortBy=1";
         String signature = this.getSignature(verb, date, nonce, url, null);
         // 构建请求
-        MediaType mediaType = MediaType.parse(contentType);
-        RequestBody requestBody = RequestBody.create(mediaType, "{}");
+        // MediaType mediaType = MediaType.parse(contentType);
+        // RequestBody requestBody = RequestBody.create(mediaType, "{}");
         Request request = new Request
                 .Builder()
                 .url(endpoint + url)
@@ -123,9 +128,9 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
     }
 
     public static void main(String args[]) {
-//        SearchEngineInitModel initModel = new SearchEngineInitModel();
-//        initModel.setTables(new ArrayList<>());
-//        new AliOpenSearchEngine().init(initModel);
+        SearchEngineInitModel initModel = new SearchEngineInitModel();
+        initModel.setTables(new ArrayList<>());
+        new AliOpenSearchEngine().init(initModel);
     }
 
     @Override
@@ -153,7 +158,6 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
 
     @Override
     public void dataTransmission(Object object) {
-        this.checkClientExit();
         if (object == null) {
             throw new NullPointerException("OpenSearch 传输对象不能为空");
         }
@@ -161,7 +165,6 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
     }
 
     /**
-     * FIXME 需要验证，如果出现主键冲突，那边报什么错
      * @param list
      */
     @Override
@@ -208,7 +211,47 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
     }
 
     @Override
-    public <T> Page<T> search(SearchWrapperModel wrapperModel, Class<?> clazz) {
+    public void deleteData(Object obj) {
+        try {
+            Class<?> clazz = obj.getClass();
+            Method method = clazz.getMethod("getId");
+            SearchTable searchTable = clazz.getAnnotation(SearchTable.class);
+            if (searchTable == null) {
+                throw new SearchEngineException("提供的pojo没有被SearchTable所注解");
+            }
+            Object id = method.invoke(obj);
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", id);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(DocumentConstants.DOC_KEY_CMD, Command.DELETE.toString());
+            jsonObject.put(DocumentConstants.DOC_KEY_FIELDS, map);
+            String docsJson = JSONObject.toJSONString(Arrays.asList(jsonObject));
+            documentClient.push(docsJson, APPNAME, searchTable.value());
+        } catch (NoSuchMethodException e) {
+            throw new SearchEngineException("请为Pojo提供id 的 Getter与Setter");
+        } catch (IllegalAccessException e) {
+            throw new SearchEngineException("请为Pojo提供id 的 Getter与Setter");
+        } catch (InvocationTargetException e) {
+            throw new SearchEngineException("请为Pojo提供id 的 Getter与Setter");
+        } catch (OpenSearchException e) {
+            logger.error("[OpenSearch Delete] 异常", e);
+            throw new SearchEngineException("[OpenSearch Delete] 异常");
+        } catch (OpenSearchClientException e) {
+            logger.error("[OpenSearch Delete] 异常", e);
+            throw new SearchEngineException("[OpenSearch Delete] 异常");
+        }
+    }
+
+    /**
+     * 阿里云 OpenSearch中 搜索无需(也不能)指定表，因为一个应用只允许一张主表
+     * @param wrapperModel 搜索条件wrapper
+     * @param clazz 搜索结果 映射的被SearchTable注解的 Java Pojo'class
+     * @param <T>
+     * @return
+     */
+    @Override
+    public <T> Page<T> search(SearchWrapperModel wrapperModel, Class<T> clazz) {
+        this.checkClientExit();
         // 此处不进行页码校验，因为在网关上已经校验过了
         Config config = new Config(Lists.newArrayList(APPNAME));
         config.setStart((wrapperModel.getPageNo() - 1) * wrapperModel.getPageSize());
@@ -223,7 +266,14 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
             switch (item.getType()) {
                 case SearchWrapperModel.CONDITION_TYPE_ACCURATE:
                 case SearchWrapperModel.CONDITION_TYPE_FUZZY:
-                    return item.getField() + ":" + item.getKeyword();
+                    SearchField searchField = super.getAnnotation(clazz, item.getField());
+                    if (searchField.tokenizer() == SearchEngineTokenizerType.STAND) {
+                        // 1. 使用分词器
+                        return "default:'" + item.getKeyword() + "'";
+                    } else {
+                        // 2. 不使用分词器
+                        return item.getField() + ":" + item.getKeyword();
+                    }
                 case SearchWrapperModel.CONDITION_TYPE_GTE:
                 case SearchWrapperModel.CONDITION_TYPE_GT:
                     // FIXME 测试这里可以为空不
@@ -242,73 +292,87 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
         Boolean isAsc = wrapperModel.getIsAsc();
         String orderByField = wrapperModel.getOrderByField();
         sorter.addToSortFields(new SortField(orderByField, isAsc ? Order.INCREASE : Order.DECREASE));
+        sorter.addToSortFields(new SortField("RANK", Order.INCREASE));
         searchParams.setSort(sorter);
         // 执行返回查询结果
         try {
             SearchResult searchResult = searcherClient.execute(searchParams);
             String resultStr = searchResult.getResult();
-            JSONObject result = JSONObject.parseObject(resultStr);
-            JSONArray items = result.getJSONArray("items");
-            Integer total = result.getInteger("total");
-            if (total == null || total == 0) {
-                // 返回空页
-                return new Page<T>(new ArrayList<>(), wrapperModel.getPageNo(), wrapperModel.getPageSize(), 0);
+            JSONObject result = JSONObject.parseObject(resultStr).getJSONObject("result");
+            if (!CollectionUtils.isEmpty(result.getJSONArray("errors"))) {
+                logger.error("[阿里云 OpenSearch] 搜索回复 错误:" + resultStr);
             }
-            // 构建一个 Field Setter 映射表
+            if (result != null) {
+                JSONArray items = result.getJSONArray("items");
+                Integer total = result.getInteger("total");
+                if (total == null || total == 0) {
+                    // 返回空页
+                    return new Page<T>(new ArrayList<>(), wrapperModel.getPageNo(), wrapperModel.getPageSize(), 0);
+                }
+                // 构建一个 Field Setter 映射表
 
-            Map<String, Method> fieldMethodMap;
-            // 先尝试从JVM Cache中获取
-            fieldMethodMap = fieldMethodMapCache.get(clazz);
-            if (fieldMethodMap == null) {
-                synchronized (this) {
-                    if (fieldMethodMap == null) {
-                        fieldMethodMap = new HashMap<>();
-                        // 此处应该缓存 | 可以借鉴单例来保证线程安全
-                        Field[] declaredFields = clazz.getDeclaredFields();
-                        for (Field field : declaredFields) {
-                            SearchField searchField = field.getDeclaredAnnotation(SearchField.class);
-                            if (searchField != null) {
-                                String methodName = ReflectUtil.getMethodName(field.getName(), "set");
-                                Method method = clazz.getMethod(methodName, field.getDeclaringClass());
-                                fieldMethodMap.put(searchField.value(), method);
+                Map<String, Method> fieldMethodMap;
+                // 先尝试从JVM Cache中获取
+                fieldMethodMap = fieldMethodMapCache.get(clazz);
+                if (fieldMethodMap == null) {
+                    synchronized (this) {
+                        if (fieldMethodMap == null) {
+                            fieldMethodMap = new HashMap<>();
+                            // 此处应该缓存 | 可以借鉴单例来保证线程安全
+                            Field[] declaredFields = clazz.getDeclaredFields();
+                            for (Field field : declaredFields) {
+                                SearchField searchField = field.getDeclaredAnnotation(SearchField.class);
+                                if (searchField != null) {
+                                    String methodName = ReflectUtil.getMethodName(field.getName(), "set");
+                                    Method method = clazz.getMethod(methodName, field.getType());
+                                    fieldMethodMap.put(searchField.value(), method);
+                                }
                             }
                         }
                     }
                 }
-            }
-            final Map<String, Method> finalFieldMethodMap = fieldMethodMap;
-            // 将结果反射为对象
-            List<T> list = items.stream().map(item -> {
-                try {
-                    JSONObject json = (JSONObject) item;
-                    T t = (T) clazz.getConstructor().newInstance();
-                    Set<String> keys = json.keySet();
-                    for (String key : keys) {
-                        Method method = finalFieldMethodMap.get(key);
-                        Class<?> parameterType = method.getParameterTypes()[0];
-                        // 基础类型 & string 直接获取
-                        if (parameterType == String.class) {
-                            method.invoke(t, json.getString(key));
-                        } else if (parameterType == Integer.class) {
-                            method.invoke(t, json.getInteger(key));
-                        } else if (parameterType == Long.class) {
-                            method.invoke(t, json.getLong(key));
-                        } else if (parameterType == Boolean.class) {
-                            method.invoke(t, json.getBoolean(key));
-                        } else if (parameterType == Float.class) {
-                            method.invoke(t, json.getFloat(key));
-                        } else if (parameterType == Double.class) {
-                            method.invoke(t, json.getDouble(key));
-                        } else {
-                            method.invoke(t, json.getObject(key, parameterType));
+                final Map<String, Method> finalFieldMethodMap = fieldMethodMap;
+                // 将结果反射为对象
+                List<T> list = items.stream().map(item -> {
+                    try {
+                        JSONObject json = (JSONObject) item;
+                        T t = (T) clazz.getConstructor().newInstance();
+                        Set<String> keys = json.keySet();
+                        for (String key : keys) {
+                            Method method = finalFieldMethodMap.get(key);
+                            if (method != null) {
+                                // 阿里云会强行在 fields 里面加一个 index_name。这不属于unimall的属性
+                                Class<?> parameterType = method.getParameterTypes()[0];
+                                // 基础类型 & string 直接获取
+                                if (parameterType == String.class) {
+                                    method.invoke(t, json.getString(key));
+                                } else if (parameterType == Integer.class) {
+                                    method.invoke(t, json.getInteger(key));
+                                } else if (parameterType == Long.class) {
+                                    method.invoke(t, json.getLong(key));
+                                } else if (parameterType == Boolean.class) {
+                                    method.invoke(t, json.getBoolean(key));
+                                } else if (parameterType == Date.class) {
+                                    method.invoke(t, json.getDate(key));
+                                } else if (parameterType == Float.class) {
+                                    method.invoke(t, json.getFloat(key));
+                                } else if (parameterType == Double.class) {
+                                    method.invoke(t, json.getDouble(key));
+                                } else {
+                                    method.invoke(t, json.getObject(key, parameterType));
+                                }
+                            }
+
                         }
+                        return t;
+                    } catch (Exception e) {
+                        logger.error("[OpenSearch 反射封装] 异常", e);
+                        throw new SearchEngineException("反射失败，请确定是单纯pojo");
                     }
-                    return t;
-                } catch (Exception e) {
-                    throw new SearchEngineException("反射失败，请确定是单纯pojo");
-                }
-            }).collect(Collectors.toList());
-            return new Page<T>(list, wrapperModel.getPageNo(), wrapperModel.getPageSize(), total);
+                }).collect(Collectors.toList());
+                return new Page<T>(list, wrapperModel.getPageNo(), wrapperModel.getPageSize(), total);
+            }
+            return new Page<T>(new ArrayList<>(), wrapperModel.getPageNo(), wrapperModel.getPageSize(), 0);
         } catch (Exception e) {
             logger.error("[OpenSearch] 搜索 异常", e);
             throw new SearchEngineException("搜索引擎暂时不可用");

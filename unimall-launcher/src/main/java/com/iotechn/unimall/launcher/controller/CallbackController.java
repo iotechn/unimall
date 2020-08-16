@@ -6,7 +6,7 @@ import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
-import com.iotechn.unimall.app.executor.GlobalExecutor;
+import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;

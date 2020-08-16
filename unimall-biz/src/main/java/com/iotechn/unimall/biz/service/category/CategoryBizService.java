@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.annotaion.AspectCommonCache;
+import com.iotechn.unimall.data.annotation.AspectCommonCache;
 import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;

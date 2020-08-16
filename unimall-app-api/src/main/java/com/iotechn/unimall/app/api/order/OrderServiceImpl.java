@@ -5,7 +5,7 @@ import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
-import com.iotechn.unimall.app.executor.GlobalExecutor;
+import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.address.AddressBizService;
 import com.iotechn.unimall.biz.service.cart.CartBizService;
 import com.iotechn.unimall.biz.service.coupon.CouponBizService;

@@ -322,6 +322,16 @@ public class CacheComponent {
     }
 
     /**
+     * 增加ZSet分数
+     * @param setName
+     * @param value
+     * @param delta
+     */
+    public Double incZSetSource(String setName, String value, double delta) {
+        return stringRedisTemplate.opsForZSet().incrementScore(setName, value, delta);
+    }
+
+    /**
      * 获取前N个
      * @param setName
      * @param n

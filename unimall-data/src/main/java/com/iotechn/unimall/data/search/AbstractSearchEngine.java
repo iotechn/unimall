@@ -2,8 +2,8 @@ package com.iotechn.unimall.data.search;
 
 import com.alibaba.fastjson.JSONObject;
 import com.iotechn.unimall.core.util.ReflectUtil;
-import com.iotechn.unimall.data.annotaion.SearchField;
-import com.iotechn.unimall.data.annotaion.SearchTable;
+import com.iotechn.unimall.data.annotation.SearchField;
+import com.iotechn.unimall.data.annotation.SearchTable;
 import com.iotechn.unimall.data.model.SearchEngineInitModel;
 import com.iotechn.unimall.data.search.exception.SearchEngineException;
 import lombok.Data;
@@ -27,6 +27,9 @@ import java.util.stream.Collectors;
 public abstract class AbstractSearchEngine implements SearchEngine {
 
     private Map<Class, List<String>> documentFieldsMap = new HashMap<>();
+
+    private Map<Class, Map<String, SearchField>> documentFieldsAnnotationMap = new HashMap<>();
+
     /**
      * 将SearchTable类转换为STable的行为（Action）
      */
@@ -130,18 +133,28 @@ public abstract class AbstractSearchEngine implements SearchEngine {
                         throw new SearchEngineException("传入搜索引擎模型,并非SearchTable");
                     }
                     Field[] fields = clazz.getDeclaredFields();
-                    documentFields = Arrays.stream(fields).map(item -> {
-                        SearchField searchField = item.getDeclaredAnnotation(SearchField.class);
-                        if (searchField != null) {
-                            return searchField.value();
-                        }
-                        return null;
-                    }).filter(item -> !StringUtils.isEmpty(searchTable)).collect(Collectors.toList());
+                    List<SearchField> annotationList = Arrays.stream(fields).map(item -> item.getDeclaredAnnotation(SearchField.class)).filter(item -> item != null).collect(Collectors.toList());
+                    documentFields = annotationList.stream().map(item -> item.value()).collect(Collectors.toList());
                     documentFieldsMap.put(clazz, documentFields);
+                    // 同时缓存映射
+                    Map<String, SearchField> annotationMap = annotationList.stream().collect(Collectors.toMap(SearchField::value, item -> item));
+                    documentFieldsAnnotationMap.put(clazz, annotationMap);
                 }
             }
         }
         return documentFields;
+    }
+
+    /**
+     * 获取注解
+     * @param clazz
+     * @param field
+     * @return
+     */
+    protected SearchField getAnnotation(Class clazz, String field) {
+        // 确保初始化
+        getDocumentFields(clazz);
+        return documentFieldsAnnotationMap.get(clazz).get(field);
     }
 
     /**

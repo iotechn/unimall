@@ -172,6 +172,7 @@
     <el-card class="box-card">
       <div slot="header" class="clearfix">
         <h4>商品(Sku)详情</h4>
+        <el-button :plain="true" type="primary" @click="skuBatchPriceVisiable = true">批量定价</el-button>
       </div>
       <div v-for="(item, index) in specList" :key="index" class="tag-group">
         <el-tag
@@ -261,13 +262,17 @@
           width="85"
           label="SKU图片">
           <template slot-scope="scope">
+            <!-- on-success 接收的是一个变量，而非事件，也就是说是一个函数指针，所以无法将row给传过去 -->
             <el-upload
               :show-file-list="false"
-              :on-success="handleAvatarSuccess"
-              :before-upload="beforeAvatarUpload"
-              class="sku-uploader"
-              action="https://jsonplaceholder.typicode.com/posts/">
-              <img v-if="imageUrl" :src="imageUrl" class="sku">
+              :on-success="(e, file) => {
+                handleSkuImgSuccess(e, file, scope)
+              }"
+              :before-upload="beforSkuImgUpload"
+              :action="uploadPath"
+              accept=".jpg, .jpeg, .png, .gif"
+              class="sku-uploader">
+              <img v-if="scope.row.img" :src="scope.row.img" class="sku">
               <i v-else class="el-icon-plus sku-uploader-icon"/>
             </el-upload>
           </template>
@@ -286,6 +291,32 @@
           prop=""
           label=""/>
       </el-table>
+
+      <!-- 批量定价Dialog -->
+      <el-dialog :visible.sync="skuBatchPriceVisiable" title="批量定价">
+        <el-form
+          ref="skuBatchPriceForm"
+          :model="skuBatchPriceForm"
+          status-icon
+          label-position="left"
+          label-width="100px"
+          style="width: 400px; margin-left:50px;"
+        >
+          <el-form-item label="现价(￥)" prop="price">
+            <el-input-number v-model="skuBatchPriceForm.price" :precision="2" :min="0.01" :max="2147483647" size="small" />
+          </el-form-item>
+          <el-form-item label="VIP价格(￥)" prop="vipPrice">
+            <el-input-number v-model="skuBatchPriceForm.vipPrice" :precision="2" :min="0.01" :max="2147483647" size="small" />
+          </el-form-item>
+          <el-form-item label="吊牌价(￥)" prop="originalPrice">
+            <el-input-number v-model="skuBatchPriceForm.originalPrice" :precision="2" :min="0.01" :max="2147483647" size="small" />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="skuBatchPriceVisiable = false">取消</el-button>
+          <el-button type="primary" @click="handleBatchPrice">确定</el-button>
+        </div>
+      </el-dialog>
     </el-card>
 
     <div class="op-container">
@@ -320,12 +351,11 @@ export default {
         imgList: [],
         type: 0
       },
-      skuCombineTempModel: [],
       attributeVisiable: false,
       attributeForm: { attribute: '', value: '' },
       attributes: [],
-      skuVisiable: false,
-      skuForm: { img: undefined },
+      skuBatchPriceVisiable: false,
+      skuBatchPriceForm: {},
       specVisiable: false,
       specForm: { title: undefined },
       skuList: [],
@@ -536,6 +566,7 @@ export default {
                 stock: this.skuTableData[i].stock,
                 barCode: this.skuTableData[i].barCode,
                 weight: this.skuTableData[i].weight,
+                img: this.skuTableData[i].img,
                 title,
                 specification
               }
@@ -578,45 +609,6 @@ export default {
           })
         }
       })
-    },
-
-    uploadOverrun: function() {
-      this.$message({
-        type: 'error',
-        message: '上传文件个数超出限制!最多上传5张图片!'
-      })
-    },
-    handleimgsUrl(response, file, fileList) {
-      if (response.errno === 200) {
-        this.product.imgList.push(response.url)
-        this.product.img = this.product.imgList[0]
-      }
-    },
-    handleRemove: function(file, fileList) {
-      for (var i = 0; i < this.product.imgList.length; i++) {
-        // 这里存在两种情况
-        // 1. 如果所删除图片是刚刚上传的图片，那么图片地址是file.response.url
-        //    此时的file.url虽然存在，但是是本机地址，而不是远程地址。
-        // 2. 如果所删除图片是后台返回的已有图片，那么图片地址是file.url
-        var url
-        if (file.response === undefined) {
-          url = file.url
-        } else {
-          url = file.response.url
-        }
-
-        if (this.product.imgList[i] === url) {
-          this.product.imgList.splice(i, 1)
-        }
-      }
-      if (this.product.imgList.length > 0) {
-        this.product.img = this.product.imgList[0]
-      }
-    },
-    handleSkuImgSuccess(e, file) {
-      this.skuForm.img = e.url
-      this.skuVisiable = false
-      this.skuVisiable = true
     },
     handleAttributeShow() {
       this.attributeForm = {}
@@ -785,6 +777,64 @@ export default {
     randonBarcode(row) {
       row.barCode = new Date().getTime() + ''
       this.$forceUpdate()
+    },
+    handleBatchPrice() {
+      for (let i = 0; i < this.skuTableData.length; i++) {
+        if (this.skuBatchPriceForm.price) {
+          this.skuTableData[i].priceRaw = this.skuBatchPriceForm.price
+        }
+        if (this.skuBatchPriceForm.vipPrice) {
+          this.skuTableData[i].vipPriceRaw = this.skuBatchPriceForm.vipPrice
+        }
+        if (this.skuBatchPriceForm.originalPrice) {
+          this.skuTableData[i].originalPriceRaw = this.skuBatchPriceForm.originalPrice
+        }
+      }
+      this.skuBatchPriceVisiable = false
+    },
+    /** ******************* 图片上传相关 *********************/
+    uploadOverrun: function() {
+      this.$message({
+        type: 'error',
+        message: '上传文件个数超出限制!最多上传5张图片!'
+      })
+    },
+    handleimgsUrl(response, file, fileList) {
+      if (response.errno === 200) {
+        this.product.imgList.push(response.url)
+        this.product.img = this.product.imgList[0]
+      }
+    },
+    handleRemove: function(file, fileList) {
+      for (var i = 0; i < this.product.imgList.length; i++) {
+        // 这里存在两种情况
+        // 1. 如果所删除图片是刚刚上传的图片，那么图片地址是file.response.url
+        //    此时的file.url虽然存在，但是是本机地址，而不是远程地址。
+        // 2. 如果所删除图片是后台返回的已有图片，那么图片地址是file.url
+        var url
+        if (file.response === undefined) {
+          url = file.url
+        } else {
+          url = file.response.url
+        }
+
+        if (this.product.imgList[i] === url) {
+          this.product.imgList.splice(i, 1)
+        }
+      }
+      if (this.product.imgList.length > 0) {
+        this.product.img = this.product.imgList[0]
+      }
+    },
+    beforSkuImgUpload(file) {
+      const isLt2M = file.size / 1024 / 1024 < 1
+      if (!isLt2M) {
+        this.$message.error('上传头像图片大小不能超过 1MB!')
+      }
+      return isLt2M
+    },
+    handleSkuImgSuccess(e, file, scope) {
+      this.$set(this.skuTableData[scope.$index], 'img', e.url)
     }
 
   }
@@ -848,8 +898,8 @@ export default {
 }
 
 .sku {
-  width: 72px;
-  height: 72px;
+  width: 60px;
+  height: 60px;
   display: block;
 }
 

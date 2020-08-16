@@ -1,6 +1,6 @@
 package com.iotechn.unimall.data.aspect;
 
-import com.iotechn.unimall.data.annotaion.AspectCommonCache;
+import com.iotechn.unimall.data.annotation.AspectCommonCache;
 import com.iotechn.unimall.data.component.CacheComponent;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -26,7 +26,7 @@ public class RedisCommonCacheAspect {
     @Autowired
     private CacheComponent cacheComponent;
 
-    @Pointcut("@annotation(com.iotechn.unimall.data.annotaion.AspectCommonCache)")
+    @Pointcut("@annotation(com.iotechn.unimall.data.annotation.AspectCommonCache)")
     public void cachePointCut() {}
 
 

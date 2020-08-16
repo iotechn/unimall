@@ -1,6 +1,6 @@
 package com.iotechn.unimall.data.properties;
 
-import com.iotechn.unimall.data.annotaion.DynamicConfigProperties;
+import com.iotechn.unimall.data.annotation.DynamicConfigProperties;
 import com.iotechn.unimall.data.constant.DynamicConst;
 import lombok.Data;
 

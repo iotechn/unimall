@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.aspect;
 
 import com.iotechn.unimall.core.util.ReflectUtil;
-import com.iotechn.unimall.data.annotaion.DynamicConfigProperties;
+import com.iotechn.unimall.data.annotation.DynamicConfigProperties;
 import com.iotechn.unimall.data.component.DynamicConfigComponent;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

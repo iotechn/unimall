@@ -3,7 +3,7 @@ package com.iotechn.unimall.biz.service.appriaise;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.annotaion.AspectCommonCache;
+import com.iotechn.unimall.data.annotation.AspectCommonCache;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.mapper.AppraiseMapper;

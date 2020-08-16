@@ -3,7 +3,7 @@ package com.iotechn.unimall.app.api.integral;
 import com.iotechn.unimall.app.api.advert.AdvertService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.annotaion.AspectCommonCache;
+import com.iotechn.unimall.data.annotation.AspectCommonCache;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.AdvertDO;
 import com.iotechn.unimall.data.domain.SpuDO;

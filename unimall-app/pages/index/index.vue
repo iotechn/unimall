@@ -3,7 +3,10 @@
 		<!-- 小程序头部兼容 -->
 		<!-- #ifdef MP -->
 		<view class="mp-search-box">
-			<input @click="uni.navigateTo('/pages/product/search')" class="ser-input" type="text" value="输入关键字搜索" disabled />
+			<navigator url="/pages/product/search" hover-class="none">
+				<input class="ser-input" type="text" value="输入关键字搜索" disabled />
+			</navigator>
+			
 		</view>
 		<!-- #endif -->
 		
@@ -246,14 +249,16 @@
 				}).then(res => {
 					let data = res.data
 					//轮播
-					data.advertisement.t1.forEach(item => {
-						if (!item.color) {
-							item.color = 'rgb(205, 215, 218)'
-						}
-					})
-					that.carouselList = data.advertisement.t1
-					that.swiperLength = data.advertisement.t1.length
-					that.titleNViewBackground = data.advertisement.t1[0].color
+					if (data.advertisement.t1) {
+						data.advertisement.t1.forEach(item => {
+							if (!item.color) {
+								item.color = 'rgb(205, 215, 218)'
+							}
+						})
+						that.carouselList = data.advertisement.t1
+						that.swiperLength = data.advertisement.t1.length
+						that.titleNViewBackground = data.advertisement.t1[0].color
+					}
 					//分类精选
 					if (data.advertisement.t2) {
 						that.categoryPickList = data.advertisement.t2

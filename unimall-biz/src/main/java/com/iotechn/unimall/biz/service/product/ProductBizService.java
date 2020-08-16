@@ -2,6 +2,7 @@ package com.iotechn.unimall.biz.service.product;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
@@ -14,6 +15,7 @@ import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.data.model.SearchWrapperModel;
 import com.iotechn.unimall.data.search.SearchEngine;
 import com.iotechn.unimall.data.search.exception.SearchEngineException;
 import org.slf4j.Logger;
@@ -23,6 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -52,6 +57,7 @@ public class ProductBizService {
 
     @Autowired
     private SearchEngine searchEngine;
+
 
     /**
      * SPU 排除掉detail字段的其他字段名字形成的数组
@@ -90,10 +96,25 @@ public class ProductBizService {
         if (!StringUtils.isEmpty(title)) {
             try {
                 if (this.searchEngine != null) {
-                    // TODO 使用搜索引擎逻辑
+                    SearchWrapperModel searchWrapper =
+                            new SearchWrapperModel()
+                                    .div(pageNo, pageSize)
+                                    .like("title", title);
+                    if (categoryId != null && categoryId > 0) {
+                        searchWrapper.eq("category_id", categoryId);
+                    }
+                    if (orderBy != null && isAsc != null) {
+                        if (isAsc)
+                            searchWrapper.orderByAsc(orderBy);
+                        else
+                            searchWrapper.orderByDesc(orderBy);
+                    }
+                    Page<SpuDO> searchRes = searchEngine.search(searchWrapper, SpuDO.class);
+                    return searchRes;
                 }
             } catch (SearchEngineException e) {
                 logger.error("[获取商品列表] 搜素引擎 异常", e);
+                throw new AppServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.SEARCH_ENGINE_INNER_EXCEPTION, e.getMessage()));
             }
             // 使用DB逻辑
             return this.getProductPageFromDB(pageNo, pageSize, categoryId, orderBy, isAsc, title);
@@ -219,6 +240,10 @@ public class ProductBizService {
         return spuMapper.selectOne(new QueryWrapper<SpuDO>().select(SPU_EXCLUDE_DETAIL_FIELDS).eq("id", id));
     }
 
+    public SpuDO getProductByIdFromDBForUpdate(Long id) {
+        return spuMapper.selectOne(new QueryWrapper<SpuDO>().select(SPU_EXCLUDE_DETAIL_FIELDS).eq("id", id).last(" FOR UPDATE"));
+    }
+
     /**
      * 从缓存中查出SPU，不带detail字段
      *
@@ -249,6 +274,9 @@ public class ProductBizService {
         skuStockMap.forEach((k, v) -> skuMapper.decStock(k, v));
     }
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     /**
      * 增加商品销量
      *
@@ -256,7 +284,58 @@ public class ProductBizService {
      */
     public void incSpuSales(Map<Long, Integer> skuSalesMap) {
         // TODO 增加销量，需要更新缓存
-        skuSalesMap.forEach((k, v) -> spuMapper.incSales(k, v));
+        skuSalesMap.forEach((k, v) -> {
+            // 1. 更新数据库
+            spuMapper.incSales(k, v);
+            // 2. 更新缓存
+            SpuDTO spuDtoFromCache = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + k, SpuDTO.class);
+            int isTheSame = -1;
+            Double nullSource = cacheComponent.incZSetSource(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + null, "P" + k, v);
+            if (nullSource != null) {
+                isTheSame = (int) Math.round(nullSource);
+            }
+            for (Long categoryId : spuDtoFromCache.getCategoryIds()) {
+                Double source = cacheComponent.incZSetSource(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + categoryId, "P" + k, v);
+                if (source != null) {
+                    int i = (int) Math.round(source);
+                    if (i != isTheSame) {
+                        // 若不相等
+                        isTheSame = - 1;
+                    }
+                }
+            }
+            if (isTheSame == -1) {
+                // 则重新冲数据库建立新的缓存 （一般情况下不会执行到这里）
+                transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                    @Override
+                    protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                        // 锁定此ID的记录，防止脏读
+                        SpuDO newSpuDO = ProductBizService.this.getProductByIdFromDBForUpdate(k);
+                        List<Long> categoryFamily = categoryBizService.getCategoryFamily(newSpuDO.getCategoryId());
+                        SpuDTO newSpuDto = new SpuDTO();
+                        BeanUtils.copyProperties(newSpuDO, newSpuDto);
+                        newSpuDto.setCategoryIds(categoryFamily);
+                        cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + k, newSpuDto);
+                        for (Long categoryId : categoryFamily) {
+                            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + categoryId, newSpuDO.getSales(), "P" + newSpuDO.getId());
+                        }
+                        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + null, newSpuDO.getSales(), "P" + newSpuDO.getId());
+                    }
+                });
+            } else {
+                spuDtoFromCache.setSales(isTheSame);
+                cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + k, spuDtoFromCache);
+            }
+            // 3. 更新搜索引擎
+            final SpuDTO finalSpuDto = spuDtoFromCache;
+            GlobalExecutor.execute(() -> {
+                if (searchEngine != null) {
+                    SpuDO newSpuDO = new SpuDO();
+                    BeanUtils.copyProperties(finalSpuDto, newSpuDO);
+                    searchEngine.dataTransmission(newSpuDO);
+                }
+            });
+        });
     }
 
 }

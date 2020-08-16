@@ -1,4 +1,4 @@
-package com.iotechn.unimall.app.executor;
+package com.iotechn.unimall.biz.executor;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

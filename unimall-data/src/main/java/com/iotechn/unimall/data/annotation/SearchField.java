@@ -1,4 +1,6 @@
-package com.iotechn.unimall.data.annotaion;
+package com.iotechn.unimall.data.annotation;
+
+import com.iotechn.unimall.data.enums.SearchEngineTokenizerType;
 
 import java.lang.annotation.*;
 
@@ -11,5 +13,7 @@ import java.lang.annotation.*;
 public @interface SearchField {
 
     String value();
+
+    SearchEngineTokenizerType tokenizer() default SearchEngineTokenizerType.NONE;
 
 }

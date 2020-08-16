@@ -1,4 +1,4 @@
-package com.iotechn.unimall.data.annotaion;
+package com.iotechn.unimall.data.annotation;
 
 import java.lang.annotation.*;
 
