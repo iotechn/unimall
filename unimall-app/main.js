@@ -3,7 +3,6 @@ import store from './store'
 import App from './App'
 
 import * as filters from './filters'
-import * as config from './config'
 
 Object.keys(filters).forEach(key => {
 	Vue.filter(key, filters[key])
@@ -20,7 +19,7 @@ Vue.mixin({
 })
 //#endif
 
-const defConfig = config.def
+import config from './config'
 
 const msg = (title, duration = 1500, mask = false, icon = 'none') => {
 	//统一提示方便全局修改
@@ -61,7 +60,7 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 			userInfo = uni.getStorageSync('userInfo')
 		}
 		let accessToken = userInfo ? userInfo.accessToken : ''
-		let baseUrl = config.def().baseUrl
+		let baseUrl = config.baseUrl
 		uni.request({
 			url: baseUrl + '/m.api',
 			data: {
@@ -120,7 +119,7 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 }
 
 const uploadImg = (successCallback) => {
-	let baseUrl = config.def().baseUrl
+	let baseUrl = config.baseUrl
 	uni.chooseImage({
 		sizeType: ['compressed'],
 		success: function(res) {
@@ -214,7 +213,7 @@ Vue.prototype.$api = {
 	logout,
 	isVip,
 	setUserInfo,
-	defConfig,
+	config,
 	globalData
 };
 //#ifdef H5

@@ -297,9 +297,9 @@ public class CacheComponent {
         List<String> list = new ArrayList<>();
         if (size > 0) {
             if (isAsc) {
-                list.addAll(stringRedisTemplate.opsForZSet().range(setName, (pageNo - 1) * pageSize, pageSize));
+                list.addAll(stringRedisTemplate.opsForZSet().range(setName, (pageNo - 1) * pageSize, pageNo * pageSize - 1));
             } else {
-                list.addAll(stringRedisTemplate.opsForZSet().reverseRange(setName, (pageNo - 1) * pageSize, pageSize));
+                list.addAll(stringRedisTemplate.opsForZSet().reverseRange(setName, (pageNo - 1) * pageSize, pageNo * pageSize - 1));
             }
         }
         return new Page<>(list, pageNo, pageSize, size);

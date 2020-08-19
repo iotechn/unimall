@@ -167,7 +167,7 @@
 						</view>
 					</view>
 				</view>
-				<scroll-view scroll-y="true"  @click.stop="stopPrevent">
+				<scroll-view scroll-y="true" style="max-height: 70vh;" @click.stop="stopPrevent">
 					<view v-for="(specItem, specIndex) in product.specificationList" :key="specIndex" class="attr-list">
 						<text>{{ specItem.title }}</text>
 						<view class="item-list">

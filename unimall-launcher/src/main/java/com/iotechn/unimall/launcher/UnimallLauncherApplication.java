@@ -1,6 +1,5 @@
 package com.iotechn.unimall.launcher;
 
-import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +19,6 @@ public class UnimallLauncherApplication {
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext applicationContext = SpringApplication.run(UnimallLauncherApplication.class, args);
-		UnimallWxAppProperties bean = applicationContext.getBean(UnimallWxAppProperties.class);
-		bean.getAppId();
 		logger.info("[系统初始化完毕]");
 	}
 
