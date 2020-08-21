@@ -158,7 +158,7 @@ public class CallbackController {
                         // 若存在团购商品
                         OrderDO groupShopUpdateDO = new OrderDO();
                         groupShopUpdateDO.setPayId(payId);
-                        groupShopUpdateDO.setPayChannel("WX");
+                        groupShopUpdateDO.setPayChannel(PayChannelType.WEPAY.getCode());
                         groupShopUpdateDO.setPayPrice(result.getTotalFee());
                         groupShopUpdateDO.setGmtPay(now);
                         groupShopUpdateDO.setGmtUpdate(now);
@@ -188,7 +188,7 @@ public class CallbackController {
                 // 若存在团购商品
                 OrderDO groupShopUpdateDO = new OrderDO();
                 groupShopUpdateDO.setPayId(payId);
-                groupShopUpdateDO.setPayChannel("WX");
+                groupShopUpdateDO.setPayChannel(PayChannelType.WEPAY.getCode());
                 groupShopUpdateDO.setPayPrice(result.getTotalFee());
                 groupShopUpdateDO.setGmtPay(now);
                 groupShopUpdateDO.setGmtUpdate(now);

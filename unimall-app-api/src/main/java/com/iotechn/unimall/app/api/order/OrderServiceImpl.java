@@ -358,13 +358,13 @@ public class OrderServiceImpl implements OrderService {
                             // 保存子单前，将子单序列累加
                             childIndex++;
                             save(groupShopSkuOriginalPrice, groupShopSkuPrice, channel, 0,
-                                    null, orderRequest, parentOrderNo, childIndex,
+                                    couponUserDTO, orderRequest, parentOrderNo, childIndex,
                                     userId, now, addressDO, groupShopSkuList, groupShopOrderCalcSkuList, userLevel, SpuActivityType.GROUP_SHOP.getCode(), groupShopId);
                         } else {
                             // 保存子单前，将子单序列累加
                             childIndex++;
                             save(groupShopSkuOriginalPrice, groupShopSkuPrice, channel, freightPrice,
-                                    null, orderRequest, parentOrderNo, childIndex,
+                                    couponUserDTO, orderRequest, parentOrderNo, childIndex,
                                     userId, now, addressDO, groupShopSkuList, groupShopOrderCalcSkuList, userLevel, SpuActivityType.GROUP_SHOP.getCode(), groupShopId);
                             // 只收一次运费
                             singleFee = true;
@@ -514,15 +514,36 @@ public class OrderServiceImpl implements OrderService {
                 throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
             }
         }
+        Date now = new Date();
         for (OrderDO orderDO : orderList) {
-            OrderDO updateOrderDO = new OrderDO();
-            updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
-            updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
-            updateOrderDO.setGmtUpdate(new Date());
-            boolean succ = orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
-            if (!succ) {
-                throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+            List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+            List<OrderSkuDO> groupShopSkuList = orderSkuDOList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).collect(Collectors.toList());
+            if (groupShopSkuList.size() > 0) {
+                // 订单中是否是团购商品
+                OrderDO groupShopUpdateDO = new OrderDO();
+                groupShopUpdateDO.setPayId("OFFLINE");
+                groupShopUpdateDO.setPayChannel(PayChannelType.OFFLINE.getCode());
+                groupShopUpdateDO.setPayPrice(orderDO.getActualPrice());
+                groupShopUpdateDO.setGmtPay(now);
+                groupShopUpdateDO.setGmtUpdate(now);
+                groupShopUpdateDO.setStatus(OrderStatusType.GROUP_SHOP_WAIT.getCode());
+                groupShopUpdateDO.setSubPay(1);
+                // 增加buyer count
+                for (OrderSkuDO orderSkuDO : groupShopSkuList) {
+                    groupShopBizService.incGroupShopNum(orderSkuDO.getActivityId(), orderSkuDO.getNum());
+                }
+                orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.UNPAY.getCode(), groupShopUpdateDO);
+            } else {
+                OrderDO updateOrderDO = new OrderDO();
+                updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
+                updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+                updateOrderDO.setGmtUpdate(new Date());
+                boolean succ = orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
+                if (!succ) {
+                    throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+                }
             }
+
         }
         // 删除自动取消订单消息
         delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), orderNo);

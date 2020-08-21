@@ -255,9 +255,11 @@ public class ProductBizService {
         if (spuDTO == null) {
             SpuDO spuDO = spuMapper.selectOne(new QueryWrapper<SpuDO>().select(ProductBizService.SPU_EXCLUDE_DETAIL_FIELDS).eq("id", spuId));
             if (spuDO != null) {
-                cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, spuDO);
                 spuDTO = new SpuDTO();
                 BeanUtils.copyProperties(spuDO, spuDTO);
+                List<Long> categoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
+                spuDTO.setCategoryIds(categoryFamily);
+                cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, spuDTO);
             } else {
                 throw new AppServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
             }

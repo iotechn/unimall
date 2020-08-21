@@ -5,15 +5,16 @@ import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
-import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.core.exception.*;
 import com.iotechn.unimall.data.component.LockComponent;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
+import com.iotechn.unimall.data.enums.PayChannelType;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
@@ -189,27 +190,32 @@ public class OrderBizService {
                 Long userId = orderDO.getUserId();
                 UserDO userDO = userMapper.selectById(userId);
                 Integer loginType = userDO.getLoginType();
+                // 根据不同的的支付方式，进行退款
+                if (PayChannelType.WEPAY.getCode().equals(orderDO.getPayChannel())) {
+                    //2.1.2 向微信支付平台发送退款请求
+                    WxPayRefundRequest wxPayRefundRequest = new WxPayRefundRequest();
+                    wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? unimallWxProperties.getMiniAppId() : unimallWxProperties.getAppId());
+                    wxPayRefundRequest.setOutTradeNo(orderNo);
+                    wxPayRefundRequest.setOutRefundNo("refund_" + orderNo);
+                    wxPayRefundRequest.setRefundDesc("团购失败退款");
+                    wxPayRefundRequest.setTotalFee(orderDO.getPayPrice() - orderDO.getFreightPrice());
+                    wxPayRefundRequest.setRefundFee(orderDO.getPayPrice() - orderDO.getFreightPrice());
+                    WxPayRefundResult wxPayRefundResult = wxPayService.refund(wxPayRefundRequest);
+                    if (!wxPayRefundResult.getReturnCode().equals("SUCCESS")) {
+                        logger.warn("[微信退款] 失败 : " + wxPayRefundResult.getReturnMsg());
+                        throw new AdminServiceException(wxPayRefundResult.getReturnMsg(),
+                                ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+                    }
+                    if (!wxPayRefundResult.getResultCode().equals("SUCCESS")) {
+                        logger.warn("[微信退款] 失败 : " + wxPayRefundResult.getReturnMsg());
+                        throw new AdminServiceException(wxPayRefundResult.getReturnMsg(),
+                                ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+                    }
+                    return "ok";
+                } else if (PayChannelType.OFFLINE.getCode().equals(orderDO.getChannel())) {
+                    // 不需要退款
+                }
 
-                //2.1.2 向微信支付平台发送退款请求
-                WxPayRefundRequest wxPayRefundRequest = new WxPayRefundRequest();
-                wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? unimallWxProperties.getMiniAppId() : unimallWxProperties.getAppId());
-                wxPayRefundRequest.setOutTradeNo(orderNo);
-                wxPayRefundRequest.setOutRefundNo("refund_" + orderNo);
-                wxPayRefundRequest.setRefundDesc("团购失败退款");
-                wxPayRefundRequest.setTotalFee(orderDO.getPayPrice() - orderDO.getFreightPrice());
-                wxPayRefundRequest.setRefundFee(orderDO.getPayPrice() - orderDO.getFreightPrice());
-                WxPayRefundResult wxPayRefundResult = wxPayService.refund(wxPayRefundRequest);
-                if (!wxPayRefundResult.getReturnCode().equals("SUCCESS")) {
-                    logger.warn("[微信退款] 失败 : " + wxPayRefundResult.getReturnMsg());
-                    throw new AdminServiceException(wxPayRefundResult.getReturnMsg(),
-                            ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
-                }
-                if (!wxPayRefundResult.getResultCode().equals("SUCCESS")) {
-                    logger.warn("[微信退款] 失败 : " + wxPayRefundResult.getReturnMsg());
-                    throw new AdminServiceException(wxPayRefundResult.getReturnMsg(),
-                            ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
-                }
-                return "ok";
             } catch (ServiceException e) {
                 throw e;
             } catch (Exception e) {

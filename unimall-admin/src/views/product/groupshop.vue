@@ -174,7 +174,7 @@
 
       <el-card class="box-card">
         <h3>商品类型(sku)</h3>
-        <!-- <el-button :plain="true" type="primary" @click="handleSkuShow">添加</el-button> -->
+        <el-button :plain="true" type="primary" @click="batchSkuUpdateDialogVisible = true">批量定价</el-button>
         <el-table :data="dataForm.skuList">
           <el-table-column property="id" label="SkuId"/>
           <el-table-column property="barCode" label="Sku条形码" />
@@ -190,6 +190,26 @@
         </el-table>
       </el-card>
 
+      <!-- 团购批量定价Dialog -->
+      <el-dialog :visible.sync="batchSkuUpdateDialogVisible" :modal="true" :append-to-body="true" :close-on-click-modal = "false" top="10vh" width="70%" title="更新团购价格">
+        <el-form
+          ref="specForm"
+          :model="skuForm"
+          status-icon
+          label-position="left"
+          label-width="100px"
+          style="width: 400px; margin-left:50px;"
+        >
+          <el-form-item label="团购价格" >
+            <el-input-number v-model="batchSkuUpdatePrice" :precision="2" controls-position="right" />元
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="batchSkuUpdateDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleBatchSkuUpdate()">确定</el-button>
+        </div>
+      </el-dialog>
+
       <!-- 更新团购价格的Dialog -->
       <el-dialog :visible.sync="groupShopUpdateSkuPriceDialog" :modal="true" :append-to-body="true" :close-on-click-modal = "false" top="10vh" width="70%" title="更新团购价格">
         <el-form
@@ -201,7 +221,7 @@
           style="width: 400px; margin-left:50px;"
         >
           <el-form-item label="团购价格" >
-            <el-input-number v-model="skuForm.skuGroupShopPrice" :precision="2" controls-position="right" />元
+            <el-input-number v-model="batchSkuUpdatePrice" :precision="2" controls-position="right" />元
           </el-form-item>
           <el-form-item label="现价">
             {{ skuForm.price }}元
@@ -273,7 +293,9 @@ export default {
       goodsOptions: [],
       goodsOption: undefined,
       groupShopUpdateSkuPriceDialog: false,
-      skuForm: {}
+      skuForm: {},
+      batchSkuUpdateDialogVisible: false,
+      batchSkuUpdatePrice: undefined
     }
   },
   created() {
@@ -481,6 +503,12 @@ export default {
     },
     skuGroupShopUpdate(data) {
       this.groupShopUpdateSkuPriceDialog = false
+    },
+    handleBatchSkuUpdate() {
+      for (let i = 0; i < this.dataForm.skuList.length; i++) {
+        this.dataForm.skuList[i].skuGroupShopPrice = this.batchSkuUpdatePrice
+      }
+      this.batchSkuUpdateDialogVisible = false
     }
   }
 }

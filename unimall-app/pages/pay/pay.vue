@@ -119,8 +119,8 @@
 								})
 							},
 							fail: function(res) {
-								console.log("支付过程失败");
-								that.$api.msg(JSON.stringify(res))
+								console.log("支付过程失败:" + JSON.stringify(res));
+								that.$api.msg('支付取消')
 							},
 							complete: function(res) {
 								console.log("支付过程结束")
@@ -141,8 +141,8 @@
 								})
 							},
 							fail: function(res) {
-								console.log("支付过程失败");
-								that.$api.msg(JSON.stringify(res))
+								console.log("支付过程失败:" + JSON.stringify(res));
+								that.$api.msg('支付取消')
 							},
 							complete: function(res) {
 								console.log("支付过程结束")

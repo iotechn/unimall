@@ -35,10 +35,6 @@ public class OrderRequestDTO {
      */
     private String takeWay;
 
-    private Long combineSpuId;
-
-    private Integer combineNum;
-
     private Integer freightPrice;
 
     private Integer exceptPrice;

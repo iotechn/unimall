@@ -11,7 +11,7 @@
 				<view class="demand">满{{item.min / 100.0}}可用。{{item.categoryTitle?'限' + item.categoryTitle + '可用': '全品类可用'}}</view>
 			</view>
 		</view>
-		<view @click="share" v-if="item.couponId" class="get-btn" :style="{color:color, borderColor:color, background:solid}">分享</view>
+		<!-- <view @click="share" v-if="item.couponId" class="get-btn" :style="{color:color, borderColor:color, background:solid}">分享</view> -->
 		<view @click="obtain" v-if="!item.couponId" class="get-btn" :style="{color:color, borderColor:color, background:solid}">{{ item.nowCount < item.limit ? '立即领取' : '已领取' }}</view>
 	</view>
 </template>

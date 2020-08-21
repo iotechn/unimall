@@ -161,7 +161,7 @@
             <template slot="append">张</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="满减金额" prop="discount">
+        <el-form-item label="优惠金额" prop="discount">
           <el-input v-model="dataForm.discount" :disabled="dialogStatus === 'update'">
             <template slot="append">元</template>
           </el-input>
@@ -221,7 +221,7 @@
           <el-cascader
             v-model="dataForm.categoryTitle"
             :options="options"
-            :props="{ checkStrictly: true }"
+            :props="{label:'title', value:'id', children:'childrenList', checkStrictly: true}"
             placeholder="优惠类目"
             filterable
             @change="handleLink"

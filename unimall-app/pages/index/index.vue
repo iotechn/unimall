@@ -39,7 +39,7 @@
 		<!-- 店铺公告 -->
 		<view v-if="postMsgs && postMsgs.length > 0" class="post-section">
 			<swiper style="height: 100%;" :circular="true" :autoplay="true" :vertical="true">
-				<swiper-item v-for="(item, index) in postMsgs"><view class="yticon icon-xiaoxi content">: {{ item }}</view></swiper-item>
+				<swiper-item v-for="(item, index) in postMsgs" :key="index"><view class="yticon icon-xiaoxi content">: {{ item }}</view></swiper-item>
 			</swiper>
 		</view>
 		

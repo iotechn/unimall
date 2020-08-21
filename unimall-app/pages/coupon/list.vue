@@ -26,9 +26,6 @@
 				</view>
 			</view>
 		</view>
-		<view v-if="type === 'list'" class="other_type">
-			<view class="text"><span>可领取优惠券</span></view>
-		</view>
 
 	</view>
 </template>
@@ -102,7 +99,7 @@
 				}).then(res => {
 					that.$api.msg('领取成功')
 					if (that.type === 'list') {
-						that.couponList[index].nowCount++
+						that.obatinableCouponList[index].nowCount++
 					} else {
 						that.loadData()	
 					}

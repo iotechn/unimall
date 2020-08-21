@@ -221,6 +221,9 @@
 						if (that.addressData.id) {
 							that.orderReqeust.addressId = that.addressData.id
 						}
+						const orderReqeust = that.orderReqeust
+						const exceptPrice = orderReqeust.totalPrice - (orderReqeust.coupon?orderReqeust.coupon.discount:0) + orderReqeust.freightPrice
+						that.orderReqeust.exceptPrice = exceptPrice
 						that.$api.request('order', 'takeOrder', {
 							orderRequest : JSON.stringify(that.orderReqeust),
 							channel: uni.getSystemInfoSync().platform
@@ -237,6 +240,7 @@
 					})
 			},
 			selectCoupon(couponItem) {
+				this.orderReqeust.couponId = couponItem.id
 				this.orderReqeust.coupon = couponItem
 				this.maskState = 0
 				this.calcFreightPrice()

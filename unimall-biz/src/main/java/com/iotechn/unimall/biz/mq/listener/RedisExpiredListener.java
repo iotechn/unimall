@@ -1,6 +1,8 @@
 package com.iotechn.unimall.biz.mq.listener;
 
 import com.iotechn.unimall.biz.mq.handler.RedisNotifyHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -17,15 +19,17 @@ public class RedisExpiredListener implements MessageListener {
     @Autowired
     private HashMap<Integer, RedisNotifyHandler> handlerRouter;
 
+    private static final Logger logger = LoggerFactory.getLogger(RedisExpiredListener.class);
+
     @Override
     public void onMessage(Message message, byte[] bytes) {
         String expiredKey = message.toString();
-        System.out.println("=========================>" + expiredKey);
         // TASK:CODE:VALUE结构
         String[] split = expiredKey.split(":");
         if (split.length < 2 || !expiredKey.startsWith("TASK:")) {
             return;
         }
+        logger.info("[Redis键失效通知] key=" + expiredKey);
         StringBuilder value = new StringBuilder();
         for (int i = 2; i < split.length; i++) {
             value.append(split[i]);

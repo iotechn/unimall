@@ -13,7 +13,7 @@
 			</view>
 		</view>
 		<view class="goods-list">
-			<view v-for="(item, index) in goodsList" :key="index" class="goods-item" @click="navToDetailPage(item)">
+			<view v-for="(item, index) in productList" :key="index" class="goods-item" @click="navToDetailPage(item)">
 				<view class="image-wrapper">
 					<image :src="item.img + '?x-oss-process=style/400px'" mode="aspectFill"></image>
 				</view>
@@ -43,7 +43,7 @@
 				loadingType: 'more', //加载更多状态
 				filterIndex: 0,
 				priceOrder: 0, //1 价格从低到高 2价格从高到低
-				goodsList: [],
+				productList: [],
 				cateId: 0,
 				keywords: '',
 				pageNo: 1,
@@ -116,9 +116,9 @@
 				}).then(res => {
 					let tempList = res.data.items
 					if (type === 'refresh') {
-						this.goodsList = [];
+						this.productList = [];
 					}
-					this.goodsList = this.goodsList.concat(tempList);
+					this.productList = this.productList.concat(tempList);
 					this.pageNo = res.data.pageNo + 1
 					this.loadingType = res.data.totalPageNo > res.data.pageNo ? 'more' : 'nomore';
 					if (type === 'refresh') {
