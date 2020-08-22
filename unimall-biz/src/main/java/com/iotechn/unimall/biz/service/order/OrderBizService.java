@@ -214,18 +214,21 @@ public class OrderBizService {
                     return "ok";
                 } else if (PayChannelType.OFFLINE.getCode().equals(orderDO.getChannel())) {
                     // 不需要退款
+                    return "ok";
+                } else {
+                    throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
                 }
 
             } catch (ServiceException e) {
                 throw e;
             } catch (Exception e) {
                 logger.error("[微信退款] 异常", e);
-                throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+                throw new AppServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
             } finally {
                 lockComponent.release(LockConst.ORDER_REFUND_LOCK + orderNo);
             }
         } else {
-            throw new AdminServiceException(ExceptionDefinition.SYSTEM_BUSY);
+            throw new AppServiceException(ExceptionDefinition.SYSTEM_BUSY);
         }
     }
 
