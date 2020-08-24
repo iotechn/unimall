@@ -4,6 +4,8 @@ import App from './App'
 
 import * as filters from './filters'
 
+import config from './config'
+
 Object.keys(filters).forEach(key => {
 	Vue.filter(key, filters[key])
 })
@@ -18,8 +20,6 @@ Vue.mixin({
 	}
 })
 //#endif
-
-import config from './config'
 
 const msg = (title, duration = 1500, mask = false, icon = 'none') => {
 	//统一提示方便全局修改

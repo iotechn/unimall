@@ -27,6 +27,13 @@ public class DynamicConfigAspect {
     @Pointcut("execution(public * com.iotechn.unimall.data.properties.*.get*())")
     public void cachePointCut() {}
 
+    /**
+     * TODO 可对field定义一个注解，获取其默认值。并且添加JVM缓存功能，加快高频动态配置读取速度
+     * 将DynamicConfigProperties对象Get方法拦截
+     * @param joinPoint
+     * @return
+     * @throws Throwable
+     */
     @Around("cachePointCut()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature)joinPoint.getSignature();

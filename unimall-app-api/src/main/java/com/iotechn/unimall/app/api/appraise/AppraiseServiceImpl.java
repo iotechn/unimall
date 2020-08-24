@@ -122,7 +122,7 @@ public class AppraiseServiceImpl implements AppraiseService {
         // 4. 改变订单状态
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.COMPLETE.getCode());
-        orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.COMPLETE.getCode(), updateOrderDO);
+        orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.WAIT_APPRAISE.getCode(), updateOrderDO);
         // 5. 清理缓存
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override

@@ -1,6 +1,7 @@
 import request from '@/utils/request'
 const uploadPath = process.env.HOST + '/upload/admin'
-export { uploadPath }
+const uploadLocalPath = process.env.HOST + '/upload/local'
+export { uploadPath, uploadLocalPath }
 
 export function createStorage(data) {
   return request({

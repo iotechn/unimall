@@ -7,6 +7,7 @@ import com.aliyun.oss.model.MatchMode;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PolicyConditions;
 import com.aliyun.oss.model.PutObjectRequest;
+import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.properties.UnimallAliOSSProperties;
 import org.apache.commons.io.FilenameUtils;
@@ -14,14 +15,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +43,8 @@ public class FileUploadController implements InitializingBean {
     private UnimallAliOSSProperties unimallAliOSSProperties;
     @Autowired
     private OSSClient ossClient;
+    @Autowired
+    private StringRedisTemplate userRedisTemplate;
 
     private String host;
 
@@ -51,6 +57,7 @@ public class FileUploadController implements InitializingBean {
      * 前台签名直传， 由服务器签名，用户可直接上传图片
      * 这种只支持 Aliyun(因为我编码查看文档时，只有阿里云做了这个设计) 优点是 上传不需要占用应用服务器带宽。 目前前端是使用的这个。
      * 若需要更改，请自行修改前端上传逻辑
+     *
      * @param request
      * @param response
      */
@@ -92,25 +99,71 @@ public class FileUploadController implements InitializingBean {
 
     /**
      * 后台通过服务器间接传文件
+     *
      * @param file
      * @return
      * @throws IOException
      */
     @PostMapping("/admin")
     @ResponseBody
-    public Object create(@RequestParam("file") MultipartFile file) throws IOException {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(file.getSize());
-        objectMetadata.setContentType(file.getContentType());
-        String ext = FilenameUtils.getExtension(file.getOriginalFilename());
-        String uuid = GeneratorUtil.genFileName();
-        PutObjectRequest putObjectRequest = new PutObjectRequest(unimallAliOSSProperties.getBucket(), "bg/" + uuid+"."+ext, file.getInputStream(), objectMetadata);
-        ossClient.putObject(putObjectRequest);
-        Map<String, Object> data = new HashMap<>();
-        data.put("url", unimallAliOSSProperties.getBaseUrl() + "bg/" + uuid +"."+ext);
-        data.put("errno", 200);
-        data.put("errmsg", "成功");
-        return data;
+    public Object create(@RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
+        String accessToken = request.getHeader(Const.ADMIN_ACCESS_TOKEN);
+        String json = userRedisTemplate.opsForValue().get(Const.ADMIN_REDIS_PREFIX + accessToken);
+        if (!StringUtils.isEmpty(json)) {
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentLength(file.getSize());
+            objectMetadata.setContentType(file.getContentType());
+            String ext = FilenameUtils.getExtension(file.getOriginalFilename());
+            String uuid = GeneratorUtil.genFileName();
+            PutObjectRequest putObjectRequest = new PutObjectRequest(unimallAliOSSProperties.getBucket(), "bg/" + uuid + "." + ext, file.getInputStream(), objectMetadata);
+            ossClient.putObject(putObjectRequest);
+            Map<String, Object> data = new HashMap<>();
+            data.put("url", unimallAliOSSProperties.getBaseUrl() + "bg/" + uuid + "." + ext);
+            data.put("errno", 200);
+            data.put("errmsg", "成功");
+            return data;
+        }
+        throw new RuntimeException("权限不足");
+    }
+
+    /**
+     * 上传文件到文件系统
+     *
+     * @param file
+     * @param fsf  FileSystem File 上传覆盖具体某个文件
+     * @return
+     */
+    @PostMapping("/local")
+    @ResponseBody
+    public Object local(@RequestParam("file") MultipartFile file, String fsf, HttpServletRequest request) throws IOException {
+        String accessToken = request.getHeader(Const.ADMIN_ACCESS_TOKEN);
+        String json = userRedisTemplate.opsForValue().get(Const.ADMIN_REDIS_PREFIX + accessToken);
+        if (!StringUtils.isEmpty(json)) {
+            int i = fsf.lastIndexOf("/");
+            if (i > 0) {
+                String substring = fsf.substring(0, i);
+                File dir = new File(substring);
+                if (!dir.exists()) {
+                    dir.mkdir();
+                }
+                File fsFile = new File(fsf);
+                if (fsFile.exists()) {
+                    fsFile.delete();
+                }
+                InputStream fis = file.getInputStream();
+                OutputStream os = new FileOutputStream(fsf);
+                FileCopyUtils.copy(fis, os);
+                fis.close();
+                os.close();
+                Map<String, Object> data = new HashMap<>();
+                data.put("errno", 200);
+                data.put("errmsg", "成功");
+                return data;
+            } else {
+                throw new RuntimeException("文件系统路径不正确");
+            }
+        }
+        throw new RuntimeException("权限不足");
     }
 
 
@@ -118,8 +171,7 @@ public class FileUploadController implements InitializingBean {
      * Post请求
      */
     @RequestMapping(method = RequestMethod.POST)
-    public void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Map<String, String[]> parameterMap = request.getParameterMap();
         JSONObject responseJson = new JSONObject();
         responseJson.put("code", 200);

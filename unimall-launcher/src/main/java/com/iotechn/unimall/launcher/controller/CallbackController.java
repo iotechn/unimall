@@ -144,7 +144,6 @@ public class CallbackController {
             orderSkuDOList = orderSkuMapper.selectList(
                     new QueryWrapper<OrderSkuDO>()
                             .in("order_no", orderNos));
-            // TODO 检测是否有团购等需要将各个子单 转换到不同的状态 eg.团购子单需要将状态转换到OrderStatusType.GROUP_SHOP_WAIT。而普通订单需要转换到OrderStatusTyp.UNPAY
             if (orderSkuDOList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).count() > 0) {
                 // 走团购商品逻辑 更新状态只能按单独子单更新
                 List<OrderDO> subOrderList = orderBizService.checkOrderExistByParentNo(orderAbstractNo, null);

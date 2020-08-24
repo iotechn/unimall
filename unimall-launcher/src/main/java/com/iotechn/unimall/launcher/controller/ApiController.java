@@ -14,6 +14,7 @@ import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AdminLogDO;
 import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
+import com.iotechn.unimall.data.properties.UnimallSystemProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
 import com.iotechn.unimall.launcher.exception.LauncherExceptionDefinition;
 import com.iotechn.unimall.launcher.exception.LauncherServiceException;
@@ -61,6 +62,8 @@ public class ApiController {
 
     @Value("${com.iotechn.unimall.env}")
     private String ENV;
+    @Autowired
+    private UnimallSystemProperties unimallSystemProperties;
 
     @RequestMapping(method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
@@ -197,7 +200,7 @@ public class ApiController {
                             UserDTO userDTO = JSONObject.parseObject(userJson, UserDTO.class);
                             SessionUtil.setUser(userDTO);
                             args[i] = userDTO.getId();
-                            userRedisTemplate.expire(Const.USER_REDIS_PREFIX + accessToken, 30, TimeUnit.MINUTES);
+                            userRedisTemplate.expire(Const.USER_REDIS_PREFIX + accessToken, unimallSystemProperties.getUserSessionPeriod(), TimeUnit.MINUTES);
                             continue;
                         }
                     }
@@ -212,7 +215,7 @@ public class ApiController {
                             AdminDTO adminDTO = JSONObject.parseObject(userJson, AdminDTO.class);
                             SessionUtil.setAdmin(adminDTO);
                             args[i] = adminDTO.getId();
-                            userRedisTemplate.expire(Const.ADMIN_REDIS_PREFIX + accessToken, 30, TimeUnit.MINUTES);
+                            userRedisTemplate.expire(Const.ADMIN_REDIS_PREFIX + accessToken, unimallSystemProperties.getAdminSessionPeriod(), TimeUnit.MINUTES);
                             continue;
                         }
                     }

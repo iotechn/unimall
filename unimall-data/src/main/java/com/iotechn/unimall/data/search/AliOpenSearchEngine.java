@@ -185,7 +185,7 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
             } else {
                 subList = list.subList(pageNo * pageSize, list.size());
             }
-            pageNo ++;
+            pageNo++;
             Object docsJsonArr = subList.stream().map(item -> {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put(DocumentConstants.DOC_KEY_CMD, Command.ADD.toString());
@@ -207,7 +207,7 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
                 logger.error("[OpenSearch PushList] 异常 第 {} 页 docs: {}", pageNo + 1, docsJson);
                 logger.error("[OpenSearch PushList] 异常", e);
             }
-        } while (list.size() > pageNo);
+        } while (list.size() > pageNo * pageSize);
     }
 
     @Override

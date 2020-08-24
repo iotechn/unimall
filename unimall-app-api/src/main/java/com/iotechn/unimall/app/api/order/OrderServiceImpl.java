@@ -543,7 +543,9 @@ public class OrderServiceImpl implements OrderService {
                     throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
                 }
             }
-
+            // 增加商品销量
+            Map<Long, Integer> salesMap = orderSkuDOList.stream().collect(Collectors.toMap(OrderSkuDO::getSpuId, OrderSkuDO::getNum, (k1, k2) -> k1.intValue() + k2.intValue()));
+            productBizService.incSpuSales(salesMap);
         }
         // 删除自动取消订单消息
         delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), orderNo);

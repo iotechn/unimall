@@ -220,6 +220,79 @@
     </el-card>
 
     <el-card class="box-card">
+      <h3>系统配置</h3>
+      <el-form ref="advertDataForm" :model="systemDataForm" label-width="150px">
+
+        <el-form-item label="用户登录有效期(分)" prop="userSessionPeriod">
+          <el-input-number :precision="0" v-model="systemDataForm.userSessionPeriod" />
+        </el-form-item>
+
+        <el-form-item label="管理登录有效期(分)" prop="adminSessionPeriod">
+          <el-input-number :precision="0" v-model="systemDataForm.adminSessionPeriod" />
+        </el-form-item>
+
+        <el-form-item label="游客访问" prop="guest">
+          <el-select v-model="systemDataForm.guest" placeholder="默认不可游客访问">
+            <el-option
+              :value="'true'"
+              :label="'允许'"
+            />
+            <el-option
+              :value="'false'"
+              :label="'不允许'"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="SSL Crt 路径" prop="sslCrtPath">
+          <el-input v-model="systemDataForm.sslCrtPath" />
+        </el-form-item>
+
+        <el-form-item label="SSL Crt 上传">
+          <el-upload
+            :action="uploadLocalPath"
+            :headers="headers"
+            :data="{
+              fsf: systemDataForm.sslCrtPath
+            }"
+            accept=".crt,.pem"
+            class="upload-demo"
+            drag>
+            <i class="el-icon-upload"/>
+            <div class="el-upload__text">将Crt/Pem文件拖到此处，或<em>点击上传</em></div>
+            <div slot="tip" class="el-upload__tip">Docker用户请勿修改上传路径，只能上传crt/pem纯文本文件</div>
+          </el-upload>
+        </el-form-item>
+
+        <el-form-item label="SSL Key 路径" prop="sslKeyPath">
+          <el-input v-model="systemDataForm.sslKeyPath" />
+        </el-form-item>
+
+        <el-form-item label="SSL Key 上传">
+          <el-upload
+            :action="uploadLocalPath"
+            :headers="headers"
+            :data="{
+              fsf: systemDataForm.sslKeyPath
+            }"
+            class="upload-demo"
+            accept=".key"
+            drag>
+            <i class="el-icon-upload"/>
+            <div class="el-upload__text">将Key文件拖到此处，或<em>点击上传</em></div>
+            <div slot="tip" class="el-upload__tip">Docker用户请勿修改上传路径，只能上传key文件纯文本文件</div>
+          </el-upload>
+        </el-form-item>
+
+      </el-form>
+
+      <div class="op-container">
+        <el-button :loading="submiting" type="primary" @click="handleSave('systemDataForm', prefixs.systemDataPrefix)">保存更改</el-button>
+      </div>
+
+    </el-card>
+
+    <el-card class="box-card">
       <h3>搜索引擎</h3>
       <el-form ref="searchDataForm" :model="searchDataForm" label-width="150px">
 
@@ -263,11 +336,15 @@
 <script>
 
 import { initSearchEngine, rebuildSearchEngine, reloadPropertiesSearchEngine } from '@/api/search'
+import { uploadLocalPath } from '@/api/storage'
+import { getToken } from '@/utils/auth'
 import { getData, save } from '@/api/config'
 export default {
   name: 'SysConfig',
   data() {
     return {
+      // 为上传SSL证书等文件
+      uploadLocalPath,
       // 请按照此命名规范命名
       prefixs: {
         wxAppDataPrefix: 'WX_APP_CONFIG:',
@@ -276,7 +353,8 @@ export default {
         ossDataPrefix: 'OSS_CONFIG:',
         orderDataPrefix: 'ORDER_CONFIG:',
         advertDataPrefix: 'ADVERT_CONFIG:',
-        searchDataPrefix: 'OPEN_SEARCH_CONFIG:'
+        searchDataPrefix: 'OPEN_SEARCH_CONFIG:',
+        systemDataPrefix: 'SYSTEM_CONFIG:'
       },
       wxAppDataForm: {},
       wxPayDataForm: {},
@@ -285,7 +363,15 @@ export default {
       orderDataForm: {},
       advertDataForm: {},
       searchDataForm: {},
+      systemDataForm: {},
       submiting: false
+    }
+  },
+  computed: {
+    headers() {
+      return {
+        ADMINTOKEN: getToken()
+      }
     }
   },
   created() {

@@ -22,4 +22,6 @@ public class DynamicConst {
 
     public static final String ADVERT_CONFIG_PREFIX = "ADVERT_CONFIG:";
 
+    public static final String SYSTEM_CONFIG_PREFIX = "SYSTEM_CONFIG:";
+
 }

@@ -161,7 +161,7 @@ export default {
   computed: {
     headers() {
       return {
-        accessToken: getToken()
+        ADMINTOKEN: getToken()
       }
     }
   },

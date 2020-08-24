@@ -24,6 +24,7 @@ import com.iotechn.unimall.data.mapper.AdminMapper;
 import com.iotechn.unimall.data.mapper.RoleMapper;
 import com.iotechn.unimall.data.mapper.RolePermissionMapper;
 import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.data.properties.UnimallSystemProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -77,12 +78,14 @@ public class AdminServiceImpl implements AdminService {
     @Value("${com.iotechn.admin.notify.uninotify.app-id}")
     private String uniNotifyAppId;
 
+    @Autowired
+    private UnimallSystemProperties unimallSystemProperties;
 
 
     private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
     @Override
-    public String login(String username, String password,String verifyCode) throws ServiceException {
+    public String login(String username, String password, String verifyCode) throws ServiceException {
         String accessToken = generateAccessToken();
         //数据库查管理员
         List<AdminDO> adminDOS = adminMapper.selectList(
@@ -93,11 +96,11 @@ public class AdminServiceImpl implements AdminService {
         }
         AdminDO adminDO = adminDOS.get(0);
         //短信验证码
-        String code = cacheComponent.getRaw(CacheConst.ADMIN_MSG_CODE+adminDO.getPhone() );
-        if(!"guest".equals(username) && (code == null || verifyCode==null || !code.equals(verifyCode))){
+        String code = cacheComponent.getRaw(CacheConst.ADMIN_MSG_CODE + adminDO.getPhone());
+        boolean isGuest = "guest".equals(username) && "true".equals(unimallSystemProperties.getGuest());
+        if (!isGuest && (code == null || verifyCode == null || !code.equals(verifyCode))) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
         }
-
         if (!MD5Util.verify(password, username, adminDO.getPassword())) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
         }
@@ -133,7 +136,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public String logout(String accessToken, Long adminId) throws ServiceException {
-        userRedisTemplate.delete(Const.ADMIN_REDIS_PREFIX  + accessToken);
+        userRedisTemplate.delete(Const.ADMIN_REDIS_PREFIX + accessToken);
         return "ok";
     }
 
@@ -152,7 +155,7 @@ public class AdminServiceImpl implements AdminService {
         Page<AdminDO> selectPage = adminMapper.selectPage(Page.div(page, limit, AdminDO.class), wrapper);
         List<AdminDTO> adminDTOS = new ArrayList<AdminDTO>(selectPage.getItems().size());
 
-        if(!CollectionUtils.isEmpty(selectPage.getItems())){
+        if (!CollectionUtils.isEmpty(selectPage.getItems())) {
             for (AdminDO adminDO : selectPage.getItems()) {
                 AdminDTO adminDTO = new AdminDTO();
                 BeanUtils.copyProperties(adminDO, adminDTO);
@@ -240,18 +243,18 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Boolean sendLoginMsg(String username,String password) throws ServiceException {
+    public Boolean sendLoginMsg(String username, String password) throws ServiceException {
         if ("guest".equals(username)) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_GUEST_NOT_NEED_VERIFY_CODE);
         }
-        AdminDO admin = adminMapper.selectOne(new QueryWrapper<AdminDO>().eq("username", username).eq("password", MD5Util.md5(password,username)));
-        if(admin == null){
+        AdminDO admin = adminMapper.selectOne(new QueryWrapper<AdminDO>().eq("username", username).eq("password", MD5Util.md5(password, username)));
+        if (admin == null) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXITS);
         }
         String code = GeneratorUtil.genSixVerifyCode();
-        cacheComponent.putRaw(CacheConst.ADMIN_MSG_CODE+admin.getPhone(), code,300 );
+        cacheComponent.putRaw(CacheConst.ADMIN_MSG_CODE + admin.getPhone(), code, 300);
         SMSResult smsResult = smsClient.sendAdminLoginVerify(admin.getPhone(), code);
-        if(!smsResult.isSucc()){
+        if (!smsResult.isSucc()) {
             throw new ThirdPartServiceException(smsResult.getMsg(), ExceptionDefinition.ADMIN_VERIFY_CODE_SEND_FAIL.getCode());
         }
         return true;

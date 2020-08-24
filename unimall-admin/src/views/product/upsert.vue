@@ -264,6 +264,7 @@
           <template slot-scope="scope">
             <!-- on-success 接收的是一个变量，而非事件，也就是说是一个函数指针，所以无法将row给传过去 -->
             <el-upload
+              :headers="headers"
               :show-file-list="false"
               :on-success="(e, file) => {
                 handleSkuImgSuccess(e, file, scope)
@@ -419,7 +420,7 @@ export default {
   computed: {
     headers() {
       return {
-        accessToken: getToken()
+        ADMINTOKEN: getToken()
       }
     }
   },
