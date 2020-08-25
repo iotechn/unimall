@@ -1,9 +1,10 @@
 package com.iotechn.unimall.biz.config.notify;
 
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
-import com.iotechn.unimall.biz.service.notify.UniNotifyAdminNotifyBizServiceImpl;
 import com.iotechn.unimall.biz.service.notify.MockAdminNotifyBizServiceImpl;
-import org.springframework.beans.factory.annotation.Value;
+import com.iotechn.unimall.biz.service.notify.UniNotifyAdminNotifyBizServiceImpl;
+import com.iotechn.unimall.data.properties.UnimallAdminNotifyProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,14 +18,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AdminNotifyConfig {
 
-    @Value("${com.iotechn.admin.notify.enable}")
-    private String enable;
+    @Autowired
+    private UnimallAdminNotifyProperties unimallAdminNotifyProperties;
 
     @Bean
     public AdminNotifyBizService adminNotifyBizService() {
-        if ("mock".equalsIgnoreCase(enable)) {
+        if ("mock".equalsIgnoreCase(unimallAdminNotifyProperties.getEnable())) {
             return new MockAdminNotifyBizServiceImpl();
-        } else if ("uninotify".equalsIgnoreCase(enable)) {
+        } else if ("uninotify".equalsIgnoreCase(unimallAdminNotifyProperties.getEnable())) {
             return new UniNotifyAdminNotifyBizServiceImpl();
         } else {
             return null;

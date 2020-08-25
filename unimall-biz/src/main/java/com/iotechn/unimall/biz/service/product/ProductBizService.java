@@ -285,7 +285,6 @@ public class ProductBizService {
      * @param skuSalesMap
      */
     public void incSpuSales(Map<Long, Integer> skuSalesMap) {
-        // TODO 增加销量，需要更新缓存
         skuSalesMap.forEach((k, v) -> {
             // 1. 更新数据库
             spuMapper.incSales(k, v);

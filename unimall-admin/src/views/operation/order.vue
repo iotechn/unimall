@@ -296,10 +296,10 @@
           <span>允许退款后钱会退回对方账户，请确认您已经收到退货</span>
         </el-form-item>
         <el-form-item label="操作">
-          <el-radio v-model="refundForm.type" label="0">拒绝退款</el-radio>
-          <el-radio v-model="refundForm.type" label="1">允许退款</el-radio>
+          <el-radio v-model="refundForm.type" :label="0">拒绝退款</el-radio>
+          <el-radio v-model="refundForm.type" :label="1">允许退款</el-radio>
         </el-form-item>
-        <el-form-item v-if="refundForm.type === 1 || refundForm.type === '1'" label="金额">
+        <el-form-item v-if="refundForm.type === 1" label="金额">
           <el-input v-model="refundForm.sum"/>
         </el-form-item>
       </el-form>
@@ -405,7 +405,7 @@ export default {
       orderDetail: {},
       refundForm: {
         orderNo: undefined,
-        type: '0'
+        type: 0
       },
       refundDialogVisible: false,
       refundSubmiting: false,

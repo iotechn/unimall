@@ -58,10 +58,9 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    // TODO 团购增加修改删除时注意商品是否正在其他活动中
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String create(Long spuId, Long gmtStart, Long gmtEnd, Integer minimumNumber, Integer automaticRefund, String groupShopSkuListStr, Long adminId) throws ServiceException {
+    public String create(Long spuId, Long gmtStart, Long gmtEnd, Integer minNum, Integer automaticRefund, String groupShopSkuListStr, Long adminId) throws ServiceException {
         // 1.转化为对应的GroupShopSkuDTO类的链表
         List<GroupShopSkuDTO> groupShopSkuDTOList = JSONObject.parseArray(groupShopSkuListStr, GroupShopSkuDTO.class)
                 .stream().sorted(Comparator.comparingInt(GroupShopSkuDTO::getSkuGroupShopPrice)).collect(Collectors.toList());
@@ -96,7 +95,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         GroupShopDO groupShopDO = new GroupShopDO();
 
         groupShopDO.setBuyerNum(0);
-        groupShopDO.setMinNum(minimumNumber);
+        groupShopDO.setMinNum(minNum);
         groupShopDO.setGmtStart(timeStart);
         groupShopDO.setGmtEnd(timeEnd);
         groupShopDO.setAutomaticRefund(automaticRefund.compareTo(0) > 0 ? GroupShopAutomaticRefundType.YES.getCode() : GroupShopAutomaticRefundType.NO.getCode());

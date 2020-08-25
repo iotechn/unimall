@@ -76,7 +76,6 @@ public class AdminProductServiceImpl implements AdminProductService {
     private SearchEngine searchEngine;
 
     /**
-     * TODO 请检查一下商品删除修改时是否正在举办活动。商品添加修改时看下有没有特殊字符，特别是双引号和不可见字符，因为要上传给openSearch，容易炸。
      * 后台低频接口，无需缓存，用于选择商品，需要
      *
      * @return

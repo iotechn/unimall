@@ -153,6 +153,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_GROUP_SHOP_ACTIVITY_HAS_OVER =
             new ServiceExceptionDefinition(13027, "团购活动已经结束");
 
+    public static final ServiceExceptionDefinition ORDER_REFUND_KEY_PATH_ERROR =
+            new ServiceExceptionDefinition(13028, "退款证书路径不正确，请参照系统配置放置");
+
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
             new ServiceExceptionDefinition(14001, "优惠券已经领完～");

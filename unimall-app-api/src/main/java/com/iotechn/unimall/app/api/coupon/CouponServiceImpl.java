@@ -65,7 +65,7 @@ public class CouponServiceImpl implements CouponService {
                     throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
                 } else {
                     if (couponDO.getTotal() >= 0) {
-                        if (couponDO.getSurplus() == 1) { // TODO 三个用户同时领最后两张，锁不住，可以改成数据库乐观锁。
+                        if (couponDO.getSurplus() == 1) {
                             if (!lockComponent.tryLock(LockConst.COUPON_LOCK + couponId, 10)) {
                                 throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
                             }

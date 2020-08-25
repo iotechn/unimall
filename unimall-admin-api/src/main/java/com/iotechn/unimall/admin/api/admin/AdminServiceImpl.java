@@ -2,18 +2,16 @@ package com.iotechn.unimall.admin.api.admin;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.exception.ThirdPartServiceException;
-import com.iotechn.unimall.data.notify.SMSClient;
-import com.iotechn.unimall.data.notify.SMSResult;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.core.util.MD5Util;
 import com.iotechn.unimall.core.util.SHAUtil;
 import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
 import com.iotechn.unimall.data.domain.RolePermissionDO;
@@ -24,6 +22,9 @@ import com.iotechn.unimall.data.mapper.AdminMapper;
 import com.iotechn.unimall.data.mapper.RoleMapper;
 import com.iotechn.unimall.data.mapper.RolePermissionMapper;
 import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.data.notify.SMSClient;
+import com.iotechn.unimall.data.notify.SMSResult;
+import com.iotechn.unimall.data.properties.UnimallAdminNotifyProperties;
 import com.iotechn.unimall.data.properties.UnimallSystemProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
 import okhttp3.OkHttpClient;
@@ -32,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,14 +69,8 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private SMSClient smsClient;
 
-    @Value("${com.iotechn.admin.notify.uninotify.url}")
-    private String uniNotifyUrl;
-
-    @Value("${com.iotechn.admin.notify.uninotify.app-secret}")
-    private String uniNotifyAppSecret;
-
-    @Value("${com.iotechn.admin.notify.uninotify.app-id}")
-    private String uniNotifyAppId;
+    @Autowired
+    private UnimallAdminNotifyProperties unimallAdminNotifyProperties;
 
     @Autowired
     private UnimallSystemProperties unimallSystemProperties;
@@ -236,7 +230,6 @@ public class AdminServiceImpl implements AdminService {
         adminDO.setId(adminId);
         adminDO.setPassword(MD5Util.md5(newPassword, adminDOExist.getUsername()));
         if (adminMapper.updateById(adminDO) > 0) {
-            //logout(accessToken, adminId);
             return "ok";
         }
         throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
@@ -270,13 +263,13 @@ public class AdminServiceImpl implements AdminService {
             set.add(timestamp + "");
             set.add("developer");
             set.add(SessionUtil.getAdmin().getUsername());
-            set.add(this.uniNotifyAppSecret);
-            set.add(this.uniNotifyAppId);
+            set.add(this.unimallAdminNotifyProperties.getUniNotifyAppSecret());
+            set.add(this.unimallAdminNotifyProperties.getUniNotifyAppId());
             String json = okHttpClient
                     .newCall(new Request.Builder()
                             .get()
-                            .url(this.uniNotifyUrl + "?_gp=developer&_mt=getRegisterUrl&userId=" + SessionUtil.getAdmin().getUsername()
-                                    + "&appId=" + this.uniNotifyAppId + "&timestamp=" + timestamp + "&sign=" + SHAUtil.sha256Encode(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
+                            .url(this.unimallAdminNotifyProperties.getUniNotifyUrl() + "?_gp=developer&_mt=getRegisterUrl&userId=" + SessionUtil.getAdmin().getUsername()
+                                    + "&appId=" + this.unimallAdminNotifyProperties.getUniNotifyAppId() + "&timestamp=" + timestamp + "&sign=" + SHAUtil.sha256Encode(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
                             .build()).execute().body().string();
             JSONObject jsonObject = JSONObject.parseObject(json);
             Integer errcode = jsonObject.getInteger("errno");

@@ -26,6 +26,7 @@ import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
+import com.iotechn.unimall.data.properties.UnimallWxPayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -78,6 +80,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Autowired
     private UnimallOrderProperties unimallOrderProperties;
 
+    @Autowired
+    private UnimallWxPayProperties unimallWxPayProperties;
+
     @Override
     public Page<OrderDO> list(Integer page, Integer limit, Integer status, String orderNo, Long adminId) throws ServiceException {
         QueryWrapper<OrderDO> wrapper = new QueryWrapper<OrderDO>();
@@ -105,11 +110,20 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 if (type == 0) {
                     //2.1 店主拒绝退款
                     OrderDO updateOrderDO = new OrderDO();
-                    updateOrderDO.setStatus(OrderStatusType.WAIT_CONFIRM.getCode());
+                    // 判断之前是否已经发货，若没发货，则将状态流转到待发货
+                    if (orderDO.getGmtShip() != null) {
+                        updateOrderDO.setStatus(OrderStatusType.WAIT_CONFIRM.getCode());
+                    } else {
+                        updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+                    }
                     updateOrderDO.setGmtUpdate(new Date());
                     orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
                     return "ok";
                 } else if (type == 1) {
+                    String keyPath = unimallWxPayProperties.getKeyPath();
+                    if (!new File(keyPath).exists()) {
+                        throw new AdminServiceException(ExceptionDefinition.ORDER_REFUND_KEY_PATH_ERROR);
+                    }
                     //2.2 店主同意退款
                     //2.2.1 先流转状态
                     OrderDO updateOrderDO = new OrderDO();
@@ -136,8 +150,15 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     }
                     WxPayRefundRequest wxPayRefundRequest = new WxPayRefundRequest();
                     wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? unimallWxProperties.getMiniAppId() : unimallWxProperties.getMiniAppSecret());
-                    wxPayRefundRequest.setOutTradeNo(orderNo);
-                    wxPayRefundRequest.setOutRefundNo("refund_" + orderNo);
+                    // 判断订单是子单支付还是父单支付
+                    String abstractOrderNo;
+                    if (orderDO.getSubPay().intValue() == 1) {
+                        abstractOrderNo = orderDO.getOrderNo();
+                    } else {
+                        abstractOrderNo = orderDO.getParentOrderNo();
+                    }
+                    wxPayRefundRequest.setOutTradeNo(abstractOrderNo);
+                    wxPayRefundRequest.setOutRefundNo("refund_" + abstractOrderNo);
                     wxPayRefundRequest.setTotalFee(orderDO.getPayPrice());
                     wxPayRefundRequest.setRefundFee(refundPrice);
                     WxPayRefundResult wxPayRefundResult = wxPayService.refund(wxPayRefundRequest);

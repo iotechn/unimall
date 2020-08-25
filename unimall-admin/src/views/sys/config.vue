@@ -53,7 +53,7 @@
         </el-form-item>
 
         <el-form-item label="文件系统证书地址" prop="keyPath">
-          <el-input v-model="wxPayDataForm.appScret" placeholder="文件系统中退款证书的位置 eg: /cert/apiclient_cert.p12" />
+          <el-input v-model="wxPayDataForm.keyPath" placeholder="文件系统中退款证书的位置 eg: /cert/apiclient_cert.p12" />
         </el-form-item>
 
       </el-form>
@@ -289,7 +289,42 @@
       <div class="op-container">
         <el-button :loading="submiting" type="primary" @click="handleSave('systemDataForm', prefixs.systemDataPrefix)">保存更改</el-button>
       </div>
+    </el-card>
 
+    <el-card class="box-card">
+      <h3>管理员通知</h3>
+      <el-form ref="advertDataForm" :model="adminNotifyDataForm" label-width="150px">
+
+        <el-form-item label="启用(需要重启)" prop="enable">
+          <el-select v-model="adminNotifyDataForm.enable" placeholder="默认不可游客访问">
+            <el-option
+              :value="'mock'"
+              :label="'控制台模拟'"
+            />
+            <el-option
+              :value="'uninotify'"
+              :label="'驽驹通知中心'"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item v-if="adminNotifyDataForm.enable === 'uninotify'" label="服务器URL" prop="uniNotifyUrl">
+          <el-input v-model="adminNotifyDataForm.uniNotifyUrl" placeholder="http://public.dobbinsoft.com/m.api" />
+        </el-form-item>
+
+        <el-form-item v-if="adminNotifyDataForm.enable === 'uninotify'" label="Uni AppId" prop="uniNotifyAppId">
+          <el-input v-model="adminNotifyDataForm.uniNotifyAppId" placeholder="申请的通知AppId" />
+        </el-form-item>
+
+        <el-form-item v-if="adminNotifyDataForm.enable === 'uninotify'" label="Uni AppSecret" prop="uniNotifyAppSecret">
+          <el-input v-model="adminNotifyDataForm.uniNotifyAppSecret" placeholder="申请的通知AppSecret" />
+        </el-form-item>
+
+      </el-form>
+
+      <div class="op-container">
+        <el-button :loading="submiting" type="primary" @click="handleSave('adminNotifyDataForm', prefixs.adminNotifyDataPrefix)">保存更改</el-button>
+      </div>
     </el-card>
 
     <el-card class="box-card">
@@ -354,7 +389,8 @@ export default {
         orderDataPrefix: 'ORDER_CONFIG:',
         advertDataPrefix: 'ADVERT_CONFIG:',
         searchDataPrefix: 'OPEN_SEARCH_CONFIG:',
-        systemDataPrefix: 'SYSTEM_CONFIG:'
+        systemDataPrefix: 'SYSTEM_CONFIG:',
+        adminNotifyDataPrefix: 'ADMIN_NOTIFY_CONFIG:'
       },
       wxAppDataForm: {},
       wxPayDataForm: {},
@@ -364,6 +400,7 @@ export default {
       advertDataForm: {},
       searchDataForm: {},
       systemDataForm: {},
+      adminNotifyDataForm: {},
       submiting: false
     }
   },
