@@ -45,7 +45,7 @@
 				priceOrder: 0, //1 价格从低到高 2价格从高到低
 				productList: [],
 				cateId: 0,
-				keywords: '',
+				keyword: '',
 				pageNo: 1,
 				isVip: false
 			};
@@ -58,7 +58,7 @@
 			this.headerTop = document.getElementsByTagName('uni-page-head')[0].offsetHeight + 'px';
 			// #endif
 			this.cateId = options.tid ? options.tid : 0;
-			this.keywords = options.keywords ? options.keywords : ''
+			this.keyword = options.keyword ? options.keyword : ''
 			this.loadData();
 		},
 		onPageScroll(e) {
@@ -110,7 +110,7 @@
 				}
 				this.$api.request('product', 'getProductPage', {
 					categoryId: this.cateId,
-					title: this.keywords,
+					title: this.keyword,
 					pageNo : this.pageNo,
 					...orderByInfo
 				}).then(res => {

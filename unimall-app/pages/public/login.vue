@@ -157,21 +157,32 @@
 							uni.hideLoading()
 						}).then(res => {
 							that.$api.setUserInfo(res.data)
-							that.$api.request('user', 'syncUserInfo', userInfo).then(syncRes => {
-								//同步过后
-								res.data.nickname = userInfo.nickName
-								res.data.avatarUrl = userInfo.avatarUrl
-								res.data.gender = userInfo.gender
-								uni.setStorageSync('userInfo', res.data)
+							if (!res.data.nickname) {
+								that.$api.request('user', 'syncUserInfo', userInfo).then(syncRes => {
+									//同步过后
+									res.data.nickname = userInfo.nickName
+									res.data.avatarUrl = userInfo.avatarUrl
+									res.data.gender = userInfo.gender
+									uni.setStorageSync('userInfo', res.data)
+									that.$store.commit('login', res.data)
+									that.$api.setUserInfo(res.data)
+								
+									if (that.$api.prePage().lodaData) {
+										that.$api.prePage().loadData()
+									}
+									uni.hideLoading()
+									uni.navigateBack()
+								})
+							} else {
 								that.$store.commit('login', res.data)
 								that.$api.setUserInfo(res.data)
-
+																
 								if (that.$api.prePage().lodaData) {
 									that.$api.prePage().loadData()
 								}
 								uni.hideLoading()
 								uni.navigateBack()
-							})
+							}
 						})
 					})
 				})
