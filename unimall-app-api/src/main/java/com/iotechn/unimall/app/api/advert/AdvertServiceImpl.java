@@ -31,10 +31,9 @@ public class AdvertServiceImpl implements AdvertService {
         QueryWrapper<AdvertDO> wrapper = new QueryWrapper<AdvertDO>()
                 .eq("status", StatusType.ACTIVE.getCode());
         if (adType != null) {
-            wrapper.eq("ad_type", adType);
+            wrapper.eq("type", adType);
         }
-        List<AdvertDO> advertDOList = advertMapper.selectList(wrapper);
-        return advertDOList;
+        return advertMapper.selectList(wrapper);
     }
 
 }
