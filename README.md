@@ -35,8 +35,12 @@ Unimall社区版源码包含:
 ## Contact
 
 QQ讨论群：656676341(1群已满) 940197916(2群) (进群前，请在网页右上角点star)
+
 微信：18584669549 (若微信群二维码超100人，请加此微信备注意图，接受邀请)
+
 微信群(初建)：
+
+![front](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/wx.png)
 
 ## Experience
 
