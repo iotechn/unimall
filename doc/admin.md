@@ -23,3 +23,6 @@ Admin使用vuejs+elementui编写。最终打包成静态文件。
 
 ##### ② 放入web容器
 将这些文件让入nginx的静态文件目录即可。
+
+账号：admin
+密码：1234567
