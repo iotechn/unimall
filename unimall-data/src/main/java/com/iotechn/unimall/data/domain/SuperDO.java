@@ -1,6 +1,6 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotations.TableField;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.util.Date;

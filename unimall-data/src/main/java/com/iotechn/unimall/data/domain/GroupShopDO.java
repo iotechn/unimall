@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.util.Date;
@@ -39,11 +39,11 @@ public class GroupShopDO extends SuperDO {
     /**
      * 团购最小人数
      */
-    @TableField("minimum_number")
-    private Integer minimumNumber;
+    @TableField("min_num")
+    private Integer minNum;
 
-    @TableField("already_buy_number")
-    private Integer alreadyBuyNumber;
+    @TableField("buyer_num")
+    private Integer buyerNum;
 
     /**
      * 团购人数未满,是否自动退款,默认自动退款,1是自动退款,0不自动退款

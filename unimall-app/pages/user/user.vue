@@ -76,19 +76,19 @@
 					<text>浏览历史</text>
 				</view>
 				<scroll-view v-if="footprintList.length > 0" scroll-x class="h-list">
-					<image v-for="(item, index ) in footprintList" :key="index" @longpress="deleteFootprint(item)" @click="navTo('/pages/product/detail?id=' + item.spuId)" :src="item.spuImg + '?x-oss-process=style/200px'" mode="aspectFill"></image>
+					<image v-for="(item, index ) in footprintList" :key="index" @longpress="deleteFootprint(item)" @click="navTo('/pages/product/detail?id=' + item.id)" :src="item.img + '?x-oss-process=style/200px'" mode="aspectFill"></image>
 				</scroll-view>
 				<list-cell icon="icon-dizhi" iconColor="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/list')"></list-cell>
 				<list-cell icon="icon-shoucang_xuanzhongzhuangtai" iconColor="#54b4ef" title="我的收藏" @eventClick="navTo('/pages/product/favorite')"></list-cell>
+				<!-- #ifdef MP-WEIXIN -->
 				<list-cell icon="icon-huifu" iconColor="#e07472" title="在线客服" :openType="'contact'"></list-cell>
+				<!-- #endif -->
 				<list-cell icon="icon-tuandui" iconColor="#EE82EE" title="个人资料" @eventClick="navTo('/pages/user/profile')"></list-cell>
-				<!-- <list-cell icon="icon-iconfontweixin" iconColor="#EEEE00" title="我的优惠券" @eventClick="navTo('/pages/coupon/listTODO')"></list-cell> -->
+				<list-cell icon="icon-iconfontweixin" iconColor="#EEEE00" title="我的优惠券" @eventClick="navTo('/pages/coupon/list?type=user')"></list-cell>
 				<list-cell icon="icon-pinglun-copy" iconColor="#ee883b" title="关于" @eventClick="navTo('/pages/user/about')"></list-cell>
-				<list-cell icon="icon-shanchu4" iconColor="#e07472" title="退出登录" border="" @eventClick="logout()"></list-cell>
+				<list-cell icon="icon-zuoshang" iconColor="#e07472" title="退出登录" border="" @eventClick="logout()"></list-cell>
 			</view> 
 		</view>
-			
-		
     </view>  
 </template>  
 <script>  
@@ -142,7 +142,7 @@
         methods: {
 			async loadFootprint() {
 				const that = this
-				that.$api.request('footprint', 'getAllFootprint').then(res => {
+				that.$api.request('footprint', 'list').then(res => {
 					that.footprintList = res.data
 				})
 			},
@@ -154,7 +154,7 @@
 					content: '您确定要删除此足迹吗？',
 					success : (e) => {
 						if (e.confirm) {
-							that.$api.request('footprint', 'deleteFootprint', {
+							that.$api.request('footprint', 'delete', {
 								footprintId: item.id
 							}).then(res => {
 								that.loadFootprint()

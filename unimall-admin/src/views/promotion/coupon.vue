@@ -81,7 +81,7 @@
 
       <el-table-column align="center" label="使用类目名称" prop="categoryTitle" width="100">
         <template slot-scope="scope">
-          <el-tag> {{ scope.row.categoryTitle != null?scope.row.categoryTitle:"全部类目" }} </el-tag>
+          <el-tag> {{ scope.row.categoryTitle != null?scope.row.categoryTitle:(scope.row.categoryId ? '类目已删除' : "全部类目") }} </el-tag>
         </template>
       </el-table-column>
 
@@ -161,7 +161,7 @@
             <template slot="append">张</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="满减金额" prop="discount">
+        <el-form-item label="优惠金额" prop="discount">
           <el-input v-model="dataForm.discount" :disabled="dialogStatus === 'update'">
             <template slot="append">元</template>
           </el-input>
@@ -221,7 +221,7 @@
           <el-cascader
             v-model="dataForm.categoryTitle"
             :options="options"
-            :props="{ checkStrictly: true }"
+            :props="{label:'title', value:'id', children:'childrenList', checkStrictly: true}"
             placeholder="优惠类目"
             filterable
             @change="handleLink"

@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
@@ -58,7 +58,26 @@ public class OrderSkuDO extends SuperDO {
      */
     private String img;
 
-    //单位
+    /**
+     * 商品单位
+     */
     private String unit;
+
+    /**
+     * 商品重量 (g)
+     */
+    private Integer weight;
+
+    /**
+     * 活动类型
+     */
+    @TableField("activity_type")
+    private Integer activityType;
+
+    /**
+     * 活动Id
+     */
+    @TableField("activity_id")
+    private Long activityId;
 
 }

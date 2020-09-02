@@ -1,7 +1,6 @@
 package com.iotechn.unimall.data.dto.freight;
 
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
-import com.iotechn.unimall.data.domain.FreightTemplateDO;
 import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,8 +20,24 @@ import java.util.List;
 @Data
 public class FreightTemplateDTO extends SuperDTO {
 
-    private FreightTemplateDO freightTemplateDO;
+    // private FreightTemplateDO freightTemplateDO;
 
-    private List<FreightTemplateCarriageDO> freightTemplateCarriageDOList;
+    private List<FreightTemplateCarriageDO> carriageDOList;
+
+    private String title;
+
+    private String spuLocation;
+
+    private Integer deliveryDeadline;
+
+    private Integer defaultFreePrice;
+
+    private Integer defaultFirstWeight;
+
+    private Integer defaultFirstPrice;
+
+    private Integer defaultContinueWeight;
+
+    private Integer defaultContinuePrice;
 
 }

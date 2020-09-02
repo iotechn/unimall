@@ -3,7 +3,10 @@
 		<!-- 小程序头部兼容 -->
 		<!-- #ifdef MP -->
 		<view class="mp-search-box">
-			<input @click="naviageToPage('/pages/product/search')" class="ser-input" type="text" value="输入关键字搜索" disabled />
+			<navigator url="/pages/product/search" hover-class="none">
+				<input class="ser-input" type="text" value="输入关键字搜索" disabled />
+			</navigator>
+			
 		</view>
 		<!-- #endif -->
 		
@@ -14,7 +17,7 @@
 			<!-- 背景色区域 -->
 			<view class="titleNview-background" :style="{backgroundColor:titleNViewBackground}"></view>
 			<swiper autoplay="true" interval="3000" duration="500" class="carousel" circular @change="swiperChange">
-				<swiper-item v-for="(item, index) in carouselList" :key="index" class="carousel-item" @click="naviageToPage(item.url)">
+				<swiper-item v-for="(item, index) in carouselList" :key="index" class="carousel-item" @click="navToAdvertTargetPage(item)">
 					<image :src="item.imgUrl" />
 				</swiper-item>
 			</swiper>
@@ -25,15 +28,22 @@
 				<text class="num">{{swiperLength}}</text>
 			</view>
 		</view>
-		<!-- 分类 -->
+		<!-- 轮播下五按钮 -->
 		<view class="cate-section">
-			<view v-for="(item, index) in categoryButtomList" :key="index" @click="naviageToPage(item.url)" class="cate-item">
+			<view v-for="(item, index) in categoryButtomList" :key="index" @click="navToAdvertTargetPage(item)" class="cate-item">
 				<image :src="item.imgUrl"></image>
 				<text>{{item.title}}</text>
 			</view>
 		</view>
 		
-		<view v-if="banner" @click="naviageToPage(banner.url)" class="ad-1">
+		<!-- 店铺公告 -->
+		<view v-if="postMsgs && postMsgs.length > 0" class="post-section">
+			<swiper style="height: 100%;" :circular="true" :autoplay="true" :vertical="true">
+				<swiper-item v-for="(item, index) in postMsgs" :key="index"><view class="yticon icon-xiaoxi content">: {{ item }}</view></swiper-item>
+			</swiper>
+		</view>
+		
+		<view v-if="banner" @click="navToAdvertTargetPage(banner)" class="ad-1">
 			<image :src="banner.imgUrl" mode="scaleToFill"></image>
 		</view>
 		
@@ -63,14 +73,14 @@
 		</view> -->
 		
 		<!-- 橱窗推荐 -->
-		<view class="f-header m-t">
+		<view v-if="windowSpuList && windowSpuList.length > 0" class="f-header m-t">
 			<image src="/static/temp/h1.png"></image>
 			<view class="tit-box">
 				<text class="tit">橱窗推荐</text>
 				<text class="tit2">Shop Window</text>
 			</view>
 		</view>
-		<view class="group-section">
+		<view v-if="windowSpuList && windowSpuList.length > 0" class="group-section">
 			<swiper class="g-swiper" :duration="500">
 				<swiper-item
 					class="g-swiper-item"
@@ -78,30 +88,30 @@
 					v-for="(item, index) in windowSpuList" :key="index"
 				>
 					<view @click="navToWindowSuggestSpu(index)" class="g-item left">
-						<image :src="item.spuImg + '?x-oss-process=style/400px'" mode="aspectFill"></image>
+						<image :src="item.img + '?x-oss-process=style/400px'" mode="aspectFill"></image>
 						<view class="t-box">
-							<text class="title clamp">{{item.spuTitle}}</text>
+							<text class="title clamp">{{item.title}}</text>
 							<view class="price-box">
-								<text class="price">￥{{isVip ? (item.spuVipPrice / 100.0 + ' [VIP]') : (item.spuPrice / 100.0)}}</text> 
-								<text v-if="item.spuOriginalPrice > (isVip ? item.spuVipPrice : item.spuPrice)" class="m-price">￥{{item.spuOriginalPrice / 100}}</text> 
+								<text class="price">￥{{isVip ? (item.vipPrice / 100.0 + ' [VIP]') : (item.price / 100.0)}}</text> 
+								<text v-if="item.originalPrice > (isVip ? item.vipPrice : item.price)" class="m-price">￥{{item.originalPrice / 100}}</text> 
 							</view>
 							
 							<view class="pro-box">
-								<text>累计销售:{{item.spuSales}}件</text>
+								<text>累计销售:{{item.sales}}件</text>
 							</view>
 						</view>
 						            
 					</view>
 					<view v-if="index + 1 < windowSpuList.length" @click="navToWindowSuggestSpu(index + 1)" class="g-item right">
-						<image :src="windowSpuList[index+1].spuImg" mode="aspectFill"></image>
+						<image :src="windowSpuList[index+1].img" mode="aspectFill"></image>
 						<view class="t-box">
-							<text class="title clamp">{{windowSpuList[index+1].spuTitle}}</text>
+							<text class="title clamp">{{windowSpuList[index+1].title}}</text>
 							<view class="price-box">
-								<text class="price">￥{{isVip ? (windowSpuList[index+1].spuVipPrice / 100.0 + ' [VIP]') : (windowSpuList[index+1].spuPrice / 100.0)}}</text> 
-								<text v-if="windowSpuList[index+1].spuOriginalPrice > (isVip ? (windowSpuList[index+1].spuVipPrice) : (windowSpuList[index+1].spuPrice))" class="m-price">￥{{windowSpuList[index+1].spuOriginalPrice / 100.0}}</text> 
+								<text class="price">￥{{isVip ? (windowSpuList[index+1].vipPrice / 100.0 + ' [VIP]') : (windowSpuList[index+1].price / 100.0)}}</text> 
+								<text v-if="windowSpuList[index+1].originalPrice > (isVip ? (windowSpuList[index+1].vipPrice) : (windowSpuList[index+1].price))" class="m-price">￥{{windowSpuList[index+1].originalPrice / 100.0}}</text> 
 							</view>
 							<view class="pro-box">
-								<text>累计销售:{{item.spuSales}}件</text>
+								<text>累计销售:{{windowSpuList[index+1].sales}}件</text>
 							</view>
 						</view>
 					</view>
@@ -134,7 +144,7 @@
 						<text class="title clamp">{{spuItem.title}}</text>
 						<text class="price">￥{{(isVip ? spuItem.vipPrice : spuItem.price) / 100 }}</text>
 					</view>
-					<view @click="naviageToPage(item.url)" class="more">
+					<view @click="navToAdvertTargetPage(item)" class="more">
 						<text>查看全部</text>
 						<text>More+</text>
 					</view>
@@ -175,6 +185,7 @@
 
 		data() {
 			return {
+				uni,
 				titleNViewBackground: '',
 				swiperCurrent: 0,
 				swiperLength: 0,
@@ -184,7 +195,8 @@
 				categoryButtomList: [],
 				salesTop: [],
 				banner: undefined,
-				isVip: false
+				isVip: false,
+				postMsgs: []
 			};
 		},
 		onShow() {
@@ -236,17 +248,17 @@
 					uni.hideLoading()
 				}).then(res => {
 					let data = res.data
-					//橱窗
-					that.windowSpuList = data.windowRecommend
 					//轮播
-					data.advertisement.t1.forEach(item => {
-						if (!item.color) {
-							item.color = 'rgb(205, 215, 218)'
-						}
-					})
-					that.carouselList = data.advertisement.t1
-					that.swiperLength = data.advertisement.t1.length
-					that.titleNViewBackground = data.advertisement.t1[0].color
+					if (data.advertisement.t1) {
+						data.advertisement.t1.forEach(item => {
+							if (!item.color) {
+								item.color = 'rgb(205, 215, 218)'
+							}
+						})
+						that.carouselList = data.advertisement.t1
+						that.swiperLength = data.advertisement.t1.length
+						that.titleNViewBackground = data.advertisement.t1[0].color
+					}
 					//分类精选
 					if (data.advertisement.t2) {
 						that.categoryPickList = data.advertisement.t2
@@ -263,30 +275,53 @@
 					if (data.advertisement.t4) {
 						that.categoryButtomList = data.advertisement.t4
 					}
+					//橱窗
+					if (data.advertisement.t9) {
+						this.windowSpuList = data.advertisement.t9.map(item => item.data)
+						console.log(this.windowSpuList)
+					}
+					//公告
+					if (data.advertisement.t6) {
+						this.postMsgs = data.advertisement.t6.map(item => item.title)
+					}
 					uni.hideLoading()
 				})
 			},
-			//轮播图切换修改背景色
+			// 轮播图切换修改背景色
 			swiperChange(e) {
 				const index = e.detail.current;
 				this.swiperCurrent = index;
 				this.titleNViewBackground = this.carouselList[index].color;
 			},
-			//详情页
+			// 详情页
 			navToDetailPage(id) {
 				uni.navigateTo({
 					url: `/pages/product/detail?id=${id}`
 				})
 			},
+			// 橱窗推荐跳转
 			navToWindowSuggestSpu(index) {
 				const that = this
 				uni.navigateTo({
-					url: '/pages/product/detail?id=' + that.windowSpuList[index].spuId
+					url: '/pages/product/detail?id=' + that.windowSpuList[index].id
 				})
 			},
-			naviageToPage(page) {
+			// 跳转到广告目标页
+			navToAdvertTargetPage(advert) {
+				// 针对Advert Type 不同做不同跳转
+				const {unionType, unionValue} = advert
+				let url = '/pages/index/index'
+				if (unionType === 1) {
+					url = '/pages/product/detail?id=' + unionValue
+				} else if (unionType === 2) {
+					url = '/pages/product/list?tid=' + unionValue
+				} else if (unionType === 3) {
+					url = '/pages/product/list?keyword=' + unionValue
+				} else if (unionType === 4) {
+					url = unionValue
+				}
 				uni.navigateTo({
-					url: page
+					url: url
 				})
 			}
 		},
@@ -297,25 +332,6 @@
 				url: '/pages/product/search'
 			})
 		},
-		//点击导航栏 buttons 时触发
-		// onNavigationBarButtonTap(e) {
-		// 	const index = e.index;
-		// 	if (index === 0) {
-		// 		this.$api.msg('点击了扫描');
-		// 	} else if (index === 1) {
-		// 		// #ifdef APP-PLUS
-		// 		const pages = getCurrentPages();
-		// 		const page = pages[pages.length - 1];
-		// 		const currentWebview = page.$getAppWebview();
-		// 		currentWebview.hideTitleNViewButtonRedDot({
-		// 			index
-		// 		});
-		// 		// #endif
-		// 		uni.navigateTo({
-		// 			url: '/pages/notice/notice'
-		// 		})
-		// 	}
-		// }
 		// #endif
 	}
 </script>
@@ -361,6 +377,24 @@
 			.swiper-dots{
 				left:45upx;
 				bottom:40upx;
+			}
+		}
+		
+		.post-section {
+			margin-top: 16upx;
+			height: 60upx;
+			line-height: 60upx;
+			background-color: white;
+			padding-left: 20upx;
+
+			.content {
+				height: 60upx;
+				line-height: 60upx;
+				font-size: 28upx;
+				text-overflow: ellipsis;
+				overflow: hidden;
+				color: $uni-color-primary;
+				white-space: nowrap;
 			}
 		}
 	}

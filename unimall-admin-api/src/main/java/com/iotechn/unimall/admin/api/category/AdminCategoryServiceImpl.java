@@ -1,25 +1,31 @@
 package com.iotechn.unimall.admin.api.category;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
-import com.iotechn.unimall.core.exception.*;
+import com.iotechn.unimall.core.exception.AdminServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
+import com.iotechn.unimall.data.domain.AdvertDO;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.domain.SpuDO;
-import com.iotechn.unimall.data.dto.CategoryTreeNodeDTO;
+import com.iotechn.unimall.data.dto.CategoryDTO;
+import com.iotechn.unimall.data.enums.AdvertUnionType;
+import com.iotechn.unimall.data.mapper.AdvertMapper;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.model.Page;
-import com.iotechn.unimall.plugin.core.inter.IPluginUpdateCategory;
-import com.iotechn.unimall.plugin.core.manager.PluginsManager;
-import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +38,9 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     private CategoryMapper categoryMapper;
 
     @Autowired
+    private AdvertMapper advertMapper;
+
+    @Autowired
     private SpuMapper spuMapper;
 
     @Autowired
@@ -40,91 +49,41 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    @Autowired
-    private PluginsManager pluginsManager;
-
-    private static final String CA_CATEGORY_TREE = "CA_CATEGORY_TREE";
-
-    private static final String ADMIN_QUERY_CATEGORY_LIST = "ADMIN_QUERY_CATEGORY_LIST";
-
-    private static final String CA_CATEGORY_SECOND_LEVEL_TREE = "CA_CATEGORY_SECOND_LEVEL_TREE";
-
     /**
-     * @return
-     * @throws ServiceException
+     * 获取两级类目树,用于添加类目时选择使用
      */
-
-
-    /*获取两级目录树*/
-    public List<CategoryTreeNodeDTO> categorySecondLevelTree() throws ServiceException {
-        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(CA_CATEGORY_SECOND_LEVEL_TREE, CategoryTreeNodeDTO.class);
-        if (objList != null) {
-            return objList;
-        }
-        List<CategoryTreeNodeDTO> list = categoryBizService.categorySecondLevelTree();
-        cacheComponent.putObj(CA_CATEGORY_SECOND_LEVEL_TREE, list, 60 * 60);
+    public List<CategoryDTO> categorySecondLevelTree() throws ServiceException {
+        List<CategoryDTO> list = categoryBizService.categorySecondLevelTree();
         return list;
     }
 
-
-    /*获取三级目录树。*/
-    //TODO 做下优化
+    /**
+     * 获取三级类目树,用于商品、优惠券之类添加的使用
+     */
     @Override
-    public List<CategoryTreeNodeDTO> categoryTree() throws ServiceException {
-        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(CA_CATEGORY_TREE, CategoryTreeNodeDTO.class);
-        if (objList != null) {
-            return objList;
-        }
-        List<CategoryDO> categoryDOS = categoryMapper.selectList(new EntityWrapper<>());
-        List<CategoryTreeNodeDTO> list = categoryDOS.stream().filter((item) -> (item.getParentId().equals(0l))).map(item -> {
-            CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
-            dto.setLabel(item.getTitle());
-            dto.setLevel(0);
-            dto.setFullName(dto.getLabel());
-            dto.setValue(item.getId());
-            dto.setChildren(new LinkedList<>());
-            return dto;
-        }).collect(Collectors.toList());
-        list.forEach(item -> {
-            categoryDOS.forEach(categoryDO -> {
-                if (categoryDO.getParentId().equals(item.getValue())) {
-                    CategoryTreeNodeDTO categoryTreeNodeDTO = new CategoryTreeNodeDTO();
-                    categoryTreeNodeDTO.setChildren(new LinkedList<>());
-                    categoryTreeNodeDTO.setValue(categoryDO.getId());
-                    categoryTreeNodeDTO.setLabel(categoryDO.getTitle());
-                    categoryTreeNodeDTO.setLevel(1);
-                    categoryTreeNodeDTO.setParent(item.getValue());
-                    categoryTreeNodeDTO.setFullName(item.getFullName() + "/" + categoryDO.getTitle());
-                    item.getChildren().add(categoryTreeNodeDTO);
-                    categoryDOS.forEach(subCategoryDO -> {
-                        if (subCategoryDO.getParentId().equals(categoryTreeNodeDTO.getValue())) {
-                            CategoryTreeNodeDTO childCategoryNodeDTO = new CategoryTreeNodeDTO();
-                            childCategoryNodeDTO.setLabel(subCategoryDO.getTitle());
-                            childCategoryNodeDTO.setValue(subCategoryDO.getId());
-                            childCategoryNodeDTO.setLevel(2);
-                            childCategoryNodeDTO.setParent(categoryTreeNodeDTO.getValue());
-                            childCategoryNodeDTO.setFullName(categoryTreeNodeDTO.getFullName() + "/" + subCategoryDO.getTitle());
-                            categoryTreeNodeDTO.getChildren().add(childCategoryNodeDTO);
-                        }
-                    });
-                }
-            });
-        });
-        cacheComponent.putObj(CA_CATEGORY_TREE, list, 60 * 60);
+    public List<CategoryDTO> categoryTree() throws ServiceException {
+        List<CategoryDTO> list = categoryBizService.categoryThreeLevelTree();
         return list;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public CategoryDO addCategory(Long adminId, String title, Long parentId, String iconUrl, String picUrl, Integer level) throws ServiceException {
+    public CategoryDO create(String title, Long parentId, String iconUrl, String picUrl, Long adminId) throws ServiceException {
         CategoryDO parent = null;
         CategoryDO categoryDO = new CategoryDO();
         if (!parentId.equals(0l)) {
             parent = categoryMapper.selectById(parentId);
-            if (parent == null) {
-                throw new AdminServiceException(ExceptionDefinition.PARENT_NODE_INFORMATION_ERROR);
+            if (parent == null || parent.getLevel().intValue() >= 2) {
+                throw new AdminServiceException(ExceptionDefinition.CATEGORY_PARENT_NODE_INFORMATION_ERROR);
             }
             categoryDO.setLevel(parent.getLevel() + 1);
+
+            if(parent.getLevel().intValue() == 0){
+                categoryDO.setFirstLevelId(parentId);
+            }else if(parent.getLevel().intValue() == 1){
+                categoryDO.setFirstLevelId(parent.getFirstLevelId());
+                categoryDO.setSecondLevelId(parentId);
+            }
         } else {
             categoryDO.setLevel(0);
         }
@@ -137,88 +96,106 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         categoryDO.setGmtUpdate(now);
 
         if (categoryMapper.insert(categoryDO) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.DATABASE_INSERT_FAILURE);
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
         }
-        cacheComponent.del(CA_CATEGORY_TREE);
-        cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
-        cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
-        pluginInvokeUpdateCategory(categoryDO.getId());
+        this.clearCache();
         return categoryDO;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteCategory(Long adminId, Long id) throws ServiceException {
-        Integer count_category = categoryMapper.selectCount(new EntityWrapper<CategoryDO>().eq("parent_id", id));
-        Integer count_spu = spuMapper.selectCount(new EntityWrapper<SpuDO>().eq("category_id", id));
-
-        if (count_category != 0 || count_spu != 0) {
-            throw new AppServiceException(ExceptionDefinition.CATEGORY_OUGHT_TO_EMPTY);
+    public String delete(Long id, Long adminId) throws ServiceException {
+        /**
+         *  删除类目时 不允许类目有子类目
+         *  删除类目时 不允许类目有商品
+         *  删除类目时 不允许有广告关联类目
+         */
+        Integer countCategory = categoryMapper.selectCount(new QueryWrapper<CategoryDO>().eq("parent_id", id));
+        Integer countSpu = spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("category_id", id));
+        Integer countAdvert = advertMapper.selectCount(
+                new QueryWrapper<AdvertDO>()
+                        .eq("union_type", AdvertUnionType.CATEGORY.getCode())
+                        .eq("union_value", id.toString()));
+        if (countCategory != 0 || countSpu != 0) {
+            throw new AdminServiceException(ExceptionDefinition.CATEGORY_OUGHT_TO_EMPTY);
         }
-        cacheComponent.del(CA_CATEGORY_TREE);
-        cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
-        cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
-        pluginInvokeUpdateCategory(id);
-        return categoryMapper.deleteById(id) > 0;
+        if (countAdvert != 0) {
+            throw new AdminServiceException(ExceptionDefinition.CATEGORY_EXIST_ADVERT);
+        }
+        if (categoryMapper.deleteById(id) > 0) {
+            this.clearCache();
+            return "ok";
+        }
+        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public CategoryTreeNodeDTO updateCategory(Long adminId, Long id, String title, Long parentId, String iconUrl, String picUrl, Integer level) throws ServiceException {
-        CategoryDO categoryDO = new CategoryDO();
+    public CategoryDTO update(Long id, String title, Long parentId, String iconUrl, String picUrl, Long adminId) throws ServiceException {
         if (id == null || parentId == null) {
             throw new AdminServiceException(ExceptionDefinition.CATEGORY_OR_PARENT_NODE_IS_EMPTY);
         }
-        categoryDO.setId(parentId);
-        CategoryDO categoryParent = categoryMapper.selectOne(categoryDO);
+        CategoryDO categoryParent = categoryMapper.selectById(parentId);
+        CategoryDO category = categoryMapper.selectById(id);
 
-        //传入父节点等于自身抛出异常
-        if (id.equals(parentId)) {
-            throw new AdminServiceException(ExceptionDefinition.PARENT_CAN_NOT_EQUALS_ONESELF);
+        // 1. 检验类目是否存在,非一级类目的父类目是否存在
+        if (category == null || (categoryParent == null && !parentId.equals(0L))) {
+            throw new AdminServiceException(ExceptionDefinition.CATEGORY_NOT_FIND_PARENT_NODE_OR_NODE);
         }
 
-        if (categoryParent == null && !parentId.equals(0L)) {
-            throw new AdminServiceException(ExceptionDefinition.NOT_FIND_PARENT_NODE);
+        CategoryDO updateDO = new CategoryDO();
+
+        // 如果是一级类目修改，就不会变更父类目；如果没有变更父类目，也不会变更对应的一二级长辈类目
+        if (!category.getParentId().equals(0L) && !category.getParentId().equals(parentId)) {
+            // 节点只能平级变更
+            if(category.getLevel().intValue() != categoryParent.getLevel().intValue() + 1){
+                throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+            }
+            if(categoryParent.getLevel().intValue() == 0){
+                updateDO.setFirstLevelId(parentId);
+            }else if(categoryParent.getLevel().intValue() == 1){
+                updateDO.setFirstLevelId(categoryParent.getFirstLevelId());
+                updateDO.setSecondLevelId(parentId);
+            }
         }
-        if (parentId.equals(0L)) {
-            categoryDO.setLevel(0);
-        } else {
-            categoryDO.setLevel(categoryParent.getLevel() + 1);
-        }
-        categoryDO.setId(id);
-        categoryDO.setGmtUpdate(new Date());
-        categoryDO.setParentId(parentId);
-        categoryDO.setTitle(title);
-        categoryDO.setPicUrl(picUrl);
-        categoryDO.setIconUrl(iconUrl);
-        if (categoryMapper.updateById(categoryDO) <= 0) {
+        updateDO.setId(id);
+        updateDO.setGmtUpdate(new Date());
+        updateDO.setParentId(parentId);
+        updateDO.setTitle(title);
+        updateDO.setPicUrl(picUrl);
+        updateDO.setIconUrl(iconUrl);
+        if (categoryMapper.updateById(updateDO) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.CATEGORY_UPDATE_FAILURE);
         }
-        CategoryTreeNodeDTO categoryTreeNodeDTO = new CategoryTreeNodeDTO();
-        List<CategoryTreeNodeDTO> list = getCategoryList();
-        for (CategoryTreeNodeDTO temp : list) {
-            if (categoryDO.getId().equals(temp.getValue())) {
-                BeanUtils.copyProperties(temp, categoryTreeNodeDTO);
+
+        // 如果变更了父节点，就需要变更当前节点的子孙节点的一二级长辈节点
+        if(!category.getParentId().equals(parentId)){
+            // 只有二三级节点能变更父节点，其中只有二级节点变更后，会造成子节点的长辈节点变更。
+            if(updateDO.getLevel().intValue() == 1){
+                QueryWrapper<CategoryDO> wrapper = new QueryWrapper<>();
+                wrapper.eq("parent_id",updateDO.getId());
+                CategoryDO child = new CategoryDO();
+                child.setFirstLevelId(updateDO.getFirstLevelId());
+                categoryMapper.update(child,wrapper);
+            }
+        }
+
+        CategoryDTO categoryDTO = new CategoryDTO();
+        BeanUtils.copyProperties(updateDO, categoryDTO);
+        List<CategoryDTO> list = categoryBizService.getCategoryList();
+        for (CategoryDTO temp : list) {
+            if (updateDO.getId().equals(temp.getId())) {
+                BeanUtils.copyProperties(temp, categoryDTO);
                 break;
             }
         }
-        cacheComponent.del(CA_CATEGORY_TREE);
-        cacheComponent.del(ADMIN_QUERY_CATEGORY_LIST);
-        cacheComponent.del(CA_CATEGORY_SECOND_LEVEL_TREE);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_ID_HASH);
-        cacheComponent.del(CategoryBizService.CA_CATEGORY_LIST);
-        pluginInvokeUpdateCategory(categoryDO.getId());
-        return categoryTreeNodeDTO;
+        this.clearCache();
+        return categoryDTO;
     }
 
-    //首先的到所有的类目的List<CategoryTreeNodeDTO>,在根据SQL查询得到的数据转化成传往前端的数据
     @Override
-    public Page<CategoryTreeNodeDTO> queryCategory(Long adminId, Long id, String title, Integer level, Long parentId, Integer pageNo, Integer limit) throws ServiceException {
-        EntityWrapper wrapper = new EntityWrapper();
+    public Page<CategoryDTO> list(Long id, String title, Integer level, Long parentId, Integer page, Integer limit, Long adminId) throws ServiceException {
+        QueryWrapper wrapper = new QueryWrapper();
         if (id != null) {
             wrapper.eq("id", id);
         }
@@ -229,76 +206,42 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
             wrapper.eq("level", level);
         }
         if (parentId != null) {
-            wrapper.eq("parent_id", parentId);
+            List<Long> categorySelfAndChildren = categoryBizService.getCategorySelfAndChildren(parentId);
+            if(!CollectionUtils.isEmpty(categorySelfAndChildren)){
+                wrapper.in("id",categorySelfAndChildren);
+            }
         }
-        wrapper.orderBy("level");
-        Integer count = categoryMapper.selectCount(wrapper);
+        wrapper.orderByAsc("level");
 
-        List<CategoryDO> categoryDOS = categoryMapper.selectPage(new RowBounds((pageNo - 1) * limit, limit), wrapper);
-        List<CategoryTreeNodeDTO> totalCategory = getCategoryList();
-        List<CategoryTreeNodeDTO> list = categoryDOS.stream().map(item -> {
-            CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
-            for (CategoryTreeNodeDTO temp : totalCategory) {
-                if (temp.getValue().equals(item.getId())) {
+        Page selectPage = categoryMapper.selectPage(Page.div(page, limit, CategoryDO.class), wrapper);
+        List<CategoryDO> categoryDOS = selectPage.getItems();
+        List<CategoryDTO> totalCategory = categoryBizService.getCategoryList();
+        List<CategoryDTO> list = categoryDOS.stream().map(item -> {
+            CategoryDTO dto = new CategoryDTO();
+            for (CategoryDTO temp : totalCategory) {
+                if (temp.getId().equals(item.getId())) {
                     BeanUtils.copyProperties(temp, dto);
                     return dto;
                 }
             }
             BeanUtils.copyProperties(item, dto);
-            ;
             return dto;
         }).collect(Collectors.toList());
-        Page<CategoryTreeNodeDTO> page = new Page<>(list, pageNo, limit, count);
-        return page;
+        return new Page<>(list, page, limit, selectPage.getCount());
     }
 
-
-    //TODO 可以做出父节点查询所有子节点
-    //获得所有类目按类目等级排序的类目list,
-    private List<CategoryTreeNodeDTO> getCategoryList() {
-        List<CategoryTreeNodeDTO> objList = cacheComponent.getObjList(ADMIN_QUERY_CATEGORY_LIST, CategoryTreeNodeDTO.class);
-        if (objList != null) {
-            return objList;
-        }
-        EntityWrapper wrapper = new EntityWrapper();
-        wrapper.orderBy("level");
-        List<CategoryDO> categoryDOS = categoryMapper.selectList(wrapper);
-        List<CategoryTreeNodeDTO> list = categoryDOS.stream().map(item -> {
-            CategoryTreeNodeDTO dto = new CategoryTreeNodeDTO();
-            dto.setLabel(item.getTitle());
-            dto.setLevel(item.getLevel());
-            dto.setValue(item.getId());
-            dto.setParent(item.getParentId());
-            dto.setIconUrl(item.getIconUrl());
-            dto.setPicUrl(item.getPicUrl());
-            if (item.getLevel() == 0) {
-                dto.setFullName(dto.getLabel());
+    /**
+     * 抽取删除缓存公共代码
+     */
+    private void clearCache(){
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                cacheComponent.del(CacheConst.CATEGORY_ALL_LIST);
+                cacheComponent.del(CacheConst.CATEGORY_SECOND_LEVEL_TREE);
+                cacheComponent.del(CacheConst.CATEGORY_THREE_LEVEL_TREE);
             }
-            return dto;
-        }).collect(Collectors.toList());
-
-        for (CategoryTreeNodeDTO cOne : list) {
-
-            for (CategoryTreeNodeDTO cTwo : list) {
-                if (cOne.getParent().equals(cTwo.getValue())) {
-                    cOne.setFullName(cTwo.getFullName() + "/" + cOne.getLabel());
-                    break;
-                }
-            }
-
-        }
-        cacheComponent.putObj(ADMIN_QUERY_CATEGORY_LIST, list, 60 * 60);
-        return list;
+        });
     }
-
-    private void pluginInvokeUpdateCategory(Long categoryId) {
-        List<IPluginUpdateCategory> plugins = pluginsManager.getPlugins(IPluginUpdateCategory.class);
-        if (!CollectionUtils.isEmpty(plugins)) {
-            for (IPluginUpdateCategory updateGoods : plugins) {
-                updateGoods.invokeCategoryUpdate(categoryId);
-            }
-        }
-    }
-
 
 }

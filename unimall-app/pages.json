@@ -16,28 +16,13 @@
 							"disabled": true,
 							"placeholderColor": "#606266"
 						},
-						"buttons": [{
-								"fontSrc": "/static/yticon.ttf",
-								"text": "\ue60d",
-								"fontSize": "26",
-								"color": "#303133",
-								"float": "left",
-								"background": "rgba(0,0,0,0)"
-							},
-							{
-								"fontSrc": "/static/yticon.ttf",
-								"text": "\ue744",
-								"fontSize": "27",
-								"color": "#303133",
-								"background": "rgba(0,0,0,0)",
-								"redDot": true
-							}
+						"buttons": [
 						]
 					}
 				}
 			}
 		}, {
-			"path": "pages/groupshop/list",
+			"path": "pages/product/groupshop",
 			"style": {
 				"navigationBarTitleText": "团购"
 			}
@@ -47,7 +32,7 @@
 				"navigationBarTitleText": "收货地址"
 			}
 		}, {
-			"path": "pages/address/create",
+			"path": "pages/address/upsert",
 			"style": {
 				"navigationBarTitleText": "",
 				"disableScroll" : true
@@ -126,22 +111,7 @@
 					"bounce": "none",
 					"titleNView": {
 						"type": "transparent",
-						"buttons": [{
-								"fontSrc": "/static/yticon.ttf",
-								"text": "\ue60f",
-								"fontSize": "24",
-								"color": "#303133",
-								"width": "46px",
-								"background": "rgba(0,0,0,0)"
-							},
-							{
-								"fontSrc": "/static/yticon.ttf",
-								"text": "\ue744",
-								"fontSize": "28",
-								"color": "#303133",
-								"background": "rgba(0,0,0,0)",
-								"redDot": true
-							}
+						"buttons": [
 						]
 					}
 				}
@@ -198,6 +168,14 @@
             "path" : "pages/category/category",
             "style" : {
 				"navigationBarTitleText": "分类",
+				"app-plus": {
+					"bounce": "none"
+				}
+			}
+        }, {
+            "path" : "pages/coupon/list",
+            "style" : {
+				"navigationBarTitleText": "我的优惠券",
 				"app-plus": {
 					"bounce": "none"
 				}

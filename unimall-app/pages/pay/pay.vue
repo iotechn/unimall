@@ -51,15 +51,17 @@
 				payType: 1,
 				price: 0,
 				orderNo: '',
+				parentOrderNo: '',
 				submiting: false
 			};
 		},
-		computed: {
-
-		},
 		onLoad(options) {
 			this.price = options.price
-			this.orderNo = options.orderno
+			if (options.orderno) {
+				this.orderNo = options.orderno
+			} else {
+				this.parentOrderNo = options.parentorderno
+			}
 		},
 
 		methods: {
@@ -73,7 +75,8 @@
 				if (that.payType === 1) {
 					that.submiting = true
 					that.$api.request('order', 'wxPrepay', {
-						orderNo : that.orderNo
+						orderNo: that.orderNo,
+						parentOrderNo: that.parentOrderNo
 					}, failres => {
 						that.submiting = false
 						that.$api.msg(failres.errmsg)
@@ -116,8 +119,8 @@
 								})
 							},
 							fail: function(res) {
-								console.log("支付过程失败");
-								that.$api.msg(JSON.stringify(res))
+								console.log("支付过程失败:" + JSON.stringify(res));
+								that.$api.msg('支付取消')
 							},
 							complete: function(res) {
 								console.log("支付过程结束")
@@ -138,8 +141,8 @@
 								})
 							},
 							fail: function(res) {
-								console.log("支付过程失败");
-								that.$api.msg(JSON.stringify(res))
+								console.log("支付过程失败:" + JSON.stringify(res));
+								that.$api.msg('支付取消')
 							},
 							complete: function(res) {
 								console.log("支付过程结束")
@@ -151,6 +154,7 @@
 				} else if (that.payType === 3) {
 					that.submiting = true
 					that.$api.request('order', 'offlinePrepay', {
+						parentOrderNo: that.parentOrderNo,
 						orderNo : that.orderNo
 					}, failres => {
 						that.submiting = false

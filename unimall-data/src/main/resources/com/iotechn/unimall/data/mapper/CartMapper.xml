@@ -23,6 +23,8 @@
             k.title AS skuTitle,
             p.img AS spuImg,
             k.img AS skuImg,
+            p.freight_template_id AS freightTemplateId,
+            k.weight,
             k.stock,
             k.spu_id AS spuId,
             p.category_id AS categoryId,

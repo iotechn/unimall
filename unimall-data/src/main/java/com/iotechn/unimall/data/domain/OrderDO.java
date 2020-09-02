@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.util.Date;
@@ -18,8 +18,17 @@ public class OrderDO extends SuperDO {
      */
     private String channel;
 
+    @TableField("parent_order_no")
+    private String parentOrderNo;
+
     @TableField("order_no")
     private String orderNo;
+
+    /**
+     * 若是子单支付的，则此字段为1，若是父单合单支付的，此字段为0。若未支付，此字段为NULL
+     */
+    @TableField("sub_pay")
+    private Integer subPay;
 
     @TableField("user_id")
     private Long userId;
@@ -53,6 +62,9 @@ public class OrderDO extends SuperDO {
     @TableField("actual_price")
     private Integer actualPrice;
 
+    /**
+     * 支付金额是单次支付的金额，其为父单的金额，可能超过子单的价格
+     */
     @TableField("pay_price")
     private Integer payPrice;
 
@@ -93,6 +105,15 @@ public class OrderDO extends SuperDO {
     private String consignee;
 
     private String mono;
+
+    @TableField("admin_mono_level")
+    private Integer adminMonoLevel;
+
+    @TableField("admin_mono")
+    private String adminMono;
+
+    @TableField("refund_reason")
+    private String refundReason;
 
     @TableField("gmt_ship")
     private Date gmtShip;

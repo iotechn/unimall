@@ -37,11 +37,11 @@ export function updateRole(data) {
 export function deleteRole(id) {
   return request({
     method: 'post',
-    params: {
+    data: Qs.stringify({
       _gp: 'admin.role',
       _mt: 'delete',
       roleId: id
-    }
+    })
   })
 }
 

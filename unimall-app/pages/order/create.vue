@@ -146,8 +146,8 @@
 		},
 		onLoad(option) {
 			//商品数据
-			this.isVip = this.$api.isVip()
 			const that = this
+			that.isVip = that.$api.isVip()
 			if (option.takeway) {
 				that.orderReqeust.takeWay = option.takeway
 			}
@@ -163,10 +163,11 @@
 					if (skuCategoryPriceMap[catItem]) {
 						skuCategoryPriceMap[catItem] += that.isVip ? (item.vipPrice*item.num) :  (item.price*item.num)
 					} else {
-						skuCategoryPriceMap[catItem] = that.isVip ? (item.vipPrice) :  (item.price)
+						skuCategoryPriceMap[catItem] = that.isVip ? (item.vipPrice*item.num) :  (item.price*item.num)
 					}
 				})
 			})
+			// 不同类目价格映射表
 			that.skuCategoryPriceMap = skuCategoryPriceMap
 			that.orderReqeust.totalOriginalPrice = totalOriginalPrice
 			that.orderReqeust.totalPrice = totalPrice
@@ -200,8 +201,8 @@
 				if (that.addressData) {
 					that.orderReqeust.addressId = that.addressData.id
 				}
-				that.$api.request('freight', 'getFreightMoney', {
-					orderRequestDTO: JSON.stringify(that.orderReqeust)
+				that.$api.request('order', 'previewFreight', {
+					orderRequest: JSON.stringify(that.orderReqeust)
 				}).then(res => {
 					that.orderReqeust.freightPrice = res.data
 				})
@@ -214,26 +215,32 @@
 				if (that.submiting) {
 					return
 				}
-				that.submiting = true
-				if (that.addressData.id) {
-					that.orderReqeust.addressId = that.addressData.id
-				}
-				that.$api.request('order', 'takeOrder', {
-					orderRequest : JSON.stringify(that.orderReqeust),
-					channel: uni.getSystemInfoSync().platform
-				}, failres => {
-					that.submiting = false
-					that.$api.msg(failres.errmsg)
-				}).then(res => {
-					//提交订单成功后，无需再让用户提交订单
-					// that.submiting = false
-					uni.redirectTo({
-						url: '/pages/pay/pay?orderno='+ res.data + '&price=' + that.orderReqeust.totalPrice
+				that.$api.request('user', 'checkLogin')
+					.then(res => {
+						that.submiting = true
+						if (that.addressData.id) {
+							that.orderReqeust.addressId = that.addressData.id
+						}
+						const orderReqeust = that.orderReqeust
+						const exceptPrice = orderReqeust.totalPrice - (orderReqeust.coupon?orderReqeust.coupon.discount:0) + orderReqeust.freightPrice
+						that.orderReqeust.exceptPrice = exceptPrice
+						that.$api.request('order', 'takeOrder', {
+							orderRequest : JSON.stringify(that.orderReqeust),
+							channel: uni.getSystemInfoSync().platform
+						}, failres => {
+							that.submiting = false
+							that.$api.msg(failres.errmsg)
+						}).then(res => {
+							//提交订单成功后，无需再让用户提交订单
+							// that.submiting = false
+							uni.redirectTo({
+								url: '/pages/pay/pay?parentorderno='+ res.data + '&price=' + ((that.orderReqeust.totalPrice - (that.orderReqeust.coupon?that.orderReqeust.coupon.discount:0) + that.orderReqeust.freightPrice))
+							})
+						})
 					})
-				})
-				
 			},
 			selectCoupon(couponItem) {
+				this.orderReqeust.couponId = couponItem.id
 				this.orderReqeust.coupon = couponItem
 				this.maskState = 0
 				this.calcFreightPrice()

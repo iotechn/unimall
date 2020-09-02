@@ -1,6 +1,5 @@
 package com.iotechn.unimall.data.dto.order;
 
-import com.iotechn.unimall.data.dto.UserCouponDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -20,19 +19,24 @@ public class OrderRequestDTO {
 
     private Integer totalOriginalPrice;
 
-    private UserCouponDTO coupon;
-
     private Long addressId;
 
     private Long groupShopId;
 
+    /**
+     * 用户优惠券id
+     */
+    private Long couponId;
+
     private String mono;
 
     /**
-     * 购物车 ？ 直接点击购买商品
+     * 购物车 ？ 直接点击购买商品 cart,buy,combine
      */
     private String takeWay;
 
     private Integer freightPrice;
+
+    private Integer exceptPrice;
 
 }

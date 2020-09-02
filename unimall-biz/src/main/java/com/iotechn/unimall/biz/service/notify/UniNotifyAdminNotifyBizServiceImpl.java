@@ -2,15 +2,15 @@ package com.iotechn.unimall.biz.service.notify;
 
 import com.iotechn.unimall.core.util.SHAUtil;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
+import com.iotechn.unimall.data.properties.UnimallAdminNotifyProperties;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Set;
 import java.util.TreeSet;
@@ -25,14 +25,8 @@ import java.util.stream.Collectors;
  */
 public class UniNotifyAdminNotifyBizServiceImpl implements AdminNotifyBizService {
 
-    @Value("${com.iotechn.admin.notify.uninotify.app-id}")
-    private String appId;
-
-    @Value("${com.iotechn.admin.notify.uninotify.app-secret}")
-    private String appSecret;
-
-    @Value("${com.iotechn.admin.notify.uninotify.url}")
-    private String serverUrl;
+    @Autowired
+    private UnimallAdminNotifyProperties unimallAdminNotifyProperties;
 
     private OkHttpClient okHttpClient = new OkHttpClient();
 
@@ -53,11 +47,11 @@ public class UniNotifyAdminNotifyBizServiceImpl implements AdminNotifyBizService
                     .add("phone", StringUtils.isEmpty(orderDTO.getPhone()) ? "" : orderDTO.getPhone())
                     .add("address", StringUtils.isEmpty(orderDTO.getAddress()) ? "" : orderDTO.getAddress())
                     .add("skuInfo", orderDTO.getSkuList().stream().map(item -> (item.getSpuTitle() + "-" + item.getTitle() + " * " + item.getNum())).collect(Collectors.joining("\r\n")))
-                    .add("appId", this.appId)
+                    .add("appId", unimallAdminNotifyProperties.getUniNotifyAppId())
                     .add("timestamp", System.currentTimeMillis() + "")
                     .build();
             String sign = getSign(formBody);
-            String string = okHttpClient.newCall(new Request.Builder().url(serverUrl + "?sign=" + sign).post(formBody).build()).execute().body().string();
+            String string = okHttpClient.newCall(new Request.Builder().url(unimallAdminNotifyProperties.getUniNotifyUrl() + "?sign=" + sign).post(formBody).build()).execute().body().string();
             logger.info(string);
         } catch (Exception e) {
             logger.error("[通知管理员] 异常", e);
@@ -75,11 +69,11 @@ public class UniNotifyAdminNotifyBizServiceImpl implements AdminNotifyBizService
                     .add("orderNo", orderDTO.getOrderNo())
                     .add("refundPrice", "￥" + ((orderDTO.getActualPrice() - orderDTO.getFreightPrice()) / 100.0))
                     .add("skuInfo", orderDTO.getSkuList().stream().map(item -> (item.getSpuTitle() + "-" + item.getTitle() + " * " + item.getNum())).collect(Collectors.joining("\r\n")))
-                    .add("appId", this.appId)
+                    .add("appId", unimallAdminNotifyProperties.getUniNotifyAppId())
                     .add("timestamp", System.currentTimeMillis() + "")
                     .build();
             String sign = getSign(formBody);
-            okHttpClient.newCall(new Request.Builder().url(serverUrl + "?sign=" + sign).post(formBody).build()).execute().body().string();
+            okHttpClient.newCall(new Request.Builder().url(unimallAdminNotifyProperties.getUniNotifyUrl() + "?sign=" + sign).post(formBody).build()).execute().body().string();
         } catch (Exception e) {
             logger.error("[通知管理员] 异常", e);
         }
@@ -90,7 +84,7 @@ public class UniNotifyAdminNotifyBizServiceImpl implements AdminNotifyBizService
         for (int i = 0; i < formBody.size(); i++) {
             sortSet.add(formBody.value(i));
         }
-        sortSet.add(this.appSecret);
-        return SHAUtil.shaEncode(URLEncoder.encode(sortSet.stream().collect(Collectors.joining()), "utf-8"));
+        sortSet.add(this.unimallAdminNotifyProperties.getUniNotifyAppSecret());
+        return SHAUtil.sha256Encode(URLEncoder.encode(sortSet.stream().collect(Collectors.joining()), "utf-8"));
     }
 }

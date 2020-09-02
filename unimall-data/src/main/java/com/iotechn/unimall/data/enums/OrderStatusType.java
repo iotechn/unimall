@@ -1,7 +1,5 @@
 package com.iotechn.unimall.data.enums;
 
-import net.sf.jsqlparser.statement.select.Wait;
-
 /**
  * Created by rize on 2019/2/13.
  */
@@ -39,8 +37,8 @@ public enum OrderStatusType {
      * 判断定订单是否可退款
      * @return
      */
-    public static boolean refundable(int orderStauts) {
-        if (orderStauts == WAIT_STOCK.getCode() || orderStauts == WAIT_CONFIRM.getCode()) {
+    public static boolean refundable(int orderStatus) {
+        if (orderStatus == WAIT_STOCK.getCode() || orderStatus == WAIT_CONFIRM.getCode()) {
             return true;
         } else {
             return false;

@@ -47,7 +47,7 @@
 			const that = this
 			if (that.loadingType === 'more') {
 				that.loadingType = 'loading'
-				that.$api.request('appraise', 'getSpuAllAppraise', {
+				that.$api.request('appraise', 'getSpuAppraisePage', {
 					spuId: that.spuId,
 					pageNo: that.page.pageNo + 1,
 					pageSize: 10

@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
@@ -22,6 +22,9 @@ public class SkuDO extends SuperDO {
      */
     private String title;
 
+    @TableField("specification")
+    private String specification;
+
     private String img;
 
     @TableField("original_price")
@@ -34,7 +37,6 @@ public class SkuDO extends SuperDO {
 
     private Integer stock;
 
-    @TableField("freeze_stock")
-    private Integer freezeStock;
+    private Integer weight;
 
 }

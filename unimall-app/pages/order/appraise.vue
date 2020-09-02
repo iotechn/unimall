@@ -133,7 +133,7 @@
 				that.appraiseRequest.orderId = that.orderDetail.id
 				that.appraiseRequest.appraiseDTOList = requestItems
 				
-				that.$api.request('appraise', 'addAppraise', {
+				that.$api.request('appraise', 'create', {
 					appraiseRequestDTO : JSON.stringify(that.appraiseRequest)
 				}).then(res => {
 					that.$api.msg('评价成功！')

@@ -5,7 +5,6 @@ import com.iotechn.unimall.core.annotation.HttpMethod;
 import com.iotechn.unimall.core.annotation.HttpOpenApi;
 import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.dto.PermissionPointDTO;
 import com.iotechn.unimall.launcher.exception.LauncherExceptionDefinition;
@@ -43,10 +42,12 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
     @Override
     public void afterPropertiesSet() throws Exception {
         List<Class> classList = new LinkedList<>();
-        String[] serviceArray = applicationContext.getBeanNamesForAnnotation(Service.class);
-        for (String service : serviceArray) {
+        String[] beanArray = applicationContext.getBeanNamesForAnnotation(Service.class);
+        for (String service : beanArray) {
             Object bean = applicationContext.getBean(service);
-            Class<?>[] interfaces = bean.getClass().getInterfaces();
+            String className = bean.toString().split("@")[0];
+            Class<?> serviceClazz = Class.forName(className);
+            Class<?>[] interfaces = serviceClazz.getInterfaces();
             if (interfaces != null && interfaces.length > 0) {
                 for (Class clazz : interfaces) {
                     if (clazz.getAnnotation(HttpOpenApi.class) != null) {

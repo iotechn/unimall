@@ -1,19 +1,17 @@
 package com.iotechn.unimall.admin.api.admin;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.Const;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.core.exception.ThirdPartServiceException;
-import com.iotechn.unimall.core.notify.SMSClient;
-import com.iotechn.unimall.core.notify.SMSResult;
 import com.iotechn.unimall.core.util.GeneratorUtil;
 import com.iotechn.unimall.core.util.MD5Util;
 import com.iotechn.unimall.core.util.SHAUtil;
 import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
 import com.iotechn.unimall.data.domain.RolePermissionDO;
@@ -24,15 +22,17 @@ import com.iotechn.unimall.data.mapper.AdminMapper;
 import com.iotechn.unimall.data.mapper.RoleMapper;
 import com.iotechn.unimall.data.mapper.RolePermissionMapper;
 import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.data.notify.SMSClient;
+import com.iotechn.unimall.data.notify.SMSResult;
+import com.iotechn.unimall.data.properties.UnimallAdminNotifyProperties;
+import com.iotechn.unimall.data.properties.UnimallSystemProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,36 +69,32 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private SMSClient smsClient;
 
-    @Value("${com.iotechn.admin.notify.uninotify.url}")
-    private String uniNotifyUrl;
+    @Autowired
+    private UnimallAdminNotifyProperties unimallAdminNotifyProperties;
 
-    @Value("${com.iotechn.admin.notify.uninotify.app-secret}")
-    private String uniNotifyAppSecret;
+    @Autowired
+    private UnimallSystemProperties unimallSystemProperties;
 
-    @Value("${com.iotechn.admin.notify.uninotify.app-id}")
-    private String uniNotifyAppId;
-
-    private final static String ADMIN_MSG_CODE = "admin_msg_code_";
 
     private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
     @Override
-    public String login(String username, String password,String verifyCode) throws ServiceException {
+    public String login(String username, String password, String verifyCode) throws ServiceException {
         String accessToken = generateAccessToken();
         //数据库查管理员
         List<AdminDO> adminDOS = adminMapper.selectList(
-                new EntityWrapper<AdminDO>()
+                new QueryWrapper<AdminDO>()
                         .eq("username", username));
         if (CollectionUtils.isEmpty(adminDOS)) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_NOT_EXIST);
         }
         AdminDO adminDO = adminDOS.get(0);
         //短信验证码
-        String code = cacheComponent.getRaw(ADMIN_MSG_CODE+adminDO.getPhone() );
-        if(!"guest".equals(username) && (code == null || verifyCode==null || !code.equals(verifyCode))){
+        String code = cacheComponent.getRaw(CacheConst.ADMIN_MSG_CODE + adminDO.getPhone());
+        boolean isGuest = "guest".equals(username) && "true".equals(unimallSystemProperties.getGuest());
+        if (!isGuest && (code == null || verifyCode == null || !code.equals(verifyCode))) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
         }
-
         if (!MD5Util.verify(password, username, adminDO.getPassword())) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
         }
@@ -107,7 +103,7 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_ROLE_IS_EMPTY);
         }
         List<RoleDO> roleDOList = roleMapper.selectList(
-                new EntityWrapper<RoleDO>()
+                new QueryWrapper<RoleDO>()
                         .in("id", ids)
                         .eq("status", RoleStatusType.ACTIVE.getCode()));
         List<String> roleNames = new LinkedList<>();
@@ -120,7 +116,7 @@ public class AdminServiceImpl implements AdminService {
         adminDTO.setRoleIds(JSONObject.parseArray(adminDO.getRoleIds(), Long.class));
         adminDTO.setPassword(null);
         List<RolePermissionDO> rolePermissionDOList = rolePermissionMapper.selectList(
-                new EntityWrapper<RolePermissionDO>()
+                new QueryWrapper<RolePermissionDO>()
                         .in("role_id", ids)
                         .eq("deleted", 0));
         List<String> permissionNames = new LinkedList<>();
@@ -134,7 +130,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public String logout(String accessToken, Long adminId) throws ServiceException {
-        userRedisTemplate.delete(Const.ADMIN_REDIS_PREFIX  + accessToken);
+        userRedisTemplate.delete(Const.ADMIN_REDIS_PREFIX + accessToken);
         return "ok";
     }
 
@@ -145,22 +141,24 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Page<AdminDTO> list(String name, Integer page, Integer limit, Long adminId) throws ServiceException {
-        Wrapper<AdminDO> wrapper = new EntityWrapper<AdminDO>();
+        QueryWrapper<AdminDO> wrapper = new QueryWrapper<AdminDO>();
         if (!StringUtils.isEmpty(name)) {
             wrapper.like("username", name);
         }
-        wrapper.orderBy("id", false);
-        Integer count = adminMapper.selectCount(wrapper);
-        List<AdminDO> adminDOS = adminMapper.selectPage(new RowBounds((page - 1) * limit, limit), wrapper);
-        List<AdminDTO> adminDTOS = new ArrayList<AdminDTO>(adminDOS.size());
-        for (AdminDO adminDO : adminDOS) {
-            AdminDTO adminDTO = new AdminDTO();
-            BeanUtils.copyProperties(adminDO, adminDTO);
-            adminDTO.setRoleIds(JSONObject.parseArray(adminDO.getRoleIds(), Long.class));
-            adminDTO.setPassword(null);
-            adminDTOS.add(adminDTO);
+        wrapper.orderByDesc("id");
+        Page<AdminDO> selectPage = adminMapper.selectPage(Page.div(page, limit, AdminDO.class), wrapper);
+        List<AdminDTO> adminDTOS = new ArrayList<AdminDTO>(selectPage.getItems().size());
+
+        if (!CollectionUtils.isEmpty(selectPage.getItems())) {
+            for (AdminDO adminDO : selectPage.getItems()) {
+                AdminDTO adminDTO = new AdminDTO();
+                BeanUtils.copyProperties(adminDO, adminDTO);
+                adminDTO.setRoleIds(JSONObject.parseArray(adminDO.getRoleIds(), Long.class));
+                adminDTO.setPassword(null);
+                adminDTOS.add(adminDTO);
+            }
         }
-        return new Page<>(adminDTOS, page, limit, count);
+        return new Page<>(adminDTOS, page, limit, selectPage.getCount());
     }
 
     @Override
@@ -168,7 +166,7 @@ public class AdminServiceImpl implements AdminService {
     public AdminDTO create(AdminDTO adminDTO, Long adminId) throws ServiceException {
         AdminDO adminDO = new AdminDO();
         Integer count = adminMapper.selectCount(
-                new EntityWrapper<AdminDO>()
+                new QueryWrapper<AdminDO>()
                         .eq("username", adminDTO.getUsername()));
         if (count > 0) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NAME_REPEAT);
@@ -190,7 +188,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String update(AdminDTO adminDTO, Long adminId) throws ServiceException {
+    public String edit(AdminDTO adminDTO, Long adminId) throws ServiceException {
         Long id = adminDTO.getId();
         if (id == null) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
@@ -232,28 +230,24 @@ public class AdminServiceImpl implements AdminService {
         adminDO.setId(adminId);
         adminDO.setPassword(MD5Util.md5(newPassword, adminDOExist.getUsername()));
         if (adminMapper.updateById(adminDO) > 0) {
-            //logout(accessToken, adminId);
             return "ok";
         }
         throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
-    public Boolean sendLoginMsg(String username,String password) throws ServiceException {
+    public Boolean sendLoginMsg(String username, String password) throws ServiceException {
         if ("guest".equals(username)) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_GUEST_NOT_NEED_VERIFY_CODE);
         }
-        AdminDO adminDO = new AdminDO();
-        adminDO.setUsername(username);
-        adminDO.setPassword(MD5Util.md5(password,username));
-        AdminDO admin = adminMapper.selectOne(adminDO);
-        if(admin == null){
+        AdminDO admin = adminMapper.selectOne(new QueryWrapper<AdminDO>().eq("username", username).eq("password", MD5Util.md5(password, username)));
+        if (admin == null) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXITS);
         }
         String code = GeneratorUtil.genSixVerifyCode();
-        cacheComponent.putRaw(ADMIN_MSG_CODE+admin.getPhone(), code,300 );
+        cacheComponent.putRaw(CacheConst.ADMIN_MSG_CODE + admin.getPhone(), code, 300);
         SMSResult smsResult = smsClient.sendAdminLoginVerify(admin.getPhone(), code);
-        if(!smsResult.isSucc()){
+        if (!smsResult.isSucc()) {
             throw new ThirdPartServiceException(smsResult.getMsg(), ExceptionDefinition.ADMIN_VERIFY_CODE_SEND_FAIL.getCode());
         }
         return true;
@@ -269,13 +263,13 @@ public class AdminServiceImpl implements AdminService {
             set.add(timestamp + "");
             set.add("developer");
             set.add(SessionUtil.getAdmin().getUsername());
-            set.add(this.uniNotifyAppSecret);
-            set.add(this.uniNotifyAppId);
+            set.add(this.unimallAdminNotifyProperties.getUniNotifyAppSecret());
+            set.add(this.unimallAdminNotifyProperties.getUniNotifyAppId());
             String json = okHttpClient
                     .newCall(new Request.Builder()
                             .get()
-                            .url(this.uniNotifyUrl + "?_gp=developer&_mt=getRegisterUrl&userId=" + SessionUtil.getAdmin().getUsername()
-                                    + "&appId=" + this.uniNotifyAppId + "&timestamp=" + timestamp + "&sign=" + SHAUtil.shaEncode(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
+                            .url(this.unimallAdminNotifyProperties.getUniNotifyUrl() + "?_gp=developer&_mt=getRegisterUrl&userId=" + SessionUtil.getAdmin().getUsername()
+                                    + "&appId=" + this.unimallAdminNotifyProperties.getUniNotifyAppId() + "&timestamp=" + timestamp + "&sign=" + SHAUtil.sha256Encode(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
                             .build()).execute().body().string();
             JSONObject jsonObject = JSONObject.parseObject(json);
             Integer errcode = jsonObject.getInteger("errno");

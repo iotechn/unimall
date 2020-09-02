@@ -1,19 +1,20 @@
 package com.iotechn.unimall.admin.api.role;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
+import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
 import com.iotechn.unimall.data.domain.RolePermissionDO;
 import com.iotechn.unimall.data.dto.PermissionPointDTO;
 import com.iotechn.unimall.data.dto.RoleSetPermissionDTO;
 import com.iotechn.unimall.data.enums.RoleStatusType;
+import com.iotechn.unimall.data.mapper.AdminMapper;
 import com.iotechn.unimall.data.mapper.RoleMapper;
 import com.iotechn.unimall.data.mapper.RolePermissionMapper;
 import com.iotechn.unimall.data.model.Page;
-import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by rize on 2019/4/11.
@@ -32,6 +34,9 @@ public class RoleServiceImpl implements RoleService {
     private RoleMapper roleMapper;
 
     @Autowired
+    private AdminMapper adminMapper;
+
+    @Autowired
     private RolePermissionMapper rolePermissionMapper;
 
     public static List<PermissionPointDTO> permDTOs = new LinkedList<>();
@@ -40,13 +45,11 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Page<RoleDO> list(String name, Integer page, Integer limit, Long adminId) throws ServiceException {
-        Wrapper<RoleDO> wrapper = new EntityWrapper<RoleDO>();
+        QueryWrapper<RoleDO> wrapper = new QueryWrapper<RoleDO>();
         if (!StringUtils.isEmpty(name)) {
             wrapper.like("name", name);
         }
-        List<RoleDO> roleDOS = roleMapper.selectPage(new RowBounds((page - 1) * limit, limit), wrapper);
-        Integer count = roleMapper.selectCount(wrapper);
-        return new Page<RoleDO>(roleDOS, page, limit, count);
+        return roleMapper.selectPage(Page.div(page,limit,RoleDO.class),wrapper);
     }
 
     @Override
@@ -62,7 +65,17 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String delete(Long roleId, Long adminId) throws ServiceException {
+        // 列举出所有管理员，并校验是否存在关联此角色的管理员
+        List<List<Long>> roleIds = adminMapper.selectList(new QueryWrapper<AdminDO>().select("role_ids")).stream().map(item -> JSONObject.parseArray(item.getRoleIds(), Long.class)).collect(Collectors.toList());
+        for (List<Long> list : roleIds) {
+            for (Long id : list) {
+                if (roleId.longValue() == id.longValue()) {
+                    throw new AdminServiceException(ExceptionDefinition.ADMIN_ROLE_UNION_ADMIN);
+                }
+            }
+        }
         if (roleMapper.deleteById(roleId) > 0) {
             return "ok";
         }
@@ -84,7 +97,7 @@ public class RoleServiceImpl implements RoleService {
         if (roleId == null) {
             throw new AdminServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
         }
-        rolePermissionMapper.delete(new EntityWrapper<RolePermissionDO>().eq("role_id", roleId));
+        rolePermissionMapper.delete(new QueryWrapper<RolePermissionDO>().eq("role_id", roleId));
         //构建插入
         List<String> permissions = roleSetPermissionDTO.getPermissions();
         if (!CollectionUtils.isEmpty(permissions)) {
@@ -106,7 +119,7 @@ public class RoleServiceImpl implements RoleService {
     public Map<String,Object> permissionList(Long roleId, Long adminId) throws ServiceException {
         List<RolePermissionDO> rolePermissionDOList =
                 rolePermissionMapper.selectList(
-                        new EntityWrapper<RolePermissionDO>()
+                        new QueryWrapper<RolePermissionDO>()
                                 .eq("role_id", roleId));
 
         Map<String,Object> map = new HashMap<>();
@@ -127,7 +140,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<Map<String, Object>> options(Long adminId) throws ServiceException {
-        List<RoleDO> roleDOS = roleMapper.selectList(new EntityWrapper<>());
+        List<RoleDO> roleDOS = roleMapper.selectList(new QueryWrapper<>());
         List<Map<String,Object>> list = new LinkedList<>();
         roleDOS.forEach(item -> {
             Map<String,Object> map = new HashMap<>();

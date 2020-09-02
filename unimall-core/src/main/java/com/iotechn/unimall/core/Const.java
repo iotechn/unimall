@@ -25,7 +25,9 @@ public class Const {
         IGNORE_PARAM_LIST.add(Boolean.class);
     }
 
-    public static final Integer CACHE_ONE_DAY = 60 * 60 * 24;
+    public static final int CACHE_ONE_DAY = 60 * 60 * 24;
+
+    public static final int CACHE_ONE_YEAR = 60 * 60 * 24 * 365;
 
 
     public static final String USER_ACCESS_TOKEN = "ACCESSTOKEN";

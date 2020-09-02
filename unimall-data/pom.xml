@@ -19,7 +19,12 @@
 
 	<dependencies>
 
-		<!-- https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-core -->
+		<dependency>
+			<groupId>com.iotechn</groupId>
+			<artifactId>unimall-core</artifactId>
+			<version>0.0.1-RELEASE</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.aliyun</groupId>
 			<artifactId>aliyun-java-sdk-core</artifactId>
@@ -36,11 +41,6 @@
 		<dependency>
 			<groupId>com.baomidou</groupId>
 			<artifactId>mybatis-plus-boot-starter</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.baomidou</groupId>
-			<artifactId>mybatis-plus-support</artifactId>
 		</dependency>
 
 		<!-- mysql -->
@@ -76,6 +76,23 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+
+		<!-- 阿里云开放搜索 -->
+		<dependency>
+			<groupId>com.aliyun.opensearch</groupId>
+			<artifactId>aliyun-sdk-opensearch</artifactId>
+		</dependency>
+
+		<!-- http客户端 -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
 
 		<dependency>

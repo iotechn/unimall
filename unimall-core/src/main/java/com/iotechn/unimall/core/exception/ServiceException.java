@@ -13,6 +13,8 @@ public abstract class ServiceException extends Exception implements Serializable
 
     private int code;
 
+    private Object attach;
+
     public int getCode() {
         return code;
     }
@@ -32,5 +34,10 @@ public abstract class ServiceException extends Exception implements Serializable
     public ServiceException(ServiceExceptionDefinition definition) {
         super(definition.getMsg());
         this.code = definition.getCode();
+    }
+
+    public ServiceException attach(Object attach) {
+        this.attach = attach;
+        return this;
     }
 }

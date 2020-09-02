@@ -3,6 +3,8 @@ package com.iotechn.unimall.data.dto.goods;
 import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Created by rize on 2019/7/6.
  */
@@ -22,6 +24,8 @@ public class SkuDTO extends SuperDTO {
 
     private String spuTitle;
 
+    private String specification;
+
     private String img;
 
     private String spuImg;
@@ -34,8 +38,20 @@ public class SkuDTO extends SuperDTO {
 
     private Integer stock;
 
-    private Integer freezeStock;
+    private Long freightTemplateId;
+
+    private Integer status;
+
+    private Integer weight;
 
     private String unit;
+
+    private Integer activityType;
+
+    private Long activityId;
+
+    private Date gmtActivityStart;
+
+    private Date gmtActivityEnd;
 
 }

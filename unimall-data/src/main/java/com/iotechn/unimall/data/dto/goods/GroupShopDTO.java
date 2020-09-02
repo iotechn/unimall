@@ -1,6 +1,5 @@
 package com.iotechn.unimall.data.dto.goods;
 
-import com.iotechn.unimall.data.domain.GroupShopSkuDO;
 import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.Data;
 
@@ -28,9 +27,9 @@ public class GroupShopDTO extends SuperDTO {
 
     private Date gmtEnd;
 
-    private Integer minimumNumber;
+    private Integer minNum;
 
-    private Integer alreadyBuyNumber;
+    private Integer buyerNum;
 
     private Integer automaticRefund;
 
@@ -38,8 +37,6 @@ public class GroupShopDTO extends SuperDTO {
      * GroupShopSkuDTO列表
      */
     private List<GroupShopSkuDTO> groupShopSkuDTOList;
-
-    private List<GroupShopSkuDO> groupShopSkuList;
 
     /**
      * spu属性

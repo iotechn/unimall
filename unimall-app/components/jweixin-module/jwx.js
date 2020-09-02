@@ -1,10 +1,10 @@
-import * as config from '../../config'
+import config from '../../config'
 
 const jweixin = require('./index')
 
 const configWeiXin = async function(callback) {
 	uni.request({
-		url: config.def().baseUrl + '/m.api',
+		url: config.baseUrl + '/m.api',
 		data: {
 			_gp: 'user',
 			_mt: 'getH5Sign',
@@ -23,8 +23,8 @@ const configWeiXin = async function(callback) {
 					        'chooseWXPay'
 					    ];
 					    let info = {
-					        debug: config.def().debug, // 调试，发布的时候改为false
-					        appId: config.def().h5Appid,
+					        debug: config.debug, // 调试，发布的时候改为false
+					        appId: config.h5Appid,
 					        nonceStr: resConfig.noncestr,
 					        timestamp: resConfig.timestamp,
 					        signature: resConfig.sign,
@@ -32,7 +32,7 @@ const configWeiXin = async function(callback) {
 					    };
 					    jweixin.config(info);
 					    jweixin.error(err => {
-					        //console.log('config fail:', err);
+					        console.log('config fail:', err);
 					    });
 					
 					    jweixin.ready(res => {

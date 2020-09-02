@@ -45,11 +45,10 @@
 			<version>0.0.1-RELEASE</version>
 		</dependency>
 
-		<!-- 插件核心依赖 勿删 -->
+		<!-- 模板引擎 -->
 		<dependency>
-			<groupId>com.iotechn</groupId>
-			<artifactId>unimall-plugin-core</artifactId>
-			<version>0.0.1-RELEASE</version>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
 		</dependency>
 
 		<dependency>

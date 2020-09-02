@@ -66,17 +66,27 @@
 				</scroll-view>
 			</swiper-item>
 		</swiper>
+		<neil-modal
+			:show="refundShow" 
+			@close="refundShow = false" 
+			title="退款" 
+			@cancel="refundShow = false" 
+			@confirm="refundConfirm">
+			<input v-model="inputRefundReason" style="margin:20upx" placeholder="简要描述退款理由.." />
+		</neil-modal>
 	</view>
 </template>
 
 <script>
+	import neilModal from '@/components/neil-modal/neil-modal.vue';
 	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
 	import empty from "@/components/empty";
 	export default {
 
 		components: {
 			uniLoadMore,
-			empty
+			empty,
+			neilModal
 		},
 		data() {
 			return {
@@ -93,6 +103,9 @@
 					90: '已取消(系统)'
 				},
 				submiting: false,
+				refundShow: false,
+				inputRefundReason: '',
+				refundOrderItem: '',
 				tabCurrentIndex: 0,
 				navList: [{
 						state: 0,
@@ -237,26 +250,29 @@
 				
 			},
 			//订单退款
+			refundConfirm() {
+				const that = this
+				if (that.submiting) {
+					return
+				}
+				that.submiting = true
+				that.$api.request('order', 'refund', {
+					orderNo: that.refundOrderItem.orderNo,
+					reason: that.inputRefundReason
+				}, failres => {
+					that.submiting = false
+					that.$api.msg(failres.errmsg)
+				}).then(res => {
+					that.submiting = false
+					that.refundOrderItem.status = 60
+					that.$api.msg('申请退款成功！')
+				})
+			},
 			refundOrder(item) {
 				const that = this
-				uni.showModal({
-					title: '退款？',
-					content: '您确定要退款吗？',
-					success : (e) => {
-						if (e.confirm) {
-							that.submiting = true
-							that.$api.request('order', 'refund', {
-								orderNo: item.orderNo
-							}, failres => {
-								that.submiting = false
-								that.$api.msg(failres.errmsg)
-							}).then(res => {
-								that.submiting = false
-								item.status = 60
-							})
-						}
-					}
-				})
+				that.refundOrderItem = item
+				that.refundShow = true
+				that.inputRefundReason = ''
 			},
 			//确认订单
 			confirmOrder(item) {

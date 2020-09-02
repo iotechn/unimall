@@ -19,6 +19,8 @@ public class OrderDTO extends SuperDTO {
      */
     private String channel;
 
+    private String parentOrderNo;
+
     private String orderNo;
 
     private Long userId;
@@ -77,6 +79,12 @@ public class OrderDTO extends SuperDTO {
 
     private String mono;
 
+    private Integer adminMonoLevel;
+
+    private String adminMono;
+
+    private String refundReason;
+
     private Date gmtShip;
 
     /**
@@ -84,8 +92,27 @@ public class OrderDTO extends SuperDTO {
      */
     private Date gmtConfirm;
 
+    /**
+     * 自动取消订单还有多少秒
+     */
+    private Integer cancelSec;
+
+    /**
+     * 自动确认收货还有多少秒
+     */
+    private Integer confirmSec;
+
     private List<OrderSkuDO> skuList;
 
     private ShipTraceDTO shipTraceDTO;
+
+
+    private Integer activityType;
+
+    /**
+     * 活动Id
+     */
+    private Long activityId;
+
 
 }

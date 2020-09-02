@@ -11,9 +11,9 @@
 					<text class="address">{{item.province}} {{item.city}} {{item.county}} {{item.address}}</text>
 				</view>
 			</view>
-			<text class="yticon icon-bianji" @click.stop="addAddress('edit', item)"></text>
+			<text class="yticon icon-bianji" @click.stop="toUpsert('edit', item)"></text>
 		</view>
-		<button class="add-btn" @click="addAddress('add')">新增地址</button>
+		<button class="add-btn" @click="toUpsert('add')">新增地址</button>
 	</view>
 </template>
 
@@ -41,15 +41,15 @@
 					uni.navigateBack()
 				}
 			},
-			addAddress(type, item) {
+			toUpsert(type, item) {
 				uni.navigateTo({
-					url: `/pages/address/create?type=${type}&data=${JSON.stringify(item)}`
+					url: `/pages/address/upsert?type=${type}&data=${JSON.stringify(item)}`
 				})
 			},
 			//添加或修改成功之后回调
 			refreshList(data, type) {
 				const that = this
-				that.$api.request('address', 'getAllAddress').then(res => {
+				that.$api.request('address', 'list').then(res => {
 					that.addressList = res.data
 				})
 			},
@@ -62,8 +62,10 @@
 					confirmText: '删除',
 					success: (e) => {
 						if (e.confirm) {
-							that.$api.request('address', 'deleteAddress').then(res => {
+							that.$api.request('address', 'delete', {
 								addressId: item.id
+							}).then(res => {
+								that.refreshList()
 							})
 						}
 					},

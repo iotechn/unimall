@@ -1,10 +1,8 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableName;
-import lombok.AllArgsConstructor;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -13,8 +11,6 @@ import java.util.Date;
  */
 @Data
 @TableName("unimall_coupon")
-@AllArgsConstructor
-@NoArgsConstructor
 public class CouponDO extends SuperDO {
 
     private String title;
@@ -27,12 +23,18 @@ public class CouponDO extends SuperDO {
 
     private Integer surplus;
 
+    @TableField("`limit`")
     private Integer limit;
 
     private Integer discount;
 
+    @TableField("`min`")
     private Integer min;
 
+    /**
+     * 0:下架
+     * 1: 正常
+     */
     private Integer status;
 
     @TableField("category_id")

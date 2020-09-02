@@ -1,6 +1,7 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
@@ -12,6 +13,7 @@ public class RoleDO extends SuperDO {
 
     private String name;
 
+    @TableField("`desc`")
     private String desc;
 
     private Integer status;

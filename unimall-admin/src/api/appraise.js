@@ -1,11 +1,12 @@
 import request from '@/utils/request'
+import Qs from 'qs'
 
 export function listAppraise(query) {
   return request({
     method: 'get',
     params: {
       _gp: 'admin.appraise',
-      _mt: 'getAppraiseList',
+      _mt: 'list',
       ...query
     }
   })
@@ -13,11 +14,11 @@ export function listAppraise(query) {
 
 export function deleteAppraise(data) {
   return request({
-    method: 'get',
-    params: {
+    method: 'post',
+    data: Qs.stringify({
       _gp: 'admin.appraise',
-      _mt: 'deleteAppraise',
+      _mt: 'delete',
       ...data
-    }
+    })
   })
 }

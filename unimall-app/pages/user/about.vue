@@ -2,7 +2,7 @@
 	<view class="content">
 		<view class="row b-b">
 			<text class="tit">版本号</text>
-			<text class="tiv">v1.0.0</text>
+			<text class="tiv">v2.0.0</text>
 		</view>
 		<view class="row b-b">
 			<text class="tit">贡献</text>

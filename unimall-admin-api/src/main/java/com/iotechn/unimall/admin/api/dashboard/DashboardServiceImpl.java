@@ -1,6 +1,6 @@
 package com.iotechn.unimall.admin.api.dashboard;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.SpuDO;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,8 +32,8 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public Object integral(Long adminId) throws ServiceException {
         DashboardIntegralDTO dto = new DashboardIntegralDTO();
-        Integer orderWaitStock = orderMapper.selectCount(new EntityWrapper<OrderDO>().eq("status", OrderStatusType.WAIT_STOCK.getCode()));
-        Integer spuCount = spuMapper.selectCount(new EntityWrapper<SpuDO>());
+        Integer orderWaitStock = orderMapper.selectCount(new QueryWrapper<OrderDO>().eq("status", OrderStatusType.WAIT_STOCK.getCode()));
+        Integer spuCount = spuMapper.selectCount(new QueryWrapper<SpuDO>());
         List<KVModel<String, Long>> area = orderMapper.selectAreaStatistics();
         List<KVModel<String, Long>> channel = orderMapper.selectChannelStatistics();
         dto.setArea(area);

@@ -6,9 +6,8 @@ import com.iotechn.unimall.core.annotation.HttpParam;
 import com.iotechn.unimall.core.annotation.HttpParamType;
 import com.iotechn.unimall.core.annotation.param.NotNull;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.dto.CouponDTO;
-import com.iotechn.unimall.data.dto.UserCouponDTO;
+import com.iotechn.unimall.data.dto.CouponUserDTO;
 
 import java.util.List;
 
@@ -28,7 +27,7 @@ public interface CouponService {
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
     @HttpMethod(description = "获取用户优惠券")
-    public List<UserCouponDTO> getUserCoupons(
+    public List<CouponUserDTO> getUserCoupons(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
 }

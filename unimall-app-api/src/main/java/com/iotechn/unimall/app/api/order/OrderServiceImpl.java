@@ -1,36 +1,51 @@
 package com.iotechn.unimall.app.api.order;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
-import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
-import com.iotechn.unimall.app.api.category.CategoryService;
-import com.iotechn.unimall.app.executor.GlobalExecutor;
-import com.iotechn.unimall.biz.service.freight.FreightBizService;
+import com.iotechn.unimall.biz.executor.GlobalExecutor;
+import com.iotechn.unimall.biz.service.address.AddressBizService;
+import com.iotechn.unimall.biz.service.cart.CartBizService;
+import com.iotechn.unimall.biz.service.coupon.CouponBizService;
+import com.iotechn.unimall.biz.service.freight.FreightTemplateBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
-import com.iotechn.unimall.biz.service.user.UserBizService;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.core.util.GeneratorUtil;
+import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.component.LockComponent;
-import com.iotechn.unimall.data.domain.*;
-import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
-import com.iotechn.unimall.data.dto.goods.SkuDTO;
-import com.iotechn.unimall.data.dto.UserCouponDTO;
+import com.iotechn.unimall.data.constant.CacheConst;
+import com.iotechn.unimall.data.constant.LockConst;
+import com.iotechn.unimall.data.domain.AddressDO;
+import com.iotechn.unimall.data.domain.OrderDO;
+import com.iotechn.unimall.data.domain.OrderSkuDO;
+import com.iotechn.unimall.data.domain.SpuDO;
+import com.iotechn.unimall.data.dto.CouponUserDTO;
+import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
+import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
+import com.iotechn.unimall.data.dto.goods.GroupShopSkuDTO;
+import com.iotechn.unimall.data.dto.goods.SkuDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.enums.*;
-import com.iotechn.unimall.data.mapper.*;
+import com.iotechn.unimall.data.mapper.OrderMapper;
+import com.iotechn.unimall.data.mapper.OrderSkuMapper;
+import com.iotechn.unimall.data.mapper.SkuMapper;
+import com.iotechn.unimall.data.model.FreightCalcModel;
+import com.iotechn.unimall.data.model.OrderCalcSkuModel;
 import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.data.model.SkuStockInfoModel;
+import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
+import com.iotechn.unimall.data.properties.UnimallOrderProperties;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import com.iotechn.unimall.data.util.SessionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -53,13 +69,11 @@ public class OrderServiceImpl implements OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
-    private static final String TAKE_ORDER_LOCK = "TAKE_ORDER_";
-
     @Autowired
     private SkuMapper skuMapper;
 
     @Autowired
-    private UserCouponMapper userCouponMapper;
+    private CouponBizService couponBizService;
 
     @Autowired
     private OrderMapper orderMapper;
@@ -68,13 +82,7 @@ public class OrderServiceImpl implements OrderService {
     private OrderSkuMapper orderSkuMapper;
 
     @Autowired
-    private AddressMapper addressMapper;
-
-    @Autowired
-    private CartMapper cartMapper;
-
-    @Autowired
-    private CategoryService categoryService;
+    private CartBizService cartBizService;
 
     @Autowired
     private WxPayService wxPayService;
@@ -83,13 +91,13 @@ public class OrderServiceImpl implements OrderService {
     private LockComponent lockComponent;
 
     @Autowired
+    private AddressBizService addressBizService;
+
+    @Autowired
     private OrderBizService orderBizService;
 
     @Autowired
-    private FreightBizService freightBizService;
-
-    @Autowired
-    private UserBizService userBizService;
+    private FreightTemplateBizService freightTemplateBizService;
 
     @Autowired
     private GroupShopBizService groupShopBizService;
@@ -97,227 +105,312 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private AdminNotifyBizService adminNotifyBizService;
 
+    @Autowired
+    private CacheComponent cacheComponent;
+
+    @Autowired
+    private ProductBizService productBizService;
+
+    @Autowired
+    private DelayedMessageQueue delayedMessageQueue;
+
     @Value("${com.iotechn.unimall.machine-no}")
     private String MACHINE_NO;
 
     @Value("${com.iotechn.unimall.env}")
     private String ENV;
 
-    @Value("${com.iotechn.unimall.wx.mini.app-id}")
-    private String wxMiNiAppid;
+    @Autowired
+    private UnimallWxAppProperties unimallWxAppProperties;
 
-    @Value("${com.iotechn.unimall.wx.app.app-id}")
-    private String wxAppAppid;
-
-    @Value("${com.iotechn.unimall.wx.h5.app-id}")
-    private String wxH5Appid;
+    @Autowired
+    private UnimallOrderProperties unimallOrderProperties;
 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String takeOrder(OrderRequestDTO orderRequest, String channel, Long userId) throws ServiceException {
-        if (lockComponent.tryLock(TAKE_ORDER_LOCK + userId, 20)) {
+        if (lockComponent.tryLock(LockConst.TAKE_ORDER_LOCK + userId, 20)) {
             //加上乐观锁，防止用户重复提交订单
+            List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
+            boolean calcStockFlag = false;
             try {
                 //用户会员等级
                 Integer userLevel = SessionUtil.getUser().getLevel();
+                // 对Sku排序，防止相互拿锁，两边都无法结算的情况。
+                orderRequest.getSkuList().sort((o1, o2) -> (int) (o1.getSkuId() - o2.getSkuId()));
                 //参数强校验 START
-                List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
                 if (CollectionUtils.isEmpty(skuList) || orderRequest.getTotalPrice() == null) {
                     throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
                 }
                 if (orderRequest.getTotalPrice() <= 0) {
                     throw new AppServiceException(ExceptionDefinition.ORDER_PRICE_MUST_GT_ZERO);
                 }
-                Long groupShopId = orderRequest.getGroupShopId();
-                Integer groupShopPrice = null;
-                if (groupShopId != null) {
-                    //校验团购参数
-                    if (skuList.size() > 1) {
-                        throw new AppServiceException(ExceptionDefinition.ORDER_GROUP_SPU_CAN_SINGLE_TAKE);
-                    }
-                    GroupShopDTO groupShopDTO = groupShopBizService.getGroupShopById(groupShopId);
-                    if (groupShopDTO == null || groupShopDTO.getStatus() == StatusType.LOCK.getCode()) {
-                        throw new AppServiceException(ExceptionDefinition.ORDER_GROUP_SHOP_NOT_EXIST_OR_EXPIRED);
-                    }
-                    List<GroupShopSkuDO> groupShopSkuList = groupShopDTO.getGroupShopSkuList();
-                    for (GroupShopSkuDO groupShopSkuDO : groupShopSkuList) {
-                        if (groupShopSkuDO.getSkuId().equals(groupShopSkuList.get(0).getSkuId())) {
-                            //若找到交集
-                            groupShopPrice = groupShopSkuDO.getSkuGroupShopPrice();
-                        }
-                    }
+                // 若是卖虚拟物品，不需要收货地址，可以将此行注释掉
+                if (orderRequest.getAddressId() == null) {
+                    throw new AppServiceException(ExceptionDefinition.ORDER_ADDRESS_CANNOT_BE_NULL);
                 }
-                //商品价格
-                int skuPrice = 0;
-                int skuOriginalPrice = 0;
-                //稍后用于优惠券作用范围校验
-                Map<Long, Integer> categoryPriceMap = new HashMap<>();
-                //稍后用于插入OrderSku
-                Map<Long, SkuDTO> skuIdDTOMap = new HashMap<>();
+                // 收货地址对象
+                AddressDO addressDO = addressBizService.getAddressById(orderRequest.getAddressId());
+                // 库存不足列表，用于提示前端
+                List<SkuStockInfoModel> stockErrorSkuList = new LinkedList<>();
+                // 商品状态异常列表，用于提示前端
+                List<Long> statusErrorSkuList = new LinkedList<>();
+                // 从缓存读取，用于计算的列表。属于SkuDO的部分属性。
+                List<OrderCalcSkuModel> calcSkuList = new ArrayList<>();
+                // 将SkuIds 查取出来
+                List<Long> skuIds = new ArrayList<>();
                 for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
-                    SkuDTO skuDTO = skuMapper.getSkuDTOById(orderRequestSkuDTO.getSkuId());
-                    skuIdDTOMap.put(skuDTO.getId(), skuDTO);
-                    if (skuDTO == null) {
-                        throw new AppServiceException(ExceptionDefinition.ORDER_SKU_NOT_EXIST);
-                    }
-                    if (skuDTO.getStock() < orderRequestSkuDTO.getNum()) {
-                        throw new AppServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH);
-                    }
-                    int p;
-                    if (groupShopId != null && groupShopPrice != null) {
-                        p = groupShopPrice;
-                    } else if (userLevel == UserLevelType.VIP.getCode()) {
-                        p = skuDTO.getVipPrice() * orderRequestSkuDTO.getNum();
-                    } else {
-                        p = skuDTO.getPrice() * orderRequestSkuDTO.getNum();
-                    }
-                    skuPrice += p;
-                    skuOriginalPrice += skuDTO.getOriginalPrice() * orderRequestSkuDTO.getNum();
-                    List<Long> categoryFamily = categoryService.getCategoryFamily(skuDTO.getCategoryId());
-                    for (Long cid : categoryFamily) {
-                        Integer price = categoryPriceMap.get(cid);
-                        if (price == null) {
-                            price = p;
+                    Long skuId = orderRequestSkuDTO.getSkuId();
+                    skuIds.add(skuId);
+                    OrderCalcSkuModel orderCalcSpuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + orderRequestSkuDTO.getSpuId(), OrderCalcSkuModel.class);
+                    if (orderCalcSpuDTO == null) {
+                        // 尝试从DB中读取
+                        SpuDO spuFromDB = productBizService.getProductByIdFromDB(orderRequestSkuDTO.getSpuId());
+                        if (spuFromDB == null || (spuFromDB.getStatus() == SpuStatusType.STOCK.getCode())) {
+                            // 不存在的或下架的商品
+                            statusErrorSkuList.add(skuId);
+                            continue;
                         } else {
-                            price += p;
+                            orderCalcSpuDTO = new OrderCalcSkuModel();
+                            BeanUtils.copyProperties(spuFromDB, orderCalcSpuDTO);
                         }
-                        categoryPriceMap.put(cid, price);
+
                     }
+                    long surplus = cacheComponent.decrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuId, orderRequestSkuDTO.getNum());
+                    if (surplus < 0) {
+                        // 若余量小于0，则表示该商品不存在或库存不足。
+                        SkuStockInfoModel skuStockInfo = new SkuStockInfoModel();
+                        skuStockInfo.setSkuId(skuId);
+                        skuStockInfo.setExpect(orderRequestSkuDTO.getNum());
+                        // 扣减之后的余量 + 用户期望量 = 扣减之前的余量
+                        skuStockInfo.setSurplus((int) surplus + orderRequestSkuDTO.getNum());
+                        stockErrorSkuList.add(skuStockInfo);
+                        continue;
+                    }
+                    // 将SkuId设置进去
+                    orderCalcSpuDTO.setSkuId(skuId);
+                    orderCalcSpuDTO.setNum(orderRequestSkuDTO.getNum());
+                    calcSkuList.add(orderCalcSpuDTO);
                 }
 
-                if (skuPrice != orderRequest.getTotalPrice()) {
-                    throw new AppServiceException(ExceptionDefinition.ORDER_PRICE_CHECK_FAILED);
+                calcStockFlag = true;
+
+                // 商品库存不足列表，用于前端提示 使用异常的Attach方法
+                if (!CollectionUtils.isEmpty(stockErrorSkuList)) {
+                    throw new AppServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH).attach(stockErrorSkuList);
                 }
 
-                //优惠券折扣价格
-                int couponPrice = 0;
-                //优惠券校验
-                UserCouponDTO userCouponFromFront = orderRequest.getCoupon();
-                if (userCouponFromFront != null) {
-                    if (userCouponFromFront.getId() == null || userCouponFromFront.getDiscount() == null) {
-                        throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
-                    }
+                // 状态错误列表，用于前端提示
+                if (!CollectionUtils.isEmpty(statusErrorSkuList)) {
+                    throw new AppServiceException(ExceptionDefinition.ORDER_SKU_NOT_EXIST).attach(statusErrorSkuList);
+                }
 
-                    UserCouponDTO userCouponFromDB = userCouponMapper.getUserCouponById(userCouponFromFront.getId(), userId);
-
-                    if (userCouponFromDB == null) {
+                Date now = new Date();
+                // 若库存充足，也没下架，则获取所有sku实体对象
+                List<SkuDTO> skuDTOListOfAll = productBizService.getSkuListByIds(skuIds);
+                // 优惠券实例
+                CouponUserDTO couponUserDTO = null;
+                if (orderRequest.getCouponId() != null) {
+                    couponUserDTO = couponBizService.getCouponUserById(orderRequest.getCouponId(), userId);
+                    if (couponUserDTO == null || couponUserDTO.getGmtUsed() != null) {
                         throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_NOT_EXIST);
                     }
+                }
 
-                    if (!userCouponFromDB.getDiscount().equals(userCouponFromFront.getDiscount())) {
-                        throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_DISCOUNT_CHECK_FAILED);
-                    }
-
-                    //校验优惠券策略是否满足
-                    Long categoryId = userCouponFromDB.getCategoryId();
-                    if (categoryId != null) {
-                        Integer p = categoryPriceMap.get(categoryId);
-                        if (p < userCouponFromDB.getMin()) {
-                            throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_PRICE_NOT_ENOUGH);
+                List<OrderCalcSkuModel> orderCalcSkuList = calcSkuList;
+                // 进行主键排序
+                orderCalcSkuList.sort((o1, o2) -> (int) (o1.getSkuId() - o2.getSkuId()));
+                // 查出来的数据是按主键排序的
+                List<SkuDTO> skuDTOList = skuDTOListOfAll;
+                skuDTOList.sort((o1, o2) -> (int) (o1.getId() - o2.getId()));
+                // 商品总价 = 普通商品价格 + 团购商品价格 (暂未使用)
+                int totalSkuPrice = 0;
+                // 普通商品价格
+                int skuPrice = 0;
+                int skuOriginalPrice = 0;
+                // 团购商品价格映射
+                Map<Long, Integer> groupShopPriceMap = new HashMap<>();
+                Map<Long, Integer> groupShopOriginalPriceMap = new HashMap<>();
+                for (int i = 0; i < skuDTOList.size(); i++) {
+                    OrderCalcSkuModel orderCalcSkuDTO = orderCalcSkuList.get(i);
+                    SkuDTO skuDTO = skuDTOList.get(i);
+                    Integer originalPrice = skuDTO.getOriginalPrice();
+                    // FIXME 对于活动价格，需要在skuDTO中覆盖掉之前价格
+                    // FIXME 对于参加活动的商品，商品的非活动价格已经无参考价值
+                    if ((skuDTO.getActivityType() != null
+                            && skuDTO.getActivityType() == SpuActivityType.GROUP_SHOP.getCode() && skuDTO.getGmtActivityStart() != null
+                            && skuDTO.getGmtActivityEnd() != null && skuDTO.getGmtActivityStart().getTime() < now.getTime() && skuDTO.getGmtActivityEnd().getTime() > now.getTime())) {
+                        // 这个判断，表示该商品与正在进行的团购活动
+                        GroupShopDTO groupShopActivity = groupShopBizService.getGroupShopById(skuDTO.getActivityId());
+                        if (groupShopActivity == null) {
+                            throw new AppServiceException(ExceptionDefinition.ORDER_GROUP_SHOP_ACTIVITY_HAS_OVER);
                         }
-                    } else {
-                        if (skuPrice < userCouponFromDB.getMin()) {
-                            throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_PRICE_NOT_ENOUGH);
+                        // 有可能两个SKU是同一个团购活动，所以需要将这两个活动价格合并
+                        Integer oldPrice = groupShopPriceMap.get(groupShopActivity.getId());
+                        Integer oldOriginalPrice = groupShopOriginalPriceMap.get(groupShopActivity.getId());
+                        Map<Long, GroupShopSkuDTO> groupShopSkuMap = groupShopActivity.getGroupShopSkuDTOList().stream().collect(Collectors.toMap(GroupShopSkuDTO::getSkuId, v -> v));
+                        // 累加商品总价
+                        totalSkuPrice += groupShopSkuMap.get(skuDTO.getId()).getSkuGroupShopPrice() * orderCalcSkuDTO.getNum();
+                        // 将价格覆盖掉
+                        skuDTO.setPrice(groupShopSkuMap.get(skuDTO.getId()).getSkuGroupShopPrice());
+                        skuDTO.setVipPrice(groupShopSkuMap.get(skuDTO.getId()).getSkuGroupShopPrice());
+                        if (oldPrice != null) {
+                            groupShopPriceMap.put(groupShopActivity.getId(), oldPrice + (groupShopSkuMap.get(skuDTO.getId()).getSkuGroupShopPrice() * orderCalcSkuDTO.getNum()));
+                        } else {
+                            groupShopPriceMap.put(groupShopActivity.getId(), groupShopSkuMap.get(skuDTO.getId()).getSkuGroupShopPrice() * orderCalcSkuDTO.getNum());
                         }
-                    }
-                    couponPrice = userCouponFromDB.getDiscount();
-                }
-
-                Integer freightPrice = freightBizService.getFreightMoney(orderRequest);
-                //参数强校验 END
-                //???是否校验actualPrice??强迫校验？
-                int actualPrice = skuPrice - couponPrice + freightPrice;
-                Date now = new Date();
-                OrderDO orderDO = new OrderDO();
-                orderDO.setSkuTotalPrice(skuPrice);
-                orderDO.setSkuOriginalTotalPrice(skuOriginalPrice);
-                orderDO.setChannel(channel);
-                orderDO.setActualPrice(actualPrice);
-                orderDO.setGroupShopId(groupShopId);
-                if (couponPrice != 0) {
-                    orderDO.setCouponId(orderRequest.getCoupon().getCouponId());
-                    orderDO.setCouponPrice(couponPrice);
-                }
-                orderDO.setMono(orderRequest.getMono());
-                orderDO.setFreightPrice(freightPrice);
-                orderDO.setOrderNo(GeneratorUtil.genOrderId(MACHINE_NO, ENV));
-                orderDO.setUserId(userId);
-                orderDO.setStatus(OrderStatusType.UNPAY.getCode());
-                orderDO.setGmtUpdate(now);
-                orderDO.setGmtCreate(now);
-
-                if (orderRequest.getAddressId() != null) {
-                    AddressDO addressDO = addressMapper.selectById(orderRequest.getAddressId());
-                    if (!userId.equals(addressDO.getUserId())) {
-                        throw new AppServiceException(ExceptionDefinition.ORDER_ADDRESS_NOT_BELONGS_TO_YOU);
-                    }
-                    orderDO.setConsignee(addressDO.getConsignee());
-                    orderDO.setPhone(addressDO.getPhone());
-                    orderDO.setProvince(addressDO.getProvince());
-                    orderDO.setCity(addressDO.getCity());
-                    orderDO.setCounty(addressDO.getCounty());
-                    orderDO.setAddress(addressDO.getAddress());
-                }
-                orderMapper.insert(orderDO);
-
-                //扣除用户优惠券
-                if (orderDO.getCouponId() != null) {
-                    UserCouponDO updateUserCouponDO = new UserCouponDO();
-                    updateUserCouponDO.setId(orderDO.getCouponId());
-                    updateUserCouponDO.setGmtUsed(now);
-                    updateUserCouponDO.setOrderId(orderDO.getId());
-                    userCouponMapper.updateById(updateUserCouponDO);
-                }
-
-                //插入OrderSku
-                skuList.forEach(item -> {
-                    SkuDTO skuDTO = skuIdDTOMap.get(item.getSkuId());
-                    OrderSkuDO orderSkuDO = new OrderSkuDO();
-                    orderSkuDO.setBarCode(skuDTO.getBarCode());
-                    orderSkuDO.setTitle(skuDTO.getTitle());
-                    orderSkuDO.setUnit(skuDTO.getUnit());
-                    orderSkuDO.setSpuTitle(skuDTO.getSpuTitle());
-                    orderSkuDO.setImg(skuDTO.getImg() == null ? skuDTO.getSpuImg() : skuDTO.getImg());
-                    orderSkuDO.setNum(item.getNum());
-                    orderSkuDO.setOriginalPrice(skuDTO.getOriginalPrice());
-                    orderSkuDO.setPrice(skuDTO.getPrice());
-                    if (userLevel == UserLevelType.VIP.getCode()) {
-                        orderSkuDO.setPrice(skuDTO.getVipPrice());
+                        if (oldOriginalPrice != null) {
+                            groupShopOriginalPriceMap.put(groupShopActivity.getId(), oldOriginalPrice + (skuDTO.getOriginalPrice() * orderCalcSkuDTO.getNum()));
+                        } else {
+                            groupShopOriginalPriceMap.put(groupShopActivity.getId(), skuDTO.getOriginalPrice() * orderCalcSkuDTO.getNum());
+                        }
+                    } else if (userLevel == UserLevelType.VIP.getCode()) {
+                        skuOriginalPrice += originalPrice * orderCalcSkuDTO.getNum();
+                        skuPrice += skuDTO.getVipPrice() * orderCalcSkuDTO.getNum();
+                        totalSkuPrice += skuDTO.getVipPrice() * orderCalcSkuDTO.getNum();
                     } else {
-                        orderSkuDO.setPrice(skuDTO.getPrice());
+                        skuOriginalPrice += originalPrice * orderCalcSkuDTO.getNum();
+                        skuPrice += skuDTO.getPrice() * orderCalcSkuDTO.getNum();
+                        totalSkuPrice += skuDTO.getPrice() * orderCalcSkuDTO.getNum();
                     }
-                    orderSkuDO.setSkuId(skuDTO.getId());
-                    orderSkuDO.setSpuId(skuDTO.getSpuId());
-                    orderSkuDO.setOrderNo(orderDO.getOrderNo());
-                    orderSkuDO.setOrderId(orderDO.getId());
-                    orderSkuDO.setGmtCreate(now);
-                    orderSkuDO.setGmtUpdate(now);
-                    orderSkuMapper.insert(orderSkuDO);
-
-                    //扣除库存
-                    skuMapper.decSkuStock(item.getSkuId(), item.getNum());
+                    // 将DB中的价格，重量赋值给计算模型
+                    orderCalcSkuDTO.setFreightTemplateId(skuDTO.getFreightTemplateId());
+                    orderCalcSkuDTO.setWeight(skuDTO.getWeight());
+                    orderCalcSkuDTO.setPrice(skuDTO.getPrice());
+                    orderCalcSkuDTO.setVipPrice(skuDTO.getVipPrice());
+                }
+                // 拆分单序号
+                int childIndex = 1;
+                // 获取邮费
+                FreightCalcModel freightCalcModel = new FreightCalcModel();
+                // 将SKU按照不同的运费模板进行分组
+                Map<Long, OrderCalcSkuModel> freightTemplateCalcMap = orderCalcSkuList
+                        .stream()
+                        .collect(Collectors.toMap(OrderCalcSkuModel::getFreightTemplateId,
+                                v -> v,
+                                (c1, c2) -> {
+                                    // 将同组的价格和重量相累加
+                                    c1.setWeight(c1.getWeight() + c2.getWeight());
+                                    c1.setPrice(c1.getPrice() + c2.getPrice());
+                                    c1.setVipPrice(c1.getVipPrice() + c2.getVipPrice());
+                                    return c1;
+                                }));
+                // 获取SKU数量映射表
+                List<FreightCalcModel.FreightAndWeight> faws = new LinkedList<>();
+                freightTemplateCalcMap.forEach((k, v) -> {
+                    FreightCalcModel.FreightAndWeight faw = new FreightCalcModel.FreightAndWeight();
+                    faw.setId(k);
+                    faw.setPrice(userLevel == UserLevelType.VIP.getCode() ? v.getVipPrice() : v.getPrice());
+                    faw.setWeight(v.getWeight());
+                    faws.add(faw);
                 });
-
-                if (!StringUtils.isEmpty(orderRequest.getTakeWay())) {
-                    String takeWay = orderRequest.getTakeWay();
-                    if ("cart".equals(takeWay)) {
-                        //扣除购物车
-                        List<Long> skuIds = skuList.stream().map(item -> item.getSkuId()).collect(Collectors.toList());
-                        cartMapper.delete(new EntityWrapper<CartDO>().in("sku_id", skuIds).eq("user_id", userId));
+                freightCalcModel.setFreightAndWeights(faws);
+                Integer freightPrice = freightTemplateBizService.computePostage(freightCalcModel);
+                // 是否已经计算过单次费用，例如优惠券、运费。同一个商家只计算一次（因为团购订单可能会被拆为两单，但是邮费只应该计算一次）
+                boolean singleFee = false;
+                // 使用优惠券的订单
+                Long useCouponOrderId = null;
+                // 生成一个父单号
+                String parentOrderNo = GeneratorUtil.genOrderId(this.MACHINE_NO, this.ENV);
+                if (skuPrice > 0) {
+                    // 这是普通商品
+                    // 将普通商品(非团购等需要单独拆单的商品)的SkuList过滤出来
+                    List<SkuDTO> commonSkuList = new ArrayList<>();
+                    List<OrderCalcSkuModel> commonOrderCalcSkuList = new ArrayList<>();
+                    for (int i = 0; i < skuDTOList.size(); i++) {
+                        SkuDTO item = skuDTOList.get(i);
+                        if (!(item.getActivityType() != null
+                                && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode() && item.getGmtActivityStart() != null
+                                && item.getGmtActivityEnd() != null && item.getGmtActivityStart().getTime() < now.getTime() && item.getGmtActivityEnd().getTime() > now.getTime())) {
+                            commonSkuList.add(item);
+                            commonOrderCalcSkuList.add(orderCalcSkuList.get(i));
+                        }
                     }
-                    //直接购买传值为 "buy"
+                    // 保存订单
+                    OrderDO o = save(skuOriginalPrice, skuPrice, channel, freightPrice,
+                            couponUserDTO, orderRequest, parentOrderNo, childIndex,
+                            userId, now, addressDO, commonSkuList, commonOrderCalcSkuList, userLevel, null, null);
+                    useCouponOrderId = o.getId();
+                    // 标记已经计算过运费和优惠券了
+                    singleFee = true;
+                }
+                if (groupShopPriceMap.size() > 0) {
+                    // 存在团购商品，分别分单处理团购商品
+                    Set<Long> groupShopIds = groupShopPriceMap.keySet();
+                    for (Long groupShopId : groupShopIds) {
+                        Integer groupShopSkuOriginalPrice = groupShopOriginalPriceMap.get(groupShopId);
+                        Integer groupShopSkuPrice = groupShopPriceMap.get(groupShopId);
+                        // 过滤出当前团购的团购商品，即SkuDTOList
+                        List<SkuDTO> groupShopSkuList = new ArrayList<>();
+                        List<OrderCalcSkuModel> groupShopOrderCalcSkuList = new ArrayList<>();
+                        for (int i = 0; i < skuDTOList.size(); i++) {
+                            SkuDTO item = skuDTOList.get(i);
+                            if (item.getActivityType() != null
+                                    && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode() && item.getGmtActivityStart() != null && item.getActivityId().longValue() == groupShopId.longValue()
+                                    && item.getGmtActivityEnd() != null && item.getGmtActivityStart().getTime() < now.getTime() && item.getGmtActivityEnd().getTime() > now.getTime()) {
+                                groupShopSkuList.add(item);
+                                groupShopOrderCalcSkuList.add(calcSkuList.get(i));
+                            }
+                        }
+                        if (singleFee) {
+                            // 保存子单前，将子单序列累加
+                            childIndex++;
+                            save(groupShopSkuOriginalPrice, groupShopSkuPrice, channel, 0,
+                                    couponUserDTO, orderRequest, parentOrderNo, childIndex,
+                                    userId, now, addressDO, groupShopSkuList, groupShopOrderCalcSkuList, userLevel, SpuActivityType.GROUP_SHOP.getCode(), groupShopId);
+                        } else {
+                            // 保存子单前，将子单序列累加
+                            childIndex++;
+                            save(groupShopSkuOriginalPrice, groupShopSkuPrice, channel, freightPrice,
+                                    couponUserDTO, orderRequest, parentOrderNo, childIndex,
+                                    userId, now, addressDO, groupShopSkuList, groupShopOrderCalcSkuList, userLevel, SpuActivityType.GROUP_SHOP.getCode(), groupShopId);
+                            // 只收一次运费
+                            singleFee = true;
+                        }
+                    }
+                }
+                Map<Long, Integer> skuStockMap = skuList.stream().collect(Collectors.toMap(OrderRequestSkuDTO::getSkuId, OrderRequestSkuDTO::getNum));
+                // 减少商品库存，microFix。使用事务通知
+                productBizService.decSkuStock(skuStockMap);
+                // 扣除优惠券，microFix。使用事务通知
+                if (couponUserDTO != null) {
+                    couponBizService.useCoupon(orderRequest.getCouponId(), useCouponOrderId);
+                }
+                // 若购物车结算，删除这些购物车的商品
+                if (orderRequest.getTakeWay().equals("cart")) {
+                    cartBizService.deleteBySkuId(skuIds, userId);
+                }
+                // 与前端预览的金额比对，若因为时间差不一致，则告诉用户
+                if (orderRequest.getExceptPrice() != null) {
+                    int exceptPrice = this.checkPrepay(parentOrderNo, null, userId);
+                    if (exceptPrice != orderRequest.getExceptPrice().intValue()) {
+                        throw new AppServiceException(ExceptionDefinition.ORDER_PRODUCT_PRICE_HAS_BEEN_CHANGED);
+                    }
+                }
+                // 日志 & 发送一个订单自动取消定时任务
+                for (int i = 1; i <= childIndex; i++) {
+                    String childOrderNo = parentOrderNo + "S" + ((1000) + i);
+                    logger.info("订单创建成功:" + childOrderNo);
+                    delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), childOrderNo, unimallOrderProperties.getAutoCancelTime().intValue());
                 }
 
-                return orderDO.getOrderNo();
-
-            } catch (ServiceException e) {
-                throw e;
+                return parentOrderNo;
             } catch (Exception e) {
+                if (calcStockFlag) {
+                    for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
+                        cacheComponent.incrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + orderRequestSkuDTO.getSkuId(), orderRequestSkuDTO.getNum());
+                    }
+                }
+                if (e instanceof ServiceException) {
+                    // 服务异常
+                    throw e;
+                }
+                // 未知异常
                 logger.error("[提交订单] 异常", e);
-                throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+                throw e;
             } finally {
-                lockComponent.release(TAKE_ORDER_LOCK + userId);
+                lockComponent.release(LockConst.TAKE_ORDER_LOCK + userId);
             }
         }
         throw new AppServiceException(ExceptionDefinition.ORDER_SYSTEM_BUSY);
@@ -329,7 +422,7 @@ public class OrderServiceImpl implements OrderService {
         Long count = orderMapper.countOrder(status, (pageNo - 1) * pageSize, pageSize, userId);
         //封装SKU
         orderDTOList.forEach(item -> {
-            item.setSkuList(orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_id", item.getId())));
+            item.setSkuList(orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", item.getId())));
         });
         return new Page<>(orderDTOList, pageNo, pageSize, count);
     }
@@ -341,98 +434,139 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Object wxPrepay(String orderNo, String ip, Long userId) throws ServiceException {
-        Date now = new Date();
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
-        // 检测订单状态
-        Integer status = orderDO.getStatus();
-        if (status != OrderStatusType.UNPAY.getCode()) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
-        }
-
+    public Object wxPrepay(String parentOrderNo, String orderNo, String ip, Long userId) throws ServiceException {
+        int actualPrice = this.checkPrepay(parentOrderNo, orderNo, userId);
         Integer loginType = SessionUtil.getUser().getLoginType();
         String appId;
         String tradeType;
         if (UserLoginType.MP_WEIXIN.getCode() == loginType) {
-            appId = wxMiNiAppid;
+            appId = unimallWxAppProperties.getMiniAppId();
             tradeType = WxPayConstants.TradeType.JSAPI;
         } else if (UserLoginType.APP_WEIXIN.getCode() == loginType || UserLoginType.REGISTER.getCode() == loginType) {
-            appId = wxAppAppid;
+            appId = unimallWxAppProperties.getAppId();
             tradeType = WxPayConstants.TradeType.APP;
         } else if (UserLoginType.H5_WEIXIN.getCode() == loginType) {
-            appId = wxH5Appid;
+            appId = unimallWxAppProperties.getH5AppId();
             tradeType = WxPayConstants.TradeType.JSAPI;
         } else {
             throw new AppServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
         }
-
-        Object result = null;
         try {
             WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
+            // 设置微信请求基本信息
             orderRequest.setAppid(appId);
-            orderRequest.setOutTradeNo(orderNo);
+            // 区分回调 直接通过 S 来判断
+            orderRequest.setOutTradeNo(StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo);
             orderRequest.setOpenid(SessionUtil.getUser().getOpenId());
-            orderRequest.setBody("订单：" + orderNo);
-            orderRequest.setTotalFee(orderDO.getActualPrice());
+            orderRequest.setBody("buy_" + (StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo));
+            orderRequest.setTotalFee(actualPrice);
             orderRequest.setSpbillCreateIp(ip);
             orderRequest.setTradeType(tradeType);
-            result = wxPayService.createOrder(orderRequest);
-            if (result instanceof  WxPayMpOrderResult) {
-                String prepayId = ((WxPayMpOrderResult)result).getPackageValue();
-                prepayId = prepayId.replace("prepay_id=", "");
-                UserFormIdDO userFormIdDO = new UserFormIdDO();
-                userFormIdDO.setFormId(prepayId);
-                userFormIdDO.setUserId(userId);
-                userFormIdDO.setOpenid(SessionUtil.getUser().getOpenId());
-                userFormIdDO.setGmtUpdate(now);
-                userFormIdDO.setGmtCreate(now);
-                userBizService.setValidFormId(userFormIdDO);
-            }
+            return wxPayService.createOrder(orderRequest);
         } catch (WxPayException e) {
             logger.error("[微信支付] 异常", e);
-            throw new ThirdPartServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+            throw new AppServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
         } catch (Exception e) {
             logger.error("[预付款异常]", e);
             throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
         }
-        return result;
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Object offlinePrepay(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+    private int checkPrepay(String parentOrderNo, String orderNo, Long userId) throws ServiceException {
+        // 两个都为空 和 两个都不为空是不合法的
+        if ((StringUtils.isEmpty(parentOrderNo) && StringUtils.isEmpty(orderNo)) || (!StringUtils.isEmpty(parentOrderNo) && !StringUtils.isEmpty(orderNo))) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_PARAM_CHECK_FAILED);
+        }
+        List<OrderDO> orderList;
+        if (!StringUtils.isEmpty(parentOrderNo))
+            orderList = orderBizService.checkOrderExistByParentNo(parentOrderNo, userId);
+        else
+            orderList = orderBizService.checkOrderExistByNo(orderNo, userId);
         // 检测订单状态
-        Integer status = orderDO.getStatus();
-        if (status != OrderStatusType.UNPAY.getCode()) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+        int actualPrice = 0;
+        for (OrderDO orderDO : orderList) {
+            Integer status = orderDO.getStatus();
+            if (status != OrderStatusType.UNPAY.getCode()) {
+                throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+            }
+            actualPrice += orderDO.getActualPrice();
         }
-        OrderDO updateOrderDO = new OrderDO();
-        updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
-        updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
-        updateOrderDO.setGmtUpdate(new Date());
-        boolean succ = orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
-        if (succ) {
-            return "ok";
-        }
-        throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+        return actualPrice;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String refund(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+    public Object offlinePrepay(String parentOrderNo, String orderNo, Long userId) throws ServiceException {
+        // 两个都为空 和 两个都不为空是不合法的
+        if ((StringUtils.isEmpty(parentOrderNo) && StringUtils.isEmpty(orderNo)) || (!StringUtils.isEmpty(parentOrderNo) && !StringUtils.isEmpty(orderNo))) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_PARAM_CHECK_FAILED);
+        }
+        List<OrderDO> orderList;
+        if (!StringUtils.isEmpty(parentOrderNo))
+            orderList = orderBizService.checkOrderExistByParentNo(parentOrderNo, userId);
+        else
+            orderList = orderBizService.checkOrderExistByNo(orderNo, userId);
+        // 检测订单状态
+        for (OrderDO orderDO : orderList) {
+            Integer status = orderDO.getStatus();
+            if (status != OrderStatusType.UNPAY.getCode()) {
+                throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+            }
+        }
+        Date now = new Date();
+        for (OrderDO orderDO : orderList) {
+            List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+            List<OrderSkuDO> groupShopSkuList = orderSkuDOList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).collect(Collectors.toList());
+            if (groupShopSkuList.size() > 0) {
+                // 订单中是否是团购商品
+                OrderDO groupShopUpdateDO = new OrderDO();
+                groupShopUpdateDO.setPayId("OFFLINE");
+                groupShopUpdateDO.setPayChannel(PayChannelType.OFFLINE.getCode());
+                groupShopUpdateDO.setPayPrice(orderDO.getActualPrice());
+                groupShopUpdateDO.setGmtPay(now);
+                groupShopUpdateDO.setGmtUpdate(now);
+                groupShopUpdateDO.setStatus(OrderStatusType.GROUP_SHOP_WAIT.getCode());
+                groupShopUpdateDO.setSubPay(1);
+                // 增加buyer count
+                for (OrderSkuDO orderSkuDO : groupShopSkuList) {
+                    groupShopBizService.incGroupShopNum(orderSkuDO.getActivityId(), orderSkuDO.getNum());
+                }
+                orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.UNPAY.getCode(), groupShopUpdateDO);
+            } else {
+                OrderDO updateOrderDO = new OrderDO();
+                updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
+                updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+                updateOrderDO.setGmtUpdate(new Date());
+                boolean succ = orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
+                if (!succ) {
+                    throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+                }
+            }
+            // 增加商品销量
+            Map<Long, Integer> salesMap = orderSkuDOList.stream().collect(Collectors.toMap(OrderSkuDO::getSpuId, OrderSkuDO::getNum, (k1, k2) -> k1.intValue() + k2.intValue()));
+            productBizService.incSpuSales(salesMap);
+        }
+        // 删除自动取消订单消息
+        delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), orderNo);
+        return "ok";
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String refund(String orderNo, String reason, Long userId) throws ServiceException {
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (PayChannelType.OFFLINE.getCode().equals(orderDO.getPayChannel())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
         }
         if (OrderStatusType.refundable(orderDO.getStatus())) {
             OrderDO updateOrderDO = new OrderDO();
+            updateOrderDO.setRefundReason(reason);
             updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());
-            orderBizService.changeOrderStatus(orderNo, orderDO.getStatus() , updateOrderDO);
+            orderBizService.changeOrderSubStatus(orderNo, orderDO.getStatus(), updateOrderDO);
             GlobalExecutor.execute(() -> {
                 OrderDTO orderDTO = new OrderDTO();
                 BeanUtils.copyProperties(orderDO, orderDTO);
-                List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new EntityWrapper<OrderSkuDO>().eq("order_no", orderDO.getOrderNo()));
+                List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_no", orderDO.getOrderNo()));
                 orderDTO.setSkuList(orderSkuList);
                 adminNotifyBizService.refundOrder(orderDTO);
             });
@@ -444,45 +578,190 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String cancel(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() != OrderStatusType.UNPAY.getCode()) {
             throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CANCEL);
         }
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.CANCELED.getCode());
         updateOrderDO.setGmtUpdate(new Date());
-        orderBizService.changeOrderStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
+        List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+        orderSkuList.forEach(item -> {
+            skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
+        });
+        orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
+        delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), orderNo);
         return "ok";
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String confirm(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() != OrderStatusType.WAIT_CONFIRM.getCode()) {
             throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CONFIRM);
         }
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
         updateOrderDO.setGmtUpdate(new Date());
-        orderBizService.changeOrderStatus(orderNo, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
+        orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
+        delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CONFIRM.getCode(), orderNo);
         return "ok";
     }
 
     @Override
     public ShipTraceDTO queryShip(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExist(orderNo, userId);
+        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() < OrderStatusType.WAIT_CONFIRM.getCode()) {
             throw new AppServiceException(ExceptionDefinition.ORDER_HAS_NOT_SHIP);
         }
         if (StringUtils.isEmpty(orderDO.getShipCode()) || StringUtils.isEmpty(orderDO.getShipNo())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_DID_NOT_SET_SHIP);
         }
-        ShipTraceDTO shipTraceList = freightBizService.getShipTraceList(orderDO.getShipNo(), orderDO.getShipCode());
+        ShipTraceDTO shipTraceList = freightTemplateBizService.getShipTraceList(orderDO.getShipNo(), orderDO.getShipCode());
         if (CollectionUtils.isEmpty(shipTraceList.getTraces())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_DO_NOT_EXIST_SHIP_TRACE);
         }
         return shipTraceList;
     }
 
+    @Override
+    public Integer previewFreight(OrderRequestDTO orderRequest, Long userId) throws ServiceException {
+        List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
+        AddressDO addressDO = null;
+        if (orderRequest.getAddressId() != null) {
+            addressDO = addressBizService.getAddressById(orderRequest.getAddressId());
+        }
+        FreightCalcModel calcModel = new FreightCalcModel();
+        if (addressDO == null) {
+            // 若没穿省份，则传一个不存在的省份。系统会默认他是全国。
+            calcModel.setProvince("一个不存在的地址");
+        } else {
+            calcModel.setProvince(addressDO.getProvince());
+        }
+        // 由于是预览，此处可详细用户从前端传入进来的 商品运费模板Id 重量 价格等信息
+        UserDTO user = SessionUtil.getUser();
+        // 将SKU按照运费模板分组
+        Map<Long, List<OrderRequestSkuDTO>> calcMap = skuList.stream().collect(Collectors.groupingBy(OrderRequestSkuDTO::getFreightTemplateId));
+        List<FreightCalcModel.FreightAndWeight> faws = new LinkedList<>();
+        calcMap.forEach((k, v) -> {
+            FreightCalcModel.FreightAndWeight faw = new FreightCalcModel.FreightAndWeight();
+            faw.setId(k);
+            int weight = 0;
+            int price = 0;
+            for (OrderRequestSkuDTO skuDTO : v) {
+                weight += skuDTO.getWeight();
+                price += user.getLevel() == UserLevelType.VIP.getCode() ? skuDTO.getVipPrice() : skuDTO.getPrice();
+            }
+            faw.setWeight(weight);
+            faw.setPrice(price);
+            faws.add(faw);
+        });
+        calcModel.setFreightAndWeights(faws);
+        int sum = freightTemplateBizService.computePostage(calcModel);
+        return sum;
+    }
+
+
+    /**
+     * 保存订单抽取接口
+     *
+     * @param skuOriginalPrice
+     * @param skuPrice
+     * @param channel
+     * @param freightPrice
+     * @param couponUserDTO
+     * @param orderRequest
+     * @param parentOrderNo
+     * @param childIndex
+     * @param userId
+     * @param now
+     * @param addressDO
+     * @param skuDTOList
+     * @param orderCalcSkuList
+     * @param userLevel
+     * @param activityType
+     * @param activityId
+     * @return
+     * @throws ServiceException
+     */
+    private OrderDO save(int skuOriginalPrice, int skuPrice, String channel,
+                         int freightPrice, CouponUserDTO couponUserDTO,
+                         OrderRequestDTO orderRequest, String parentOrderNo, int childIndex,
+                         Long userId, Date now, AddressDO addressDO, List<SkuDTO> skuDTOList,
+                         List<OrderCalcSkuModel> orderCalcSkuList, Integer userLevel,
+                         Integer activityType, Long activityId) throws ServiceException {
+        OrderDO orderDO = new OrderDO();
+        // 设置商品原价，总价
+        orderDO.setSkuOriginalTotalPrice(skuOriginalPrice);
+        orderDO.setSkuTotalPrice(skuPrice);
+        // 下单渠道
+        orderDO.setChannel(channel);
+        // 计算订单价格
+        orderDO.setFreightPrice(freightPrice);
+        // 计算订单优惠券价格
+        int couponPrice = 0;
+        if (couponUserDTO != null) {
+            couponPrice = couponUserDTO.getDiscount();
+            // 这里根据实际情况决定是否需要将邮费加入到优惠券计算中
+            if (couponUserDTO.getMin() > skuPrice) {
+                throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_PRICE_NOT_ENOUGH);
+            }
+        }
+        orderDO.setCouponPrice(couponPrice);
+        orderDO.setActualPrice(skuPrice + freightPrice - couponPrice);
+        orderDO.setMono(orderRequest.getMono());
+        orderDO.setParentOrderNo(parentOrderNo);
+        orderDO.setOrderNo(parentOrderNo + "S" + (1000 + childIndex));
+        orderDO.setUserId(userId);
+        orderDO.setStatus(OrderStatusType.UNPAY.getCode());
+        orderDO.setGmtUpdate(now);
+        orderDO.setGmtCreate(now);
+        if (!userId.equals(addressDO.getUserId())) {
+            throw new AppServiceException(ExceptionDefinition.ORDER_ADDRESS_NOT_BELONGS_TO_YOU);
+        }
+        orderDO.setConsignee(addressDO.getConsignee());
+        orderDO.setPhone(addressDO.getPhone());
+        orderDO.setProvince(addressDO.getProvince());
+        orderDO.setCity(addressDO.getCity());
+        orderDO.setCounty(addressDO.getCounty());
+        orderDO.setAddress(addressDO.getAddress());
+        // 冗余一个团购信息
+        if (activityType != null && activityType == SpuActivityType.GROUP_SHOP.getCode()) {
+            orderDO.setGroupShopId(activityId);
+        }
+        orderMapper.insert(orderDO);
+
+        for (int i = 0; i < skuDTOList.size(); i++) {
+            OrderCalcSkuModel orderCalcSpuDTO = orderCalcSkuList.get(i);
+            SkuDTO skuDTO = skuDTOList.get(i);
+            Assert.isTrue(orderCalcSpuDTO.getSkuId().longValue() == skuDTO.getId().longValue(), "断言失败！");
+            OrderSkuDO orderSkuDO = new OrderSkuDO();
+            orderSkuDO.setBarCode(skuDTO.getBarCode());
+            orderSkuDO.setTitle(skuDTO.getTitle());
+            orderSkuDO.setUnit(skuDTO.getUnit());
+            orderSkuDO.setSpuTitle(skuDTO.getSpuTitle());
+            orderSkuDO.setImg(skuDTO.getImg() == null ? skuDTO.getSpuImg() : skuDTO.getImg());
+            orderSkuDO.setNum(orderCalcSpuDTO.getNum());
+            orderSkuDO.setOriginalPrice(skuDTO.getOriginalPrice());
+            orderSkuDO.setPrice(skuDTO.getPrice());
+            if (userLevel == UserLevelType.VIP.getCode()) {
+                orderSkuDO.setPrice(skuDTO.getVipPrice());
+            } else {
+                orderSkuDO.setPrice(skuDTO.getPrice());
+            }
+            orderSkuDO.setSkuId(skuDTO.getId());
+            orderSkuDO.setSpuId(skuDTO.getSpuId());
+            orderSkuDO.setOrderNo(orderDO.getOrderNo());
+            orderSkuDO.setOrderId(orderDO.getId());
+            orderSkuDO.setGmtCreate(now);
+            orderSkuDO.setGmtUpdate(now);
+            // 考虑到有的活动又不需要拆单，所以这里活动就只能关联到订单商品。也就是商品参加促销活动，而非订单参加。
+            orderSkuDO.setActivityType(activityType);
+            orderSkuDO.setActivityId(activityId);
+            orderSkuMapper.insert(orderSkuDO);
+        }
+        return orderDO;
+    }
 
 }

@@ -3,44 +3,20 @@ package com.iotechn.unimall.data.config.db;
 import com.alibaba.druid.filter.Filter;
 import com.alibaba.druid.filter.stat.StatFilter;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.baomidou.mybatisplus.MybatisConfiguration;
-import com.baomidou.mybatisplus.MybatisXMLLanguageDriver;
-import com.baomidou.mybatisplus.entity.GlobalConfiguration;
-import com.baomidou.mybatisplus.enums.IdType;
-import com.baomidou.mybatisplus.mapper.LogicSqlInjector;
-import com.baomidou.mybatisplus.mapper.MetaObjectHandler;
-import com.baomidou.mybatisplus.plugins.OptimisticLockerInterceptor;
-import com.baomidou.mybatisplus.plugins.PaginationInterceptor;
-import com.baomidou.mybatisplus.plugins.PerformanceInterceptor;
-import com.baomidou.mybatisplus.plugins.parser.ISqlParser;
-import com.baomidou.mybatisplus.plugins.parser.tenant.TenantHandler;
-import com.baomidou.mybatisplus.plugins.parser.tenant.TenantSqlParser;
-import com.baomidou.mybatisplus.spring.MybatisSqlSessionFactoryBean;
-import com.baomidou.mybatisplus.spring.boot.starter.MybatisPlusProperties;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.LongValue;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.type.JdbcType;
-import org.mybatis.spring.annotation.MapperScan;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
+import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.pagination.optimize.JsqlParserCountOptimize;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
 @EnableConfigurationProperties(value = {MybatisPlusProperties.class})
 public class MybatisPlusConfig {
-
-    private MybatisPlusProperties mybatisPlusProperties;
-
-    public MybatisPlusConfig(MybatisPlusProperties mybatisPlusProperties) {
-        this.mybatisPlusProperties = mybatisPlusProperties;
-    }
 
     /**
      * 数据源
@@ -69,37 +45,19 @@ public class MybatisPlusConfig {
     }
 
     /**
-     * Druid 监控
+     * 分页插件
+     * @return
      */
-//    @Bean
-//    public ServletRegistrationBean servletRegistrationBean(){
-//        return new ServletRegistrationBean(new StatViewServlet(),"/druid/*");
-//    }
-
-    @Bean("mybatisSqlSession")
-    public SqlSessionFactory sqlSessionFactory(DataSource dataSource, GlobalConfiguration globalConfiguration) throws Exception {
-        MybatisSqlSessionFactoryBean sqlSessionFactory = new MybatisSqlSessionFactoryBean();
-        sqlSessionFactory.setDataSource(dataSource);
-        sqlSessionFactory.setTypeAliasesPackage(mybatisPlusProperties.getTypeAliasesPackage());
-        sqlSessionFactory.setTypeEnumsPackage(mybatisPlusProperties.getTypeEnumsPackage());
-        MybatisConfiguration configuration = new MybatisConfiguration();
-        configuration.setDefaultScriptingLanguage(MybatisXMLLanguageDriver.class);
-        configuration.setJdbcTypeForNull(JdbcType.NULL);
-        sqlSessionFactory.setConfiguration(configuration);
-        sqlSessionFactory.setPlugins(new Interceptor[]{
-                new PaginationInterceptor(),
-                new PerformanceInterceptor(),
-                new OptimisticLockerInterceptor()
-        });
-        sqlSessionFactory.setGlobalConfig(globalConfiguration);
-        return sqlSessionFactory.getObject();
-    }
-
     @Bean
-    public GlobalConfiguration globalConfiguration() {
-        GlobalConfiguration conf = new GlobalConfiguration(new LogicSqlInjector());
-        conf.setIdType(IdType.AUTO.getKey());
-        return conf;
+    public PaginationInterceptor paginationInterceptor() {
+        PaginationInterceptor paginationInterceptor = new PaginationInterceptor();
+        // 设置请求的页面大于最大页后操作， true调回到首页，false 继续请求  默认false
+        // paginationInterceptor.setOverflow(false);
+        // 设置最大单页限制数量，默认 500 条，-1 不受限制
+        // paginationInterceptor.setLimit(500);
+        // 开启 count 的 join 优化,只针对部分 left join
+        paginationInterceptor.setCountSqlParser(new JsqlParserCountOptimize(true));
+        return paginationInterceptor;
     }
 
 }

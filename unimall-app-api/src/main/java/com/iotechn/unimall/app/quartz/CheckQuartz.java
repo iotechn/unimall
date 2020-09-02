@@ -1,21 +1,21 @@
 package com.iotechn.unimall.app.quartz;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.LockComponent;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.GroupShopDO;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.SpuDO;
+import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.GroupShopAutomaticRefundType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.StatusType;
-import com.iotechn.unimall.data.mapper.GroupShopMapper;
-import com.iotechn.unimall.data.mapper.OrderMapper;
-import com.iotechn.unimall.data.mapper.SpuMapper;
+import com.iotechn.unimall.data.mapper.*;
+import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
+import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +40,7 @@ import java.util.stream.Collectors;
 public class CheckQuartz {
 
     private static final Logger logger = LoggerFactory.getLogger(CheckQuartz.class);
-    private static final String ORDER_STATUS_LOCK = "ORDER_STATUS_QUARTZ_LOCK";
-    private static final String GROUP_SHOP_START_LOCK = "GROUP_SHOP_START_LOCK";
-    private static final String GROUP_SHOP_END_LOCK = "GROUP_SHOP_END_LOCK";
-    private static final String GROUP_SHOP_LOCK_LOCK = "GROUP_SHOP_LOCK_LOCK";
+
     @Autowired
     private OrderMapper orderMapper;
     @Autowired
@@ -53,50 +50,46 @@ public class CheckQuartz {
     @Autowired
     private SpuMapper spuMapper;
     @Autowired
+    private UnimallOrderProperties unimallOrderProperties;
+    @Autowired
     private LockComponent lockComponent;
+    @Autowired
+    private DelayedMessageQueue delayedMessageQueue;
     @Autowired
     private TransactionTemplate transactionTemplate;
 
     /**
-     * 订单状态定时轮训
+     * 此定时任务是算是保险，防止Redis延迟消息丢失的情况
+     * 订单状态定时轮训,检查是否存在需要取消订单，需要收货订单
      */
     @Scheduled(cron = "0 * * * * ?")
     public void checkOrderStatus() {
-        if (lockComponent.tryLock(ORDER_STATUS_LOCK, 15)) {
-            try {
-                Date now = new Date();
-                List<String> nos = orderMapper.selectExpireOrderNos(OrderStatusType.UNPAY.getCode(), new Date(now.getTime() - 1000l * 60 * 15));
-                if (!CollectionUtils.isEmpty(nos)) {
-                    nos.forEach(no -> {
-                        try {
-                            OrderDO updateOrderDO = new OrderDO();
-                            updateOrderDO.setStatus(OrderStatusType.CANCELED_SYS.getCode());
-                            updateOrderDO.setGmtUpdate(now);
-                            orderBizService.changeOrderStatus(no, OrderStatusType.UNPAY.getCode(), updateOrderDO);
-                        } catch (Exception e) {
-                            logger.error("[未付款检测] 异常", e);
-                        }
-                    });
-                }
-                //15分钟执行一次
-                long minutes = (now.getTime() / (1000 * 60));
-                if (minutes % 15 == 0) {
-                    List<String> waitConfirmNos = orderMapper.selectExpireOrderNos(OrderStatusType.WAIT_CONFIRM.getCode(), new Date(now.getTime() - 1000l * 60 * 60 * 24 * 7));
-                    waitConfirmNos.forEach(item -> {
-                        try {
-                            OrderDO updateOrderDO = new OrderDO();
-                            updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
-                            updateOrderDO.setGmtUpdate(now);
-                            orderBizService.changeOrderStatus(item, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
-                        } catch (Exception e) {
-                            logger.error("[未确认检测] 异常", e);
-                        }
-                    });
-                }
-            } catch (Exception e) {
-                logger.error("[订单状态检测定时任务] 异常", e);
-            } finally {
-                lockComponent.release(ORDER_STATUS_LOCK);
+        if (lockComponent.tryLock(LockConst.SCHEDULED_ORDER_STATUS_CHECK_LOCK, 30)) {
+            Date now = new Date();
+            // 1.检查是否存在需要自动取消的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
+            QueryWrapper<OrderDO> cancelWrapper = new QueryWrapper<OrderDO>();
+            cancelWrapper.select("id", "order_no");
+            cancelWrapper.eq("status", OrderStatusType.UNPAY.getCode());
+            Date cancelTime = new Date(now.getTime() - unimallOrderProperties.getAutoCancelTime() * 1000);
+            cancelWrapper.lt("gmt_update", cancelTime);
+            List<OrderDO> cancelList = orderMapper.selectList(cancelWrapper);
+            if (!CollectionUtils.isEmpty(cancelList)) {
+                cancelList.stream().forEach(item -> {
+                    delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), item.getOrderNo(), 1);
+                });
+            }
+
+            // 2.检查是否存在需要自动收货的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
+            QueryWrapper<OrderDO> confirmWrapper = new QueryWrapper<OrderDO>();
+            confirmWrapper.select("id", "order_no");
+            confirmWrapper.eq("status", OrderStatusType.WAIT_CONFIRM.getCode());
+            Date confirmTime = new Date(now.getTime() - unimallOrderProperties.getAutoConfirmTime() * 1000);
+            confirmWrapper.lt("gmt_update", confirmTime);
+            List<OrderDO> confirmList = orderMapper.selectList(confirmWrapper);
+            if (!CollectionUtils.isEmpty(confirmList)) {
+                confirmList.stream().forEach(item -> {
+                    delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CONFIRM.getCode(), item.getOrderNo(), 1);
+                });
             }
         }
     }
@@ -104,19 +97,19 @@ public class CheckQuartz {
     /**
      * 设定60s跑一次,团购商品到期自动退款,改变状态
      */
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "10 * * * * ?")
     @Transactional(rollbackFor = Exception.class)
     public void groupShopStart() throws Exception {
-        if (lockComponent.tryLock(GROUP_SHOP_START_LOCK, 30)) {
+        if (lockComponent.tryLock(LockConst.GROUP_SHOP_START_LOCK, 30)) {
             try {
                 Date now = new Date();
                 /**
                  * 1. 激活 团购时间开始的活动商品
                  */
                 // 1.1 查询在活动期间,且冻结状态的团购商品
-                List<GroupShopDO> groupShopDOList = groupShopMapper.selectList(new EntityWrapper<GroupShopDO>()
-                        .le("gmt_start", now).and()
-                        .gt("gmt_end", now).and()
+                List<GroupShopDO> groupShopDOList = groupShopMapper.selectList(new QueryWrapper<GroupShopDO>()
+                        .le("gmt_start", now)
+                        .gt("gmt_end", now)
                         .eq("status", StatusType.LOCK.getCode()));
                 if (groupShopDOList != null) {
                     for (GroupShopDO groupShopDO : groupShopDOList) {
@@ -139,28 +132,29 @@ public class CheckQuartz {
                 logger.error("[团购开始 定时任务] 异常", e);
                 throw e;
             } finally {
-                lockComponent.release(GROUP_SHOP_START_LOCK);
+                lockComponent.release(LockConst.GROUP_SHOP_START_LOCK);
             }
         }
 
 
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "10 * * * * ?")
     @Transactional(rollbackFor = Exception.class)
     public void groupShopEnd() throws Exception {
-        if (lockComponent.tryLock(GROUP_SHOP_END_LOCK, 30)) {
+        if (lockComponent.tryLock(LockConst.GROUP_SHOP_END_LOCK, 30)) {
             try {
                 Date now = new Date();
                 /**
                  * 2. 冻结 团购时间结束的活动商品,并根据对应情况处理订单
                  */
-                Wrapper<GroupShopDO> wrapper = new EntityWrapper<GroupShopDO>()
+                QueryWrapper<GroupShopDO> wrapper = new QueryWrapper<GroupShopDO>()
                         .eq("status", StatusType.ACTIVE.getCode())
-                        .andNew()
-                        .gt("gmt_start", now)
-                        .or()
-                        .le("gmt_end", now);
+                        .and(i -> i
+                                .gt("gmt_start", now)
+                                .or()
+                                .le("gmt_end", now));
+
                 List<GroupShopDO> lockGroupShopDOList = groupShopMapper.selectList(wrapper);
                 // 2.2 将团购订单的状态转为对应的退款或待出库状态,对未达人数且自动退款的商品订单进行退款,对达到人数或不自动退款的商品订单转换状态
                 if (!CollectionUtils.isEmpty(lockGroupShopDOList)) {
@@ -172,7 +166,7 @@ public class CheckQuartz {
                     for (GroupShopDO groupShopDO : lockGroupShopDOList) {
                         // 2.2.1查询团购订单中数据
                         List<OrderDO> lockOrderList = orderMapper.selectList(
-                                new EntityWrapper<OrderDO>()
+                                new QueryWrapper<OrderDO>()
                                         .eq("group_shop_id", groupShopDO.getId())
                                         .eq("status", OrderStatusType.GROUP_SHOP_WAIT.getCode()));
 
@@ -180,9 +174,9 @@ public class CheckQuartz {
                             continue;
                         }
 
-                        if (groupShopDO.getAutomaticRefund() == GroupShopAutomaticRefundType.YES.getCode() && groupShopDO.getAlreadyBuyNumber().compareTo(groupShopDO.getMinimumNumber()) < 0) {
+                        if (groupShopDO.getAutomaticRefund() == GroupShopAutomaticRefundType.YES.getCode() && groupShopDO.getBuyerNum().compareTo(groupShopDO.getMinNum()) < 0) {
                             // 2.2.2.1.退款
-                            logger.info("[团购结束] 退款逻辑 groupShopId:" + groupShopDO.getId());
+                            logger.info("[团购结束] 退款逻辑 GroupShopId:" + groupShopDO.getId());
                             for (OrderDO orderDO : lockOrderList) {
                                 transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                                     @Override
@@ -199,13 +193,13 @@ public class CheckQuartz {
                                 });
                             }
                         } else {
-                            logger.info("[团购结束] 发货逻辑 groupShopId:" + groupShopDO.getId());
+                            logger.info("[团购结束] 发货逻辑 GroupShopId:" + groupShopDO.getId());
                             // 2.2.2.2 转换订单为待出货状态 (非自动退款场景)
                             List<Long> collect = lockOrderList.stream().map(s -> s.getId()).collect(Collectors.toList());
                             OrderDO orderDO = new OrderDO();
                             orderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
                             orderMapper.update(orderDO, (
-                                    new EntityWrapper<OrderDO>()
+                                    new QueryWrapper<OrderDO>()
                                             .in("id", collect)
                                             .eq("status", OrderStatusType.GROUP_SHOP_WAIT.getCode())));
                         }
@@ -216,51 +210,9 @@ public class CheckQuartz {
                 logger.error("[团购结束 定时任务] 异常", e);
                 throw e;
             } finally {
-                lockComponent.release(GROUP_SHOP_END_LOCK);
+                lockComponent.release(LockConst.GROUP_SHOP_END_LOCK);
             }
         }
-
-    }
-
-    @Scheduled(fixedRate = 60000)
-    @Transactional(rollbackFor = Exception.class)
-    public void groupShopLock() throws Exception {
-        if (lockComponent.tryLock(GROUP_SHOP_LOCK_LOCK, 30)) {
-            try {
-                Date now = new Date();
-                /**
-                 * 3 冻结 团购活动期间却被下架的商品
-                 */
-                EntityWrapper<GroupShopDO> groupShopDOEntityWrapper = new EntityWrapper<>();
-
-                // 3.1 从团购中查询活动期间的商品
-                groupShopDOEntityWrapper.eq("status", StatusType.ACTIVE.getCode())
-                        .and()
-                        .le("gmt_start", now)
-                        .and()
-                        .gt("gmt_end", now);
-                List<GroupShopDO> groupShopDOS = groupShopMapper.selectList(groupShopDOEntityWrapper);
-                if (!CollectionUtils.isEmpty(groupShopDOS)) {
-                    List<Long> spuIdList = groupShopDOS.stream().map(t -> t.getSpuId()).collect(Collectors.toList());
-
-                    // 3.2 在团购中查询给出spuID,是否有被下架的商品
-                    List<SpuDO> spuDOS = spuMapper.selectList(new EntityWrapper<SpuDO>().in("id", spuIdList).eq("status", StatusType.LOCK.getCode()));
-                    if (!CollectionUtils.isEmpty(spuDOS)) {
-                        List<Long> collect = spuDOS.stream().map(t -> t.getId()).collect(Collectors.toList());
-                        GroupShopDO groupShopDO = new GroupShopDO();
-                        groupShopDO.setStatus(StatusType.LOCK.getCode());
-                        groupShopDO.setGmtUpdate(now);
-                        groupShopMapper.update(groupShopDO, (new EntityWrapper<GroupShopDO>().in("spu_id", collect)));
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("[团购锁定 定时任务] 异常", e);
-                throw e;
-            } finally {
-                lockComponent.release(GROUP_SHOP_LOCK_LOCK);
-            }
-        }
-
     }
 
 }

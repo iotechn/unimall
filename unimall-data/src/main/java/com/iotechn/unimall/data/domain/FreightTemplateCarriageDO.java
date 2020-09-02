@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,8 +15,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @TableName("unimall_freight_template_carriage")
-@AllArgsConstructor
-@NoArgsConstructor
 public class FreightTemplateCarriageDO extends SuperDO{
 
 
@@ -31,21 +29,21 @@ public class FreightTemplateCarriageDO extends SuperDO{
     @TableField("free_price")
     private Integer freePrice;
 
-    //首次记件数量，为超过该件数不加价
-    @TableField("first_num")
-    private Integer firstNum;
+    //首次记件重量，未超过重量不加价
+    @TableField("first_weight")
+    private Integer firstWeight;
 
-    //首次记件价格
-    @TableField("first_money")
-    private Integer firstMoney;
+    //首次记件重量价格
+    @TableField("first_price")
+    private Integer firstPrice;
 
-    //续件一次的数量
-    @TableField("continue_num")
-    private Integer continueNum;
+    //续件一次的重量
+    @TableField("continue_weight")
+    private Integer continueWeight;
 
-    //续件一次的价格
-    @TableField("continue_money")
-    private Integer continueMoney;
+    //续件一次重量的价格
+    @TableField("continue_price")
+    private Integer continuePrice;
 
 
 }

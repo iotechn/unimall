@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.FavoriteMapper">
+
+
+    <select id="getFavoritePage" resultType="com.iotechn.unimall.data.dto.FavoriteDTO">
+     SELECT
+            c.id AS id,
+            c.user_id AS userId,
+            c.gmt_create AS gmtUpdate,
+            c.gmt_update AS gmtCreate,
+            c.spu_id as spuId,
+            s.original_price AS originalPrice,
+            s.price AS price,
+            s.vip_price as vipPrice,
+            s.title AS title,
+            s.sales AS sales,
+            s.img AS img,
+            s.description as description,
+            s.unit AS unit,
+            s.status AS status
+    FROM
+            unimall_favorite AS c,
+            unimall_spu AS s
+    WHERE
+            c.user_id = #{userId}
+            AND c.spu_id = s.id
+    </select>
+
+    <select id="getFavoriteById" resultType="com.iotechn.unimall.data.dto.FavoriteDTO">
+     SELECT
+            c.id,
+            c.user_id AS userId,
+            c.gmt_create AS gmtCreate,
+            c.gmt_update AS gmtUpdate,
+            c.spu_id AS spuId,
+            s.original_price AS originalPrice,
+            s.price AS price,
+            s.vip_price AS vipPrice,
+            s.title,
+            s.sales,
+            s.img,
+            s.description,
+            s.unit AS unit,
+            s.status AS status
+    FROM
+        unimall_favorite AS c,
+            unimall_spu AS s
+    WHERE
+            c.user_id = #{userId}
+            and c.spu_id = s.id
+            and c.id = #{favoriteId}
+            <if test="spuId != null">
+                and c.spu_id = #{spuId}
+            </if>
+    </select>
+
+    <select id="getUserFavoriteSpuIds" resultType="java.lang.String">
+      SELECT spu_id FROM  unimall_favorite WHERE user_id = #{userId}
+    </select>
+
+</mapper>

@@ -1,6 +1,6 @@
 package com.iotechn.unimall.data.dto;
 
-import com.iotechn.unimall.data.dto.goods.SpuDTO;
+import com.iotechn.unimall.data.domain.SpuDO;
 import lombok.Data;
 
 import java.util.List;
@@ -13,12 +13,10 @@ import java.util.Map;
 @Data
 public class IntegralIndexDataDTO {
 
-    private Map<String, List<AdvertisementDTO>> advertisement;
+    private Map<String, List<AdvertDTO>> advertisement;
 
-    private List<RecommendDTO> windowRecommend;
+    private List<SpuDO> salesTop;
 
-    private List<SpuDTO> salesTop;
-
-    private List<SpuDTO> newTop;
+    private List<SpuDO> newTop;
 
 }

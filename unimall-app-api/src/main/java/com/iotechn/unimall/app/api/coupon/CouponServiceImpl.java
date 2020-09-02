@@ -1,25 +1,26 @@
 package com.iotechn.unimall.app.api.coupon;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.core.exception.AppServiceException;
+import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.CouponDO;
-import com.iotechn.unimall.data.domain.UserCouponDO;
+import com.iotechn.unimall.data.domain.CouponUserDO;
 import com.iotechn.unimall.data.dto.CouponDTO;
-import com.iotechn.unimall.data.dto.UserCouponDTO;
+import com.iotechn.unimall.data.dto.CouponUserDTO;
 import com.iotechn.unimall.data.enums.StatusType;
 import com.iotechn.unimall.data.mapper.CouponMapper;
-import com.iotechn.unimall.data.mapper.UserCouponMapper;
+import com.iotechn.unimall.data.mapper.CouponUserMapper;
 import com.iotechn.unimall.data.model.KVModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,14 +37,10 @@ public class CouponServiceImpl implements CouponService {
     private CouponMapper couponMapper;
 
     @Autowired
-    private UserCouponMapper userCouponMapper;
+    private CouponUserMapper couponUserMapper;
 
     @Autowired
     private LockComponent lockComponent;
-
-    private static final String COUPON_LOCK = "COUPON_LOCK_";
-
-    private static final String COUPON_USER_LOCK = "COUPON_USER_LOCK_";
 
     private static final Logger logger = LoggerFactory.getLogger(CouponServiceImpl.class);
 
@@ -51,7 +48,7 @@ public class CouponServiceImpl implements CouponService {
     @Transactional(rollbackFor = Exception.class)
     public String obtainCoupon(Long couponId, Long userId) throws ServiceException {
         //防止用户一瞬间提交两次表单，导致超领
-        if (lockComponent.tryLock(COUPON_USER_LOCK + userId + "_" + couponId, 10)) {
+        if (lockComponent.tryLock(LockConst.COUPON_USER_LOCK + userId + "_" + couponId, 10)) {
             try {
                 CouponDO couponDO = couponMapper.selectById(couponId);
                 if (couponDO.getStatus() == StatusType.LOCK.getCode()) {
@@ -69,7 +66,7 @@ public class CouponServiceImpl implements CouponService {
                 } else {
                     if (couponDO.getTotal() >= 0) {
                         if (couponDO.getSurplus() == 1) {
-                            if (!lockComponent.tryLock(COUPON_LOCK + couponId, 10)) {
+                            if (!lockComponent.tryLock(LockConst.COUPON_LOCK + couponId, 10)) {
                                 throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
                             }
                         }
@@ -80,8 +77,8 @@ public class CouponServiceImpl implements CouponService {
 
                 if (couponDO.getLimit() != -1) {
                     //校验用户是否已经领了
-                    Integer count = userCouponMapper.selectCount(
-                            new EntityWrapper<UserCouponDO>()
+                    Integer count = couponUserMapper.selectCount(
+                            new QueryWrapper<CouponUserDO>()
                                     .eq("user_id", userId)
                                     .eq("coupon_id", couponId));
 
@@ -91,7 +88,7 @@ public class CouponServiceImpl implements CouponService {
                 }
 
                 //领取优惠券
-                UserCouponDO userCouponDO = new UserCouponDO();
+                CouponUserDO userCouponDO = new CouponUserDO();
                 userCouponDO.setUserId(userId);
                 userCouponDO.setCouponId(couponId);
                 if (couponDO.getGmtStart() != null && couponDO.getGmtEnd() != null) {
@@ -109,7 +106,7 @@ public class CouponServiceImpl implements CouponService {
                 userCouponDO.setGmtUpdate(now);
                 userCouponDO.setGmtCreate(now);
 
-                userCouponMapper.insert(userCouponDO);
+                couponUserMapper.insert(userCouponDO);
                 return "ok";
             } catch (ServiceException e) {
                 throw e;
@@ -117,7 +114,7 @@ public class CouponServiceImpl implements CouponService {
                 logger.error("[领取优惠券] 异常", e);
                 throw new AppServiceException(ExceptionDefinition.APP_UNKNOWN_EXCEPTION);
             } finally {
-                lockComponent.release(COUPON_USER_LOCK + userId + "_" + couponId);
+                lockComponent.release(LockConst.COUPON_USER_LOCK + userId + "_" + couponId);
             }
         } else {
             throw new AppServiceException(ExceptionDefinition.SYSTEM_BUSY);
@@ -146,12 +143,12 @@ public class CouponServiceImpl implements CouponService {
                 }
             }
             return item;
-        }).collect(Collectors.toList());
+        }).filter(item -> (item.getCategoryId() == null || (item.getCategoryId() != null && !StringUtils.isEmpty(item.getCategoryTitle())))).collect(Collectors.toList());
         return couponDTOList;
     }
 
     @Override
-    public List<UserCouponDTO> getUserCoupons(Long userId) throws ServiceException {
-        return userCouponMapper.getUserCoupons(userId);
+    public List<CouponUserDTO> getUserCoupons(Long userId) throws ServiceException {
+        return couponUserMapper.getUserCoupons(userId);
     }
 }

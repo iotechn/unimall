@@ -11,7 +11,7 @@
             coupon_id AS `key`,
             count( coupon_id ) AS `value`
         FROM
-            unimall_user_coupon
+            unimall_coupon_user
         WHERE
             coupon_id IN
         <foreach open="(" close=")" collection="couponIds" separator="," item="cid">
@@ -59,8 +59,7 @@
               AND unix_timestamp(c.gmt_end) &lt; unix_timestamp(#{now})
           </if>
         </if>
-        order BY c.id DESC
-        limit #{offset},#{limit}
+        ORDER BY c.id DESC
     </select>
 
     <select id="getActiveCoupons" resultType="com.iotechn.unimall.data.dto.CouponDTO">

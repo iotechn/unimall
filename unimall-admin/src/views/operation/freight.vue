@@ -1,13 +1,11 @@
 <template>
   <div class="app-container">
-    <!-- 查询和其他操作 -->
+    <!-- 查询添加操作 -->
     <div class="filter-container">
-      <!--<el-input v-model="listQuery.userId" clearable class="filter-item" style="width: 200px;" placeholder="请输入用户ID"/>-->
       <el-button
         v-permission="['operation:freight:create']"
         class="filter-item"
         type="primary"
-        icon="el-icon-search"
         @click="createHandle"
       >添加</el-button>
     </div>
@@ -22,38 +20,32 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="模板编号" prop="freightTemplateDO.id" />
+      <el-table-column align="center" label="模板编号" prop="id" />
 
-      <el-table-column align="center" label="模板名称" width="300" prop="freightTemplateDO.templateName" />
-      <el-table-column align="center" label="宝贝地址" prop="freightTemplate.DOspuLocation" />
+      <el-table-column align="center" label="模板名称" width="300" prop="title" />
+      <el-table-column align="center" label="宝贝地址" prop="spuLocation" />
 
-      <el-table-column align="center" label="发货期限" prop="freightTemplateDO.deliveryDeadline">
-        <template slot-scope="scope">{{ scope.row.freightTemplateDO.deliveryDeadline }}天</template>
+      <el-table-column align="center" label="发货期限" prop="deliveryDeadline">
+        <template slot-scope="scope">{{ scope.row.deliveryDeadline }}天</template>
       </el-table-column>
-      <el-table-column align="center" label="默认包邮门栏" prop="freightTemplateDO.defaultFreePrice" >
-        <template slot-scope="scope">{{ scope.row.freightTemplateDO.defaultFreePrice | defaultFreePriceFilter }}</template>
+      <el-table-column align="center" label="默认包邮门栏" prop="defaultFreePrice" >
+        <template slot-scope="scope">{{ scope.row.defaultFreePrice | defaultFreePriceFilter }}</template>
       </el-table-column>
-      <el-table-column align="center" label="默认计费首次发货数量" prop="freightTemplateDO.defaultFirstNum" >
-        <template slot-scope="scope">{{ scope.row.freightTemplateDO.defaultFirstNum }}件</template>
+      <el-table-column align="center" label="默认计费首次发货重量" prop="defaultFirstWeight" >
+        <template slot-scope="scope">{{ scope.row.defaultFirstWeight }}克</template>
       </el-table-column>
-      <el-table-column align="center" label="默认计费首次发货价格" prop="freightTemplateDO.defaultFirstMoney">
-        <template slot-scope="scope">{{ scope.row.freightTemplateDO.defaultFirstMoney }}元</template>
+      <el-table-column align="center" label="默认计费续件重量" prop="defaultContinueWeight" >
+        <template slot-scope="scope">{{ scope.row.defaultContinueWeight }}克</template>
       </el-table-column>
-      <el-table-column align="center" label="默认计费续件数量" prop="freightTemplateDO.defaultContinueNum" >
-        <template slot-scope="scope">{{ scope.row.freightTemplateDO.defaultContinueNum }}件</template>
+      <el-table-column align="center" label="默认计费首次发货价格" prop="defaultFirstPrice">
+        <template slot-scope="scope">{{ scope.row.defaultFirstPrice }}元</template>
       </el-table-column>
-      <el-table-column align="center" label="默认计费续件价格" prop="freightTemplateDO.defaultContinueMoney">
-        <template slot-scope="scope">{{ scope.row.freightTemplateDO.defaultContinueMoney }}元</template>
+      <el-table-column align="center" label="默认计费续件价格" prop="defaultContinuePrice">
+        <template slot-scope="scope">{{ scope.row.defaultContinuePrice }}元</template>
       </el-table-column>
-      <el-table-column align="center" label="指定地区数量" prop="freightTemplateCarriageDOList.length"/>
+      <el-table-column align="center" label="指定地区数量" prop="carriageDOList.length"/>
       <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <!-- <el-button
-            v-permission="['operation:freight:query']"
-            type="primary"
-            size="mini"
-            @click="(scope.row)"
-          >阅读</el-button> -->
           <el-button
             v-permission="['operation:freight:update']"
             type="primary"
@@ -67,7 +59,6 @@
             @click="deleteBtn(scope.row)"
           >删除</el-button>
         </template>
-
       </el-table-column>
     </el-table>
 
@@ -82,11 +73,11 @@
         label-width="150px"
         style="width: 700px; margin-left:50px;"
       >
-        <el-form-item v-if="dialogStatus === 'update'" label="隐藏的用户id" prop="templateId" hidden>
-          <el-input v-model="dataForm.templateId" clearable placeholder=""/>
+        <el-form-item v-if="dialogStatus === 'update'" label="隐藏的用户id" prop="id" hidden>
+          <el-input v-model="dataForm.id" clearable placeholder=""/>
         </el-form-item>
-        <el-form-item label="模板名称" prop="templateName">
-          <el-input v-model="dataForm.templateName" clearable placeholder=""/>
+        <el-form-item label="模板名称" prop="title">
+          <el-input v-model="dataForm.title" clearable placeholder=""/>
         </el-form-item>
         <el-form-item label="发货地址" prop="spuLocation">
           <el-input v-model="dataForm.spuLocation" clearable placeholder=""/>
@@ -110,29 +101,40 @@
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="计费首次数量" prop="defaultFirstNum">
-          <el-input v-model.number="dataForm.defaultFirstNum" clearable placeholder="">
-            <template slot="append">件</template>
+        <el-form-item v-if="0 !== dataForm.isFree" label="计费首次数量" prop="defaultFirstWeight">
+          <el-input v-model.number="dataForm.defaultFirstWeight" clearable placeholder="">
+            <template slot="append">件
+              <el-tooltip class="item" effect="dark" content="当用户购买商品数量小于 ‘这个数’ 就支付默认首次发货价格的运费" placement="top-start">
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </template>
           </el-input>
         </el-form-item>
-        <el-form-item label="计费首次价格" prop="defaultFirstPrice">
+        <el-form-item v-if="0 !== dataForm.isFree" label="计费首次价格" prop="defaultFirstPrice">
           <el-input v-model.number="dataForm.defaultFirstPrice" clearable placeholder="">
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="计费续件数量" prop="defaultContinueNum">
-          <el-input v-model.number="dataForm.defaultContinueNum" clearable placeholder="">
-            <template slot="append">件</template>
-          </el-input>
+        <el-form-item v-if="0 !== dataForm.isFree" label="计费续件数量" prop="defaultContinueWeight">
+          <el-input v-model.number="dataForm.defaultContinueWeight" clearable placeholder="">
+            <template slot="append">件
+              <el-tooltip class="item" effect="dark" content="当用户购买数量高于 ‘首次发货数量’ 每多 N 件，就须额外支付 ‘续件价格’" placement="top-start">
+                <i class="el-icon-question" />
+              </el-tooltip>
+          </template></el-input>
         </el-form-item>
-        <el-form-item label="计费续件价格" prop="defaultContinuePrice">
+        <el-form-item v-if="0 !== dataForm.isFree" label="计费续件价格" prop="defaultContinuePrice">
           <el-input v-model.number="dataForm.defaultContinuePrice" clearable placeholder="">
-            <template slot="append">元</template>
+            <template slot="append">元
+              <el-tooltip class="item" effect="dark" content="若不需要计件额外算运费，则直接填0即可" placement="top-start">
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </template>
           </el-input>
         </el-form-item>
-        <el-form-item label="指定地区价格" prop="freightTemplateCarriageDOList" style="width:150%">
+        <el-form-item label="指定地区价格" prop="carriageDOList" style="width:150%">
           <el-button :plain="true" type="primary" @click="handleSpecified">添加</el-button>
-          <el-table :data="dataForm.freightTemplateCarriageDOList">
+          <el-table :data="dataForm.carriageDOList">
             <el-table-column v-if="dialogStatus==='update'" property="id" label="指定地区ID" />
             <el-table-column property="designatedArea" label="指定省份" />
             <el-table-column property="firstNum" label="首次数量" />
@@ -163,6 +165,11 @@
               label-width="100px"
               style="width: 400px; margin-left:50px;"
             >
+              <el-form-item label="指定地区ID" prop="id">
+                <el-input v-model.number="specForm.id" clearable >
+                  <template slot="append"/>
+                </el-input>
+              </el-form-item>
               <el-form-item label="包邮门栏" prop="freePrice">
                 <el-input v-model.number="specForm.freePrice" clearable >
                   <template slot="append">元</template>
@@ -214,16 +221,11 @@
   </div>
 </template>
 
-<style>
-</style>
-
 <script>
 import { listFreight, createFreight, deleteFreight, updateFreight } from '@/api/freight'
-import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
   name: 'Freight',
-  components: { Pagination },
   filters: {
     defaultFreePriceFilter(code) {
       if (code < 0) {
@@ -257,31 +259,28 @@ export default {
       callback()
     }
     return {
-      list: undefined,
-      total: 0,
+      list: [],
       listLoading: true,
-      carriage: undefined,
       dialogStatus: '',
       dialogFormVisible: false,
-      specList: undefined,
       specVisiable: false,
-      listQuery: {
-      },
+      carriageDOListData: [],
       textMap: { update: '编辑', create: '创建' },
       dataForm: {
-        templateId: undefined,
-        templateName: undefined,
+        id: undefined,
+        title: undefined,
         spuLocation: undefined,
         isFree: 1,
         deliveryDeadline: undefined,
         defaultFreePrice: undefined,
         defaultFirstPrice: undefined,
-        defaultFirstNum: undefined,
+        defaultFirstWeight: undefined,
         defaultContinuePrice: undefined,
-        defaultContinueNum: undefined,
-        freightTemplateCarriageDOList: []
+        defaultContinueWeight: undefined,
+        carriageDOList: []
       },
       specForm: {
+        id: undefined,
         designatedAreaList: [],
         designatedArea: undefined,
         freePrice: undefined,
@@ -292,15 +291,16 @@ export default {
       },
       provs: ['北京市', '天津市', '河北省', '山西省', '内蒙古自治区', '辽宁省', '吉林省', '黑龙江省', '上海市', '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省', '河南省', '湖北省', '湖南省', '广东省', '广西壮族自治区', '海南省', '重庆市', '四川省', '贵州省', '云南省', '西藏自治区', '陕西省', '甘肃省', '青海省', '宁夏回族自治区', '新疆维吾尔自治区', '台湾省', '香港特别行政区', '澳门特别行政区'],
       rules: {
-        templateName: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }],
+        title: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }],
         deliveryDeadline: [{ required: true, message: '发货期限不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
         defaultFreePrice: [{ required: true, message: '包邮门栏额度不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
-        defaultFirstNum: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
+        defaultFirstWeight: [{ required: true, message: '首次计费重量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
         defaultFirstPrice: [{ required: true, message: '首次计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
-        defaultContinueNum: [{ required: true, message: '续件计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
+        defaultContinueWeight: [{ required: true, message: '续件计费重量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
         defaultContinuePrice: [{ required: true, message: '续件计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }]
       },
       specRules: {
+        id: [{ required: true, message: '指定地区ID不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { trigger: 'blur' }],
         freePrice: [{ required: true, message: '包邮门栏额度不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
         firstNum: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
         firstMoney: [{ required: true, message: '首次计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
@@ -317,20 +317,21 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      listFreight(this.listQuery)
+      listFreight()
         .then(response => {
           response.data.data.forEach(item => {
-            item.freightTemplateDO.defaultContinueMoney = item.freightTemplateDO.defaultContinueMoney / 100
-            item.freightTemplateDO.defaultFirstMoney = item.freightTemplateDO.defaultFirstMoney / 100
-            item.freightTemplateDO.defaultFreePrice = item.freightTemplateDO.defaultFreePrice / 100
+            item.defaultContinuePrice = item.defaultContinuePrice / 100
+            item.defaultFirstPrice = item.defaultFirstPrice / 100
+            item.defaultFreePrice = item.defaultFreePrice / 100
 
-            item.freightTemplateCarriageDOList.forEach(carriageItem => {
+            item.carriageDOList.forEach(carriageItem => {
               carriageItem.freePrice = carriageItem.freePrice / 100
               carriageItem.firstMoney = carriageItem.firstMoney / 100
               carriageItem.continueMoney = carriageItem.continueMoney / 100
             })
           })
           this.list = response.data.data
+          console.log(this.list)
           this.listLoading = false
         })
         .catch(() => {
@@ -340,17 +341,17 @@ export default {
     },
     resetData() {
       this.dataForm = {
-        templateId: undefined,
-        templateName: undefined,
+        id: undefined,
+        title: undefined,
         spuLocation: undefined,
         isFree: 1,
         deliveryDeadline: undefined,
-        defaultFreePrice: undefined,
-        defaultFirstPrice: undefined,
-        defaultFirstNum: undefined,
-        defaultContinuePrice: undefined,
-        defaultContinueNum: undefined,
-        freightTemplateCarriageDOList: []
+        defaultFreePrice: 68,
+        defaultFirstPrice: 0,
+        defaultFirstWeight: 1,
+        defaultContinuePrice: 0,
+        defaultContinueWeight: 1,
+        carriageDOList: []
       }
     },
     resetSpec() {
@@ -365,12 +366,12 @@ export default {
       }
     },
     deleteBtn(row) {
-      this.$confirm('此操作将永久删除该运费模板---' + row.freightTemplateDO.templateName + '---, 是否继续?', '提示', {
+      this.$confirm('此操作将永久删除该运费模板---' + row.title + '---, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteFreight(row.freightTemplateDO.id)
+        deleteFreight(row.id)
           .then(response => {
             this.$notify.success({
               title: '成功',
@@ -400,11 +401,15 @@ export default {
     createData() {
       if (this.dataForm.isFree <= 0) {
         this.dataForm.defaultFreePrice = this.dataForm.isFree
+        if (this.dataForm.isFree === 0) {
+          this.dataForm.defaultFirstPrice = 0
+          this.dataForm.defaultContinuePrice = 0
+        }
       }
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.multiplyHundred(this.dataForm)
-          createFreight(this.dataForm)
+          const formData = this.multiplyHundred(this.dataForm)
+          createFreight(formData)
             .then(response => {
               this.getList()
               this.dialogFormVisible = false
@@ -433,17 +438,17 @@ export default {
     updateBtn(row) {
       this.resetData()
       this.dataForm = Object.assign({}, {
-        templateId: row.freightTemplateDO.id,
-        templateName: row.freightTemplateDO.templateName,
-        spuLocation: row.freightTemplateDO.spuLocation,
-        deliveryDeadline: row.freightTemplateDO.deliveryDeadline,
-        defaultFreePrice: row.freightTemplateDO.defaultFreePrice,
-        defaultFirstPrice: row.freightTemplateDO.defaultFirstMoney,
-        defaultFirstNum: row.freightTemplateDO.defaultFirstNum,
-        defaultContinuePrice: row.freightTemplateDO.defaultContinueMoney,
-        defaultContinueNum: row.freightTemplateDO.defaultContinueNum,
-        freightTemplateCarriageDOList: row.freightTemplateCarriageDOList,
-        isFree: row.freightTemplateDO.defaultFreePrice > 0 ? 1 : row.freightTemplateDO.defaultFreePrice
+        id: row.id,
+        title: row.title,
+        spuLocation: row.spuLocation,
+        deliveryDeadline: row.deliveryDeadline,
+        defaultFreePrice: row.defaultFreePrice,
+        defaultFirstPrice: row.defaultFirstMoney,
+        defaultFirstWeight: row.defaultFirstWeight,
+        defaultContinuePrice: row.defaultContinueMoney,
+        defaultContinueWeight: row.defaultContinueWeight,
+        carriageDOList: row.carriageDOList,
+        isFree: row.defaultFreePrice > 0 ? 1 : row.defaultFreePrice
       })
 
       this.dialogStatus = 'update'
@@ -455,11 +460,15 @@ export default {
     updateDate() {
       if (this.dataForm.isFree <= 0) {
         this.dataForm.defaultFreePrice = this.dataForm.isFree
+        if (this.dataForm.isFree === 0) {
+          this.dataForm.defaultFirstPrice = 0
+          this.dataForm.defaultContinuePrice = 0
+        }
       }
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.multiplyHundred(this.dataForm)
-          updateFreight(this.dataForm)
+          const formData = this.multiplyHundred(this.dataForm)
+          updateFreight(formData)
             .then(response => {
               this.getList()
               this.dialogFormVisible = false
@@ -482,7 +491,9 @@ export default {
         if (valid) {
           this.specForm.designatedArea = this.specForm.designatedAreaList.join(',')
           var temp = Object.assign({}, this.specForm)
-          this.dataForm.freightTemplateCarriageDOList.unshift(temp)
+          this.carriageDOListData.unshift(temp)
+          this.dataForm.carriageDOList = this.carriageDOListData
+          console.log(this.dataForm.carriageDOList)
           this.specVisiable = false
         }
       })
@@ -494,21 +505,23 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        const index = this.dataForm.freightTemplateCarriageDOList.indexOf(row)
-        this.dataForm.freightTemplateCarriageDOList.splice(index, 1)
+        const index = this.dataForm.carriageDOList.indexOf(row)
+        this.dataForm.carriageDOList.splice(index, 1)
       }).catch(() => {
         return false
       })
     },
     // 用于配合后台数据需要将提交数据乘以100
-    multiplyHundred(data) {
-      data.defaultFreePrice = data.defaultFreePrice * 100
-      data.defaultFirstPrice = data.defaultFirstPrice * 100
-      data.defaultContinuePrice = data.defaultContinuePrice * 100
-      for (let i = 0; i < data.freightTemplateCarriageDOList.length; i++) {
-        data.freightTemplateCarriageDOList[i].freePrice = data.freightTemplateCarriageDOList[i].freePrice * 100
-        data.freightTemplateCarriageDOList[i].firstMoney = data.freightTemplateCarriageDOList[i].firstMoney * 100
-        data.freightTemplateCarriageDOList[i].continueMoney = data.freightTemplateCarriageDOList[i].continueMoney * 100
+    multiplyHundred(rawData) {
+      // Object.assign 属于浅拷贝，故用JSON来解析
+      const data = JSON.parse(JSON.stringify(rawData))
+      data.defaultFreePrice = rawData.defaultFreePrice * 100
+      data.defaultFirstPrice = rawData.defaultFirstPrice * 100
+      data.defaultContinuePrice = rawData.defaultContinuePrice * 100
+      for (let i = 0; i < rawData.carriageDOList.length; i++) {
+        data.carriageDOList[i].freePrice = rawData.carriageDOList[i].freePrice * 100
+        data.carriageDOList[i].firstMoney = rawData.carriageDOList[i].firstMoney * 100
+        data.carriageDOList[i].continueMoney = rawData.carriageDOList[i].continueMoney * 100
       }
       return data
     }
@@ -516,3 +529,6 @@ export default {
 
 }
 </script>
+
+<style>
+</style>

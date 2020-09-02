@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 /**
@@ -12,6 +12,18 @@ import lombok.Data;
 public class CategoryDO extends SuperDO {
 
     private String title;
+
+    /**
+     * 存储当前类目所属的一级类目，不存在为空
+     */
+    @TableField("first_level_id")
+    private Long firstLevelId;
+
+    /**
+     * 存储当前类目所属的二级类目，不存在为空
+     */
+    @TableField("second_level_id")
+    private Long secondLevelId;
 
     @TableField("parent_id")
     private Long parentId;
@@ -28,6 +40,9 @@ public class CategoryDO extends SuperDO {
     @TableField("pic_url")
     private String picUrl;
 
+    /**
+     * 0,1,2三个等级
+     */
     private Integer level;
 
 }
