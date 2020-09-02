@@ -136,6 +136,11 @@ Redis安装可直接使用yum安装
 
 本项目后端由重庆驽驹科技有限公司开发，禁止未经授权用于商业用途。个人学习可免费使用。如需商业授权，请进DEMO小程序购买。
 
+1.淘宝授权：https://item.taobao.com/item.htm?spm=a2126o.11854294.0.0.5f164831jltJlx&id=615046003598 2.直接在小程序中购买商用授权商品
+
+已授权公司查询(由于是后面统计的，有些未统计到，请用订单号来添加)
+http://www.dobbinsoft.com/authorization.html
+
 ![证书](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/cert.jpg)
 
 前端代码使用的 mix.R 的开源模板，在此模板的基础上对接了Unimall后端Api，作者说不做商用限制，保留原地址，所以授权仅针对后端代码商用授权。
