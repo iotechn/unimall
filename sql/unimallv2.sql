@@ -640,7 +640,7 @@ INSERT INTO `unimall_dynamic_config` VALUES ('29', 'OPEN_SEARCH_CONFIG:accessKey
 INSERT INTO `unimall_dynamic_config` VALUES ('30', 'OPEN_SEARCH_CONFIG:accessKeySecret', 'xxxxxxxxxxxxxxxxxxxxxxxx', '2020-08-12 16:37:13', '2020-08-16 11:24:11');
 INSERT INTO `unimall_dynamic_config` VALUES ('31', 'OPEN_SEARCH_CONFIG:spuHost', 'http://opensearch-cn-shenzhen.aliyuncs.com', '2020-08-12 16:37:13', '2020-08-16 11:24:11');
 INSERT INTO `unimall_dynamic_config` VALUES ('32', 'OPEN_SEARCH_CONFIG:spuTableName', 'spu', '2020-08-12 16:37:13', '2020-08-16 11:24:11');
-INSERT INTO `unimall_dynamic_config` VALUES ('33', 'OPEN_SEARCH_CONFIG:enable', 'opensearch', '2020-08-13 11:15:15', '2020-08-16 11:24:11');
+INSERT INTO `unimall_dynamic_config` VALUES ('33', 'OPEN_SEARCH_CONFIG:enable', 'db', '2020-08-13 11:15:15', '2020-08-16 11:24:11');
 INSERT INTO `unimall_dynamic_config` VALUES ('34', 'OPEN_SEARCH_CONFIG:host', 'http://opensearch-cn-qingdao.aliyuncs.com', '2020-08-15 15:07:53', '2020-08-16 11:24:11');
 INSERT INTO `unimall_dynamic_config` VALUES ('35', 'OPEN_SEARCH_CONFIG:openSearchAccessKeyId', 'LTAIYje844VuvwKD', '2020-08-16 11:20:49', '2020-08-16 11:24:11');
 INSERT INTO `unimall_dynamic_config` VALUES ('36', 'OPEN_SEARCH_CONFIG:openSearchAccessKeySecret', 'xxxxxxxxxxxxxxxxxxxxxxxx', '2020-08-16 11:20:49', '2020-08-16 11:24:11');

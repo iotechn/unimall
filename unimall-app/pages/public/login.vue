@@ -109,7 +109,7 @@
 								that.logining = false
 								that.$store.commit('login', res.data)
 								uni.setStorageSync('userInfo', res.data)
-								if (that.$api.prePage().lodaData) {
+								if (that.$api.prePage().loadData) {
 									that.$api.prePage().loadData()
 								}
 								uni.navigateBack()
@@ -132,7 +132,7 @@
 						that.logining = false
 						that.$store.commit('login', res.data)
 						uni.setStorageSync('userInfo', res.data)
-						if (that.$api.prePage().lodaData) {
+						if (that.$api.prePage().loadData) {
 							that.$api.prePage().loadData()
 						}
 						uni.navigateBack()
@@ -167,7 +167,7 @@
 									that.$store.commit('login', res.data)
 									that.$api.setUserInfo(res.data)
 								
-									if (that.$api.prePage().lodaData) {
+									if (that.$api.prePage().loadData) {
 										that.$api.prePage().loadData()
 									}
 									uni.hideLoading()
@@ -177,7 +177,7 @@
 								that.$store.commit('login', res.data)
 								that.$api.setUserInfo(res.data)
 																
-								if (that.$api.prePage().lodaData) {
+								if (that.$api.prePage().loadData) {
 									that.$api.prePage().loadData()
 								}
 								uni.hideLoading()
@@ -224,7 +224,7 @@
 									})
 								},
 								complete: (e) => {
-									if (that.$api.prePage().lodaData) {
+									if (that.$api.prePage().loadData) {
 										that.$api.prePage().loadData()
 									}
 									uni.hideLoading()
@@ -244,7 +244,7 @@
 					prePath = page.__page__.path
 				}
 				window.location = 'https://open.weixin.qq.com/connect/oauth2/authorize?' 
-				+ 'appid=' + that.$api.defConfig().h5Appid + '&redirect_uri=' + escape(href) + '&response_type=code&scope=snsapi_userinfo&state=' + escape(prePath) + '#wechat_redirect'
+				+ 'appid=' + that.$api.config.h5Appid + '&redirect_uri=' + escape(href) + '&response_type=code&scope=snsapi_userinfo&state=' + escape(prePath) + '#wechat_redirect'
 			}
 		},
 

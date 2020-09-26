@@ -1,7 +1,9 @@
 package com.iotechn.unimall.data.config.search;
 
+import com.iotechn.unimall.data.properties.UnimallSearchEngineProperties;
 import com.iotechn.unimall.data.search.AliOpenSearchEngine;
 import com.iotechn.unimall.data.search.SearchEngine;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,9 +16,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SearchEngineConfig {
 
+    @Autowired
+    private UnimallSearchEngineProperties unimallSearchEngineProperties;
+
     @Bean
     public SearchEngine searchEngine() {
-        return new AliOpenSearchEngine();
+        if ("opensearch".equals(unimallSearchEngineProperties.getEnable())) {
+            return new AliOpenSearchEngine();
+        }
+        return null;
     }
 
 }

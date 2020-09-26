@@ -48,12 +48,6 @@ import java.util.stream.Collectors;
  */
 public class AliOpenSearchEngine extends AbstractSearchEngine implements InitializingBean {
 
-    private String accessKeyId = "LTAIYje844VuvwKD";
-
-    private String accessKeySecret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-
-    private String endpoint = "http://opensearch-cn-qingdao.aliyuncs.com";
-
     private OkHttpClient okHttpClient = new OkHttpClient();
 
     // RESTAPI HEADER 中 Content-Type 必为此值
@@ -110,11 +104,11 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
         // RequestBody requestBody = RequestBody.create(mediaType, "{}");
         Request request = new Request
                 .Builder()
-                .url(endpoint + url)
+                .url(this.unimallSearchEngineProperties.getOpenSearchHost() + url)
                 .get()
                 .addHeader("Content-MD5", "")
                 .addHeader("Content-Type", contentType)
-                .addHeader("Authorization", "OPENSEARCH " + this.accessKeyId + ":" + signature)
+                .addHeader("Authorization", "OPENSEARCH " + this.unimallSearchEngineProperties.getOpenSearchAccessKeyId() + ":" + signature)
                 .addHeader("X-Opensearch-Nonce", nonce)
                 .addHeader("Date", date).build();
         String json;
@@ -404,7 +398,7 @@ public class AliOpenSearchEngine extends AbstractSearchEngine implements Initial
                     + "x-opensearch-nonce:" + nonce + "\n"
                     + url;
             logger.info("request:\n" + beforeSha1);
-            byte[] bytes = Base64.getEncoder().encode(SHAUtil.hmacSHA1Encrypt(beforeSha1, accessKeySecret));
+            byte[] bytes = Base64.getEncoder().encode(SHAUtil.hmacSHA1Encrypt(beforeSha1, this.unimallSearchEngineProperties.getOpenSearchAccessKeySecret()));
             return new String(bytes, "utf-8");
         } catch (Exception e) {
             logger.error("[Ali OpenSearch] 签名加密 异常", e);

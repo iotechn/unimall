@@ -302,7 +302,7 @@ public class OrderServiceImpl implements OrderService {
                     FreightCalcModel.FreightAndWeight faw = new FreightCalcModel.FreightAndWeight();
                     faw.setId(k);
                     faw.setPrice(userLevel == UserLevelType.VIP.getCode() ? v.getVipPrice() : v.getPrice());
-                    faw.setWeight(v.getWeight());
+                    faw.setWeight(v.getWeight() * v.getNum());
                     faws.add(faw);
                 });
                 freightCalcModel.setFreightAndWeights(faws);

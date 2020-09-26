@@ -59,7 +59,7 @@ public class AdminAdvertServiceImpl implements AdminAdvertService {
     public String delete(Integer adType, Long adId, Long adminId) throws ServiceException {
         if (advertMapper.delete(new QueryWrapper<AdvertDO>()
                 .eq("id", adId)
-                .eq("ad_type", adType)) > 0) {
+                .eq("type", adType)) > 0) {
             this.clearCache(adType);
             return "ok";
         }
@@ -90,7 +90,7 @@ public class AdminAdvertServiceImpl implements AdminAdvertService {
     public Page<AdvertDO> list(Long adminId, Integer adType, Integer page, Integer limit, Integer status) throws ServiceException {
         QueryWrapper<AdvertDO> wrapper = new QueryWrapper<AdvertDO>();
         if (adType != null) {
-            wrapper.eq("ad_type", adType);
+            wrapper.eq("type", adType);
         }
         if (status != null) {
             wrapper.eq("status", status);

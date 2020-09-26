@@ -35,14 +35,14 @@ export function editAdvert(data) {
   })
 }
 
-export function deleteAdvert(id, adType) {
+export function deleteAdvert(id, type) {
   return request({
     method: 'post',
     data: Qs.stringify({
       _gp: 'admin.advert',
       _mt: 'delete',
       adId: id,
-      adType: adType
+      type: type
     })
   })
 }

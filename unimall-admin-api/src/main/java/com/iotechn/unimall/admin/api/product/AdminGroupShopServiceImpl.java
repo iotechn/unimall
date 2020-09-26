@@ -288,7 +288,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
                         BeanUtils.copyProperties(skuDO, groupShopSkuDTO);
                         groupShopSkuDTO.setTitle(skuDO.getTitle());
                         return groupShopSkuDTO;
-                    }).collect(Collectors.toList());
+                    }).sorted((o1, o2) -> (int)(o1.getSkuId().longValue() - o2.getSkuId().longValue())).collect(Collectors.toList());
                     groupShopDTO.setGroupShopSkuDTOList(groupShopSkuDTOList);
                     return groupShopDTO;
                 });

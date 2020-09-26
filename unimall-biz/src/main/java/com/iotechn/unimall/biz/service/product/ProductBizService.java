@@ -55,7 +55,7 @@ public class ProductBizService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    @Autowired
+    @Autowired(required = false)
     private SearchEngine searchEngine;
 
 

@@ -184,7 +184,7 @@
           <el-table-column property="skuGroupShopPrice" label="团购价格/元" />
           <el-table-column align="center" label="操作" width="100" class-name="small-padding fixed-width" >
             <template slot-scope="scope">
-              <el-button type="primary" size="mini" @click="openSkuGroupShopPriceUpdateDialog(scope.row)">更新</el-button>
+              <el-button type="primary" size="mini" @click="openSkuGroupShopPriceUpdateDialog(scope.row, scope.$index)">更新</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -221,7 +221,7 @@
           style="width: 400px; margin-left:50px;"
         >
           <el-form-item label="团购价格" >
-            <el-input-number v-model="batchSkuUpdatePrice" :precision="2" controls-position="right" />元
+            <el-input-number v-model="skuForm.skuGroupShopPrice" :precision="2" controls-position="right" />元
           </el-form-item>
           <el-form-item label="现价">
             {{ skuForm.price }}元
@@ -294,6 +294,7 @@ export default {
       goodsOption: undefined,
       groupShopUpdateSkuPriceDialog: false,
       skuForm: {},
+      skuIndex: undefined,
       batchSkuUpdateDialogVisible: false,
       batchSkuUpdatePrice: undefined
     }
@@ -496,12 +497,15 @@ export default {
 
       this.dialogFormVisible = false
     },
-    openSkuGroupShopPriceUpdateDialog(data) {
+    openSkuGroupShopPriceUpdateDialog(data, index) {
       this.skuForm = undefined
       this.groupShopUpdateSkuPriceDialog = true
-      this.skuForm = data
+      this.skuForm = Object.assign({}, data)
+      this.skuIndex = index
     },
-    skuGroupShopUpdate(data) {
+    skuGroupShopUpdate() {
+      console.log(this.skuForm)
+      this.dataForm.skuList[this.skuIndex].skuGroupShopPrice = this.skuForm.skuGroupShopPrice
       this.groupShopUpdateSkuPriceDialog = false
     },
     handleBatchSkuUpdate() {
