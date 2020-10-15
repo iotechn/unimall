@@ -112,15 +112,10 @@ public class AddressServiceImpl implements AddressService {
         Date now = new Date();
         if (defaultAddress != 0) {
             defaultAddress = 1;
-            List<AddressDO> addressDOS = addressMapper.selectList(
-                    new QueryWrapper<AddressDO>()
-                            .eq("user_id", userId)
-                            .eq("default_address", 1));
-            if (CollectionUtils.isEmpty(addressDOS)) {
-                AddressDO preDefault = addressDOS.get(0);
-                preDefault.setDefaultAddress(0);
-                addressMapper.updateById(preDefault);
-            }
+            // 将所有地址更新为非默认
+            AddressDO updateAddressDO = new AddressDO();
+            updateAddressDO.setDefaultAddress(0);
+            addressMapper.update(updateAddressDO, new QueryWrapper<AddressDO>().eq("user_id", userId));
         }
         addressDO.setDefaultAddress(defaultAddress);
         addressDO.setGmtUpdate(now);

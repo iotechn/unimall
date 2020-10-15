@@ -5,6 +5,7 @@
 			<text class="tit">联系人</text>
 			<input class="input" type="text" v-model="addressData.consignee" placeholder="收货人姓名" placeholder-class="placeholder" />
 		</view>
+		
 		<view class="row b-b">
 			<text class="tit">手机号</text>
 			<input class="input" type="number" v-model="addressData.phone" placeholder="收货人手机号码" placeholder-class="placeholder" />
@@ -17,6 +18,7 @@
 			</input>
 			<text class="yticon icon-shouhuodizhi"></text>
 		</view>
+		
 		<view class="row b-b"> 
 			<text class="tit">详细</text>
 			<input class="input" type="text" v-model="addressData.address" placeholder="街道、楼号、门牌" placeholder-class="placeholder" />
@@ -120,7 +122,7 @@
 				
 				//this.$api.msg(`地址${this.manageType=='edit' ? '修改': '添加'}成功`);
 				if (that.manageType === 'edit') {
-					that.$api.request('address', 'updateAddress', {
+					that.$api.request('address', 'edit', {
 						...that.addressData,
 						addressId : that.addressData.id
 					}).then(res => {

@@ -285,24 +285,22 @@ public class OrderServiceImpl implements OrderService {
                 // 获取邮费
                 FreightCalcModel freightCalcModel = new FreightCalcModel();
                 // 将SKU按照不同的运费模板进行分组
-                Map<Long, OrderCalcSkuModel> freightTemplateCalcMap = orderCalcSkuList
+                Map<Long, List<OrderCalcSkuModel>> freightTemplateCalcMap = orderCalcSkuList
                         .stream()
-                        .collect(Collectors.toMap(OrderCalcSkuModel::getFreightTemplateId,
-                                v -> v,
-                                (c1, c2) -> {
-                                    // 将同组的价格和重量相累加
-                                    c1.setWeight(c1.getWeight() + c2.getWeight());
-                                    c1.setPrice(c1.getPrice() + c2.getPrice());
-                                    c1.setVipPrice(c1.getVipPrice() + c2.getVipPrice());
-                                    return c1;
-                                }));
+                        .collect(Collectors.groupingBy(OrderCalcSkuModel::getFreightTemplateId));
                 // 获取SKU数量映射表
                 List<FreightCalcModel.FreightAndWeight> faws = new LinkedList<>();
                 freightTemplateCalcMap.forEach((k, v) -> {
                     FreightCalcModel.FreightAndWeight faw = new FreightCalcModel.FreightAndWeight();
                     faw.setId(k);
-                    faw.setPrice(userLevel == UserLevelType.VIP.getCode() ? v.getVipPrice() : v.getPrice());
-                    faw.setWeight(v.getWeight() * v.getNum());
+                    int weight = 0;
+                    int price = 0;
+                    for (OrderCalcSkuModel orderCalcSkuModel : v) {
+                        weight += orderCalcSkuModel.getWeight() * orderCalcSkuModel.getNum();
+                        price += (userLevel == UserLevelType.VIP.getCode() ? orderCalcSkuModel.getVipPrice() : orderCalcSkuModel.getPrice()) * orderCalcSkuModel.getNum();
+                    }
+                    faw.setPrice(price);
+                    faw.setWeight(weight);
                     faws.add(faw);
                 });
                 freightCalcModel.setFreightAndWeights(faws);
@@ -650,8 +648,8 @@ public class OrderServiceImpl implements OrderService {
             int weight = 0;
             int price = 0;
             for (OrderRequestSkuDTO skuDTO : v) {
-                weight += skuDTO.getWeight();
-                price += user.getLevel() == UserLevelType.VIP.getCode() ? skuDTO.getVipPrice() : skuDTO.getPrice();
+                weight += skuDTO.getWeight() * skuDTO.getNum();
+                price += (user.getLevel() == UserLevelType.VIP.getCode() ? skuDTO.getVipPrice() : skuDTO.getPrice()) * skuDTO.getNum();
             }
             faw.setWeight(weight);
             faw.setPrice(price);
