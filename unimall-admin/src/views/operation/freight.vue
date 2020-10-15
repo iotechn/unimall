@@ -101,10 +101,10 @@
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
-        <el-form-item v-if="0 !== dataForm.isFree" label="计费首次数量" prop="defaultFirstWeight">
+        <el-form-item v-if="0 !== dataForm.isFree" label="计费首次重量" prop="defaultFirstWeight">
           <el-input v-model.number="dataForm.defaultFirstWeight" clearable placeholder="">
-            <template slot="append">件
-              <el-tooltip class="item" effect="dark" content="当用户购买商品数量小于 ‘这个数’ 就支付默认首次发货价格的运费" placement="top-start">
+            <template slot="append">克
+              <el-tooltip class="item" effect="dark" content="当用户购买商品重量小于 ‘这个数’ 就支付默认首次发货价格的运费" placement="top-start">
                 <i class="el-icon-question" />
               </el-tooltip>
             </template>
@@ -115,10 +115,10 @@
             <template slot="append">元</template>
           </el-input>
         </el-form-item>
-        <el-form-item v-if="0 !== dataForm.isFree" label="计费续件数量" prop="defaultContinueWeight">
+        <el-form-item v-if="0 !== dataForm.isFree" label="计费续件重量" prop="defaultContinueWeight">
           <el-input v-model.number="dataForm.defaultContinueWeight" clearable placeholder="">
-            <template slot="append">件
-              <el-tooltip class="item" effect="dark" content="当用户购买数量高于 ‘首次发货数量’ 每多 N 件，就须额外支付 ‘续件价格’" placement="top-start">
+            <template slot="append">克
+              <el-tooltip class="item" effect="dark" content="当用户购买重量高于 ‘首次发货重量’ 每多 N 件，就须额外支付 ‘续件价格’" placement="top-start">
                 <i class="el-icon-question" />
               </el-tooltip>
           </template></el-input>
@@ -137,9 +137,9 @@
           <el-table :data="dataForm.carriageDOList">
             <el-table-column v-if="dialogStatus==='update'" property="id" label="指定地区ID" />
             <el-table-column property="designatedArea" label="指定省份" />
-            <el-table-column property="firstNum" label="首次数量" />
+            <el-table-column property="firstWeight" label="首次重量" />
             <el-table-column property="firstMoney" label="首次价格" />
-            <el-table-column property="continueNum" label="续件数量" />
+            <el-table-column property="continueWeight" label="续件重量" />
             <el-table-column property="continueMoney" label="续件价格" />
             <el-table-column property="freePrice" label="满额包邮门栏" />
             <el-table-column
@@ -175,8 +175,8 @@
                   <template slot="append">元</template>
                 </el-input>
               </el-form-item>
-              <el-form-item label="首次数量" prop="firstNum">
-                <el-input v-model.number="specForm.firstNum" clearable >
+              <el-form-item label="首次重量" prop="firstWeight">
+                <el-input v-model.number="specForm.firstWeight" clearable >
                   <template slot="append">件</template>
                 </el-input>
               </el-form-item>
@@ -185,8 +185,8 @@
                   <template slot="append">元</template>
                 </el-input>
               </el-form-item>
-              <el-form-item label="续件数量" prop="continueNum">
-                <el-input v-model.number="specForm.continueNum" placeholder="" clearable>
+              <el-form-item label="续件重量" prop="continueWeight">
+                <el-input v-model.number="specForm.continueWeight" placeholder="" clearable>
                   <template slot="append">件</template>
                 </el-input>
               </el-form-item>
@@ -284,9 +284,9 @@ export default {
         designatedAreaList: [],
         designatedArea: undefined,
         freePrice: undefined,
-        firstNum: undefined,
+        firstWeight: undefined,
         firstMoney: undefined,
-        continueNum: undefined,
+        continueWeight: undefined,
         continueMoney: undefined
       },
       provs: ['北京市', '天津市', '河北省', '山西省', '内蒙古自治区', '辽宁省', '吉林省', '黑龙江省', '上海市', '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省', '河南省', '湖北省', '湖南省', '广东省', '广西壮族自治区', '海南省', '重庆市', '四川省', '贵州省', '云南省', '西藏自治区', '陕西省', '甘肃省', '青海省', '宁夏回族自治区', '新疆维吾尔自治区', '台湾省', '香港特别行政区', '澳门特别行政区'],
@@ -302,9 +302,9 @@ export default {
       specRules: {
         id: [{ required: true, message: '指定地区ID不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { trigger: 'blur' }],
         freePrice: [{ required: true, message: '包邮门栏额度不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
-        firstNum: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
+        firstWeight: [{ required: true, message: '首次计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
         firstMoney: [{ required: true, message: '首次计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
-        continueNum: [{ required: true, message: '续件计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
+        continueWeight: [{ required: true, message: '续件计费数量不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isNum, trigger: 'blur' }],
         continueMoney: [{ required: true, message: '续件计费价格不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { validator: isPrice, trigger: 'blur' }],
         designatedAreaList: [{ required: true, message: '至少选择一个地区', trigger: 'blur' }]
       }
@@ -359,9 +359,9 @@ export default {
         designatedAreaList: [],
         designatedArea: undefined,
         freePrice: undefined,
-        firstNum: undefined,
+        firstWeight: undefined,
         firstMoney: undefined,
-        continueNum: undefined,
+        continueWeight: undefined,
         continueMoney: undefined
       }
     },
@@ -443,9 +443,9 @@ export default {
         spuLocation: row.spuLocation,
         deliveryDeadline: row.deliveryDeadline,
         defaultFreePrice: row.defaultFreePrice,
-        defaultFirstPrice: row.defaultFirstMoney,
+        defaultFirstPrice: row.defaultFirstPrice,
         defaultFirstWeight: row.defaultFirstWeight,
-        defaultContinuePrice: row.defaultContinueMoney,
+        defaultContinuePrice: row.defaultContinuePrice,
         defaultContinueWeight: row.defaultContinueWeight,
         carriageDOList: row.carriageDOList,
         isFree: row.defaultFreePrice > 0 ? 1 : row.defaultFreePrice
