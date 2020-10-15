@@ -72,7 +72,7 @@
 			title="退款" 
 			@cancel="refundShow = false" 
 			@confirm="refundConfirm">
-			<input v-model="inputRefundReason" style="margin:20upx" placeholder="简要描述退款理由.." />
+			<input v-show="refundShow" v-model="inputRefundReason" style="margin:20upx" placeholder="简要描述退款理由.." />
 		</neil-modal>
 	</view>
 </template>

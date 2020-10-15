@@ -173,7 +173,7 @@
 				this.keyword = key;
 				this.saveKeyword(key); //保存为历史 
 				uni.navigateTo({
-					url: `/pages/product/list?keywords=${key}`
+					url: `/pages/product/list?keyword=${key}`
 				})
 			},
 			//保存关键字到历史记录
