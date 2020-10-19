@@ -49,15 +49,15 @@ QQ讨论群：656676341(1群已满) 940197916(2群) (进群前，请在网页右
   - 扫描下面二维码体验不同终端
   
 
-![qr](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/qr.jpg)
+![qr](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/qr.png)
 
 - Pages
 
 ![front](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/front.jpg)
 
 - Admin
-  - 后台演示地址: [http://admin.unimall.iotechn.com](http://admin.unimall.iotechn.com/)
-  - 登录名:guest 密码:123456 验证码:666666 (guest仅有只读权限)
+  - 后台演示地址: [http://unimallv2.iotechn.com/](http://unimallv2.iotechn.com/)
+  - 登录名:guest 密码:123456 验证码:666666 (guest仅有只读权限，无读配置权限)
 - Pages
 
 ![front](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/b1.png)
