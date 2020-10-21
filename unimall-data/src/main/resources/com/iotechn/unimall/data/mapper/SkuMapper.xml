@@ -87,8 +87,4 @@
             AND k.spu_id = p.id
     </select>
 
-    <update id="decStock">
-        UPDATE unimall_sku SET stock = stock - #{num} WHERE id = #{skuId}
-    </update>
-
 </mapper>

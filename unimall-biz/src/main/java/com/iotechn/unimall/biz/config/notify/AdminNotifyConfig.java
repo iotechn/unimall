@@ -28,7 +28,7 @@ public class AdminNotifyConfig {
         } else if ("uninotify".equalsIgnoreCase(unimallAdminNotifyProperties.getEnable())) {
             return new UniNotifyAdminNotifyBizServiceImpl();
         } else {
-            return null;
+            return new MockAdminNotifyBizServiceImpl();
         }
     }
 

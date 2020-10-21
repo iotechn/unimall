@@ -273,7 +273,7 @@ public class ProductBizService {
      * @param skuStockMap
      */
     public void decSkuStock(Map<Long, Integer> skuStockMap) {
-        skuStockMap.forEach((k, v) -> skuMapper.decStock(k, v));
+        skuStockMap.forEach((k, v) -> skuMapper.decSkuStock(k, v));
     }
 
     @Autowired
