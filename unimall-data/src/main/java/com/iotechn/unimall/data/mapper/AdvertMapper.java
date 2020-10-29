@@ -14,7 +14,4 @@ import java.util.List;
  */
 public interface AdvertMapper extends IMapper<AdvertDO> {
 
-    public List<AdvertDO> getAdvertByTypeAndStatus(@Param("adType") Integer adType, @Param("status")Integer Status, @Param("offset")Integer offset, @Param("size")Integer size);
-
-    public List<AdvertDO> getAllAdvert(@Param("offset")Integer offset, @Param("size")Integer size);
 }

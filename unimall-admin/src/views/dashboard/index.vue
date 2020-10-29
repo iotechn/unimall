@@ -77,7 +77,7 @@ export default {
       const areaChart = echarts.init(document.getElementById('areaChart'))
       const channelChart = echarts.init(document.getElementById('channelChart'))
       this.waitStockCount = response.data.data.waitStockCount
-      this.productCount = response.data.data.productCount
+      this.productCount = response.data.data.goodsCount
       // 每日订单走势
       orderChart.setOption({
         title: { text: '7日订单' },

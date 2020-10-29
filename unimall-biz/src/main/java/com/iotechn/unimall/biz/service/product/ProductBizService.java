@@ -32,6 +32,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,17 +68,22 @@ public class ProductBizService {
     private static final Logger logger = LoggerFactory.getLogger(ProductBizService.class);
 
     static {
-        Field[] fields = SpuDO.class.getFields();
-        SPU_EXCLUDE_DETAIL_FIELDS = new String[fields.length];
+        Field[] fields = SpuDO.class.getDeclaredFields();
+        List<String> tempList = new ArrayList<>();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
             TableField annotation = field.getAnnotation(TableField.class);
+            String name;
             if (annotation != null) {
-                SPU_EXCLUDE_DETAIL_FIELDS[i] = annotation.value();
+                name = annotation.value();
             } else {
-                SPU_EXCLUDE_DETAIL_FIELDS[i] = field.getName();
+                name = field.getName();
+            }
+            if (!name.equals("detail")) {
+                tempList.add(name);
             }
         }
+        SPU_EXCLUDE_DETAIL_FIELDS = tempList.toArray(new String[0]);
     }
 
     /**

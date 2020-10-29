@@ -221,7 +221,11 @@
             "path":"config",
             "meta":{
                "noCache":true,
-               "title":"系统配置"
+               "title":"系统配置",
+               "perms":[
+                  "sys:config:get",
+                  "sys:config:save"
+               ]
             },
             "name":"config",
             "page":"/sys/config"

@@ -69,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
-        if (categoryId <= 0) {
+        if (categoryId != null && categoryId <= 0) {
             categoryId = null;
         }
         return productBizService.getProductPage(pageNo, pageSize, categoryId, orderBy, isAsc, title);
