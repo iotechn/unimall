@@ -90,8 +90,24 @@ QQ讨论群：656676341(1群已满) 940197916(2群) (进群前，请在网页右
 
 ## Getting started
 
-
 服务器可根据自身业务来选购，单机环境推荐2C4G
+
+##### docker 运行：
+
+~~~shell
+1.拉去镜像：
+	docker pull registry.cn-hangzhou.aliyuncs.com/nujukeji/unimall:2.0
+2.运行容器（执行这一步是会xshell可能会断开连接，重连即可）：
+	docker run -it -d  -p 80:80 -p 8080:8080 --name unimall --privileged=true registry.cn-hangzhou.aliyuncs.com/nujukeji/unimall:2.0 /usr/sbin/init
+3.访问电脑配置hosts IP映射：
+	docker运行环境IP demo.easycampus.cn
+4.访问网址：
+	http://demo.easycampus.cn/
+5.运行命令：docker exec -it unimall /bin/bash
+  进入docker容器中 tail -100f /unimall.log 即可查看打印的发送验证码。
+~~~
+
+
 
 ##### ① 基础运行环境
 
