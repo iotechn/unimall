@@ -23,5 +23,5 @@
 
 1. 电脑必须安装node.js环境,CentOS安装步骤[NodeJs 8.15.0](https://github.com/iotechn/document-basic/blob/master/CentOS_Install_NodeJS_8.15.0.md)
 2. 在install前,请按步骤[IDEA忽略文件设置](https://www.cnblogs.com/sxdcgaq8080/p/9007883.html)忽略node_modules文件.
-3. 跳过验证码技巧: 先去数据库录入一个admin用户 --> 进入redis-cli : set admin_msg_code_(admin的电话) (验证码)  --> 这样你就可以输入自己设置的验证码进入.
+3. 验证码默认配置的是打印在控制台上。
 
