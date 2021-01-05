@@ -37,6 +37,8 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
 
     private Map<String, Map<String, Method>> methodCacheMap = new HashMap<>();
 
+    private Map<String,String> groupDescCacheMap = new HashMap<>();
+
     private ApplicationContext applicationContext;
 
     @Override
@@ -75,6 +77,7 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
             if (tempMap == null) {
                 tempMap = new TreeMap<>();
                 methodCacheMap.put(group, tempMap);
+                groupDescCacheMap.put(group,httpOpenApiAnnotation.description());
             }
             for (Method method : methods) {
                 HttpMethod httpMethod = method.getAnnotation(HttpMethod.class);
@@ -194,6 +197,7 @@ public class ApiManager implements InitializingBean,ApplicationContextAware {
             ApiDocumentModel.Group group = new ApiDocumentModel.Group();
             groups.add(group);
             group.setName(gpKey);
+            group.setDescription(groupDescCacheMap.getOrDefault(gpKey,""));
             List<ApiDocumentModel.Method> docMethods = new LinkedList<>();
             group.setMethods(docMethods);
             Map<String, Method> methodMap = methodCacheMap.get(gpKey);

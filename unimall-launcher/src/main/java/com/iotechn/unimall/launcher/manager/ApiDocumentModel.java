@@ -29,6 +29,11 @@ public class ApiDocumentModel {
          * 组名
          */
         private String name;
+
+        /**
+         * 描述
+         */
+        private String description;
         /**
          * 方法列表
          */
@@ -40,6 +45,14 @@ public class ApiDocumentModel {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
         }
 
         public List<Method> getMethods() {
