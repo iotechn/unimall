@@ -242,7 +242,7 @@ public class AdminServiceImpl implements AdminService {
         }
         AdminDO admin = adminMapper.selectOne(new QueryWrapper<AdminDO>().eq("username", username).eq("password", MD5Util.md5(password, username)));
         if (admin == null) {
-            throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXITS);
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXIST);
         }
         String code = GeneratorUtil.genSixVerifyCode();
         cacheComponent.putRaw(CacheConst.ADMIN_MSG_CODE + admin.getPhone(), code, 300);

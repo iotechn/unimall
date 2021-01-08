@@ -73,7 +73,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         SpuDO spuDO = spuMapper.selectById(spuId);
         List<SkuDO> skuDOList = skuMapper.selectList((new QueryWrapper<SkuDO>().eq("spu_id", spuId)));
         if (spuDO == null || CollectionUtils.isEmpty(skuDOList)) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXITS_OR_ONLY_SPU);
+            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST_OR_ONLY_SPU);
         }
         // 2.2 检验groupShop表中是否存在此商品
         Integer count = groupShopMapper.selectCount((new QueryWrapper<GroupShopDO>().eq("spu_id", spuId)));
@@ -135,7 +135,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         // 1. 参数校验
         GroupShopDO groupShopDO = groupShopMapper.selectById(id);
         if (groupShopDO == null) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXITS_OR_ONLY_SPU);
+            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST_OR_ONLY_SPU);
         }
 
         if (groupShopDO.getStatus() > 0) {
@@ -184,7 +184,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         // 2.2.校验团购
         GroupShopDO groupShopDO = groupShopMapper.selectById(id);
         if (groupShopDO == null) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXITS);
+            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST);
         }
 
         if (groupShopDO.getStatus() > 0) {
@@ -195,7 +195,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         SpuDO spuDO = spuMapper.selectById(spuId);
         List<SkuDO> skuDOList = skuMapper.selectList((new QueryWrapper<SkuDO>().eq("spu_id", spuId)));
         if (spuDO == null || CollectionUtils.isEmpty(skuDOList)) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXITS_OR_ONLY_SPU);
+            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST_OR_ONLY_SPU);
         }
 
         if (skuDOList.size() != groupShopSkuDOList.size()) {

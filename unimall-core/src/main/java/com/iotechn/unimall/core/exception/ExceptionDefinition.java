@@ -283,7 +283,7 @@ public class ExceptionDefinition {
             new ServiceExceptionDefinition(20012, "商品已经存在活动，不能继续添加");
 
 
-    public static final ServiceExceptionDefinition GROUP_SHOP_SPU_NO_EXITS_OR_ONLY_SPU =
+    public static final ServiceExceptionDefinition GROUP_SHOP_SPU_NO_EXIST_OR_ONLY_SPU =
             new ServiceExceptionDefinition(21001, "团购商品中对应的spu不存在或只有spu存在,没有对应sku存在");
 
     public static final ServiceExceptionDefinition GROUP_SHOP_SKU_NUMBER_ERROR =
@@ -310,7 +310,7 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition GROUP_SHOP_SKU_DELETE_SQL_QUERY_ERROR =
             new ServiceExceptionDefinition(21009, "团购商品sku删除出错");
 
-    public static final ServiceExceptionDefinition GROUP_SHOP_SPU_NO_EXITS =
+    public static final ServiceExceptionDefinition GROUP_SHOP_SPU_NO_EXIST =
             new ServiceExceptionDefinition(21010, "团购商品spu不存在");
 
     public static final ServiceExceptionDefinition GROUP_SHOP_SPU_UPDATE_SQL_QUERY_ERROR =
@@ -379,7 +379,7 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ADMIN_VERIFYCODE_ERROR =
             new ServiceExceptionDefinition(50008, "登陆验证码错误");
 
-    public static final ServiceExceptionDefinition ADMIN_USER_NOT_EXITS =
+    public static final ServiceExceptionDefinition ADMIN_USER_NOT_EXIST =
             new ServiceExceptionDefinition(50009, "请输入正确账号密码");
 
     public static final ServiceExceptionDefinition ADMIN_GUEST_NOT_NEED_VERIFY_CODE =

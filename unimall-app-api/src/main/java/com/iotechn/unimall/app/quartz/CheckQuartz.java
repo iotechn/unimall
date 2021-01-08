@@ -117,7 +117,7 @@ public class CheckQuartz {
                         groupShopDO.setStatus(StatusType.ACTIVE.getCode());
                         SpuDO spuDO = spuMapper.selectById(groupShopDO.getSpuId());
                         if (spuDO == null) {
-                            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXITS);
+                            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST);
                         }
 
                         // 1.2 检查商品是不是已经下架
