@@ -1,6 +1,7 @@
 package com.iotechn.unimall.app.api.appraise;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.iotechn.unimall.biz.service.storage.StorageBizService;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
@@ -56,6 +57,8 @@ public class AppraiseServiceImpl implements AppraiseService {
     private AppraiseBizService appraiseBizService;
     @Autowired
     private OrderBizService orderBizService;
+    @Autowired
+    private StorageBizService storageBizService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -142,11 +145,16 @@ public class AppraiseServiceImpl implements AppraiseService {
         if (appraiseMapper.delete(new QueryWrapper<AppraiseDO>()
                 .eq("id", appraiseId)
                 .eq("user_id", userId)) > 0) {
+            List<String> imgs = imgMapper.getImgs(BizType.APPRAISE.getCode(), appraiseId);
+            imgMapper.delete(new QueryWrapper<ImgDO>()
+                    .eq("biz_type",BizType.APPRAISE.getCode())
+                    .eq("biz_id",appraiseId));
             // 用户删除评价，需要删除对应产品的评论缓存
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
                     cacheComponent.delPrefixKey(CacheConst.PRT_APPRAISE_LIST + appraiseDO.getSpuId());
+                    storageBizService.delete(imgs);
                 }
             });
             return "ok";

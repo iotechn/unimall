@@ -1,6 +1,7 @@
 package com.iotechn.unimall.biz.service.storage;
 
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,6 +12,10 @@ import java.io.InputStream;
  */
 public interface StorageBizService {
 
-    public String upload(String fileName, InputStream is, long contentLength, String contentType);
+    // public String upload(String fileName, InputStream is, long contentLength, String contentType);
+
+    public void delete(String img);
+
+    public void delete(List<String> imgList);
 
 }

@@ -115,10 +115,10 @@ public class FileUploadController implements InitializingBean {
             objectMetadata.setContentType(file.getContentType());
             String ext = FilenameUtils.getExtension(file.getOriginalFilename());
             String uuid = GeneratorUtil.genFileName();
-            PutObjectRequest putObjectRequest = new PutObjectRequest(unimallAliOSSProperties.getBucket(), "bg/" + uuid + "." + ext, file.getInputStream(), objectMetadata);
+            PutObjectRequest putObjectRequest = new PutObjectRequest(unimallAliOSSProperties.getBucket(), unimallAliOSSProperties.getDir() + uuid + "." + ext, file.getInputStream(), objectMetadata);
             ossClient.putObject(putObjectRequest);
             Map<String, Object> data = new HashMap<>();
-            data.put("url", unimallAliOSSProperties.getBaseUrl() + "bg/" + uuid + "." + ext);
+            data.put("url", unimallAliOSSProperties.getBaseUrl() + unimallAliOSSProperties.getDir() + uuid + "." + ext);
             data.put("errno", 200);
             data.put("errmsg", "成功");
             return data;

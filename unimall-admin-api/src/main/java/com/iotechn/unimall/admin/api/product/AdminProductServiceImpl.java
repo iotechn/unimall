@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
+import com.iotechn.unimall.biz.service.storage.StorageBizService;
 import com.iotechn.unimall.core.exception.AdminServiceException;
 import com.iotechn.unimall.core.exception.ExceptionDefinition;
 import com.iotechn.unimall.core.exception.ServiceException;
@@ -74,6 +75,9 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     @Autowired(required = false)
     private SearchEngine searchEngine;
+
+    @Autowired
+    private StorageBizService storageBizService;
 
     /**
      * 后台低频接口，无需缓存，用于选择商品，需要
@@ -420,6 +424,9 @@ public class AdminProductServiceImpl implements AdminProductService {
         if (spuMapper.deleteById(spuId) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
         }
+        // 将需要删除的图片路径取出来
+        List<String> deleteImgList = imgMapper.getImgs(BizType.GOODS.getCode(), spuId);
+
         cartMapper.delete(new QueryWrapper<CartDO>().in("sku_id", skuMapper.getSkuIds(spuId)));
         skuMapper.delete(new QueryWrapper<SkuDO>().eq("spu_id", spuId));
         imgMapper.delete(new QueryWrapper<ImgDO>().eq("biz_id", spuId).eq("biz_type", BizType.GOODS.getCode()));
@@ -429,6 +436,7 @@ public class AdminProductServiceImpl implements AdminProductService {
             public void afterCommit() {
                 AdminProductServiceImpl.this.deleteSpuCache(spuDOBefore);
                 AdminProductServiceImpl.this.deleteSearchEngine(spuDOBefore.getId());
+                storageBizService.delete(deleteImgList);
             }
         });
         return "ok";
