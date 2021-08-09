@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.SkuMapper">
+
+    <update id="decSkuStock">
+        UPDATE unimall_sku SET stock = stock - #{stock} WHERE id = #{skuId} AND stock >= #{stock}
+    </update>
+
+    <update id="returnSkuStock">
+        UPDATE unimall_sku SET stock = stock + #{stock} WHERE id = #{skuId}
+    </update>
+
+    <select id="getSkuDTOById" resultType="com.iotechn.unimall.data.dto.goods.SkuDTO">
+        SELECT
+            k.id,
+            k.spu_id AS spuId,
+            k.bar_code AS barCode,
+            p.category_id AS categoryId,
+            k.title,
+            p.title AS spuTitle,
+            k.img,
+            p.img AS spuImg,
+            k.original_price AS originalPrice,
+            k.price,
+            k.vip_price AS vipPrice,
+            k.stock,
+            k.weight,
+            p.unit,
+            p.status,
+            k.gmt_update AS gmtUpdate,
+            k.gmt_create AS gmtCreate
+        FROM
+            unimall_sku AS k,
+            unimall_spu AS p
+        WHERE
+            k.id = #{skuId}
+            AND k.spu_id = p.id
+    </select>
+
+    <select id="getSkuIds" resultType="java.lang.Long">
+        SELECT id FROM unimall_sku WHERE spu_id = #{spuId}
+    </select>
+
+    <select id="selectSkuIdsBySpuIds" resultType="java.lang.Long">
+        SELECT id FROM unimall_sku WHERE spu_id in
+        <foreach collection="ids" separator="," open="(" close=")" item="spuId">
+            #{spuId}
+        </foreach>
+    </select>
+
+    <select id="getStockForUpdate" resultType="java.lang.Integer">
+        SELECT stock FROM unimall_sku WHERE id = #{skuId} FOR UPDATE
+    </select>
+
+    <select id="getSkuDTOListByIds" resultType="com.iotechn.unimall.data.dto.goods.SkuDTO">
+        SELECT
+            k.id,
+            k.spu_id AS spuId,
+            k.bar_code AS barCode,
+            p.freight_template_id AS freightTemplateId,
+            p.category_id AS categoryId,
+            p.activity_type AS activityType,
+            p.activity_id AS activityId,
+            p.gmt_activity_start AS gmtActivityStart,
+            p.gmt_activity_end AS gmtActivityEnd,
+            k.specification,
+            k.title,
+            p.title AS spuTitle,
+            k.img,
+            p.img AS spuImg,
+            k.original_price AS originalPrice,
+            k.price,
+            k.vip_price AS vipPrice,
+            k.stock,
+            k.weight,
+            p.unit AS unit,
+            k.gmt_update AS gmtUpdate,
+            k.gmt_create AS gmtCreate
+        FROM
+            unimall_sku AS k,
+            unimall_spu AS p
+        WHERE
+            k.id IN
+            <foreach collection="skuIds" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+            AND k.spu_id = p.id
+    </select>
+
+</mapper>

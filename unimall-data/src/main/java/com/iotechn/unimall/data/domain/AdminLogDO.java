@@ -1,7 +1,8 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import lombok.Data;
 
 import java.util.Date;
@@ -14,23 +15,23 @@ import java.util.Date;
  */
 @Data
 @TableName("unimall_admin_log")
+@ApiEntity(description = "管理员日志对象")
 public class AdminLogDO {
 
     private Long id;
 
-    @TableField("admin_id")
+    @ApiField(description = "管理员ID")
     private Long adminId;
 
-    @TableField("request_id")
+    @ApiField(description = "请求ID")
     private Long requestId;
 
-    @TableField("`group`")
-    private String group;
+    @ApiField(description = "API 分组")
+    private String apiGroup;
 
-    @TableField("`method`")
-    private String method;
+    @ApiField(description = "API 方法")
+    private String apiMethod;
 
-    @TableField("gmt_create")
     private Date gmtCreate;
 
 }

@@ -2,12 +2,13 @@ package com.iotechn.unimall.biz.service.freight;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.exception.ThirdPartServiceException;
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.exception.ThirdPartServiceException;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceItemDTO;
 import com.iotechn.unimall.data.enums.ShipCodeType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -51,7 +52,7 @@ public class KdniaoTrackQueryAPI implements ShipTraceQuery {
             shipTraceDTO.setErrcode(jsonObject.getInteger("State"));
             shipTraceDTO.setShipNo(shipNo);
             shipTraceDTO.setShipCode(shipCode);
-            shipTraceDTO.setShipName(ShipCodeType.getByCode(shipCode).getMsg());
+            shipTraceDTO.setShipName(BaseEnums.getByCode(shipCode, ShipCodeType.class).getMsg());
             shipTraceDTO.setErrmsg(jsonObject.getString("Reason"));
             msg = shipTraceDTO.getErrmsg();
             List<ShipTraceItemDTO> traces = new LinkedList<>();

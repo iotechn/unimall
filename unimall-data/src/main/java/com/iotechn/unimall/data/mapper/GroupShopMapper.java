@@ -1,12 +1,12 @@
 package com.iotechn.unimall.data.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.GroupShopDO;
 import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
-import com.iotechn.unimall.data.model.Page;
 import org.apache.ibatis.annotations.Param;
 
-public interface GroupShopMapper extends IMapper<GroupShopDO> {
+public interface GroupShopMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<GroupShopDO> {
 
     public Page<GroupShopDTO> getGroupShopPage(IPage page);
 
@@ -18,6 +18,6 @@ public interface GroupShopMapper extends IMapper<GroupShopDO> {
      * @param num 增加人数量
      * @return
      */
-    public Integer incCurrentNum(@Param("id") Long id,@Param("num") Integer num);
+    public Integer incCurrentNum(@Param("id") Long id, @Param("num") Integer num);
 
 }

@@ -9,5 +9,5 @@ import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
  * Date: 2019-07-07
  * Time: 下午3:28
  */
-public interface FreightTemplateCarriageMapper extends IMapper<FreightTemplateCarriageDO> {
+public interface FreightTemplateCarriageMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<FreightTemplateCarriageDO> {
 }

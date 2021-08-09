@@ -2,6 +2,7 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("unimall_freight_template")
-public class FreightTemplateDO extends SuperDO{
+public class FreightTemplateDO extends SuperDO {
 
     private String title;
 

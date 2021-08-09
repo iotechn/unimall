@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by rize on 2019/7/6.
  */
-public interface OrderSkuMapper extends IMapper<OrderSkuDO> {
+public interface OrderSkuMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<OrderSkuDO> {
 
     public List<OrderStatisticsDTO> statistics(@Param("orderIds") List<Long> orderIds);
 

@@ -1,9 +1,10 @@
 package com.iotechn.unimall.app.api.integral;
 
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.annotation.AspectCommonCache;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.app.api.advert.AdvertService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.annotation.AspectCommonCache;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.AdvertDO;
 import com.iotechn.unimall.data.domain.SpuDO;
@@ -12,7 +13,6 @@ import com.iotechn.unimall.data.dto.IntegralIndexDataDTO;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.enums.AdvertType;
 import com.iotechn.unimall.data.enums.AdvertUnionType;
-import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.properties.UnimallAdvertProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

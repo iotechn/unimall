@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.UserMapper">
+
+    <select id="login" resultType="com.iotechn.unimall.data.dto.UserDTO">
+        SELECT
+            id,
+            phone,
+            wx_mp_open_id AS wxMpOpenId,
+            nickname,
+            avatar_url AS avatarUrl,
+            `level`,
+            birthday,
+            gender,
+            gmt_last_login AS gmtLastLogin,
+            last_login_ip AS lastLoginIp,
+            `status`,
+            gmt_update AS gmtUpdate,
+            gmt_create AS gmtCreate
+        FROM
+            unimall_user
+        WHERE
+            phone = #{phone} AND `password` = #{cryptPassword}
+    </select>
+
+</mapper>

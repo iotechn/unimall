@@ -1,25 +1,29 @@
 package com.iotechn.unimall.app.api.user;
 
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.symmetric.AES;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.data.constant.CacheConst;
+import com.dobbinsoft.fw.core.enums.BaseEnums;
 import com.iotechn.unimall.biz.service.user.UserBizService;
-import com.iotechn.unimall.core.Const;
-import com.iotechn.unimall.core.exception.AppServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.exception.ThirdPartServiceException;
-import com.iotechn.unimall.data.notify.SMSClient;
-import com.iotechn.unimall.data.notify.SMSResult;
-import com.iotechn.unimall.core.util.GeneratorUtil;
-import com.iotechn.unimall.core.util.SHAUtil;
-import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.UserDO;
+import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.enums.UserLoginType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.UserMapper;
-import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
-import com.iotechn.unimall.data.util.SessionUtil;
+import com.dobbinsoft.fw.core.Const;
+import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.CoreExceptionDefinition;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.exception.ThirdPartServiceException;
+import com.dobbinsoft.fw.core.util.GeneratorUtil;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
+import com.dobbinsoft.fw.support.service.BaseService;
+import com.dobbinsoft.fw.support.sms.SMSClient;
+import com.dobbinsoft.fw.support.sms.SMSResult;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.apache.commons.codec.digest.Md5Crypt;
@@ -33,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +47,7 @@ import java.util.Map;
  * Created by rize on 2019/6/30.
  */
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -61,10 +66,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private StringRedisTemplate userRedisTemplate;
 
-    private OkHttpClient okHttpClient = new OkHttpClient();
-
     @Autowired
-    private UnimallWxAppProperties unimallWxProperties;
+    private FwWxAppProperties fwWxAppProperties;
+
+    private OkHttpClient okHttpClient = new OkHttpClient();
 
     @Override
     public String sendVerifyCode(String phone) throws ServiceException {
@@ -100,7 +105,6 @@ public class UserServiceImpl implements UserService {
         userDO.setGmtLastLogin(now);
         userDO.setGmtUpdate(now);
         userDO.setGmtCreate(now);
-        userDO.setLoginType(UserLoginType.REGISTER.getCode());
         userMapper.insert(userDO);
         //返回用户DTO
         cacheComponent.del(CacheConst.USER_VERIFY_CODE_PREFIX + phone);
@@ -183,28 +187,26 @@ public class UserServiceImpl implements UserService {
         }
         //检查帐号是否已经冻结
         if (userDTO.getStatus() == 0) {
-            throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
+            throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
         }
-        if (!StringUtils.isEmpty(raw) && UserLoginType.contains(loginType)) {
+        if (!StringUtils.isEmpty(raw) && BaseEnums.getByCode(loginType, UserLoginType.class) != null) {
             if (loginType == UserLoginType.MP_WEIXIN.getCode()) {
                 try {
                     JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
                     String code = thirdPartJsonObject.getString("code");
                     String body = okHttpClient.newCall(new Request.Builder()
-                            .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.unimallWxProperties.getMiniAppId() : this.unimallWxProperties.getAppId()) +
-                                    "&secret=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.unimallWxProperties.getMiniAppSecret() : this.unimallWxProperties.getAppSecret()) +
+                            .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.fwWxAppProperties.getMiniAppId() : this.fwWxAppProperties.getAppId()) +
+                                    "&secret=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.fwWxAppProperties.getMiniAppSecret() : this.fwWxAppProperties.getAppSecret()) +
                                     "&grant_type=authorization_code&js_code=" + code).get().build()).execute().body().string();
                     JSONObject jsonObject = JSONObject.parseObject(body);
                     Integer errcode = jsonObject.getInteger("errcode");
                     if (errcode == null || errcode == 0) {
-                        String miniOpenId = jsonObject.getString("openid");
                         //将此次登录的openId，暂且放入user的域里面，支付的时候会用到
-                        userDTO.setLoginType(loginType);
-                        userDTO.setOpenId(miniOpenId);
+                        userDTO.setWxMpOpenId(jsonObject.getString("openid"));
                     }
                 } catch (Exception e) {
                     logger.error("[微信第三方登录] 异常", e);
-                    throw new ThirdPartServiceException(ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getMsg(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+                    throw new ThirdPartServiceException(CoreExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION);
                 }
             }
         }
@@ -248,6 +250,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String registerOneKeyLoginKey(String encryption, String ip) throws ServiceException {
+        AES aes = SecureUtil.aes("MjZdfoLInbGG1va4vWvy5IrP8BOTIGFQe".getBytes());
+        String json = new String(aes.decrypt(encryption), StandardCharsets.UTF_8);
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        cacheComponent.putRaw(CacheConst.USER_ONE_KEY_LOGIN_TEMP_TOKEN + jsonObject.getString("tempToken"), jsonObject.getString("phone"), 90);
+        return "ok";
+    }
+
+    @Override
+    public UserDTO oneKeyLogin(String tempToken) throws ServiceException {
+        String phone = cacheComponent.getRaw(CacheConst.USER_ONE_KEY_LOGIN_TEMP_TOKEN + tempToken);
+        if (!StringUtils.isEmpty(phone)) {
+            // 登录并注册
+            // TODO
+
+        }
+        throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
+    }
+
+    @Override
     public String syncUserInfo(String nickname, String avatarUrl, Integer gender, Long birthday, String accessToken, Long userId) throws ServiceException {
         UserDO updateUserDO = new UserDO();
         updateUserDO.setId(userId);
@@ -259,7 +281,7 @@ public class UserServiceImpl implements UserService {
             updateUserDO.setBirthday(new Date(birthday));
         if (userMapper.updateById(updateUserDO) > 0) {
             //更新SESSION缓存
-            UserDTO user = SessionUtil.getUser();
+            UserDTO user = sessionUtil.getUser();
             if (!StringUtils.isEmpty(nickname)) {
                 user.setNickname(nickname);
             }
@@ -297,7 +319,7 @@ public class UserServiceImpl implements UserService {
             sb.append(url);
             //明文
             String content = sb.toString();
-            String signature = SHAUtil.sha256Encode(content);
+            String signature = SecureUtil.sha256(content);
             Map<String, Object> obj = new HashMap<>();
             obj.put("noncestr", noncestr);
             obj.put("timestamp", timestamp);
@@ -330,8 +352,8 @@ public class UserServiceImpl implements UserService {
         JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
         String code = thirdPartJsonObject.getString("code");
         String body = okHttpClient.newCall(new Request.Builder()
-                .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.unimallWxProperties.getMiniAppId() : this.unimallWxProperties.getAppId()) +
-                        "&secret=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.unimallWxProperties.getMiniAppSecret() : this.unimallWxProperties.getAppSecret()) +
+                .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.fwWxAppProperties.getMiniAppId() : this.fwWxAppProperties.getAppId()) +
+                        "&secret=" + (UserLoginType.MP_WEIXIN.getCode() == loginType ? this.fwWxAppProperties.getMiniAppSecret() : this.fwWxAppProperties.getAppSecret()) +
                         "&grant_type=authorization_code&js_code=" + code).get().build()).execute().body().string();
         JSONObject jsonObject = JSONObject.parseObject(body);
         Integer errcode = jsonObject.getInteger("errcode");
@@ -343,8 +365,7 @@ public class UserServiceImpl implements UserService {
                 //若用户为空，则注册此用户
                 Date now = new Date();
                 UserDO newUserDO = new UserDO();
-                newUserDO.setLoginType(loginType);
-                newUserDO.setOpenId(miniOpenId);
+                newUserDO.setWxMpOpenId(miniOpenId);
                 newUserDO.setLastLoginIp(ip);
                 newUserDO.setGmtLastLogin(now);
                 newUserDO.setGmtUpdate(now);
@@ -362,7 +383,7 @@ public class UserServiceImpl implements UserService {
             }
             //检查帐号是否已经冻结
             if (userDO.getStatus() == 0) {
-                throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
+                throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
             }
             String accessToken = GeneratorUtil.genSessionId();
             UserDTO userDTO = new UserDTO();
@@ -388,7 +409,7 @@ public class UserServiceImpl implements UserService {
         //H5 微信公众号网页登录
         String json = okHttpClient.newCall(
                 new Request.Builder().url("https://api.weixin.qq.com/sns/oauth2/access_token?appid="
-                        + this.unimallWxProperties.getH5AppId() + "&secret=" + this.unimallWxProperties.getH5AppSecret() + "&code=" + raw + "&grant_type=authorization_code").build()).execute().body().string();
+                        + this.fwWxAppProperties.getH5AppId() + "&secret=" + this.fwWxAppProperties.getH5AppSecret() + "&code=" + raw + "&grant_type=authorization_code").build()).execute().body().string();
         JSONObject jsonObject = JSONObject.parseObject(json);
         Integer errcode = jsonObject.getInteger("errcode");
         if (errcode == null || errcode == 0) {
@@ -411,11 +432,10 @@ public class UserServiceImpl implements UserService {
                 JSONObject userInfoJsonObject = JSONObject.parseObject(userInfoJson);
                 Date now = new Date();
                 UserDO newUserDO = new UserDO();
-                newUserDO.setLoginType(UserLoginType.H5_WEIXIN.getCode());
                 newUserDO.setNickname(userInfoJsonObject.getString("nickname"));
                 newUserDO.setAvatarUrl(userInfoJsonObject.getString("headimgurl"));
                 newUserDO.setGender(userInfoJsonObject.getInteger("sex"));
-                newUserDO.setOpenId(openid);
+                newUserDO.setWxH5OpenId(openid);
                 newUserDO.setLastLoginIp(ip);
                 newUserDO.setGmtLastLogin(now);
                 newUserDO.setGmtUpdate(now);
@@ -453,8 +473,7 @@ public class UserServiceImpl implements UserService {
             //创建新用户
             Date now = new Date();
             UserDO newUserDO = new UserDO();
-            newUserDO.setLoginType(UserLoginType.APP_WEIXIN.getCode());
-            newUserDO.setOpenId(openid);
+            newUserDO.setWxAppOpenId(openid);
             newUserDO.setLastLoginIp(ip);
             newUserDO.setGmtLastLogin(now);
             newUserDO.setGmtUpdate(now);
@@ -472,7 +491,7 @@ public class UserServiceImpl implements UserService {
         }
         //检查帐号是否已经冻结
         if (userDO.getStatus() == 0) {
-            throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTICE);
+            throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
         }
         String accessToken = GeneratorUtil.genSessionId();
         UserDTO userDTO = new UserDTO();

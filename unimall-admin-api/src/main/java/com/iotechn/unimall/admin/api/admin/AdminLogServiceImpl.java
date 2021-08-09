@@ -1,10 +1,10 @@
 package com.iotechn.unimall.admin.api.admin;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AdminLogDO;
 import com.iotechn.unimall.data.mapper.AdminLogMapper;
-import com.iotechn.unimall.data.model.Page;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -2,10 +2,8 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
-
-import java.security.KeyStore;
-import java.util.HashMap;
 
 /**
  * Created by rize on 2019/2/13.

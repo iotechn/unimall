@@ -1,10 +1,10 @@
 package com.iotechn.unimall.admin.api.address;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.mapper.AddressMapper;
-import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

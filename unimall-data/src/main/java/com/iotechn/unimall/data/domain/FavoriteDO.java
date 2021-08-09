@@ -2,6 +2,7 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
 /*
@@ -11,7 +12,7 @@ import lombok.Data;
 */
 @Data
 @TableName("unimall_favorite")
-public class FavoriteDO extends SuperDO{
+public class FavoriteDO extends SuperDO {
 
     @TableField("user_id")
     private Long userId;

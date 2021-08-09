@@ -5,21 +5,20 @@ package com.iotechn.unimall.app.api.appraise;
 @date  2019/7/6 - 10:18
 */
 
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.annotation.HttpParam;
-import com.iotechn.unimall.core.annotation.HttpParamType;
-import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.annotation.HttpMethod;
+import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
+import com.dobbinsoft.fw.core.annotation.HttpParam;
+import com.dobbinsoft.fw.core.annotation.HttpParamType;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.dto.appraise.AppraiseRequestDTO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
-import com.iotechn.unimall.data.model.Page;
 
 @HttpOpenApi(group = "appraise", description = "评价商品")
 public interface AppraiseService {
 
     /**
-     * microFix，此步骤应该移动到订单层面，订单通过消息通知商品增加评价
      * @param appraiseRequestDTO
      * @param userId
      * @return

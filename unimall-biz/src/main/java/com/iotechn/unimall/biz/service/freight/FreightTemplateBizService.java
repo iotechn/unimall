@@ -1,15 +1,15 @@
 package com.iotechn.unimall.biz.service.freight;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.core.exception.BizServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.CacheComponent;
+import com.dobbinsoft.fw.core.exception.BizServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.domain.FreightTemplateDO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.FreightTemplateCarriageMapper;
 import com.iotechn.unimall.data.mapper.FreightTemplateMapper;
 import com.iotechn.unimall.data.model.FreightCalcModel;

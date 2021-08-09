@@ -1,19 +1,19 @@
 package com.iotechn.unimall.app.api.coupon;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.LockComponent;
+import com.dobbinsoft.fw.support.model.KVModel;
 import com.iotechn.unimall.data.constant.LockConst;
-import com.iotechn.unimall.core.exception.AppServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.domain.CouponUserDO;
 import com.iotechn.unimall.data.dto.CouponDTO;
 import com.iotechn.unimall.data.dto.CouponUserDTO;
 import com.iotechn.unimall.data.enums.StatusType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.CouponMapper;
 import com.iotechn.unimall.data.mapper.CouponUserMapper;
-import com.iotechn.unimall.data.model.KVModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,14 +1,12 @@
 package com.iotechn.unimall.app.api.user;
 
-import com.iotechn.unimall.core.Const;
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.annotation.HttpParam;
-import com.iotechn.unimall.core.annotation.HttpParamType;
-import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.annotation.param.TextFormat;
-import com.iotechn.unimall.core.exception.ServiceException;
+
 import com.iotechn.unimall.data.dto.UserDTO;
+import com.dobbinsoft.fw.core.Const;
+import com.dobbinsoft.fw.core.annotation.*;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
+import com.dobbinsoft.fw.core.annotation.param.TextFormat;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 
 /**
  * Created by rize on 2019/6/30.
@@ -16,9 +14,9 @@ import com.iotechn.unimall.data.dto.UserDTO;
 @HttpOpenApi(group = "user", description = "用户服务")
 public interface UserService {
 
-    @HttpMethod(description = "发送验证码到用户手机")
+    @HttpMethod(description = "发送验证码到用户手机", rate = 10, rateLimit = RateLimitType.IP)
     public String sendVerifyCode(
-            @NotNull @TextFormat(length = 11) @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone) throws ServiceException;
+            @NotNull(message = "手机号不能为空") @TextFormat(length = 11) @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone) throws ServiceException;
 
     @HttpMethod(description = "用户注册")
     public String register(
@@ -40,7 +38,7 @@ public interface UserService {
             @NotNull @TextFormat(lengthMin = 8, lengthMax = 18, notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
             @NotNull @HttpParam(name = "verifyCode", type = HttpParamType.COMMON, description = "注册验证码") String verifyCode) throws ServiceException;
 
-    @HttpMethod(description = "用户登录")
+    @HttpMethod(description = "密码登录")
     public UserDTO login(
             @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
             @NotNull @TextFormat(lengthMin = 8, lengthMax = 18, notChinese = true) @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
@@ -58,6 +56,15 @@ public interface UserService {
             @NotNull @HttpParam(name = "loginType", type = HttpParamType.COMMON, description = "第三方代号") Integer loginType,
             @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "用户Ip") String ip,
             @NotNull @HttpParam(name = "raw", type = HttpParamType.COMMON, description = "第三方平台返回的数据") String raw) throws ServiceException;
+
+    @HttpMethod(description = "注册一键登录Key")
+    public String registerOneKeyLoginKey(
+            @NotNull @HttpParam(name = "encryption", type = HttpParamType.COMMON, description = "从UniCloud发过来的加密数据") String encryption,
+            @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "登录IP") String ip) throws ServiceException;
+
+    @HttpMethod(description = "本机手机号一键登录")
+    public UserDTO oneKeyLogin(
+            @NotNull @HttpParam(name = "tempToken", type = HttpParamType.COMMON, description = "临时token") String tempToken) throws ServiceException;
 
     @HttpMethod(description = "同步用户信息")
     public String syncUserInfo(

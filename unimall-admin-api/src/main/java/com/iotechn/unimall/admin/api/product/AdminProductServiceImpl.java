@@ -2,14 +2,15 @@ package com.iotechn.unimall.admin.api.product;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.CoreExceptionDefinition;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.storage.StorageClient;
 import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
-import com.iotechn.unimall.biz.service.storage.StorageBizService;
-import com.iotechn.unimall.core.exception.AdminServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.goods.AdminSpuDTO;
@@ -19,9 +20,8 @@ import com.iotechn.unimall.data.enums.AdvertUnionType;
 import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.enums.SpuStatusType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.*;
-import com.iotechn.unimall.data.model.Page;
-import com.iotechn.unimall.data.search.SearchEngine;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,11 +73,11 @@ public class AdminProductServiceImpl implements AdminProductService {
     @Autowired
     private ProductBizService productBizService;
 
-    @Autowired(required = false)
-    private SearchEngine searchEngine;
+//    @Autowired(required = false)
+//    private SearchEngine searchEngine;
 
     @Autowired
-    private StorageBizService storageBizService;
+    private StorageClient storageClient;
 
     /**
      * 后台低频接口，无需缓存，用于选择商品，需要
@@ -176,7 +176,7 @@ public class AdminProductServiceImpl implements AdminProductService {
         if (!CollectionUtils.isEmpty(existSkuDO)) {
             String spuIds = existSkuDO.stream().map(item -> item.getSpuId().toString()).collect(Collectors.joining(","));
             String skuIds = existSkuDO.stream().map(item -> item.getBarCode()).collect(Collectors.joining(","));
-            throw new AdminServiceException(ExceptionDefinition
+            throw new AdminServiceException(CoreExceptionDefinition
                     .buildVariableException(ExceptionDefinition.GOODS_CREATE_BARCODE_REPEAT, spuIds, skuIds));
         }
         // 2.1.插入主表
@@ -218,16 +218,16 @@ public class AdminProductServiceImpl implements AdminProductService {
         for (SkuDO skuDO : adminSpuDTO.getSkuList()) {
             cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
         }
-        // 4. 同步到搜索引擎
-        if (searchEngine != null) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    AdminProductServiceImpl.this.transmissionSearchEngine(spuDO.getId());
-                }
-            });
-
-        }
+        // 4. TODO 同步到搜索引擎
+//        if (searchEngine != null) {
+//            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+//                @Override
+//                public void afterCommit() {
+//                    AdminProductServiceImpl.this.transmissionSearchEngine(spuDO.getId());
+//                }
+//            });
+//
+//        }
         return "ok";
     }
 
@@ -436,7 +436,14 @@ public class AdminProductServiceImpl implements AdminProductService {
             public void afterCommit() {
                 AdminProductServiceImpl.this.deleteSpuCache(spuDOBefore);
                 AdminProductServiceImpl.this.deleteSearchEngine(spuDOBefore.getId());
-                storageBizService.delete(deleteImgList);
+                GlobalExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (String img : deleteImgList) {
+                            storageClient.delete(img);
+                        }
+                    }
+                });
             }
         });
         return "ok";
@@ -448,7 +455,7 @@ public class AdminProductServiceImpl implements AdminProductService {
                         .eq("union_type", AdvertUnionType.PRODUCT.getCode())
                         .in("union_value", ids).last("LIMIT 1"));
         if (!CollectionUtils.isEmpty(list1)) {
-            throw new AdminServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.GOODS_EXIST_ADVERT, list1.get(0).getTitle()));
+            throw new AdminServiceException(CoreExceptionDefinition.buildVariableException(ExceptionDefinition.GOODS_EXIST_ADVERT, list1.get(0).getTitle()));
         }
     }
 
@@ -620,22 +627,24 @@ public class AdminProductServiceImpl implements AdminProductService {
     }
 
     private void transmissionSearchEngine(Long id) {
-        if (searchEngine != null) {
-            GlobalExecutor.execute(() -> {
-                SpuDO spuFromDB = AdminProductServiceImpl.this.productBizService.getProductByIdFromDB(id);
-                searchEngine.dataTransmission(spuFromDB);
-            });
-        }
+        // TODO
+//        if (searchEngine != null) {
+//            GlobalExecutor.execute(() -> {
+//                SpuDO spuFromDB = AdminProductServiceImpl.this.productBizService.getProductByIdFromDB(id);
+//                searchEngine.dataTransmission(spuFromDB);
+//            });
+//        }
     }
 
     private void deleteSearchEngine(Long id) {
-        if (searchEngine != null) {
-            GlobalExecutor.execute(() -> {
-                SpuDO spuDO = new SpuDO();
-                spuDO.setId(id);
-                searchEngine.deleteData(spuDO);
-            });
-        }
+        // TODO
+//        if (searchEngine != null) {
+//            GlobalExecutor.execute(() -> {
+//                SpuDO spuDO = new SpuDO();
+//                spuDO.setId(id);
+//                searchEngine.deleteData(spuDO);
+//            });
+//        }
     }
 
 }

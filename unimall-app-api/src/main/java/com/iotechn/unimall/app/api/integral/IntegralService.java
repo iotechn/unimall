@@ -1,8 +1,8 @@
 package com.iotechn.unimall.app.api.integral;
 
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.annotation.HttpMethod;
+import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.iotechn.unimall.data.dto.IntegralIndexDataDTO;
 
 /**

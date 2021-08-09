@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.dto.order;
 
+import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
-import com.iotechn.unimall.data.dto.SuperDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import lombok.Data;
 

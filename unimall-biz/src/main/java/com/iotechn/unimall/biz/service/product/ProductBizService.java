@@ -2,22 +2,18 @@ package com.iotechn.unimall.biz.service.product;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.executor.GlobalExecutor;
+import com.dobbinsoft.fw.core.exception.BizServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
-import com.iotechn.unimall.core.exception.AppServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.goods.SkuDTO;
 import com.iotechn.unimall.data.dto.goods.SpuDTO;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
-import com.iotechn.unimall.data.model.Page;
-import com.iotechn.unimall.data.model.SearchWrapperModel;
-import com.iotechn.unimall.data.search.SearchEngine;
-import com.iotechn.unimall.data.search.exception.SearchEngineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -56,8 +52,8 @@ public class ProductBizService {
     @Autowired
     private CacheComponent cacheComponent;
 
-    @Autowired(required = false)
-    private SearchEngine searchEngine;
+//    @Autowired(required = false)
+//    private SearchEngine searchEngine;
 
 
     /**
@@ -100,28 +96,29 @@ public class ProductBizService {
      */
     public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         if (!StringUtils.isEmpty(title)) {
-            try {
-                if (this.searchEngine != null) {
-                    SearchWrapperModel searchWrapper =
-                            new SearchWrapperModel()
-                                    .div(pageNo, pageSize)
-                                    .like("title", title);
-                    if (categoryId != null && categoryId > 0) {
-                        searchWrapper.eq("category_id", categoryId);
-                    }
-                    if (orderBy != null && isAsc != null) {
-                        if (isAsc)
-                            searchWrapper.orderByAsc(orderBy);
-                        else
-                            searchWrapper.orderByDesc(orderBy);
-                    }
-                    Page<SpuDO> searchRes = searchEngine.search(searchWrapper, SpuDO.class);
-                    return searchRes;
-                }
-            } catch (SearchEngineException e) {
-                logger.error("[获取商品列表] 搜素引擎 异常", e);
-                throw new AppServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.SEARCH_ENGINE_INNER_EXCEPTION, e.getMessage()));
-            }
+            // TODO
+//            try {
+//                if (this.searchEngine != null) {
+//                    SearchWrapperModel searchWrapper =
+//                            new SearchWrapperModel()
+//                                    .div(pageNo, pageSize)
+//                                    .like("title", title);
+//                    if (categoryId != null && categoryId > 0) {
+//                        searchWrapper.eq("category_id", categoryId);
+//                    }
+//                    if (orderBy != null && isAsc != null) {
+//                        if (isAsc)
+//                            searchWrapper.orderByAsc(orderBy);
+//                        else
+//                            searchWrapper.orderByDesc(orderBy);
+//                    }
+//                    Page<SpuDO> searchRes = searchEngine.search(searchWrapper, SpuDO.class);
+//                    return searchRes;
+//                }
+//            } catch (SearchEngineException e) {
+//                logger.error("[获取商品列表] 搜素引擎 异常", e);
+//                throw new AppServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.SEARCH_ENGINE_INNER_EXCEPTION, e.getMessage()));
+//            }
             // 使用DB逻辑
             return this.getProductPageFromDB(pageNo, pageSize, categoryId, orderBy, isAsc, title);
         }
@@ -134,7 +131,7 @@ public class ProductBizService {
         } else if ("sales".equals(orderBy)) {
             zsetBucketKey = CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + categoryId;
         } else {
-            throw new AppServiceException(ExceptionDefinition.GOODS_ORDER_BY_WAY_ILLEGAL);
+            throw new BizServiceException(ExceptionDefinition.GOODS_ORDER_BY_WAY_ILLEGAL);
         }
         Page<String> page = cacheComponent.getZSetPage(zsetBucketKey, pageNo, pageSize, isAsc);
         if (page.getTotal() == 0) {
@@ -267,7 +264,7 @@ public class ProductBizService {
                 spuDTO.setCategoryIds(categoryFamily);
                 cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, spuDTO);
             } else {
-                throw new AppServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+                throw new BizServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
             }
         }
         return spuDTO;
@@ -333,15 +330,15 @@ public class ProductBizService {
                 spuDtoFromCache.setSales(isTheSame);
                 cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + k, spuDtoFromCache);
             }
-            // 3. 更新搜索引擎
-            final SpuDTO finalSpuDto = spuDtoFromCache;
-            GlobalExecutor.execute(() -> {
-                if (searchEngine != null) {
-                    SpuDO newSpuDO = new SpuDO();
-                    BeanUtils.copyProperties(finalSpuDto, newSpuDO);
-                    searchEngine.dataTransmission(newSpuDO);
-                }
-            });
+            // TODO 3. 更新搜索引擎
+//            final SpuDTO finalSpuDto = spuDtoFromCache;
+//            GlobalExecutor.execute(() -> {
+//                if (searchEngine != null) {
+//                    SpuDO newSpuDO = new SpuDO();
+//                    BeanUtils.copyProperties(finalSpuDto, newSpuDO);
+//                    searchEngine.dataTransmission(newSpuDO);
+//                }
+//            });
         });
     }
 

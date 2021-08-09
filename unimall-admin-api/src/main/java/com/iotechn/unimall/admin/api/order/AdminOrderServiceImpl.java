@@ -1,17 +1,17 @@
 package com.iotechn.unimall.admin.api.order;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.LockComponent;
+import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.service.WxPayService;
-import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
-import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
-import com.iotechn.unimall.core.exception.AdminServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.LockComponent;
+import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.domain.UserDO;
@@ -20,10 +20,10 @@ import com.iotechn.unimall.data.dto.order.OrderStatisticsDTO;
 import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.UserLoginType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
-import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import com.iotechn.unimall.data.properties.UnimallWxPayProperties;
@@ -137,7 +137,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
                     Long userId = orderDO.getUserId();
                     UserDO userDO = userBizService.getUserById(userId);
-                    Integer loginType = userDO.getLoginType();
+                    // TODO loginType 取消
+                    Integer loginType =1;
                     //2.2.2 向微信支付平台发送退款请求
                     Integer refundPrice = null;
                     if (sum != null) {

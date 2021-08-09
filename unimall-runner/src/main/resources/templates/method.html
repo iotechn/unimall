@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dobbin Framework API文档 方法详情</title>
+    <link href="https://iotechn.oss-cn-hangzhou.aliyuncs.com/open/style/commons.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="https://iotechn.oss-cn-hangzhou.aliyuncs.com/open/stylesheets/commons.css">
+    <link rel="stylesheet" type="text/css" href="https://iotechn.oss-cn-hangzhou.aliyuncs.com/open/stylesheets/index-news.css">
+    <script src="https://iotechn.oss-cn-hangzhou.aliyuncs.com/open/js/jquery-lastest.js"></script>
+</head><body>
+<div class="open-header clearfix">
+    <div class="pm">
+        <div class="open-header-c1 fl">
+            <!-- logo -->
+            <a href="/"><span class='open-header-icon '></span></a>
+        </div>
+    </div>
+</div>
+<div class="open-nav">
+    <div class="pm">
+        <ul class="openapi-nav">
+            <li class="openapi-nav-apis" type=""><a href="/info/group/${gp}">API</a></li>
+        </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    function setLang(lang){
+        $.post("/lang",{lang:lang},function(result){
+            window.location.reload(true);
+        });
+    }
+    var selected="index";
+    var locationPath=window.location.pathname.toLowerCase();
+    if(locationPath.indexOf("apis")>0||locationPath.indexOf("testapi")>0){
+        selected="apis";
+    }else if(locationPath.indexOf("docs")>0){
+        selected="docs";
+    }else if(locationPath.indexOf("enter")>0){
+        selected="enter";
+    }
+    $(".openapi-nav li").removeClass("active");
+    $(".openapi-nav-"+selected).addClass("active");
+</script>  <div class="pm">
+    <nav class="open-breadcrumbs">
+        <a href="#" >API</a>/<a href="/info/group/${gp}">${gp}</a>/${model.name}
+    </nav>
+    <div class="clearfix">
+        <div class="open-grid-c1">
+            <aside class="open-sideber">
+                <ul class="open-sideber-list1">
+                    <li>
+                        <a href="javascript:void(0);" onclick="return false;" class="groupName ">${gp}开放接口</a>
+                        <ul class="open-sideber-list2">
+                            <#list methods as method>
+                                <li data-name="${method.name}">
+                                    <a href="/info/api/${gp}/${method.name}">
+                                        ${method.description}
+                                        <br>${gp}.${method.name}
+                                    </a>
+                                </li>
+                             </#list>
+                        </ul>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+        <div class="open-grid-c2">
+            <section class="open-detail">
+                <h1>${model.name}</h1>
+                <section>
+                    <h2>API 描述</h2>
+                    <p>${model.description}</p>
+                </section>
+                <section>
+                    <h2>参数列表</h2>
+                    <section>
+                        <h3>系统级别参数</h3>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>必要性</th>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>描述</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>必填</td>
+                                <td>_gp</td>
+                                <td><a href="javascript:void(0);">string</a></td>
+                                <td>method,所在分组 ${gp}</td>
+                            </tr>
+
+                            <tr>
+                                <td>必填</td>
+                                <td>_mt</td>
+                                <td><a href="javascript:void(0);">string</a></td>
+                                <td>method,请求的方法名 ${model.name}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <hr>
+                        <h3>应用级别参数</h3>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>必要性</th>
+                                <th>参数名</th>
+                                <th>class类型</th>
+                                <th>方式类型</th>
+                                <th>描述</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <#list model.parameters as param>
+                                <tr>
+                                    <td>
+                                        <#if param.required>
+                                            必填
+                                        <#else>
+                                            可空
+                                        </#if>
+                                    </td>
+                                    <td>${param.name}</td>
+                                    <td>${param.paramType}</td>
+                                    <td>${param.type}</td>
+                                    <td>${param.description}</td>
+                                </tr>
+                            </#list>
+
+                            </tbody>
+                        </table>
+                    </section>
+                </section>
+                <section>
+                    <h2>返回值</h2>
+                    <section>
+                        <h3>返回类型 </h3>
+                        <p>${model.retType} </p>
+
+                        <#if model.retObj??>
+                            <hr>
+                            <h3>类型定义</h3>
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>属性名</th>
+                                    <th>类型</th>
+                                    <th>描述</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <#list model.retObj as field>
+                                        <tr>
+                                            <td>${field.name}</td>
+                                            <td><a href="#${field.type}">${field.type}</a></td>
+                                            <td>
+                                                <span>${field.description}</span>
+                                                <#if field.enums??>
+                                                    <a onclick="copyText('${field.map}')">复制MAP</a>
+                                                </#if>
+                                                <#if field.enums??>
+                                                    <a onclick="copyText('${field.filter}')">复制Filter</a>
+                                                </#if>
+                                            </td>
+                                        </tr>
+                                    </#list>
+                                </tbody>
+                            </table>
+                        </#if>
+                    </section>
+                </section>
+                <#if model.entityList??>
+                <section>
+                    <h2>实体</h2>
+                    <#list model.entityList as entity>
+                    <section>
+                        <hr id="${entity.type}">
+                        <h3>类型定义 ${entity.type}</h3>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>属性名</th>
+                                <th>类型</th>
+                                <th>描述</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <#list entity.fields as field>
+                            <tr>
+                                <td>${field.name}</td>
+                                <td><a href="#${field.type}">${field.type}</a></td>
+                                <td>
+                                    <span>${field.description}</span>
+                                    <#if field.enums??>
+                                        <a onclick="copyText('${field.map}')">复制MAP</a>
+                                    </#if>
+                                    <#if field.enums??>
+                                        <a onclick="copyText('${field.filter}')">复制Filter</a>
+                                    </#if>
+                                </td>
+                            </tr>
+                            </#list>
+                            </tbody>
+                        </table>
+                    </section>
+                    </#list>
+                </section>
+                </#if>
+                <section>
+                    <h2>测试Api</h2>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>parameter name</th>
+                            <th>value</th>
+                            <th>description</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>_gp<span class="text-important">*</span></td>
+                            <td id="_gp">${gp}</td>
+                            <td>请求参数分组</td>
+                        </tr>
+                        <tr>
+                            <td>_mt<span class="text-important">*</span></td>
+                            <td id="_mt">${model.name}</td>
+                            <td>请求参数名</td>
+                        </tr>
+                        <#list model.parameters as param>
+                            <#if param.type == "USER_ID">
+                                <tr>
+                                    <td>accessToken<span class="text-important">
+                                        <#if param.required>
+                                            <span class="text-important">*</span>
+                                        </#if>
+                                    </span></td>
+                                    <td><input id="access_token" name="access_token" type="text"></td>
+                                    <td>需要用户登录的接口</td>
+                                </tr>
+                            <#elseif param.type == "ADMIN_ID">
+                                <tr>
+                                    <td>AdminToken<span class="text-important">
+                                        <#if param.required>
+                                            <span class="text-important">*</span>
+                                        </#if>
+                                    </span></td>
+                                    <td><input id="admin_access_token" name="admin_access_token" type="text"></td>
+                                    <td>需要管理员登录的接口</td>
+                            <#else>
+                                <tr>
+                                    <td>${param.name}
+                                        <#if param.required>
+                                            <span class="text-important">*</span>
+                                        </#if>
+                                    </td>
+                                    <td><input id="${param.name}" name="${param.name}" type="text"></td>
+                                    <td>
+                                        <span>${param.description}</span>
+                                    </td>
+
+                                </tr>
+                            </#if>
+
+                        </#list>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <a href="javascript:" class="open-detail-btn" id="submitId">submit</a>
+                    <hr>
+                    <div class="clearfix">
+                        <section style="margin-bottom: 20px">
+                            <h2>request:</h2>
+                            <pre class="prettyprint lang-http"><code id="urlParams" style="min-height: 100px" class="hljs"><span class="hljs-attribute"></span></code></pre>
+                        </section>
+                        <section style="margin-bottom: 20px">
+                            <h2>response:</h2>
+                            <pre class="prettyprint lang-json"><code id="result" style="min-height: 100px" class="hljs"></code></pre>
+                        </section>
+                    </div>
+                </section>
+                <section>
+                    <h2>异常返回值</h2>
+                    <section>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>异常返回值</th>
+                                <th>描述</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <#list exceptionList as exc>
+                            <tr>
+                                <td>${exc.code}</td>
+                                <td>${exc.msg}</td>
+                            </tr>
+                            </#list>
+
+                            </tbody>
+                        </table>
+                    </section>
+                </section>
+            </section>
+        </div>
+    </div>
+<textarea id="copyborad" style="display: none"></textarea>
+</div>
+
+<div class="open-footer">
+    <ul>
+        <li><a href="#">API</a></li>
+    </ul>
+    <p>备案</p>
+</div>
+<script type="text/javascript">
+    var path = location.pathname.split("/");
+    var len = path.length;
+    if(len > 2){
+        var groupElement = $("." + path[len-2]);
+        groupElement.addClass("active");
+        groupElement.parent().parent().find("ul").css("display", "block");
+        $("[data-name='" + decodeURI(path[len-1]) + "']").addClass("active");
+    }
+    $(".groupName").click(function(){
+        if($(this).parent().parent().find("ul").css("display") == "block"){
+            $(this).removeClass('active');
+            $($(this).parent().parent().find("ul")).css("display", "none");
+        }
+        else{
+            $(this).addClass('active');
+            $($(this).parent().parent().find("ul")).css("display", "block");
+        }
+    });
+    function setLang(lang){
+        $.post("/lang",{lang:lang},function(result){
+            window.location.reload(true);
+        });
+    }
+</script>
+<script>
+    // 设置cookie
+    <#list model.parameters as param>
+    <#if param.type == "USER_ID">
+    document.getElementById("access_token").value = getCookie("ACCESSTOKEN")
+    </#if>
+    <#if param.type == "ADMIN_ID">
+    document.getElementById("admin_access_token").value = getCookie("ADMINTOKEN")
+    </#if>
+    </#list>
+    function setCookie(c_name, value, expiredays) {
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + expiredays);
+        document.cookie = c_name + "=" + escape(value) + ";expires=" + exdate.toGMTString() + ";path=/";
+    }
+    // 读取cookie
+    function getCookie(c_name) {
+        if (document.cookie.length > 0)     {
+            c_start = document.cookie.indexOf(c_name + "=")
+            if (c_start != -1){
+                c_start = c_start + c_name.length + 1
+                c_end = document.cookie.indexOf(";", c_start)
+                if (c_end == -1)
+                    c_end = document.cookie.length
+                return unescape(document.cookie.substring(c_start, c_end))
+            }
+        }
+        return ""
+    }
+    // 清除cookie
+    function clearCookie(name) {
+        setCookie(name, "", -1);
+    }
+    function copyText(text) {
+        var copyborad = document.getElementById("copyborad");
+        copyborad.style.display = 'block'
+        copyborad.value = text; // 修改文本框的内容
+        copyborad.select(); // 选中文本
+        document.execCommand("copy"); // 执行浏览器复制命令
+        copyborad.style.display = 'none'
+        alert("复制成功");
+    }
+    function getParamData(){
+        //获取参数
+        var requestData = {};
+        requestData._gp = $("#_gp").text();
+        requestData._mt = $("#_mt").text();
+        <#list model.parameters as param>
+        <#if param.type != "USER_ID">
+        <#if param.type != "ADMIN_ID">
+        requestData.${param.name} = $("#${param.name}").val();
+        </#if>
+        </#if>
+        </#list>
+        return requestData;
+    }
+
+    $('#submitId').click(function(){
+        var data = getParamData();
+        var accessToken = $("#access_token").val();
+        var adminAccessToken = $("#admin_access_token").val();
+        $.ajax({
+            type:"POST",
+            url:'/m.api',
+            dataType: "json",
+            data: data,
+            beforeSend: function (request) {
+                if (accessToken) {
+                    request.setRequestHeader("ACCESSTOKEN", accessToken);
+                    setCookie("ACCESSTOKEN", accessToken, 1)
+                }
+                if (adminAccessToken) {
+                    request.setRequestHeader("ADMINTOKEN", adminAccessToken);
+                    setCookie("ADMINTOKEN", adminAccessToken, 1)
+                }
+            },
+            cache:true,
+            success:success,
+            error:error
+        });
+
+
+        function success(data){
+            $("#result").text(JSON.stringify(data, undefined, 4));
+        }
+
+        function error(data){
+            console.log(data);
+        }
+
+        var urlValue = [];
+        for(var prop in data){
+            urlValue.push(prop + "=" + data[prop]);
+        }
+        $("#urlParams").text("GET \r\n--url "+"/m.api?" + urlValue.join("&")+" \r\n--header access_token=" + accessToken);
+    });
+</script>
+
+</body>
+</html>

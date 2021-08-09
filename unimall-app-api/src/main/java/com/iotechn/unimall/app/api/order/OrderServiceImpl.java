@@ -1,6 +1,16 @@
 package com.iotechn.unimall.app.api.order;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.util.GeneratorUtil;
+import com.dobbinsoft.fw.pay.model.request.PayUnifiedOrderRequest;
+import com.dobbinsoft.fw.pay.service.pay.PayService;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.component.LockComponent;
+import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
+import com.dobbinsoft.fw.support.service.BaseService;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -14,18 +24,13 @@ import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
-import com.iotechn.unimall.core.exception.AppServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.util.GeneratorUtil;
-import com.iotechn.unimall.data.component.CacheComponent;
-import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.domain.SpuDO;
+import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.CouponUserDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
@@ -36,17 +41,15 @@ import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.enums.*;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.model.FreightCalcModel;
 import com.iotechn.unimall.data.model.OrderCalcSkuModel;
-import com.iotechn.unimall.data.model.Page;
 import com.iotechn.unimall.data.model.SkuStockInfoModel;
-import com.iotechn.unimall.biz.mq.DelayedMessageQueue;
 import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
-import com.iotechn.unimall.data.util.SessionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -65,7 +68,7 @@ import java.util.stream.Collectors;
  * Created by rize on 2019/7/4.
  */
 @Service
-public class OrderServiceImpl implements OrderService {
+public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
@@ -85,7 +88,7 @@ public class OrderServiceImpl implements OrderService {
     private CartBizService cartBizService;
 
     @Autowired
-    private WxPayService wxPayService;
+    private PayService wxPayService;
 
     @Autowired
     private LockComponent lockComponent;
@@ -136,7 +139,7 @@ public class OrderServiceImpl implements OrderService {
             boolean calcStockFlag = false;
             try {
                 //用户会员等级
-                Integer userLevel = SessionUtil.getUser().getLevel();
+                Integer userLevel = sessionUtil.getUser().getLevel();
                 // 对Sku排序，防止相互拿锁，两边都无法结算的情况。
                 orderRequest.getSkuList().sort((o1, o2) -> (int) (o1.getSkuId() - o2.getSkuId()));
                 //参数强校验 START
@@ -434,7 +437,8 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(rollbackFor = Exception.class)
     public Object wxPrepay(String parentOrderNo, String orderNo, String ip, Long userId) throws ServiceException {
         int actualPrice = this.checkPrepay(parentOrderNo, orderNo, userId);
-        Integer loginType = SessionUtil.getUser().getLoginType();
+        // TODO 有前端来决定支付方式
+        Integer loginType = 1;
         String appId;
         String tradeType;
         if (UserLoginType.MP_WEIXIN.getCode() == loginType) {
@@ -449,25 +453,19 @@ public class OrderServiceImpl implements OrderService {
         } else {
             throw new AppServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
         }
-        try {
-            WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();
-            // 设置微信请求基本信息
-            orderRequest.setAppid(appId);
-            // 区分回调 直接通过 S 来判断
-            orderRequest.setOutTradeNo(StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo);
-            orderRequest.setOpenid(SessionUtil.getUser().getOpenId());
-            orderRequest.setBody("buy_" + (StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo));
-            orderRequest.setTotalFee(actualPrice);
-            orderRequest.setSpbillCreateIp(ip);
-            orderRequest.setTradeType(tradeType);
-            return wxPayService.createOrder(orderRequest);
-        } catch (WxPayException e) {
-            logger.error("[微信支付] 异常", e);
-            throw new AppServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
-        } catch (Exception e) {
-            logger.error("[预付款异常]", e);
-            throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
-        }
+        // TODO 支付渠道设置
+        PayUnifiedOrderRequest orderRequest = new PayUnifiedOrderRequest();
+        // 设置微信请求基本信息
+        orderRequest.setAppid(appId);
+        // 区分回调 直接通过 S 来判断
+        orderRequest.setOutTradeNo(StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo);
+        // TODO 由前端决定支付方式后，获取OPEN_ID
+        orderRequest.setOpenid(sessionUtil.getUser().getWxMpOpenId());
+        orderRequest.setBody("buy_" + (StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo));
+        orderRequest.setTotalFee(actualPrice);
+        orderRequest.setSpbillCreateIp(ip);
+        orderRequest.setTradeType(tradeType);
+        return wxPayService.createOrder(orderRequest);
     }
 
     private int checkPrepay(String parentOrderNo, String orderNo, Long userId) throws ServiceException {
@@ -638,7 +636,7 @@ public class OrderServiceImpl implements OrderService {
             calcModel.setProvince(addressDO.getProvince());
         }
         // 由于是预览，此处可详细用户从前端传入进来的 商品运费模板Id 重量 价格等信息
-        UserDTO user = SessionUtil.getUser();
+        UserDTO user = sessionUtil.getUser();
         // 将SKU按照运费模板分组
         Map<Long, List<OrderRequestSkuDTO>> calcMap = skuList.stream().collect(Collectors.groupingBy(OrderRequestSkuDTO::getFreightTemplateId));
         List<FreightCalcModel.FreightAndWeight> faws = new LinkedList<>();

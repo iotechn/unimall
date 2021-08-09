@@ -1,9 +1,11 @@
 package com.iotechn.unimall.data.enums;
 
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+
 /**
  * Created by rize on 2019/2/13.
  */
-public enum UserLoginType {
+public enum UserLoginType implements BaseEnums<Integer> {
     REGISTER(0, "手机注册"),
     MP_WEIXIN(1, "WX小程序登录"),
     APP_WEIXIN(2, "WX第三方登录"),
@@ -19,25 +21,12 @@ public enum UserLoginType {
 
     private String msg;
 
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 
     public String getMsg() {
         return msg;
     }
-
-    public static boolean contains(Integer loginType) {
-        if (loginType == null) {
-            return false;
-        }
-        for (UserLoginType type : values()) {
-            if (type.getCode() == loginType) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
 }

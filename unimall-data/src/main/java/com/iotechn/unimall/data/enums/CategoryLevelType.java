@@ -1,9 +1,11 @@
 package com.iotechn.unimall.data.enums;
 
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+
 /**
  * Created by rize on 2019/2/11.
  */
-public enum CategoryLevelType {
+public enum CategoryLevelType implements BaseEnums<Integer> {
     ONE(0, "一级"),
     TWO(1, "二级"),
     THREE(2, "三级"),
@@ -19,7 +21,7 @@ public enum CategoryLevelType {
         this.msg = msg;
     }
 
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 

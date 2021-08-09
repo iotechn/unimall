@@ -7,6 +7,7 @@ package com.iotechn.unimall.data.constant;
  * Time: 12:11
  */
 public class LockConst {
+
     /**
      * 领取优惠券加的锁
      * COUPON_LOCK: + couponId
@@ -71,4 +72,5 @@ public class LockConst {
      *
      */
     public static final String GROUP_SHOP_LOCK_LOCK = "GROUP_SHOP_LOCK_LOCK";
+
 }

@@ -2,8 +2,8 @@ package com.iotechn.unimall.admin.api.config;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.DynamicConfigComponent;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.dynamic.DynamicConfigComponent;
 import com.iotechn.unimall.data.domain.DynamicConfigDO;
 import com.iotechn.unimall.data.mapper.DynamicConfigMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class AdminSysConfigServiceImpl implements AdminSysConfigService {
     public String save(String configsStr, String prefix, Long adminId) throws ServiceException {
         List<DynamicConfigDO> configs = JSONObject.parseArray(configsStr, DynamicConfigDO.class);
         for (DynamicConfigDO dynamicConfigDO : configs) {
-            dynamicConfigComponent.write(prefix + dynamicConfigDO.getKey(), dynamicConfigDO.getValue());
+            dynamicConfigComponent.write(prefix + dynamicConfigDO.getConfigKey(), dynamicConfigDO.getConfigValue());
         }
         return "ok";
     }

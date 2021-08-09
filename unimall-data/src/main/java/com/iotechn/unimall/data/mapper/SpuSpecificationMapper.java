@@ -10,7 +10,7 @@ import java.util.List;
  * Date: 2020/8/1
  * Time: 17:35
  */
-public interface SpuSpecificationMapper extends IMapper<SpuSpecificationDO> {
+public interface SpuSpecificationMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<SpuSpecificationDO> {
 
     public Integer batchInsert(List<SpuSpecificationDO> list);
 

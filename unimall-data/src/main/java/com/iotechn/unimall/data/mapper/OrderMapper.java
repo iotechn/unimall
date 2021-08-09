@@ -1,8 +1,8 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.dobbinsoft.fw.support.model.KVModel;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
-import com.iotechn.unimall.data.model.KVModel;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by rize on 2019/7/6.
  */
-public interface OrderMapper extends IMapper<OrderDO> {
+public interface OrderMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<OrderDO> {
 
     public List<OrderDTO> selectOrderPage(@Param("status") Integer status, @Param("offset") Integer offset, @Param("limit") Integer limit, @Param("userId") Long userId);
 

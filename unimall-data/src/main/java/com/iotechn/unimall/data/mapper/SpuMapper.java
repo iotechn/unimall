@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by rize on 2019/7/2.
  */
-public interface SpuMapper extends IMapper<SpuDO> {
+public interface SpuMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<SpuDO> {
 
     /**
      * 仅可传入叶子类目
@@ -23,7 +23,7 @@ public interface SpuMapper extends IMapper<SpuDO> {
      * @param delta
      * @return
      */
-    public Integer incSales(@Param("spuId") Long spuId,@Param("delta") Integer delta);
+    public Integer incSales(@Param("spuId") Long spuId, @Param("delta") Integer delta);
 
     public List<SpuDO> getSpuTitleAll();
 

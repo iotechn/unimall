@@ -1,9 +1,9 @@
 package com.iotechn.unimall.data.dto.goods;
 
+import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
 import com.iotechn.unimall.data.domain.SpuSpecificationDO;
-import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.Data;
 
 import java.util.List;

@@ -1,15 +1,15 @@
 package com.iotechn.unimall.admin.api.admin;
 
 
-import com.iotechn.unimall.core.Const;
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.annotation.HttpParam;
-import com.iotechn.unimall.core.annotation.HttpParamType;
-import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.dto.AdminDTO;
-import com.iotechn.unimall.data.model.Page;
+import com.dobbinsoft.fw.core.Const;
+import com.dobbinsoft.fw.core.annotation.HttpMethod;
+import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
+import com.dobbinsoft.fw.core.annotation.HttpParam;
+import com.dobbinsoft.fw.core.annotation.HttpParamType;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
 
 /**
  * Created by rize on 2019/4/8.
@@ -17,7 +17,7 @@ import com.iotechn.unimall.data.model.Page;
 @HttpOpenApi(group = "admin", description = "管理员服务")
 public interface AdminService {
 
-    @HttpMethod(description = "管理员登录 返回AccessToken")
+    @HttpMethod(description = "管理员登录 返回 AccessToken")
     public String login(
             @NotNull @HttpParam(name = "username", type = HttpParamType.COMMON, description = "用户名") String username,
             @NotNull @HttpParam(name = "password", type = HttpParamType.COMMON, description = "密码") String password,
@@ -32,9 +32,9 @@ public interface AdminService {
     public AdminDTO info(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "列表", permission = "sys:admin:list", permissionParentName = "系统管理", permissionName = "管理员")
+    @HttpMethod(description = "列表", openPlatform = true)
     public Page<AdminDTO> list(
-            @HttpParam(name = "username", type = HttpParamType.COMMON, description = "管理员名称搜索") String name,
+            @HttpParam(name = "username", type = HttpParamType.COMMON, description = "管理员名称搜索") String username,
             @HttpParam(name = "page", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer page,
             @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页长度", valueDef = "20") Integer limit,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
@@ -42,6 +42,7 @@ public interface AdminService {
     @HttpMethod(description = "创建", permission = "sys:admin:create", permissionParentName = "系统管理", permissionName = "管理员")
     public AdminDTO create(
             @NotNull @HttpParam(name = "adminDTO", type = HttpParamType.COMMON, description = "欲创建的admin对象JSON") AdminDTO adminDTO,
+            @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "IP") String ip,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "修改", permission = "sys:admin:edit", permissionParentName = "系统管理", permissionName = "管理员")

@@ -1,6 +1,6 @@
 package com.iotechn.unimall.data.dto;
 
-import com.iotechn.unimall.data.model.KVModel;
+import com.dobbinsoft.fw.support.model.KVModel;
 import lombok.Data;
 
 import java.util.List;

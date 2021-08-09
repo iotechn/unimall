@@ -2,7 +2,10 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
+
+import java.util.Date;
 
 /**
  * Created by rize on 2019/4/8.
@@ -43,6 +46,6 @@ public class AdminDO extends SuperDO {
     private String lastLoginIp;
 
     @TableField("gmt_last_login")
-    private String gmtLastLogin;
+    private Date gmtLastLogin;
 
 }

@@ -80,6 +80,12 @@ public class CacheConst {
 
     public static final String USER_MINI_WECHAT_ACCESS = "USER_MINI_WECHAT_ACCESS";
 
+    /**
+     * 用户一键登录临时令牌
+     * USER_ONE_KEY_LOGIN: + 临时令牌
+     */
+    public static final String USER_ONE_KEY_LOGIN_TEMP_TOKEN = "USER_ONE_KEY_LOGIN:";
+
     /**=========================== 商品缓存 START =============================**/
 
     /**
@@ -134,5 +140,8 @@ public class CacheConst {
     public static final String DYNAMIC_CACHE = "DYNAMIC_CACHE:";
 
     /**=========================== 动态配置 END ===============================**/
+
+
+
 
 }

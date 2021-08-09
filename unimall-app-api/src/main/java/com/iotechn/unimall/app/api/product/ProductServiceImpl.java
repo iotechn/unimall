@@ -1,12 +1,13 @@
 package com.iotechn.unimall.app.api.product;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.biz.service.footprint.FootprintBizService;
 import com.iotechn.unimall.biz.service.freight.FreightTemplateBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
@@ -17,7 +18,6 @@ import com.iotechn.unimall.data.dto.goods.SpuDTO;
 import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.mapper.*;
-import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

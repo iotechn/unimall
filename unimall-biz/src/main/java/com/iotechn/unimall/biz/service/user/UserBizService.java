@@ -2,15 +2,12 @@ package com.iotechn.unimall.biz.service.user;
 
 import com.alibaba.fastjson.JSONObject;
 import com.iotechn.unimall.data.constant.CacheConst;
-import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.mapper.UserMapper;
-import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
-import com.iotechn.unimall.data.wx.WeChatCommonTemplateMessageModel;
-import okhttp3.MediaType;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +23,7 @@ public class UserBizService {
     private OkHttpClient okHttpClient = new OkHttpClient();
 
     @Autowired
-    private UnimallWxAppProperties unimallWxProperties;
+    private FwWxAppProperties fwWxAppProperties;
 
     @Autowired
     private CacheComponent cacheComponent;
@@ -43,7 +40,7 @@ public class UserBizService {
             String accessJson = okHttpClient.newCall(
                     new Request.Builder()
                             .url("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="
-                                    + unimallWxProperties.getH5AppId() + "&secret=" + unimallWxProperties.getH5AppSecret())
+                                    + fwWxAppProperties.getH5AppId() + "&secret=" + fwWxAppProperties.getH5AppSecret())
                             .get()
                             .build()).execute().body().string();
             JSONObject jsonObject = JSONObject.parseObject(accessJson);
@@ -89,7 +86,7 @@ public class UserBizService {
             String accessJson = okHttpClient.newCall(
                     new Request.Builder()
                             .url("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="
-                                    + unimallWxProperties.getMiniAppId() + "&secret=" + unimallWxProperties.getMiniAppSecret())
+                                    + fwWxAppProperties.getMiniAppId() + "&secret=" + fwWxAppProperties.getMiniAppSecret())
                             .get()
                             .build()).execute().body().string();
             JSONObject jsonObject = JSONObject.parseObject(accessJson);
@@ -105,30 +102,6 @@ public class UserBizService {
         return access_token;
     }
 
-    /**
-     * 抽取 公众号模板消息
-     *
-     * @param model
-     * @param url
-     * @throws Exception
-     */
-    private int wechatCommonTemplateMessage(WeChatCommonTemplateMessageModel model, String url) throws Exception {
-        String modelJson = JSONObject.toJSONString(model);
-        MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(mediaType, modelJson);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-        String res = okHttpClient.newCall(request).execute().body().string();
-        JSONObject jsonObject = JSONObject.parseObject(res);
-        Integer errcode = jsonObject.getInteger("errcode");
-        if (errcode != 0) {
-            logger.error("[模板消息回复] 错误，请求报文=" + modelJson);
-            logger.error("[模板消息回复] 错误，回复报文=" + res);
-        }
-        return errcode;
-    }
 
     public UserDO getUserById(Long userId) {
         return userMapper.selectById(userId);

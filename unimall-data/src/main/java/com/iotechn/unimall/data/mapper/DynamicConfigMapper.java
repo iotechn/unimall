@@ -1,12 +1,14 @@
 package com.iotechn.unimall.data.mapper;
 
 import com.iotechn.unimall.data.domain.DynamicConfigDO;
+import com.dobbinsoft.fw.support.mapper.IMapper;
 
 /**
- * Description: 动态配置,持久化表
- * User: rize
- * Date: 2020/8/5
- * Time: 11:27
+ * ClassName: DynamicConfigMapper
+ * Description: TODO
+ *
+ * @author: e-weichaozheng
+ * @date: 2021-03-17
  */
 public interface DynamicConfigMapper extends IMapper<DynamicConfigDO> {
 }

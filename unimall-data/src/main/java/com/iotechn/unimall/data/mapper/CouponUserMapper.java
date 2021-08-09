@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by rize on 2019/7/4.
  */
-public interface CouponUserMapper extends IMapper<CouponUserDO> {
+public interface CouponUserMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<CouponUserDO> {
 
     public List<CouponUserDTO> getUserCoupons(Long userId);
 

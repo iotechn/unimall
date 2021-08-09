@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.dto;
 
+import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import lombok.Data;
 
 /**

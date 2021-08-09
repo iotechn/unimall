@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.dto.appraise;
 
 
-import com.iotechn.unimall.data.dto.SuperDTO;
+import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import lombok.Data;
 
 /*

@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by rize on 2019/7/1.
  */
-public interface ImgMapper extends IMapper<ImgDO> {
+public interface ImgMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<ImgDO> {
 
     public List<String> getImgs(@Param("bizType") Integer bizType, @Param("bizId") Long bizId);
 

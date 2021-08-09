@@ -7,11 +7,12 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
 @Data
 @TableName("unimall_address")
-public class AddressDO extends SuperDO{
+public class AddressDO extends SuperDO {
 
     /**
      * 省份

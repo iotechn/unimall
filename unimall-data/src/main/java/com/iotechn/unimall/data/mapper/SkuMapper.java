@@ -9,11 +9,11 @@ import java.util.List;
 /**
  * Created by rize on 2019/7/2.
  */
-public interface SkuMapper extends IMapper<SkuDO> {
+public interface SkuMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<SkuDO> {
 
     public SkuDTO getSkuDTOById(Long skuId);
 
-    public Integer decSkuStock(@Param("skuId") Long skuId,@Param("stock") Integer stock);
+    public Integer decSkuStock(@Param("skuId") Long skuId, @Param("stock") Integer stock);
 
     public Integer returnSkuStock(@Param("skuId") Long skuId, @Param("stock") Integer stock);
 

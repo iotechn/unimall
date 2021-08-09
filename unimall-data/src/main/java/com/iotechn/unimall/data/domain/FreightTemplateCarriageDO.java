@@ -2,9 +2,8 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +14,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @TableName("unimall_freight_template_carriage")
-public class FreightTemplateCarriageDO extends SuperDO{
+public class FreightTemplateCarriageDO extends SuperDO {
 
 
     //指定使用该运费计算的运费模板,必有存在

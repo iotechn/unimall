@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.dto.freight;
 
+import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
-import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

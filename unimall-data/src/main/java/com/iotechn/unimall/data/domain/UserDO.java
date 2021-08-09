@@ -2,6 +2,7 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
 import java.util.Date;
@@ -18,17 +19,16 @@ public class UserDO extends SuperDO {
     private String password;
 
     /**
-     * 使用某平台登录
+     * 需要扩展其他平台，使用横向扩展字段
      */
-    @TableField("login_type")
-    private Integer loginType;
+    private String wxMpOpenId;
 
-    @TableField("open_id")
-    private String openId;
+    private String wxH5OpenId;
+
+    private String wxAppOpenId;
 
     private String nickname;
 
-    @TableField("avatar_url")
     private String avatarUrl;
 
     private Integer level;
@@ -37,10 +37,8 @@ public class UserDO extends SuperDO {
 
     private Integer gender;
 
-    @TableField("gmt_last_login")
     private Date gmtLastLogin;
 
-    @TableField("last_login_ip")
     private String lastLoginIp;
 
     private Integer status;

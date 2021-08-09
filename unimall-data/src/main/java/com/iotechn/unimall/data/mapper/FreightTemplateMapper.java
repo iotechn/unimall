@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Param;
  * Date: 2019-07-07
  * Time: 下午3:26
  */
-public interface FreightTemplateMapper extends IMapper<FreightTemplateDO> {
+public interface FreightTemplateMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<FreightTemplateDO> {
 
     public FreightTemplateDO selectFreightBySkuId(@Param("skuId") Long skuId);
 }

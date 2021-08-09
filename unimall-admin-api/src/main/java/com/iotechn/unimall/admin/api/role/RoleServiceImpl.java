@@ -2,19 +2,19 @@ package com.iotechn.unimall.admin.api.role;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.core.exception.AdminServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
 import com.iotechn.unimall.data.domain.RolePermissionDO;
-import com.iotechn.unimall.data.dto.PermissionPointDTO;
 import com.iotechn.unimall.data.dto.RoleSetPermissionDTO;
 import com.iotechn.unimall.data.enums.RoleStatusType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.AdminMapper;
 import com.iotechn.unimall.data.mapper.RoleMapper;
 import com.iotechn.unimall.data.mapper.RolePermissionMapper;
-import com.iotechn.unimall.data.model.Page;
+import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.model.PermissionPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +39,7 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private RolePermissionMapper rolePermissionMapper;
 
-    public static List<PermissionPointDTO> permDTOs = new LinkedList<>();
+    public static List<PermissionPoint> permDTOs = new LinkedList<>();
 
     public static Set<String> allPermPoint = new HashSet<>();
 
@@ -105,7 +105,6 @@ public class RoleServiceImpl implements RoleService {
             for (String permission : permissions) {
                 RolePermissionDO rolePermissionDO = new RolePermissionDO();
                 rolePermissionDO.setRoleId(roleId);
-                rolePermissionDO.setDeleted(0);
                 rolePermissionDO.setPermission(permission);
                 rolePermissionDO.setGmtCreate(now);
                 rolePermissionDO.setGmtUpdate(now);

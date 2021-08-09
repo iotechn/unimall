@@ -2,6 +2,7 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
 /*
@@ -10,7 +11,7 @@ import lombok.Data;
 */
 @TableName("unimall_appraise")
 @Data
-public class AppraiseDO extends SuperDO{
+public class AppraiseDO extends SuperDO {
 
     @TableField("spu_id")
     private Long spuId;

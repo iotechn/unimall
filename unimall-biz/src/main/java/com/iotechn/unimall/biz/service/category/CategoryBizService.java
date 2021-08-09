@@ -1,11 +1,11 @@
 package com.iotechn.unimall.biz.service.category;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.Const;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.annotation.AspectCommonCache;
+import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
-import com.iotechn.unimall.core.Const;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.annotation.AspectCommonCache;
-import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
 import com.iotechn.unimall.data.enums.CategoryLevelType;
@@ -45,7 +45,7 @@ public class CategoryBizService {
         List<CategoryDO> secondLevelList = categoryDOS.stream().filter(item -> item.getLevel().intValue() == 1).collect(Collectors.toList());
 
         // 以ID为键，组装后的DTO为值，提升组装速度
-        HashMap<Long,CategoryDTO> speedUp = new HashMap<>();
+        HashMap<Long, CategoryDTO> speedUp = new HashMap<>();
 
         // 组装一级类目
         List<CategoryDTO> resultTree = firstLevelList.stream().map(item -> {
@@ -80,7 +80,7 @@ public class CategoryBizService {
         List<CategoryDO> thirdLevelList = categoryDOList.stream().filter(item -> item.getLevel().intValue() == 2).collect(Collectors.toList());
 
         // 以ID为键，组装后的DTO为值，提升组装速度
-        HashMap<Long,CategoryDTO> speedUp = new HashMap<>();
+        HashMap<Long, CategoryDTO> speedUp = new HashMap<>();
 
         // 组装一级类目
         List<CategoryDTO> resultTree = firstLevelList.stream().map(item -> {
@@ -108,7 +108,7 @@ public class CategoryBizService {
     /**
      * 上面生成类目树的公用代码提取
      */
-    private void publicCodeAssembly(HashMap<Long,CategoryDTO> speedUp, CategoryDO item){
+    private void publicCodeAssembly(HashMap<Long, CategoryDTO> speedUp, CategoryDO item){
         CategoryDTO parentDTO = speedUp.get(item.getParentId());
         if(parentDTO != null){
             if(parentDTO.getChildrenList() == null){
@@ -124,8 +124,9 @@ public class CategoryBizService {
 
     /**
      * 获得所有类目list,类中有调用，不能使用切面
-     *
+     * TODO 切面缓存
      */
+
     public List<CategoryDTO> getCategoryList() throws ServiceException{
         List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CacheConst.CATEGORY_ALL_LIST, CategoryDTO.class);
         if (categoryDTOListFormCache != null) {

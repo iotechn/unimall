@@ -1,6 +1,6 @@
 package com.iotechn.unimall.data.dto.freight;
 
-import com.iotechn.unimall.data.dto.SuperDTO;
+import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import lombok.Data;
 
 /**

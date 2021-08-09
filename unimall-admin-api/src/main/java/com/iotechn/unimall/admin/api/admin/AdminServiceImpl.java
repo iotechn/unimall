@@ -1,32 +1,36 @@
 package com.iotechn.unimall.admin.api.admin;
 
+import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.core.Const;
-import com.iotechn.unimall.core.exception.AdminServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.core.exception.ThirdPartServiceException;
-import com.iotechn.unimall.core.util.GeneratorUtil;
-import com.iotechn.unimall.core.util.MD5Util;
-import com.iotechn.unimall.core.util.SHAUtil;
-import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
 import com.iotechn.unimall.data.domain.RolePermissionDO;
 import com.iotechn.unimall.data.dto.AdminDTO;
+import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.enums.AdminStatusType;
 import com.iotechn.unimall.data.enums.RoleStatusType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.AdminMapper;
 import com.iotechn.unimall.data.mapper.RoleMapper;
 import com.iotechn.unimall.data.mapper.RolePermissionMapper;
-import com.iotechn.unimall.data.model.Page;
-import com.iotechn.unimall.data.notify.SMSClient;
-import com.iotechn.unimall.data.notify.SMSResult;
-import com.iotechn.unimall.data.properties.UnimallAdminNotifyProperties;
-import com.iotechn.unimall.data.properties.UnimallSystemProperties;
-import com.iotechn.unimall.data.util.SessionUtil;
+import com.dobbinsoft.fw.core.Const;
+import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.CoreExceptionDefinition;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.exception.ThirdPartServiceException;
+import com.dobbinsoft.fw.core.util.GeneratorUtil;
+import com.dobbinsoft.fw.support.annotation.Query;
+import com.dobbinsoft.fw.support.annotation.QueryCondition;
+import com.dobbinsoft.fw.support.annotation.enums.Conditions;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.properties.FwAdminNotifyProperties;
+import com.dobbinsoft.fw.support.properties.FwSystemProperties;
+import com.dobbinsoft.fw.support.service.BaseService;
+import com.dobbinsoft.fw.support.sms.SMSClient;
+import com.dobbinsoft.fw.support.sms.SMSResult;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.slf4j.Logger;
@@ -49,7 +53,7 @@ import java.util.stream.Collectors;
  * Created by rize on 2019/4/8.
  */
 @Service
-public class AdminServiceImpl implements AdminService {
+public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements AdminService {
 
     @Autowired
     private StringRedisTemplate userRedisTemplate;
@@ -70,10 +74,10 @@ public class AdminServiceImpl implements AdminService {
     private SMSClient smsClient;
 
     @Autowired
-    private UnimallAdminNotifyProperties unimallAdminNotifyProperties;
+    private FwAdminNotifyProperties unimallAdminNotifyProperties;
 
     @Autowired
-    private UnimallSystemProperties unimallSystemProperties;
+    private FwSystemProperties unimallSystemProperties;
 
 
     private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
@@ -95,7 +99,7 @@ public class AdminServiceImpl implements AdminService {
         if (!isGuest && (code == null || verifyCode == null || !code.equals(verifyCode))) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
         }
-        if (!MD5Util.verify(password, username, adminDO.getPassword())) {
+        if (!SecureUtil.md5(password + username).equalsIgnoreCase(adminDO.getPassword())) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
         }
         List<Long> ids = JSONObject.parseArray(adminDO.getRoleIds(), Long.class);
@@ -136,34 +140,31 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminDTO info(Long adminId) throws ServiceException {
-        return SessionUtil.getAdmin();
+        return sessionUtil.getAdmin();
     }
 
+    @Query(isAsc = false)
     @Override
-    public Page<AdminDTO> list(String name, Integer page, Integer limit, Long adminId) throws ServiceException {
-        QueryWrapper<AdminDO> wrapper = new QueryWrapper<AdminDO>();
-        if (!StringUtils.isEmpty(name)) {
-            wrapper.like("username", name);
-        }
-        wrapper.orderByDesc("id");
-        Page<AdminDO> selectPage = adminMapper.selectPage(Page.div(page, limit, AdminDO.class), wrapper);
-        List<AdminDTO> adminDTOS = new ArrayList<AdminDTO>(selectPage.getItems().size());
-
-        if (!CollectionUtils.isEmpty(selectPage.getItems())) {
-            for (AdminDO adminDO : selectPage.getItems()) {
-                AdminDTO adminDTO = new AdminDTO();
-                BeanUtils.copyProperties(adminDO, adminDTO);
-                adminDTO.setRoleIds(JSONObject.parseArray(adminDO.getRoleIds(), Long.class));
-                adminDTO.setPassword(null);
-                adminDTOS.add(adminDTO);
-            }
-        }
-        return new Page<>(adminDTOS, page, limit, selectPage.getCount());
+    public Page<AdminDTO> list(@QueryCondition(condition = Conditions.LIKE) String username, Integer page, Integer limit, Long adminId) throws ServiceException {
+//        QueryWrapper<AdminDO> wrapper = new QueryWrapper<AdminDO>();
+//        if (!StringUtils.isEmpty(name)) {
+//            wrapper.like("username", name);
+//        }
+//        wrapper.orderByDesc("id");
+//        Page<AdminDO> selectPage = adminMapper.selectPage(Page.div(page, limit, AdminDO.class), wrapper);
+        Page<AdminDO> selectPage = adminMapper.selectPage(Page.div(page, limit, AdminDO.class));
+        return selectPage.trans(item -> {
+            AdminDTO adminDTO = new AdminDTO();
+            BeanUtils.copyProperties(item, adminDTO);
+            adminDTO.setRoleIds(JSONObject.parseArray(item.getRoleIds(), Long.class));
+            adminDTO.setPassword(null);
+            return adminDTO;
+        });
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public AdminDTO create(AdminDTO adminDTO, Long adminId) throws ServiceException {
+    public AdminDTO create(AdminDTO adminDTO, String ip, Long adminId) throws ServiceException {
         AdminDO adminDO = new AdminDO();
         Integer count = adminMapper.selectCount(
                 new QueryWrapper<AdminDO>()
@@ -172,13 +173,13 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NAME_REPEAT);
         }
         BeanUtils.copyProperties(adminDTO, adminDO);
-        adminDO.setPassword(MD5Util.md5(adminDO.getPassword(), adminDO.getUsername()));
+        adminDO.setPassword(SecureUtil.md5(adminDO.getPassword() + adminDO.getUsername()));
         adminDO.setRoleIds(JSONObject.toJSONString(adminDTO.getRoleIds()));
         adminDO.setGmtUpdate(new Date());
         adminDO.setGmtCreate(adminDO.getGmtUpdate());
         adminDO.setStatus(AdminStatusType.ACTIVE.getCode());
-        adminDO.setLastLoginIp("0.0.0.0");
-        adminDO.setGmtLastLogin("1997-01-20 00:00:00");
+        adminDO.setLastLoginIp(ip);
+        adminDO.setGmtLastLogin(new Date());
         if (adminMapper.insert(adminDO) > 0) {
             adminDTO.setId(adminDO.getId());
             return adminDTO;
@@ -198,7 +199,7 @@ public class AdminServiceImpl implements AdminService {
         adminDO.setGmtUpdate(new Date());
         AdminDO adminDOExist = adminMapper.selectById(id);
         if (!StringUtils.isEmpty(adminDO.getPassword()) && !StringUtils.isEmpty(adminDOExist.getUsername())) {
-            adminDO.setPassword(MD5Util.md5(adminDO.getPassword(), adminDOExist.getUsername()));
+            adminDO.setPassword(SecureUtil.md5(adminDO.getPassword() + adminDOExist.getUsername()));
         }
         adminDO.setUsername(null);
         if (!CollectionUtils.isEmpty(adminDTO.getRoleIds())) {
@@ -223,12 +224,12 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(rollbackFor = Exception.class)
     public String newPassword(String accessToken, String oldPassword, String newPassword, Long adminId) throws ServiceException {
         AdminDO adminDOExist = adminMapper.selectById(adminId);
-        if (!MD5Util.md5(oldPassword, adminDOExist.getUsername()).equals(adminDOExist.getPassword())) {
+        if (!SecureUtil.md5(oldPassword + adminDOExist.getUsername()).equals(adminDOExist.getPassword())) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
         }
         AdminDO adminDO = new AdminDO();
         adminDO.setId(adminId);
-        adminDO.setPassword(MD5Util.md5(newPassword, adminDOExist.getUsername()));
+        adminDO.setPassword(SecureUtil.md5(newPassword + adminDOExist.getUsername()));
         if (adminMapper.updateById(adminDO) > 0) {
             return "ok";
         }
@@ -240,7 +241,10 @@ public class AdminServiceImpl implements AdminService {
         if ("guest".equals(username)) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_GUEST_NOT_NEED_VERIFY_CODE);
         }
-        AdminDO admin = adminMapper.selectOne(new QueryWrapper<AdminDO>().eq("username", username).eq("password", MD5Util.md5(password, username)));
+        AdminDO admin = adminMapper.selectOne(
+                new QueryWrapper<AdminDO>()
+                        .eq("username", username)
+                        .eq("password", SecureUtil.md5(password + username)));
         if (admin == null) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXIST);
         }
@@ -262,25 +266,25 @@ public class AdminServiceImpl implements AdminService {
             long timestamp = System.currentTimeMillis();
             set.add(timestamp + "");
             set.add("developer");
-            set.add(SessionUtil.getAdmin().getUsername());
+            set.add(sessionUtil.getAdmin().getUsername());
             set.add(this.unimallAdminNotifyProperties.getUniNotifyAppSecret());
             set.add(this.unimallAdminNotifyProperties.getUniNotifyAppId());
             String json = okHttpClient
                     .newCall(new Request.Builder()
                             .get()
-                            .url(this.unimallAdminNotifyProperties.getUniNotifyUrl() + "?_gp=developer&_mt=getRegisterUrl&userId=" + SessionUtil.getAdmin().getUsername()
-                                    + "&appId=" + this.unimallAdminNotifyProperties.getUniNotifyAppId() + "&timestamp=" + timestamp + "&sign=" + SHAUtil.sha256Encode(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
+                            .url(this.unimallAdminNotifyProperties.getUniNotifyUrl() + "?_gp=developer&_mt=getRegisterUrl&userId=" + this.sessionUtil.getAdmin().getUsername()
+                                    + "&appId=" + this.unimallAdminNotifyProperties.getUniNotifyAppId() + "&timestamp=" + timestamp + "&sign=" + SecureUtil.sha256(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
                             .build()).execute().body().string();
             JSONObject jsonObject = JSONObject.parseObject(json);
             Integer errcode = jsonObject.getInteger("errno");
             if (errcode == 200) {
                 return jsonObject.getString("data");
             }
-            throw new AdminServiceException(jsonObject.getString("errmsg"), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+            throw new ThirdPartServiceException(jsonObject.getString("errmsg"), CoreExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
         } catch (ServiceException e) {
             throw e;
         } catch (IOException e) {
-            throw new AdminServiceException(ExceptionDefinition.THIRD_PART_IO_EXCEPTION);
+            throw new ThirdPartServiceException(CoreExceptionDefinition.THIRD_PART_IO_EXCEPTION);
         } catch (Exception e) {
             logger.error("[绑定通知] 异常", e);
             throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);

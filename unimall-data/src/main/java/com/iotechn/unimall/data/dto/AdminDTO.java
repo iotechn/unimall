@@ -1,5 +1,7 @@
 package com.iotechn.unimall.data.dto;
 
+import com.dobbinsoft.fw.core.entiy.SuperDTO;
+import com.dobbinsoft.fw.core.entiy.inter.PermissionOwner;
 import lombok.Data;
 
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
  * Created by rize on 2019/4/8.
  */
 @Data
-public class AdminDTO extends SuperDTO {
+public class AdminDTO extends SuperDTO implements PermissionOwner {
     /**
      * 管理员名
      */

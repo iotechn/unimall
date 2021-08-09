@@ -1,9 +1,11 @@
 package com.iotechn.unimall.data.enums;
 
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+
 /**
  * Created by rize on 2019/2/13.
  */
-public enum GroupShopAutomaticRefundType {
+public enum GroupShopAutomaticRefundType implements BaseEnums<Integer> {
     NO(0, "NO"),
     YES(1, "Yes")
     ;
@@ -17,7 +19,7 @@ public enum GroupShopAutomaticRefundType {
 
     private String msg;
 
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 

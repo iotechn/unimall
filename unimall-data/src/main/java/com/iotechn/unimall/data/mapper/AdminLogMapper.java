@@ -1,6 +1,7 @@
 package com.iotechn.unimall.data.mapper;
 
 import com.iotechn.unimall.data.domain.AdminLogDO;
+import com.dobbinsoft.fw.support.mapper.IMapper;
 
 /**
  * Description:

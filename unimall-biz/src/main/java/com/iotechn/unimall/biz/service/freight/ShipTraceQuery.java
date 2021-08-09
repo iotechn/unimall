@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.service.freight;
 
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 
 /**

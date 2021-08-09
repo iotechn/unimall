@@ -12,6 +12,8 @@ public class DynamicConst {
 
     public static final String WX_PAY_CONFIG_PREFIX = "WX_PAY_CONFIG:";
 
+    public static final String ALI_PAY_CONFIG_PREFIX = "ALI_PAY_CONFIG:";
+
     public static final String SMS_CONFIG_PREFIX = "SMS_CONFIG:";
 
     public static final String OSS_CONFIG_PREFIX = "OSS_CONFIG:";

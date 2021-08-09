@@ -8,5 +8,5 @@ import com.iotechn.unimall.data.domain.SkuActivityPriceDO;
  * Date: 2020/8/4
  * Time: 15:06
  */
-public interface SkuActivityPriceMapper extends IMapper<SkuActivityPriceDO> {
+public interface SkuActivityPriceMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<SkuActivityPriceDO> {
 }

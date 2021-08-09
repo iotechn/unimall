@@ -1,5 +1,7 @@
 package com.iotechn.unimall.data.dto;
 
+import com.dobbinsoft.fw.core.entiy.SuperDTO;
+import com.dobbinsoft.fw.core.entiy.inter.IdentityOwner;
 import lombok.Data;
 
 import java.util.Date;
@@ -8,13 +10,11 @@ import java.util.Date;
  * Created by rize on 2019/7/1.
  */
 @Data
-public class UserDTO extends SuperDTO {
+public class UserDTO extends SuperDTO implements IdentityOwner {
 
     private String phone;
 
-    private Integer loginType;
-
-    private String openId;
+    private String wxMpOpenId;
 
     private String nickname;
 
