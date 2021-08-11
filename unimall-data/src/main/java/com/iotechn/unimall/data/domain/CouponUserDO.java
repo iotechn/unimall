@@ -1,7 +1,8 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
@@ -11,25 +12,26 @@ import java.util.Date;
  * Created by rize on 2019/7/4.
  */
 @Data
+@ApiEntity(description = "用户领取的优惠券")
 @TableName("unimall_coupon_user")
 public class CouponUserDO extends SuperDO {
 
-    @TableField("user_id")
+    @ApiField(description = "用户ID")
     private Long userId;
 
-    @TableField("coupon_id")
+    @ApiField(description = "优惠券ID")
     private Long couponId;
 
-    @TableField("order_id")
+    @ApiField(description = "使用订单的ID 若未使用为空")
     private Long orderId;
 
-    @TableField("gmt_used")
+    @ApiField(description = "使用的时间 未使用未空")
     private Date gmtUsed;
 
-    @TableField("gmt_start")
+    @ApiField(description = "可使用开始时间")
     private Date gmtStart;
 
-    @TableField("gmt_end")
+    @ApiField(description = "可使用结束时间")
     private Date gmtEnd;
 
 }

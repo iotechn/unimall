@@ -1,84 +1,63 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.support.domain.SuperDO;
+import com.iotechn.unimall.data.enums.SpuActivityType;
 import lombok.Data;
 
 /**
  * Created by rize on 2019/7/5.
  */
 @Data
+@ApiEntity(description = "订单商品")
 @TableName("unimall_order_sku")
 public class OrderSkuDO extends SuperDO {
 
-    @TableField("sku_id")
+    @ApiField(description = "商品规格ID")
     private Long skuId;
 
-    /**
-     * 冗余SPUID方便评论
-     */
-    @TableField("spu_id")
+    @ApiField(description = "商品ID")
     private Long spuId;
 
-    @TableField("order_id")
+    @ApiField(description = "订单主表ID")
     private Long orderId;
 
-    /**
-     * 冗余，方便技术查库
-     */
-    @TableField("order_no")
+    @ApiField(description = "订单主表串号")
     private String orderNo;
 
-    /**
-     * SPU 标题
-     */
-    @TableField("spu_title")
+    @ApiField(description = "商品标题")
     private String spuTitle;
 
-    /**
-     * SKU 标题， 即小规格名称
-     */
+    @ApiField(description = "SKU 标题， 即小规格名称")
     private String title;
 
-    @TableField("bar_code")
+    @ApiField(description = "商品条码")
     private String barCode;
 
+    @ApiField(description = "商品数量")
     private Integer num;
 
-    @TableField("original_price")
+    @ApiField(description = "商品原价")
     private Integer originalPrice;
 
-    /**
-     * 单价
-     */
+    @ApiField(description = "商品单价")
     private Integer price;
 
-    /**
-     * SKU 或 SPU主图 （优先使用SKU图）
-     */
+    @ApiField(description = "主图 优先使用SKU图片")
     private String img;
 
-    /**
-     * 商品单位
-     */
+    @ApiField(description = "商品单位")
     private String unit;
 
-    /**
-     * 商品重量 (g)
-     */
+    @ApiField(description = "商品重量")
     private Integer weight;
 
-    /**
-     * 活动类型
-     */
-    @TableField("activity_type")
+    @ApiField(description = "商品参与活动的类型", enums = SpuActivityType.class)
     private Integer activityType;
 
-    /**
-     * 活动Id
-     */
-    @TableField("activity_id")
+    @ApiField(description = "商品参与活动的ID")
     private Long activityId;
 
 }

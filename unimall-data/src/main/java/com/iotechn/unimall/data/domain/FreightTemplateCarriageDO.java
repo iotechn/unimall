@@ -1,7 +1,8 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
@@ -13,36 +14,29 @@ import lombok.Data;
  * Time: 上午11:41
  */
 @Data
+@ApiEntity(description = "运费模板特殊地区")
 @TableName("unimall_freight_template_carriage")
 public class FreightTemplateCarriageDO extends SuperDO {
 
-
-    //指定使用该运费计算的运费模板,必有存在
-    @TableField("template_id")
+    @ApiField(description = "主表ID")
     private Long templateId;
 
-    //指定该运费的区域
-    @TableField("designated_area")
+    @ApiField(description = "特殊地区名称")
     private String designatedArea;
 
-    @TableField("free_price")
+    @ApiField(description = "免邮费价格")
     private Integer freePrice;
 
-    //首次记件重量，未超过重量不加价
-    @TableField("first_weight")
+    @ApiField(description = "以起步价计算的 重量 eg 1000 代表1KG内 以firstPrice计算")
     private Integer firstWeight;
 
-    //首次记件重量价格
-    @TableField("first_price")
+    @ApiField(description = "起步价")
     private Integer firstPrice;
 
-    //续件一次的重量
-    @TableField("continue_weight")
+    @ApiField(description = "续重 每增加N的重量")
     private Integer continueWeight;
 
-    //续件一次重量的价格
-    @TableField("continue_price")
+    @ApiField(description = "续重价格 每增加N的重量 增加M的运费")
     private Integer continuePrice;
-
 
 }

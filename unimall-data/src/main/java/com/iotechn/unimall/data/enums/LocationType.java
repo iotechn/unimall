@@ -5,17 +5,18 @@ import com.dobbinsoft.fw.core.enums.BaseEnums;
 /**
  * Created by rize on 2019/2/13.
  */
-public enum GroupShopAutomaticRefundType implements BaseEnums<Integer> {
-    NO(0, "发货并不退款"),
-    YES(1, "不发货自动退款")
+public enum LocationType implements BaseEnums<Integer> {
+    STORE(1, "门店"),
+    WAREHOUSE(2, "仓库"),
+    VIRTUAL(3, "虚拟仓")
     ;
 
-    GroupShopAutomaticRefundType(int code, String msg) {
+    LocationType(Integer code, String msg) {
         this.code = code;
         this.msg = msg;
     }
 
-    private int code;
+    private Integer code;
 
     private String msg;
 

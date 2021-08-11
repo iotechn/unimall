@@ -2,7 +2,11 @@ package com.iotechn.unimall.data.domain;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.support.domain.SuperDO;
+import com.iotechn.unimall.data.enums.CouponType;
+import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
 import java.util.Date;
@@ -11,24 +15,33 @@ import java.util.Date;
  * Created by rize on 2019/7/4.
  */
 @Data
+@ApiEntity(description = "优惠券领域模型")
 @TableName("unimall_coupon")
 public class CouponDO extends SuperDO {
 
+    @ApiField(description = "优惠券标题")
     private String title;
 
+    @ApiField(description = "类型", enums = CouponType.class)
     private Integer type;
 
+    @ApiField(description = "优惠券描述")
     private String description;
 
+    @ApiField(description = "总共发的数量")
     private Integer total;
 
+    @ApiField(description = "剩余的数量")
     private Integer surplus;
 
+    @ApiField(description = "每个用户限制领取数量")
     @TableField("`limit`")
     private Integer limit;
 
+    @ApiField(description = "折扣")
     private Integer discount;
 
+    @ApiField(description = "最低使用价格，单位分")
     @TableField("`min`")
     private Integer min;
 
@@ -36,17 +49,19 @@ public class CouponDO extends SuperDO {
      * 0:下架
      * 1: 正常
      */
+    @ApiField(description = "状态", enums = StatusType.class)
     private Integer status;
 
-    @TableField("category_id")
+    @ApiField(description = "指定仅这个类目可用")
     private Long categoryId;
 
+    @ApiField(description = "有效期多少天")
     private Integer days;
 
-    @TableField("gmt_start")
+    @ApiField(description = "可领取开始时间")
     private Date gmtStart;
 
-    @TableField("gmt_end")
+    @ApiField(description = "可领取结束时间")
     private Date gmtEnd;
 
 }
