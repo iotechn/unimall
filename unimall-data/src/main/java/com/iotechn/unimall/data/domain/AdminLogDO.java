@@ -3,6 +3,7 @@ package com.iotechn.unimall.data.domain;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
 import java.util.Date;
@@ -16,9 +17,7 @@ import java.util.Date;
 @Data
 @TableName("unimall_admin_log")
 @ApiEntity(description = "管理员日志对象")
-public class AdminLogDO {
-
-    private Long id;
+public class AdminLogDO extends SuperDO {
 
     @ApiField(description = "管理员ID")
     private Long adminId;
@@ -31,7 +30,5 @@ public class AdminLogDO {
 
     @ApiField(description = "API 方法")
     private String apiMethod;
-
-    private Date gmtCreate;
 
 }

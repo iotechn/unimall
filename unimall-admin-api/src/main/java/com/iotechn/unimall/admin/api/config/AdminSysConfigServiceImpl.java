@@ -20,10 +20,10 @@ import java.util.List;
 @Service("adminSysConfigService")
 public class AdminSysConfigServiceImpl implements AdminSysConfigService {
 
-    @Autowired
+    @Autowired(required = false)
     private DynamicConfigComponent dynamicConfigComponent;
 
-    @Autowired
+    @Autowired(required = false)
     private DynamicConfigMapper dynamicConfigMapper;
 
     @Override

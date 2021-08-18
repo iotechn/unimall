@@ -10,12 +10,10 @@ import com.dobbinsoft.fw.support.model.Page;
 import com.dobbinsoft.fw.support.storage.StorageClient;
 import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
+import com.iotechn.unimall.biz.service.location.LocationBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
-import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.*;
-import com.iotechn.unimall.data.dto.goods.AdminSpuDTO;
-import com.iotechn.unimall.data.dto.goods.SpuDTO;
-import com.iotechn.unimall.data.dto.goods.SpuTreeNodeDTO;
+import com.iotechn.unimall.data.dto.product.*;
 import com.iotechn.unimall.data.enums.AdvertUnionType;
 import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.enums.SpuActivityType;
@@ -23,12 +21,14 @@ import com.iotechn.unimall.data.enums.SpuStatusType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.*;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * Created by rize on 2019/7/11.
  */
 @Service
-public class AdminProductServiceImpl implements AdminProductService {
+public class AdminProductServiceImpl implements AdminProductService, InitializingBean {
 
     @Autowired
     private CategoryMapper categoryMapper;
@@ -63,6 +63,18 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     @Autowired
     private SpuSpecificationMapper spuSpecificationMapper;
+
+    @Autowired
+    private LocationMapper locationMapper;
+
+    @Autowired
+    private LocationSpuMapper locationSpuMapper;
+
+    @Autowired
+    private LocationSkuMapper locationSkuMapper;
+
+    @Autowired
+    private LocationBizService locationBizService;
 
     @Autowired
     private CategoryBizService categoryBizService;
@@ -158,26 +170,20 @@ public class AdminProductServiceImpl implements AdminProductService {
     @Transactional(rollbackFor = Exception.class)
     public String create(AdminSpuDTO adminSpuDTO, Long adminId) throws ServiceException {
         // 1.参数校验
-        if (adminSpuDTO.getId() != null) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_CREATE_HAS_ID);
-        }
-        if (CollectionUtils.isEmpty(adminSpuDTO.getSkuList())) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_SKU_LIST_EMPTY);
-        }
         if (adminSpuDTO.getOriginalPrice() < adminSpuDTO.getPrice() || adminSpuDTO.getPrice() < adminSpuDTO.getVipPrice() || adminSpuDTO.getOriginalPrice() < adminSpuDTO.getVipPrice()) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_PRICE_CHECKED_FAILED);
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_PRICE_CHECKED_FAILED);
         }
         // 1.2.校验Sku是否重复
         Set<String> barCodes = adminSpuDTO.getSkuList().stream().map(item -> item.getBarCode()).collect(Collectors.toSet());
         if (barCodes.size() != adminSpuDTO.getSkuList().size()) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_UPLOAD_SKU_BARCODE_REPEAT);
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_UPLOAD_SKU_BARCODE_REPEAT);
         }
         List<SkuDO> existSkuDO = skuMapper.selectList(new QueryWrapper<SkuDO>().in("bar_code", barCodes));
         if (!CollectionUtils.isEmpty(existSkuDO)) {
             String spuIds = existSkuDO.stream().map(item -> item.getSpuId().toString()).collect(Collectors.joining(","));
             String skuIds = existSkuDO.stream().map(item -> item.getBarCode()).collect(Collectors.joining(","));
             throw new AdminServiceException(CoreExceptionDefinition
-                    .buildVariableException(ExceptionDefinition.GOODS_CREATE_BARCODE_REPEAT, spuIds, skuIds));
+                    .buildVariableException(ExceptionDefinition.PRODUCT_CREATE_BARCODE_REPEAT, spuIds, skuIds));
         }
         // 2.1.插入主表
         Date now = new Date();
@@ -185,23 +191,28 @@ public class AdminProductServiceImpl implements AdminProductService {
         BeanUtils.copyProperties(adminSpuDTO, spuDO);
         spuDO.setGmtUpdate(now);
         spuDO.setGmtCreate(now);
-        spuDO.setSales(0);
         spuMapper.insert(spuDO);
+        // 添加SPU仓库信息
+        locationBizService.initSpu(spuDO.getId());
         adminSpuDTO.setId(spuDO.getId());
         // 2.2.插入SKU表
-        for (SkuDO skuDO : adminSpuDTO.getSkuList()) {
+        for (AdminSkuDTO adminSkuDTO : adminSpuDTO.getSkuList()) {
+            SkuDO skuDO = new SkuDO();
+            BeanUtils.copyProperties(adminSkuDTO, skuDO);
             if (skuDO.getOriginalPrice() < skuDO.getPrice() || skuDO.getPrice() < skuDO.getVipPrice() || skuDO.getOriginalPrice() < skuDO.getVipPrice()) {
-                throw new AdminServiceException(ExceptionDefinition.GOODS_PRICE_CHECKED_FAILED);
+                throw new AdminServiceException(ExceptionDefinition.PRODUCT_PRICE_CHECKED_FAILED);
             }
             skuDO.setSpuId(spuDO.getId());
             skuDO.setGmtUpdate(now);
             skuDO.setGmtCreate(now);
             skuMapper.insert(skuDO);
+            // 添加SKU库存映射
+            locationBizService.initSku(spuDO.getId(), skuDO.getId());
         }
         // 2.3.插入spuAttr
-        insertSpuAttribute(adminSpuDTO, now);
+        this.insertSpuAttribute(adminSpuDTO, now);
         // 2.4.插入IMG
-        insertSpuImg(adminSpuDTO, spuDO.getId(), now);
+        this.insertSpuImg(adminSpuDTO, spuDO.getId(), now);
         // 2.5.插入规格维度
         List<SpuSpecificationDO> specificationList = adminSpuDTO.getSpecificationList();
         specificationList.forEach(item -> {
@@ -211,13 +222,13 @@ public class AdminProductServiceImpl implements AdminProductService {
             item.setGmtCreate(now);
             item.setGmtUpdate(now);
         });
-        spuSpecificationMapper.batchInsert(specificationList);
+        spuSpecificationMapper.insertBatchSomeColumn(specificationList);
         // 3.1. 创建商品缓存
         this.createSpuCache(spuDO);
-        // 3.2. 创建Sku库存缓存
-        for (SkuDO skuDO : adminSpuDTO.getSkuList()) {
-            cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
-        }
+        // TODO 3.2. 创建Sku库存缓存
+//        for (SkuDO skuDO : adminSpuDTO.getSkuList()) {
+//            cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
+//        }
         // 4. TODO 同步到搜索引擎
 //        if (searchEngine != null) {
 //            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -238,14 +249,11 @@ public class AdminProductServiceImpl implements AdminProductService {
         if (spuDTO.getId() == null) {
             throw new AdminServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
         }
-        if (CollectionUtils.isEmpty(spuDTO.getSkuList())) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_SKU_LIST_EMPTY);
-        }
         if (spuDTO.getOriginalPrice() < spuDTO.getPrice() || spuDTO.getPrice() < spuDTO.getVipPrice() || spuDTO.getOriginalPrice() < spuDTO.getVipPrice()) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_PRICE_CHECKED_FAILED);
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_PRICE_CHECKED_FAILED);
         }
         // 将旧值查询出来，若价格没有改变，则无需更新价格排序缓存
-        SpuDO spuFromDB = spuMapper.selectById(spuDTO.getId());
+        // SpuDO spuFromDB = spuMapper.selectById(spuDTO.getId());
         // 2.1. 更新主表
         Date now = new Date();
         SpuDO spuDO = new SpuDO();
@@ -254,9 +262,11 @@ public class AdminProductServiceImpl implements AdminProductService {
         spuMapper.updateById(spuDO);
         // 2.2. 更新barCodes
         Set<String> barCodes = new HashSet<>();
-        for (SkuDO skuDO : spuDTO.getSkuList()) {
+        for (AdminSkuDTO adminSkuDTO : spuDTO.getSkuList()) {
+            SkuDO skuDO = new SkuDO();
+            BeanUtils.copyProperties(adminSkuDTO, skuDO);
             if (skuDO.getOriginalPrice() < skuDO.getPrice() || skuDO.getPrice() < skuDO.getVipPrice() || skuDO.getOriginalPrice() < skuDO.getVipPrice()) {
-                throw new AdminServiceException(ExceptionDefinition.GOODS_PRICE_CHECKED_FAILED);
+                throw new AdminServiceException(ExceptionDefinition.PRODUCT_PRICE_CHECKED_FAILED);
             }
             skuDO.setId(null);
             skuDO.setSpuId(spuDO.getId());
@@ -266,63 +276,53 @@ public class AdminProductServiceImpl implements AdminProductService {
                             .eq("bar_code", skuDO.getBarCode())) <= 0) {
                 skuDO.setGmtCreate(now);
                 skuMapper.insert(skuDO);
+                // 添加SKU库存映射
+                locationBizService.initSku(spuDTO.getId(), skuDO.getId());
             }
-            boolean succ = barCodes.add(skuDO.getBarCode());
-            if (!succ) {
-                throw new AdminServiceException(ExceptionDefinition.GOODS_UPLOAD_SKU_BARCODE_REPEAT);
+            if (!barCodes.add(skuDO.getBarCode())) {
+                throw new AdminServiceException(ExceptionDefinition.PRODUCT_UPLOAD_SKU_BARCODE_REPEAT);
             }
         }
         // 2.2.2. 删除多余barCode
-        skuMapper.delete(new QueryWrapper<SkuDO>().eq("spu_id", spuDO.getId()).notIn("bar_code", barCodes));
+        List<Long> willDeleteSkuIds = skuMapper.selectList(
+                new QueryWrapper<SkuDO>()
+                        .select("id")
+                        .eq("spu_id", spuDO.getId())
+                        .notIn("bar_code", barCodes)).stream().map(SkuDO::getId).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(willDeleteSkuIds)) {
+            skuMapper.delete(new QueryWrapper<SkuDO>().in("id", willDeleteSkuIds));
+            locationSkuMapper.delete(new QueryWrapper<LocationSkuDO>().in("sku_id", willDeleteSkuIds));
+        }
         // 2.3. 更新spuAttr
         spuAttributeMapper.delete(new QueryWrapper<SpuAttributeDO>().eq("spu_id", spuDTO.getId()));
-        insertSpuAttribute(spuDTO, now);
+        this.insertSpuAttribute(spuDTO, now);
         imgMapper.delete(new QueryWrapper<ImgDO>().eq("biz_id", spuDO.getId()).eq("biz_type", BizType.GOODS.getCode()));
         // 2.4. 插入IMG
-        insertSpuImg(spuDTO, spuDO.getId(), now);
+        this.insertSpuImg(spuDTO, spuDO.getId(), now);
         // TODO 2.5. 更新规格维度
-        // 3. 删除缓存
+        // TODO 3. 删除缓存
         // 对于更新缓存，需要在事务提交后更新，防止事务提交期间产生读请求，将旧值覆盖到新值上
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                // 3.1. 检测商品价格、类目是否发生了改变，根据情况更新缓存
-                if (spuFromDB.getCategoryId().longValue() != spuDO.getCategoryId().longValue()) {
-                    // 3.1.1. 若二者CategoryId不一致，则表示商品更改了类目 更新列表排序缓存
-                    // 3.1.1.1 删除旧列表中的值
-                    List<Long> oldCategoryFamily = categoryBizService.getCategoryFamily(spuFromDB.getCategoryId());
-                    for (Long oldCid : oldCategoryFamily) {
-                        cacheComponent.delZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + oldCid, "P" + spuDO.getId());
-                        cacheComponent.delZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + oldCid, "P" + spuDO.getId());
-                        cacheComponent.delZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + oldCid, "P" + spuDO.getId());
-                    }
-                    // 3.1.1.2 添加新列表中的值
-                    List<Long> newCategoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
-                    for (Long newCid : newCategoryFamily) {
-                        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + newCid, spuDO.getId(), "P" + spuDO.getId());
-                        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + newCid, spuDO.getPrice(), "P" + spuDO.getId());
-                        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + newCid, spuFromDB.getSales(), "P" + spuDO.getId());
-                    }
-                }
-                List<Long> categoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
-                if (spuFromDB.getPrice().intValue() != spuDO.getPrice().intValue()) {
-                    // 3.1.2.若二者Price不一致，则表示商品更新了价格 更新列表缓存
-                    for (Long categoryId : categoryFamily) {
-                        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + categoryId, spuDO.getPrice(), "P" + spuDO.getId());
-                    }
-                }
-                // 3.2. 更新基本信息缓存
-                SpuDTO basicSpuDTO = new SpuDTO();
-                BeanUtils.copyProperties(spuDO, basicSpuDTO, "detail");
-                basicSpuDTO.setCategoryIds(categoryFamily);
-                cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuDO.getId(), basicSpuDTO);
-                // 3.3. 删除详细信息缓存
-                cacheComponent.delHashKey(CacheConst.PRT_SPU_DETAIL_HASH_BUCKET, "P" + spuDO.getId());
                 // 4 更新搜索引擎
                 AdminProductServiceImpl.this.transmissionSearchEngine(spuDO.getId());
             }
         });
         return "ok";
+    }
+
+    @Override
+    public List<LocationSpuDTO> listLocation(Long spuId, Long adminId) throws ServiceException {
+        List<LocationSpuDO> locationSpuList = locationSpuMapper.selectList(new QueryWrapper<LocationSpuDO>().eq("spu_id", spuId));
+        List<LocationSkuDO> locationSkuList = locationSkuMapper.selectList(new QueryWrapper<LocationSkuDO>().eq("spu_id", spuId));
+        Map<Long, List<LocationSkuDO>> locationSkuMap = locationSkuList.stream().collect(Collectors.groupingBy(LocationSkuDO::getSpuId));
+        return locationSpuList.stream().map(item -> {
+            LocationSpuDTO dto = new LocationSpuDTO();
+            BeanUtils.copyProperties(item, dto);
+            dto.setSkuList(locationSkuMap.get(item.getSpuId()));
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     private void insertSpuAttribute(AdminSpuDTO spuDTO, Date now) {
@@ -331,14 +331,14 @@ public class AdminProductServiceImpl implements AdminProductService {
                 spuAttributeDO.setSpuId(spuDTO.getId());
                 spuAttributeDO.setGmtUpdate(now);
                 spuAttributeDO.setGmtCreate(now);
-                spuAttributeMapper.insert(spuAttributeDO);
             }
+            spuAttributeMapper.insertBatchSomeColumn(spuDTO.getAttributeList());
         }
     }
 
     private void insertSpuImg(AdminSpuDTO spuDTO, Long bizId, Date now) {
         List<String> imgList = spuDTO.getImgList();
-        List<ImgDO> imgDOList = imgList.stream().map(item -> {
+        List<ImgDO> imgDomainList = imgList.stream().map(item -> {
             ImgDO imgDO = new ImgDO();
             imgDO.setBizType(BizType.GOODS.getCode());
             imgDO.setBizId(bizId);
@@ -347,14 +347,14 @@ public class AdminProductServiceImpl implements AdminProductService {
             imgDO.setGmtUpdate(now);
             return imgDO;
         }).collect(Collectors.toList());
-        imgMapper.insertImgs(imgDOList);
+        imgMapper.insertBatchSomeColumn(imgDomainList);
     }
 
     @Override
-    public Page<SpuDTO> list(Integer page, Integer limit, Long categoryId, String title, String barcode, Integer status, Long adminId) throws ServiceException {
+    public Page<AdminSpuDTO> list(Integer page, Integer limit, Long categoryId, String title, String barcode, Integer status, Long adminId) throws ServiceException {
         QueryWrapper<SpuDO> wrapper = new QueryWrapper<SpuDO>().select(ProductBizService.SPU_EXCLUDE_DETAIL_FIELDS);
         // 1.标题搜索
-        if (!StringUtils.isEmpty(title)) {
+        if (!ObjectUtils.isEmpty(title)) {
             wrapper.like("title", title);
         }
         // 2.类目搜索
@@ -367,19 +367,52 @@ public class AdminProductServiceImpl implements AdminProductService {
             wrapper.eq("status", status.intValue() <= SpuStatusType.STOCK.getCode() ? SpuStatusType.STOCK.getCode() : SpuStatusType.SELLING.getCode());
         }
         // 3.条码搜索
-        if (!StringUtils.isEmpty(barcode)) {
-            List<SkuDO> skuDOList = skuMapper.selectList(new QueryWrapper<SkuDO>().eq("bar_code", barcode));
-            if (!CollectionUtils.isEmpty(skuDOList)) {
-                SkuDO skuDO = skuDOList.get(0);
+        if (!ObjectUtils.isEmpty(barcode)) {
+            List<SkuDO> skuList = skuMapper.selectList(new QueryWrapper<SkuDO>().eq("bar_code", barcode));
+            if (!CollectionUtils.isEmpty(skuList)) {
+                SkuDO skuDO = skuList.get(0);
                 wrapper.eq("id", skuDO.getSpuId());
             }
         }
-        Page<SpuDTO> dtoPage = spuMapper.selectPage(Page.div(page, limit, SpuDO.class), wrapper).trans(item -> {
-            SpuDTO spuDTO = new SpuDTO();
-            BeanUtils.copyProperties(item, spuDTO);
-            List<SkuDO> skuDOList = skuMapper.selectList(new QueryWrapper<SkuDO>().eq("spu_id", item.getId()));
-            spuDTO.setSkuList(skuDOList);
-            return spuDTO;
+        Page<SpuDO> domainPage = spuMapper.selectPage(Page.div(page, limit, SpuDO.class), wrapper);
+        List<Long> spuIds = domainPage.getItems().stream().map(SpuDO::getId).collect(Collectors.toList());
+        // 仓库信息
+        Map<Long, LocationDO> locationMap = locationMapper.selectList(new QueryWrapper<LocationDO>()).stream().collect(Collectors.toMap(LocationDO::getId, v -> v));
+        // 规格信息
+        List<SkuDO> skuListOfAll = skuMapper.selectList(new QueryWrapper<SkuDO>().in("spu_id", spuIds));
+        Map<Long, List<SkuDO>> skuMap = skuListOfAll.stream().collect(Collectors.groupingBy(SkuDO::getSpuId));
+        // 库存信息
+        List<LocationSkuDO> locationSkuListOfAll = locationSkuMapper.selectList(new QueryWrapper<LocationSkuDO>().in("spu_id", spuIds));
+        Map<Long, List<LocationSkuDO>> locationSkuMap = locationSkuListOfAll.stream().collect(Collectors.groupingBy(LocationSkuDO::getSpuId));
+        // 上架、销量信息
+        List<LocationSpuDO> locationSpuListOfAll = locationSpuMapper.selectList(new QueryWrapper<LocationSpuDO>().in("spu_id", spuIds));
+        Map<String, LocationSpuDO> locationSpuMap = locationSpuListOfAll.stream().collect(Collectors.toMap(k -> (k.getLocationId() + "-" + k.getSpuId()), v -> v));
+        Page<AdminSpuDTO> dtoPage = domainPage.trans(item -> {
+            AdminSpuDTO adminSpuDTO = new AdminSpuDTO();
+            BeanUtils.copyProperties(item, adminSpuDTO);
+            adminSpuDTO.setSkuList(skuMap.get(item.getId()).stream().map(skuItem -> {
+                AdminSkuDTO skuDTO = new AdminSkuDTO();
+                BeanUtils.copyProperties(skuItem, skuDTO);
+                return skuDTO;
+            }).collect(Collectors.toList()));
+            List<LocationSkuDO> locationSkuDOS = locationSkuMap.get(item.getId());
+            // 库存映射表
+            Map<Long, List<LocationSkuDO>> locationSkuStockMap = locationSkuDOS.stream().collect(Collectors.groupingBy(LocationSkuDO::getSkuId));
+            for (AdminSkuDTO skuDTO : adminSpuDTO.getSkuList()) {
+                skuDTO.setLocationSkuList(locationSkuStockMap.get(skuDTO.getId()).stream().map(locationSkuItem -> {
+                    LocationSkuDTO locationSkuDTO = new LocationSkuDTO();
+                    BeanUtils.copyProperties(locationSkuItem, locationSkuDTO);
+                    // 1. 封装位置信息
+                    String locationTitle = locationMap.get(locationSkuItem.getLocationId()).getTitle();
+                    locationSkuDTO.setLocationTitle(locationTitle);
+                    // 2. 封装商品上架、销量信息
+                    LocationSpuDO locationSpuDO = locationSpuMap.get(locationSkuDTO.getLocationId() + "-" + locationSkuDTO.getSpuId());
+                    locationSkuDTO.setSpuSales(locationSpuDO.getSales());
+                    locationSkuDTO.setSpuStatus(locationSpuDO.getStatus());
+                    return locationSkuDTO;
+                }).collect(Collectors.toList()));
+            }
+            return adminSpuDTO;
         });
         return dtoPage;
     }
@@ -396,7 +429,11 @@ public class AdminProductServiceImpl implements AdminProductService {
         List<SkuDO> skuList = skuMapper.selectList(
                 new QueryWrapper<SkuDO>()
                         .eq("spu_id", spuId));
-        adminSpuDTO.setSkuList(skuList);
+        adminSpuDTO.setSkuList(skuList.stream().map(item -> {
+            AdminSkuDTO adminSkuDTO = new AdminSkuDTO();
+            BeanUtils.copyProperties(item, adminSkuDTO);
+            return adminSkuDTO;
+        }).collect(Collectors.toList()));
         ;
         // 2. Spu属性
         List<SpuAttributeDO> attributeList = spuAttributeMapper.selectList(new QueryWrapper<SpuAttributeDO>().eq("spu_id", spuId));
@@ -422,7 +459,7 @@ public class AdminProductServiceImpl implements AdminProductService {
         // 校验是否有不可下架的活动
         this.checkProductActivity(spuDOBefore);
         if (spuMapper.deleteById(spuId) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
         }
         // 将需要删除的图片路径取出来
         List<String> deleteImgList = imgMapper.getImgs(BizType.GOODS.getCode(), spuId);
@@ -436,12 +473,9 @@ public class AdminProductServiceImpl implements AdminProductService {
             public void afterCommit() {
                 AdminProductServiceImpl.this.deleteSpuCache(spuDOBefore);
                 AdminProductServiceImpl.this.deleteSearchEngine(spuDOBefore.getId());
-                GlobalExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (String img : deleteImgList) {
-                            storageClient.delete(img);
-                        }
+                GlobalExecutor.execute(() -> {
+                    for (String img : deleteImgList) {
+                        storageClient.delete(img);
                     }
                 });
             }
@@ -455,7 +489,7 @@ public class AdminProductServiceImpl implements AdminProductService {
                         .eq("union_type", AdvertUnionType.PRODUCT.getCode())
                         .in("union_value", ids).last("LIMIT 1"));
         if (!CollectionUtils.isEmpty(list1)) {
-            throw new AdminServiceException(CoreExceptionDefinition.buildVariableException(ExceptionDefinition.GOODS_EXIST_ADVERT, list1.get(0).getTitle()));
+            throw new AdminServiceException(CoreExceptionDefinition.buildVariableException(ExceptionDefinition.PRODUCT_EXIST_ADVERT, list1.get(0).getTitle()));
         }
     }
 
@@ -472,10 +506,10 @@ public class AdminProductServiceImpl implements AdminProductService {
             this.checkProductActivity(spuDO);
         }
         if (CollectionUtils.isEmpty(ids)) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
         }
         if (spuMapper.delete(new QueryWrapper<SpuDO>().in("id", ids)) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
         }
         List<Long> skuIds = skuMapper.selectSkuIdsBySpuIds(ids);
         cartMapper.delete(new QueryWrapper<CartDO>().in("sku_id", skuIds));
@@ -496,72 +530,51 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     @Override
     public String rebuildProductCache(Long adminId) throws ServiceException {
-        // 1.删除旧缓存
-        cacheComponent.delPrefixKey(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET);
-        cacheComponent.delPrefixKey(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET);
-        cacheComponent.delPrefixKey(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET);
-        cacheComponent.delPrefixKey(CacheConst.PRT_SKU_STOCK_BUCKET);
-        cacheComponent.delPrefixKey(CacheConst.PRT_SPU_DETAIL_HASH_BUCKET);
-        cacheComponent.delPrefixKey(CacheConst.PRT_SPU_HASH_BUCKET);
-        // 2.重建新缓存
-        List<SpuDO> spuDOS = spuMapper.selectList(new QueryWrapper<>());
-        for (SpuDO spuDO : spuDOS) {
-            // 2.1. 重建主表缓存
-            this.createSpuCache(spuDO);
-            // 2.2. 重建SKU缓存
-            List<SkuDO> skuList = skuMapper.selectList(new QueryWrapper<SkuDO>().eq("spu_id", spuDO.getId()));
-            for (SkuDO skuDO : skuList) {
-                cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
-            }
-        }
+        // TODO 1.删除旧缓存
         return null;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public AdminSpuDTO freezeOrActivation(Long spuId, Integer status, Long adminId) throws ServiceException {
-        SpuDO spuDO = spuMapper.selectById(spuId);
-        if (spuDO == null) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+    public String shelves(Long locationId, Long spuId, Integer status, Long adminId) throws ServiceException {
+        QueryWrapper<LocationSpuDO> wrapper = new QueryWrapper<LocationSpuDO>().eq("location_id", locationId).eq("spu_id", spuId);
+        LocationSpuDO locationSpuDO = locationSpuMapper.selectOne(wrapper);
+        if (locationSpuDO == null) {
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
         }
-        status = status <= SpuStatusType.STOCK.getCode() ? SpuStatusType.STOCK.getCode() : SpuStatusType.SELLING.getCode();
+        SpuDO spuDO = spuMapper.selectById(locationSpuDO.getSpuId());
+        if (spuDO == null) {
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
+        }
         // 不可下架活动校验
-        if (status == SpuStatusType.STOCK.getCode()) {
+        if (status == SpuStatusType.STOCK.getCode().intValue()) {
             this.checkProductActivity(spuDO);
         }
-        if (spuDO.getStatus().intValue() == status.intValue()) {
-            throw new AdminServiceException(ExceptionDefinition.SYSTEM_BUSY);
-        }
-        spuDO.setStatus(status);
-        spuDO.setGmtUpdate(new Date());
-        if (spuMapper.updateById(spuDO) <= 0) {
+        LocationSpuDO updateLocationSpuDO = new LocationSpuDO();
+        updateLocationSpuDO.setStatus(status);
+        if (locationSpuMapper.update(updateLocationSpuDO, wrapper) <= 0) {
             throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
         }
-        AdminSpuDTO spuDTO = new AdminSpuDTO();
-        BeanUtils.copyProperties(spuDO, spuDTO);
-        List<SkuDO> skuDOList = skuMapper.selectList(new QueryWrapper<SkuDO>().eq("spu_id", spuDO.getId()));
-        spuDTO.setSkuList(skuDOList);
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                if (spuDO.getStatus() > 0) {
-                    //1. 重建商品列表缓存
-                    AdminProductServiceImpl.this.createSpuCache(spuDO);
-                    //2. 重建Sku库存缓存
-                    for (SkuDO skuDO : spuDTO.getSkuList()) {
-                        cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
-                    }
-                    //3. 更新搜索引擎缓存
-                    AdminProductServiceImpl.this.transmissionSearchEngine(spuId);
-                } else {
-                    // 删除商品列表缓存
-                    AdminProductServiceImpl.this.deleteSpuCache(spuDO);
-                    // 更新搜索引擎
-                    AdminProductServiceImpl.this.deleteSearchEngine(spuId);
-                }
-            }
-        });
-        return spuDTO;
+        // TODO 编辑缓存
+        return "ok";
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String editStock(Long locationId, Long skuId, Integer stock, Long adminId) throws ServiceException {
+        QueryWrapper<LocationSkuDO> wrapper = new QueryWrapper<LocationSkuDO>().eq("sku_id", skuId).eq("location_id", locationId);
+        LocationSkuDO locationSkuDO = locationSkuMapper.selectOne(wrapper);
+        if (locationSkuDO == null) {
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
+        }
+        // 更改库存
+        LocationSkuDO updateLocationSkuDO = new LocationSkuDO();
+        updateLocationSkuDO.setStock(stock);
+        if (locationSkuMapper.update(updateLocationSkuDO, wrapper) <= 0) {
+            throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        }
+        // TODO 编辑缓存
+        return "ok";
     }
 
     /**
@@ -572,7 +585,7 @@ public class AdminProductServiceImpl implements AdminProductService {
      */
     private void checkProductActivity(SpuDO spuDO) throws ServiceException {
         if (spuDO.getActivityType() != null && spuDO.getActivityType() == SpuActivityType.GROUP_SHOP.getCode()) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_UNION_ACTIVITY_CAN_NOT_BE_OFF_SHELF);
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_UNION_ACTIVITY_CAN_NOT_BE_OFF_SHELF);
         }
     }
 
@@ -584,22 +597,7 @@ public class AdminProductServiceImpl implements AdminProductService {
      * @param spuDO
      */
     private void createSpuCache(SpuDO spuDO) {
-        // 1. 放入类目缓存
-        List<Long> categoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
-        for (Long categoryId : categoryFamily) {
-            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + categoryId, spuDO.getId(), "P" + spuDO.getId());
-            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + categoryId, spuDO.getPrice(), "P" + spuDO.getId());
-            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + categoryId, 0, "P" + spuDO.getId());
-        }
-        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + null, spuDO.getId(), "P" + spuDO.getId());
-        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + null, spuDO.getPrice(), "P" + spuDO.getId());
-        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + null, 0, "P" + spuDO.getId());
-        // 2. 放入Hash表中
-        spuDO.setDetail(null);
-        SpuDTO newSpuDTO = new SpuDTO();
-        BeanUtils.copyProperties(spuDO, newSpuDTO);
-        newSpuDTO.setCategoryIds(categoryFamily);
-        cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuDO.getId(), newSpuDTO);
+        // TODO 1. 创建商品缓存
     }
 
     /**
@@ -610,20 +608,7 @@ public class AdminProductServiceImpl implements AdminProductService {
      * @param spuDO
      */
     private void deleteSpuCache(SpuDO spuDO) {
-        // 1. 删除各个类目ZSET
-        List<Long> categoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
-        for (Long categoryId : categoryFamily) {
-            cacheComponent.delZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + categoryId, "P" + spuDO.getId());
-            cacheComponent.delZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + categoryId, "P" + spuDO.getId());
-            cacheComponent.delZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + categoryId, "P" + spuDO.getId());
-        }
-        cacheComponent.delZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + null, "P" + spuDO.getId());
-        cacheComponent.delZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + null, "P" + spuDO.getId());
-        cacheComponent.delZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + null, "P" + spuDO.getId());
-        // 2. 删除基本信息Hash表
-        cacheComponent.delHashKey(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuDO.getId());
-        // 3. 删除商品详情信息Hash表
-        cacheComponent.delHashKey(CacheConst.PRT_SPU_DETAIL_HASH_BUCKET, "P" + spuDO.getId());
+        // TODO 1. 删除各个类目ZSET
     }
 
     private void transmissionSearchEngine(Long id) {
@@ -647,4 +632,28 @@ public class AdminProductServiceImpl implements AdminProductService {
 //        }
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+//        List<SpuDO> spuDOS = spuMapper.selectList(new QueryWrapper<>());
+//        List<SkuDO> skuDOS = skuMapper.selectList(new QueryWrapper<>());
+//        List<LocationDO> locationDOS = locationMapper.selectList();
+//        for (LocationDO locationDO : locationDOS) {
+//            for (SpuDO spuDO : spuDOS) {
+//                LocationSpuDO locationSpuDO = new LocationSpuDO();
+//                locationSpuDO.setStatus(SpuStatusType.SELLING.getCode());
+//                locationSpuDO.setLocationId(locationDO.getId());
+//                locationSpuDO.setSales(0);
+//                locationSpuDO.setSpuId(spuDO.getId());
+//                locationSpuMapper.insert(locationSpuDO);
+//            }
+//            for (SkuDO skuDO : skuDOS) {
+//                LocationSkuDO locationSkuDO = new LocationSkuDO();
+//                locationSkuDO.setStock(10);
+//                locationSkuDO.setLocationId(locationDO.getId());
+//                locationSkuDO.setSkuId(skuDO.getId());
+//                locationSkuDO.setSpuId(skuDO.getSpuId());
+//                locationSkuMapper.insert(locationSkuDO);
+//            }
+//        }
+    }
 }

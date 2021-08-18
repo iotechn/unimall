@@ -8,7 +8,7 @@ import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.core.annotation.param.Range;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.model.Page;
-import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
+import com.iotechn.unimall.data.dto.product.GroupShopDTO;
 
 @HttpOpenApi(group = "admin.groupshop", description = "管理团购商品服务")
 public interface AdminGroupShopService {

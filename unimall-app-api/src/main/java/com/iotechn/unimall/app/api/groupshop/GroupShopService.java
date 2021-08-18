@@ -5,7 +5,7 @@ import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
 import com.dobbinsoft.fw.core.annotation.HttpParam;
 import com.dobbinsoft.fw.core.annotation.HttpParamType;
 import com.dobbinsoft.fw.support.model.Page;
-import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
+import com.iotechn.unimall.data.dto.product.GroupShopDTO;
 
 import java.rmi.ServerException;
 

@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.dobbinsoft.fw.support.mapper.IMapper;
 import com.iotechn.unimall.data.domain.FreightTemplateDO;
 import org.apache.ibatis.annotations.Param;
 
@@ -10,7 +11,7 @@ import org.apache.ibatis.annotations.Param;
  * Date: 2019-07-07
  * Time: 下午3:26
  */
-public interface FreightTemplateMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<FreightTemplateDO> {
+public interface FreightTemplateMapper extends IMapper<FreightTemplateDO> {
 
     public FreightTemplateDO selectFreightBySkuId(@Param("skuId") Long skuId);
 }

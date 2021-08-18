@@ -1,8 +1,9 @@
-package com.iotechn.unimall.data.dto.goods;
+package com.iotechn.unimall.data.dto.product;
 
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.core.entiy.SuperDTO;
+import com.dobbinsoft.fw.support.annotation.LeafTable;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
@@ -23,9 +24,6 @@ import java.util.List;
 @Data
 @ApiEntity(description = "商品传输实体")
 public class SpuDTO extends SuperDTO {
-
-    @ApiField(description = "商品列表")
-    private List<SkuDO> skuList;
 
     /**
      * 商品原价
@@ -94,15 +92,6 @@ public class SpuDTO extends SuperDTO {
     @ApiField(description = "类目对象列表")
     private List<CategoryDTO> categoryList;
 
-    @ApiField(description = "属性列表")
-    private List<SpuAttributeDO> attributeList;
-
-    /**
-     * 商品规格枚举列表
-     */
-    @ApiField(description = "商品规格枚举列表")
-    private List<SpuSpecificationDO> specificationList;
-
     /**
      * TODO 修改热评
      * 商品的第一页(前10条)评价
@@ -161,5 +150,23 @@ public class SpuDTO extends SuperDTO {
      */
     @ApiField(description = "活动附加对象")
     private Object activity;
+
+
+    /*************************** 直接子表 *********************************/
+
+    @LeafTable
+    @ApiField(description = "属性列表")
+    private List<SpuAttributeDO> attributeList;
+
+    /**
+     * 商品规格枚举列表
+     */
+    @LeafTable
+    @ApiField(description = "商品规格枚举列表")
+    private List<SpuSpecificationDO> specificationList;
+
+    @LeafTable
+    @ApiField(description = "商品列表")
+    private List<SkuDO> skuList;
 
 }

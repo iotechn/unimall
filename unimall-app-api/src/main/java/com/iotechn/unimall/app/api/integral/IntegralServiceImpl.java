@@ -10,7 +10,7 @@ import com.iotechn.unimall.data.domain.AdvertDO;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.AdvertDTO;
 import com.iotechn.unimall.data.dto.IntegralIndexDataDTO;
-import com.iotechn.unimall.data.dto.goods.SpuDTO;
+import com.iotechn.unimall.data.dto.product.SpuDTO;
 import com.iotechn.unimall.data.enums.AdvertType;
 import com.iotechn.unimall.data.enums.AdvertUnionType;
 import com.iotechn.unimall.data.properties.UnimallAdvertProperties;
@@ -44,7 +44,7 @@ public class IntegralServiceImpl implements IntegralService {
 
     @Override
     @AspectCommonCache(value = CacheConst.INTEGRAL_INDEX, second = 5 * 60)
-    public IntegralIndexDataDTO getIndexData() throws ServiceException {
+    public IntegralIndexDataDTO getIndexData(Long locationId) throws ServiceException {
         //分类
         List<AdvertDO> activeAd = advertService.getActiveAd(null);
         Map<String, List<AdvertDTO>> adDTOMap = activeAd.stream().map(item -> {
@@ -59,7 +59,7 @@ public class IntegralServiceImpl implements IntegralService {
             categoryPickAd = categoryPickAd.stream().filter(item -> {
                 if (item.getUnionType().intValue() == AdvertUnionType.CATEGORY.getCode()) {
                     try {
-                        Page<SpuDO> pickPage = productBizService.getProductPage(1, 10, Long.parseLong(item.getUnionValue()), "sales", false, null);
+                        Page<SpuDO> pickPage = productBizService.getProductPage(1, 10, locationId, Long.parseLong(item.getUnionValue()), "sales", false, null);
                         item.setData(pickPage.getItems());
                         return true;
                     } catch (Exception e) {
@@ -92,13 +92,13 @@ public class IntegralServiceImpl implements IntegralService {
         /**
          * 销量冠军
          */
-        List<SpuDO> salesTop = productBizService.getProductPage(1, unimallAdvertProperties.getTopSalesNum() == null ? 8 : unimallAdvertProperties.getTopSalesNum(), null, "sales", false, null).getItems();
+        List<SpuDO> salesTop = productBizService.getProductPage(1, unimallAdvertProperties.getTopSalesNum() == null ? 8 : unimallAdvertProperties.getTopSalesNum(), locationId, null, "sales", false, null).getItems();
         integralIndexDataDTO.setSalesTop(salesTop);
 
         /**
          * 最近上新
          */
-        List<SpuDO> newTop = productBizService.getProductPage(1, 8, null, "id", false, null).getItems();
+        List<SpuDO> newTop = productBizService.getProductPage(1, 8, locationId, null, "id", false, null).getItems();
         integralIndexDataDTO.setNewTop(newTop);
         return integralIndexDataDTO;
     }

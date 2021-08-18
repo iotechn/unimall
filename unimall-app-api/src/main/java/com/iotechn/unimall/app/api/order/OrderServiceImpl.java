@@ -11,10 +11,7 @@ import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.Page;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
 import com.dobbinsoft.fw.support.service.BaseService;
-import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
-import com.github.binarywang.wxpay.exception.WxPayException;
-import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.address.AddressBizService;
 import com.iotechn.unimall.biz.service.cart.CartBizService;
@@ -24,19 +21,17 @@ import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
-import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
-import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.CouponUserDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
-import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
-import com.iotechn.unimall.data.dto.goods.GroupShopSkuDTO;
-import com.iotechn.unimall.data.dto.goods.SkuDTO;
+import com.iotechn.unimall.data.dto.product.GroupShopDTO;
+import com.iotechn.unimall.data.dto.product.GroupShopSkuDTO;
+import com.iotechn.unimall.data.dto.product.SkuDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
@@ -166,35 +161,35 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
                     Long skuId = orderRequestSkuDTO.getSkuId();
                     skuIds.add(skuId);
-                    OrderCalcSkuModel orderCalcSpuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + orderRequestSkuDTO.getSpuId(), OrderCalcSkuModel.class);
-                    if (orderCalcSpuDTO == null) {
-                        // 尝试从DB中读取
-                        SpuDO spuFromDB = productBizService.getProductByIdFromDB(orderRequestSkuDTO.getSpuId());
-                        if (spuFromDB == null || (spuFromDB.getStatus() == SpuStatusType.STOCK.getCode())) {
-                            // 不存在的或下架的商品
-                            statusErrorSkuList.add(skuId);
-                            continue;
-                        } else {
-                            orderCalcSpuDTO = new OrderCalcSkuModel();
-                            BeanUtils.copyProperties(spuFromDB, orderCalcSpuDTO);
-                        }
-
-                    }
-                    long surplus = cacheComponent.decrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuId, orderRequestSkuDTO.getNum());
-                    if (surplus < 0) {
-                        // 若余量小于0，则表示该商品不存在或库存不足。
-                        SkuStockInfoModel skuStockInfo = new SkuStockInfoModel();
-                        skuStockInfo.setSkuId(skuId);
-                        skuStockInfo.setExpect(orderRequestSkuDTO.getNum());
-                        // 扣减之后的余量 + 用户期望量 = 扣减之前的余量
-                        skuStockInfo.setSurplus((int) surplus + orderRequestSkuDTO.getNum());
-                        stockErrorSkuList.add(skuStockInfo);
-                        continue;
-                    }
-                    // 将SkuId设置进去
-                    orderCalcSpuDTO.setSkuId(skuId);
-                    orderCalcSpuDTO.setNum(orderRequestSkuDTO.getNum());
-                    calcSkuList.add(orderCalcSpuDTO);
+//                    OrderCalcSkuModel orderCalcSpuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + orderRequestSkuDTO.getSpuId(), OrderCalcSkuModel.class);
+//                    if (orderCalcSpuDTO == null) {
+//                        // 尝试从DB中读取
+//                        SpuDO spuFromDB = productBizService.getProductByIdFromDB(orderRequestSkuDTO.getSpuId());
+//                        if (spuFromDB == null || (spuFromDB.getStatus() == SpuStatusType.STOCK.getCode())) {
+//                            // 不存在的或下架的商品
+//                            statusErrorSkuList.add(skuId);
+//                            continue;
+//                        } else {
+//                            orderCalcSpuDTO = new OrderCalcSkuModel();
+//                            BeanUtils.copyProperties(spuFromDB, orderCalcSpuDTO);
+//                        }
+//
+//                    }
+//                    long surplus = cacheComponent.decrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuId, orderRequestSkuDTO.getNum());
+//                    if (surplus < 0) {
+//                        // 若余量小于0，则表示该商品不存在或库存不足。
+//                        SkuStockInfoModel skuStockInfo = new SkuStockInfoModel();
+//                        skuStockInfo.setSkuId(skuId);
+//                        skuStockInfo.setExpect(orderRequestSkuDTO.getNum());
+//                        // 扣减之后的余量 + 用户期望量 = 扣减之前的余量
+//                        skuStockInfo.setSurplus((int) surplus + orderRequestSkuDTO.getNum());
+//                        stockErrorSkuList.add(skuStockInfo);
+//                        continue;
+//                    }
+//                    // 将SkuId设置进去
+//                    orderCalcSpuDTO.setSkuId(skuId);
+//                    orderCalcSpuDTO.setNum(orderRequestSkuDTO.getNum());
+//                    calcSkuList.add(orderCalcSpuDTO);
                 }
 
                 calcStockFlag = true;
@@ -399,9 +394,9 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 return parentOrderNo;
             } catch (Exception e) {
                 if (calcStockFlag) {
-                    for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
-                        cacheComponent.incrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + orderRequestSkuDTO.getSkuId(), orderRequestSkuDTO.getNum());
-                    }
+//                    for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
+//                        cacheComponent.incrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + orderRequestSkuDTO.getSkuId(), orderRequestSkuDTO.getNum());
+//                    }
                 }
                 if (e instanceof ServiceException) {
                     // 服务异常

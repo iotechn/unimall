@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.groupshop;
 
 import com.dobbinsoft.fw.support.model.Page;
-import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
+import com.iotechn.unimall.data.dto.product.GroupShopDTO;
 import com.iotechn.unimall.data.mapper.GroupShopMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

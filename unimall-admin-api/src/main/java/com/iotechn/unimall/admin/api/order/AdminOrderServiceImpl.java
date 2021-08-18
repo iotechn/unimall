@@ -3,12 +3,14 @@ package com.iotechn.unimall.admin.api.order;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.AdminServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.pay.model.request.PayRefundRequest;
+import com.dobbinsoft.fw.pay.model.result.PayRefundResult;
+import com.dobbinsoft.fw.pay.service.pay.PayService;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.Page;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
-import com.github.binarywang.wxpay.service.WxPayService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.data.constant.LockConst;
@@ -54,7 +56,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private OrderBizService orderBizService;
 
     @Autowired
-    private WxPayService wxPayService;
+    private PayService payService;
 
     @Autowired
     private OrderMapper orderMapper;
@@ -149,8 +151,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     } else {
                         refundPrice = orderDO.getPayPrice() - orderDO.getFreightPrice();
                     }
-                    WxPayRefundRequest wxPayRefundRequest = new WxPayRefundRequest();
-                    wxPayRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? unimallWxProperties.getMiniAppId() : unimallWxProperties.getMiniAppSecret());
+                    PayRefundRequest payRefundRequest = new PayRefundRequest();
+                    payRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? unimallWxProperties.getMiniAppId() : unimallWxProperties.getMiniAppSecret());
                     // 判断订单是子单支付还是父单支付
                     String abstractOrderNo;
                     if (orderDO.getSubPay().intValue() == 1) {
@@ -158,18 +160,18 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     } else {
                         abstractOrderNo = orderDO.getParentOrderNo();
                     }
-                    wxPayRefundRequest.setOutTradeNo(abstractOrderNo);
-                    wxPayRefundRequest.setOutRefundNo("refund_" + abstractOrderNo);
-                    wxPayRefundRequest.setTotalFee(orderDO.getPayPrice());
-                    wxPayRefundRequest.setRefundFee(refundPrice);
-                    WxPayRefundResult wxPayRefundResult = wxPayService.refund(wxPayRefundRequest);
+                    payRefundRequest.setOutTradeNo(abstractOrderNo);
+                    payRefundRequest.setOutRefundNo("refund_" + abstractOrderNo);
+                    payRefundRequest.setTotalFee(orderDO.getPayPrice());
+                    payRefundRequest.setRefundFee(refundPrice);
+                    PayRefundResult wxPayRefundResult = payService.refundOrder(payRefundRequest);
                     if (!wxPayRefundResult.getReturnCode().equals("SUCCESS")) {
-                        logger.warn("[微信退款] 失败 : " + wxPayRefundResult.getReturnMsg());
+                        logger.warn("[在线退款] 失败 : " + wxPayRefundResult.getReturnMsg());
                         throw new AdminServiceException(wxPayRefundResult.getReturnMsg(),
                                 ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
                     }
                     if (!wxPayRefundResult.getResultCode().equals("SUCCESS")) {
-                        logger.warn("[微信退款] 失败 : " + wxPayRefundResult.getReturnMsg());
+                        logger.warn("[在线退款] 失败 : " + wxPayRefundResult.getReturnMsg());
                         throw new AdminServiceException(wxPayRefundResult.getReturnMsg(),
                                 ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
                     }

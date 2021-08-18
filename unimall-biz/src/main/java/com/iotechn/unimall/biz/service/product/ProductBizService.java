@@ -1,5 +1,6 @@
 package com.iotechn.unimall.biz.service.product;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.BizServiceException;
@@ -9,8 +10,8 @@ import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.SpuDO;
-import com.iotechn.unimall.data.dto.goods.SkuDTO;
-import com.iotechn.unimall.data.dto.goods.SpuDTO;
+import com.iotechn.unimall.data.dto.product.SkuDTO;
+import com.iotechn.unimall.data.dto.product.SpuDTO;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
@@ -25,6 +26,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
@@ -68,17 +70,14 @@ public class ProductBizService {
         List<String> tempList = new ArrayList<>();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
-            TableField annotation = field.getAnnotation(TableField.class);
-            String name;
-            if (annotation != null) {
-                name = annotation.value();
-            } else {
-                name = field.getName();
-            }
+            String name = StrUtil.toUnderlineCase(field.getName());
             if (!name.equals("detail")) {
                 tempList.add(name);
             }
         }
+        tempList.add("id");
+        tempList.add("gmt_update");
+        tempList.add("gmt_create");
         SPU_EXCLUDE_DETAIL_FIELDS = tempList.toArray(new String[0]);
     }
 
@@ -94,9 +93,9 @@ public class ProductBizService {
      * @return
      * @throws ServiceException
      */
-    public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
+    public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long locationId, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         if (!StringUtils.isEmpty(title)) {
-            // TODO
+            // TODO 搜索引擎
 //            try {
 //                if (this.searchEngine != null) {
 //                    SearchWrapperModel searchWrapper =
@@ -120,7 +119,7 @@ public class ProductBizService {
 //                throw new AppServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.SEARCH_ENGINE_INNER_EXCEPTION, e.getMessage()));
 //            }
             // 使用DB逻辑
-            return this.getProductPageFromDB(pageNo, pageSize, categoryId, orderBy, isAsc, title);
+            return this.getProductPageFromDB(pageNo, pageSize, locationId, categoryId, orderBy, isAsc, title);
         }
         // 1. 从商品列表缓存中取出Id
         String zsetBucketKey;
@@ -189,7 +188,7 @@ public class ProductBizService {
      * @param title
      * @return
      */
-    public Page<SpuDO> getProductPageFromDB(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
+    public Page<SpuDO> getProductPageFromDB(Integer pageNo, Integer pageSize, Long locationId, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         QueryWrapper<SpuDO> wrapper = new QueryWrapper<SpuDO>();
         wrapper.select(SPU_EXCLUDE_DETAIL_FIELDS);
         if (orderBy != null && isAsc != null) {
@@ -202,7 +201,7 @@ public class ProductBizService {
         if (categoryId != null) {
             wrapper.eq("category_id", categoryId);
         }
-        if (!StringUtils.isEmpty(title)) {
+        if (!ObjectUtils.isEmpty(title)) {
             wrapper.like("title", title);
         }
         return spuMapper.selectPage(Page.div(pageNo, pageSize, SpuDO.class), wrapper);
@@ -248,13 +247,13 @@ public class ProductBizService {
     }
 
     /**
-     * 从缓存中查出SPU，不带detail字段
+     * TODO 从缓存中查出SPU，不带detail字段
      *
      * @param spuId
      * @return
      */
     public SpuDTO getProductByIdFromCache(Long spuId) throws ServiceException {
-        SpuDTO spuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, SpuDTO.class);
+        SpuDTO spuDTO = null; // cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, SpuDTO.class);
         if (spuDTO == null) {
             SpuDO spuDO = spuMapper.selectOne(new QueryWrapper<SpuDO>().select(ProductBizService.SPU_EXCLUDE_DETAIL_FIELDS).eq("id", spuId));
             if (spuDO != null) {
@@ -262,9 +261,9 @@ public class ProductBizService {
                 BeanUtils.copyProperties(spuDO, spuDTO);
                 List<Long> categoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
                 spuDTO.setCategoryIds(categoryFamily);
-                cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, spuDTO);
+//                cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, spuDTO);
             } else {
-                throw new BizServiceException(ExceptionDefinition.GOODS_NOT_EXIST);
+                throw new BizServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
             }
         }
         return spuDTO;

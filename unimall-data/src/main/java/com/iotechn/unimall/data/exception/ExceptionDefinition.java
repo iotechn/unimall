@@ -259,40 +259,34 @@ public class ExceptionDefinition {
             new ServiceExceptionDefinition(19006, "父节点信息不准确");
 
 
-    public static final ServiceExceptionDefinition GOODS_NOT_EXIST =
+    public static final ServiceExceptionDefinition PRODUCT_NOT_EXIST =
             new ServiceExceptionDefinition(20001, "商品并不存在");
 
-    public static final ServiceExceptionDefinition GOODS_SKU_LIST_EMPTY =
+    public static final ServiceExceptionDefinition PRODUCT_SKU_LIST_EMPTY =
             new ServiceExceptionDefinition(20002, "商品的类型（Sku）列表不能为空");
 
-    public static final ServiceExceptionDefinition GOODS_CREATE_HAS_ID =
+    public static final ServiceExceptionDefinition PRODUCT_CREATE_HAS_ID =
             new ServiceExceptionDefinition(20003, "创建商品时请不要传入Id");
 
-    public static final ServiceExceptionDefinition GOODS_CREATE_BARCODE_REPEAT =
+    public static final ServiceExceptionDefinition PRODUCT_CREATE_BARCODE_REPEAT =
             new ServiceExceptionDefinition(20004, "商品条码已经存在了 商品Id:${0} 重复Sku:${1}");
 
-    public static final ServiceExceptionDefinition GOODS_PRICE_CHECKED_FAILED =
+    public static final ServiceExceptionDefinition PRODUCT_PRICE_CHECKED_FAILED =
             new ServiceExceptionDefinition(20005, "必须 vip价格 <= 现价 <= 原价");
 
-    public static final ServiceExceptionDefinition GOODS_NEED_STATUS_ERROR =
-            new ServiceExceptionDefinition(20006, "商品已经是该状态,无法改变");
-
-    public static final ServiceExceptionDefinition GOODS_UPDATE_SQL_FAILED =
-            new ServiceExceptionDefinition(20007, "商品执行修改SQL失败");
-
-    public static final ServiceExceptionDefinition GOODS_UPLOAD_SKU_BARCODE_REPEAT =
+    public static final ServiceExceptionDefinition PRODUCT_UPLOAD_SKU_BARCODE_REPEAT =
             new ServiceExceptionDefinition(20008, "您上传的SKU列表中条码重复");
 
     public static final ServiceExceptionDefinition GOODS_ORDER_BY_WAY_ILLEGAL =
             new ServiceExceptionDefinition(20009, "商品排序方式不合法");
 
-    public static final ServiceExceptionDefinition GOODS_UNION_ACTIVITY_CAN_NOT_BE_OFF_SHELF =
+    public static final ServiceExceptionDefinition PRODUCT_UNION_ACTIVITY_CAN_NOT_BE_OFF_SHELF =
             new ServiceExceptionDefinition(20010, "商品关联的活动正在进行，不允许下架");
 
-    public static final ServiceExceptionDefinition GOODS_EXIST_ADVERT =
+    public static final ServiceExceptionDefinition PRODUCT_EXIST_ADVERT =
             new ServiceExceptionDefinition(20011, "商品存在广告，请先移除广告");
 
-    public static final ServiceExceptionDefinition GOODS_SPU_EXIST_ACTIVITY =
+    public static final ServiceExceptionDefinition PRODUCT_SPU_EXIST_ACTIVITY =
             new ServiceExceptionDefinition(20012, "商品已经存在活动，不能继续添加");
 
 

@@ -49,12 +49,9 @@ public class KdniaoTrackQueryAPI implements ShipTraceQuery {
             String orderTracesByJson = getOrderTracesByJson(shipCode, shipNo);
             JSONObject jsonObject = JSONObject.parseObject(orderTracesByJson);
             ShipTraceDTO shipTraceDTO = new ShipTraceDTO();
-            shipTraceDTO.setErrcode(jsonObject.getInteger("State"));
             shipTraceDTO.setShipNo(shipNo);
             shipTraceDTO.setShipCode(shipCode);
             shipTraceDTO.setShipName(BaseEnums.getByCode(shipCode, ShipCodeType.class).getMsg());
-            shipTraceDTO.setErrmsg(jsonObject.getString("Reason"));
-            msg = shipTraceDTO.getErrmsg();
             List<ShipTraceItemDTO> traces = new LinkedList<>();
             JSONArray tracesFromJson = jsonObject.getJSONArray("Traces");
             if (!CollectionUtils.isEmpty(tracesFromJson)) {

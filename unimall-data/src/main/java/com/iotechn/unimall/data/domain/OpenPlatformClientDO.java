@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.domain;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ import lombok.Data;
  * @date: 2021-04-25
  */
 @Data
+@TableName("unimall_open_platform_client")
 public class OpenPlatformClientDO extends SuperDO {
 
     /**

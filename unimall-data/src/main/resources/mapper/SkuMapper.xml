@@ -10,7 +10,7 @@
         UPDATE unimall_sku SET stock = stock + #{stock} WHERE id = #{skuId}
     </update>
 
-    <select id="getSkuDTOById" resultType="com.iotechn.unimall.data.dto.goods.SkuDTO">
+    <select id="getSkuDTOById" resultType="com.iotechn.unimall.data.dto.product.SkuDTO">
         SELECT
             k.id,
             k.spu_id AS spuId,
@@ -52,7 +52,7 @@
         SELECT stock FROM unimall_sku WHERE id = #{skuId} FOR UPDATE
     </select>
 
-    <select id="getSkuDTOListByIds" resultType="com.iotechn.unimall.data.dto.goods.SkuDTO">
+    <select id="getSkuDTOListByIds" resultType="com.iotechn.unimall.data.dto.product.SkuDTO">
         SELECT
             k.id,
             k.spu_id AS spuId,

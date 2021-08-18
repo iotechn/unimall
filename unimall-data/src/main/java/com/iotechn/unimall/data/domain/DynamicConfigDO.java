@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.domain;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
@@ -12,6 +13,7 @@ import java.io.Serializable;
  * Time: 11:28
  */
 @Data
+@TableName("unimall_dynamic_config")
 public class DynamicConfigDO extends SuperDO implements Serializable {
 
     private String configKey;

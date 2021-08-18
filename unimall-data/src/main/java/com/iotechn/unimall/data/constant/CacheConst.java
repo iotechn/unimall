@@ -66,13 +66,6 @@ public class CacheConst {
     public static final String FOOTPRINT_LRU = "FOOTPRINT_LRU:";
     /**=========================== 足迹缓存 END =============================**/
 
-    /**=========================== 商铺信息缓存 START =============================**/
-    /**
-     * 存储商铺信息
-     */
-    public static final String MERCHANT_INFO = "MERCHANT_INFO";
-    /**=========================== 商铺信息缓存 END =============================**/
-
 
     public static final String USER_OFFICIAL_WECHAT_ACCESS = "USER_OFFICIAL_WECHAT_ACCESS";
 
@@ -131,15 +124,6 @@ public class CacheConst {
 
     /**=========================== 商品缓存 END ===============================**/
 
-    /**=========================== 动态配置 START =============================**/
-
-    /**
-     * 动态配置缓存
-     * DYNAMIC_CACHE: + KEY
-     */
-    public static final String DYNAMIC_CACHE = "DYNAMIC_CACHE:";
-
-    /**=========================== 动态配置 END ===============================**/
 
 
 

@@ -1,4 +1,4 @@
-package com.iotechn.unimall.data.dto.goods;
+package com.iotechn.unimall.data.dto.product;
 
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;

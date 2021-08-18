@@ -1,6 +1,7 @@
 package com.iotechn.unimall.data.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.dobbinsoft.fw.support.mapper.IMapper;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
@@ -10,7 +11,7 @@ import org.apache.ibatis.annotations.Param;
 @author kbq
 @date  2019/7/6 - 10:17
 */
-public interface AppraiseMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<AppraiseDO> {
+public interface AppraiseMapper extends IMapper<AppraiseDO> {
 
     /**
      * 根据用户id，分页获取所有评价

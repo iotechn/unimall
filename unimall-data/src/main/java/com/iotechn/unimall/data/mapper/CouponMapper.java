@@ -1,6 +1,7 @@
 package com.iotechn.unimall.data.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.dobbinsoft.fw.support.mapper.IMapper;
 import com.dobbinsoft.fw.support.model.KVModel;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.CouponDO;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * Created by rize on 2019/7/4.
  */
-public interface CouponMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<CouponDO> {
+public interface CouponMapper extends IMapper<CouponDO> {
 
     public Integer decCoupon(Long couponId);
 

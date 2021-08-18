@@ -38,8 +38,10 @@ public class FootprintServiceImpl implements FootprintService {
 
     @Override
     public List<SpuDO> list(Long userId) throws ServiceException {
+        // TODO 重做足迹获取商品的方式
         Set<String> spuIdsSet = cacheComponent.getZSetLruTopN(CacheConst.FOOTPRINT_LRU + userId, 30);
-        return spuIdsSet.stream().map(item ->
-                cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, item, SpuDO.class)).filter(item -> item != null).collect(Collectors.toList());
+//        return spuIdsSet.stream().map(item ->
+//                cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, item, SpuDO.class)).filter(item -> item != null).collect(Collectors.toList());
+        return null;
     }
 }

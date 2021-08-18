@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.iotechn.unimall.data.mapper.GroupShopMapper">
 
-    <select id="getGroupShopPage" resultType="com.iotechn.unimall.data.dto.goods.GroupShopDTO">
+    <select id="getGroupShopPage" resultType="com.iotechn.unimall.data.dto.product.GroupShopDTO">
         SELECT
             g.id,
             g.spu_id as spuId,
@@ -32,7 +32,7 @@
         ORDER BY id DESC
     </select>
 
-    <select id="detail" resultType="com.iotechn.unimall.data.dto.goods.GroupShopDTO">
+    <select id="detail" resultType="com.iotechn.unimall.data.dto.product.GroupShopDTO">
         SELECT
             g.id,
             g.spu_id as spuId,

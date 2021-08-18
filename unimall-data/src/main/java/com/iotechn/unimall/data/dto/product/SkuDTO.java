@@ -1,12 +1,14 @@
-package com.iotechn.unimall.data.dto.goods;
+package com.iotechn.unimall.data.dto.product;
 
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.core.entiy.SuperDTO;
+import com.iotechn.unimall.data.domain.LocationSkuDO;
 import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by rize on 2019/7/6.
@@ -75,5 +77,8 @@ public class SkuDTO extends SuperDTO {
 
     @ApiField(description = "活动结束时间")
     private Date gmtActivityEnd;
+
+    @ApiField(description = "位置商品列表")
+    private List<LocationSkuDO> locationSkuList;
 
 }

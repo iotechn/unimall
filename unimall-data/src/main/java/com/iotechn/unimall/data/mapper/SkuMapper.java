@@ -1,7 +1,8 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.dobbinsoft.fw.support.mapper.IMapper;
 import com.iotechn.unimall.data.domain.SkuDO;
-import com.iotechn.unimall.data.dto.goods.SkuDTO;
+import com.iotechn.unimall.data.dto.product.SkuDTO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Created by rize on 2019/7/2.
  */
-public interface SkuMapper extends com.baomidou.mybatisplus.core.mapper.BaseMapper<SkuDO> {
+public interface SkuMapper extends IMapper<SkuDO> {
 
     public SkuDTO getSkuDTOById(Long skuId);
 

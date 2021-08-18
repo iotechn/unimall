@@ -13,8 +13,8 @@ import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.domain.SpuSpecificationDO;
-import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
-import com.iotechn.unimall.data.dto.goods.SpuDTO;
+import com.iotechn.unimall.data.dto.product.GroupShopDTO;
+import com.iotechn.unimall.data.dto.product.SpuDTO;
 import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.mapper.*;
@@ -68,11 +68,11 @@ public class ProductServiceImpl implements ProductService {
     private TransactionTemplate transactionTemplate;
 
     @Override
-    public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
+    public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long locationId, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         if (categoryId != null && categoryId <= 0) {
             categoryId = null;
         }
-        return productBizService.getProductPage(pageNo, pageSize, categoryId, orderBy, isAsc, title);
+        return productBizService.getProductPage(pageNo, pageSize, locationId, categoryId, orderBy, isAsc, title);
     }
 
     @Override
