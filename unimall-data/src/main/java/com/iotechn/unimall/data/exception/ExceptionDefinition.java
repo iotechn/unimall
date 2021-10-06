@@ -8,9 +8,9 @@ import com.dobbinsoft.fw.core.exception.ServiceExceptionDefinition;
  * 1. 所有已知异常，均以ServiceException异常抛出
  * 2. 异常定义不区分 ADMIN 与 APP 均定义在此文件中
  * 3. 每个模块1000个异常码
- *
- *    例如用户： 11000 —— 11999
- *      管理员： 50000 —— 50999
+ * <p>
+ * 例如用户： 11000 —— 11999
+ * 管理员： 50000 —— 50999
  *
  * @author: e-weichaozheng
  * @date: 2021-03-18
@@ -70,7 +70,6 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition USER_CAN_NOT_ACTIVE =
             new ServiceExceptionDefinition(11012, "用户处于冻结状态，请联系管理员");
-
 
 
     public static final ServiceExceptionDefinition CART_UPDATE_FAILED =
@@ -169,6 +168,20 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_EXCEL_PARAM_ERROR =
             new ServiceExceptionDefinition(13029, "生成excel查询参数错误");
 
+    public static final ServiceExceptionDefinition ORDER_SEND_SALES_HEADER_FAILED =
+            new ServiceExceptionDefinition(13030, "发送销售制单失败，未初始化");
+
+    public static final ServiceExceptionDefinition ORDER_REFUND_NUM_CANNOT_GT_BUY =
+            new ServiceExceptionDefinition(13031, "退款的商品数量不能超过购买数量");
+
+    public static final ServiceExceptionDefinition ORDER_NOT_REFUNDING =
+            new ServiceExceptionDefinition(13032, "订单并不处于退款中状态");
+
+    public static final ServiceExceptionDefinition ORDER_USER_IS_NOT_ACTIVE =
+            new ServiceExceptionDefinition(13033, "请完善手机号后提交订单");
+
+    public static final ServiceExceptionDefinition ORDER_APP_PAY_MUST_CHANNEL =
+            new ServiceExceptionDefinition(13034, "APP支付必须选择渠道");
 
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
             new ServiceExceptionDefinition(14001, "优惠券已经领完～");
@@ -195,21 +208,20 @@ public class ExceptionDefinition {
             new ServiceExceptionDefinition(14006, "优惠券审核数据失败");
 
 
-
-    public static final ServiceExceptionDefinition ADDRESS_QUERY_FAILED  =
+    public static final ServiceExceptionDefinition ADDRESS_QUERY_FAILED =
             new ServiceExceptionDefinition(16001, "这是个有地址却没有默认地址的用户");
 
-    public static final ServiceExceptionDefinition ADDRESS_DATABASE_QUERY_FAILED  =
+    public static final ServiceExceptionDefinition ADDRESS_DATABASE_QUERY_FAILED =
             new ServiceExceptionDefinition(16002, "执行语句失败");
 
-    public static final ServiceExceptionDefinition APPRAISE_PARAM_CHECK_FAILED  =
+    public static final ServiceExceptionDefinition APPRAISE_PARAM_CHECK_FAILED =
             new ServiceExceptionDefinition(17001, "参数校验失败");
 
-    public static final ServiceExceptionDefinition APPRAISE_ORDER_CHECK_FAILED  =
+    public static final ServiceExceptionDefinition APPRAISE_ORDER_CHECK_FAILED =
             new ServiceExceptionDefinition(17002, "当前状态不允许评价");
 
 
-    public static final ServiceExceptionDefinition FREIGHT_PARAM_CHECK_FAILED  =
+    public static final ServiceExceptionDefinition FREIGHT_PARAM_CHECK_FAILED =
             new ServiceExceptionDefinition(18001, "邮费传入参数校验失败");
 
     public static final ServiceExceptionDefinition FREIGHT_TEMPLATE_NOT_EXIST =
@@ -359,6 +371,43 @@ public class ExceptionDefinition {
             new ServiceExceptionDefinition(23003, "搜索引擎已经被初始化,无需重复执行");
 
 
+    public static final ServiceExceptionDefinition VIP_ORDER_UNKNOWN_EXCEPTION =
+            new ServiceExceptionDefinition(24000, "VIP订单未知异常");
+
+    public static final ServiceExceptionDefinition VIP_ORDER_NOT_EXIST =
+            new ServiceExceptionDefinition(24001, "VIP订单并不存在");
+
+    public static final ServiceExceptionDefinition VIP_ORDER_STATUS_CHANGE_FAILED =
+            new ServiceExceptionDefinition(24002, "VIP订单状态流转失败！");
+
+    public static final ServiceExceptionDefinition VIP_ORDER_SYSTEM_BUSY =
+            new ServiceExceptionDefinition(24003, "订单系统繁忙~");
+
+    public static final ServiceExceptionDefinition VIP_ORDER_STATUS_ERROR =
+            new ServiceExceptionDefinition(24004, "VIP卡当前状态不支持此操作");
+
+    public static final ServiceExceptionDefinition VIP_ORDER_CHECK_FAIL =
+            new ServiceExceptionDefinition(24005, "VIP卡校验失败");
+
+    public static final ServiceExceptionDefinition VIP_ORDER_REFUND_TIME_EXPIRED =
+            new ServiceExceptionDefinition(24006, "VIP卡退款时间已过");
+
+    public static final ServiceExceptionDefinition VIP_ORDER_WITHDRAW_INSERT_ERROR =
+            new ServiceExceptionDefinition(24007, "提现记录插入失败");
+
+    public static final ServiceExceptionDefinition VIP_TEMPLATE_NULL_OR_NOT_DISPLAY =
+            new ServiceExceptionDefinition(24008, "该VIP模板为空，或者不是可以购买的模板");
+
+    public static final ServiceExceptionDefinition VIP_TEMPLATE_NULL =
+            new ServiceExceptionDefinition(24009, "该VIP模板不存在");
+
+    public static final ServiceExceptionDefinition VIP_DATA_ERROR =
+            new ServiceExceptionDefinition(240010, "VIP数据不一致，请联系客服");
+
+    public static final ServiceExceptionDefinition VIP_BIND_ID_CARD_ERROR =
+            new ServiceExceptionDefinition(240011, "仅身份证为${0}游客可购买");
+
+
     public static final ServiceExceptionDefinition ADMIN_UNKNOWN_EXCEPTION =
             new ServiceExceptionDefinition(50000, "管理员系统未知异常");
 
@@ -392,7 +441,7 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ADMIN_GUEST_NOT_NEED_VERIFY_CODE =
             new ServiceExceptionDefinition(50010, "游客用户无须验证码，请直接输入666666");
 
-    public static final ServiceExceptionDefinition ADMIN_VERIFY_CODE_SEND_FAIL=
+    public static final ServiceExceptionDefinition ADMIN_VERIFY_CODE_SEND_FAIL =
             new ServiceExceptionDefinition(50011, "登陆验证码发送失败");
 
     public static final ServiceExceptionDefinition ADMIN_GENERATOR_WORK_DIR_NOT_EXIST =
@@ -409,7 +458,6 @@ public class ExceptionDefinition {
 
     public static final ServiceExceptionDefinition ADMIN_ROLE_UNION_ADMIN =
             new ServiceExceptionDefinition(50014, "角色关联仍有管理员关联");
-
 
 
 }

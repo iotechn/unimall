@@ -68,11 +68,11 @@ public class ProductServiceImpl implements ProductService {
     private TransactionTemplate transactionTemplate;
 
     @Override
-    public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long locationId, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
+    public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         if (categoryId != null && categoryId <= 0) {
             categoryId = null;
         }
-        return productBizService.getProductPage(pageNo, pageSize, locationId, categoryId, orderBy, isAsc, title);
+        return productBizService.getProductPage(pageNo, pageSize, categoryId, orderBy, isAsc, title);
     }
 
     @Override

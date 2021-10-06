@@ -20,7 +20,6 @@ import java.util.List;
 @HttpOpenApi(group = "advert",description = "广告推销")
 public interface AdvertService {
 
-    // TODO adType -> type
     @HttpMethod(description = "取得活跃广告")
     public List<AdvertDO> getActiveAd(
             @HttpParam(name = "adType", type = HttpParamType.COMMON, description = "广告类型") Integer adType)throws ServiceException;

@@ -65,47 +65,6 @@ public class CategoryBizService {
     }
 
     /**
-     * 获取一棵三级类目树,类内部有调用，因此不能切面
-     */
-    public List<CategoryDTO> categoryThreeLevelTree() throws ServiceException {
-        List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CacheConst.CATEGORY_THREE_LEVEL_TREE, CategoryDTO.class);
-        if (categoryDTOListFormCache != null) {
-            return categoryDTOListFormCache;
-        }
-        //从数据库查询
-        List<CategoryDO> categoryDOList = categoryMapper.selectList(new QueryWrapper<>());
-
-        List<CategoryDO> firstLevelList = categoryDOList.stream().filter(item -> item.getLevel().intValue() == 0).collect(Collectors.toList());
-        List<CategoryDO> secondLevelList = categoryDOList.stream().filter(item -> item.getLevel().intValue() == 1).collect(Collectors.toList());
-        List<CategoryDO> thirdLevelList = categoryDOList.stream().filter(item -> item.getLevel().intValue() == 2).collect(Collectors.toList());
-
-        // 以ID为键，组装后的DTO为值，提升组装速度
-        HashMap<Long, CategoryDTO> speedUp = new HashMap<>();
-
-        // 组装一级类目
-        List<CategoryDTO> resultTree = firstLevelList.stream().map(item -> {
-            CategoryDTO first = new CategoryDTO();
-            BeanUtils.copyProperties(item, first);
-            first.setFullName(item.getTitle());
-            speedUp.put(first.getId(),first);
-            return first;
-        }).collect(Collectors.toList());
-
-        // 组装二级类目
-        secondLevelList.stream().forEach(item ->{
-           publicCodeAssembly(speedUp,item);
-        });
-
-        // 组装三级类目
-        thirdLevelList.stream().forEach(item ->{
-            publicCodeAssembly(speedUp,item);
-        });
-        //放入缓存
-        cacheComponent.putObj(CacheConst.CATEGORY_THREE_LEVEL_TREE, resultTree, Const.CACHE_ONE_DAY);
-        return resultTree;
-    }
-
-    /**
      * 上面生成类目树的公用代码提取
      */
     private void publicCodeAssembly(HashMap<Long, CategoryDTO> speedUp, CategoryDO item){
@@ -133,17 +92,13 @@ public class CategoryBizService {
             return categoryDTOListFormCache;
         }
 
-        List<CategoryDTO> categoryDTOS = categoryThreeLevelTree();
+        List<CategoryDTO> categoryDTOS = categorySecondLevelTree();
         List<CategoryDTO> resultList = new LinkedList<>();
         categoryDTOS.forEach(first -> {
             resultList.add(first);
             if (!CollectionUtils.isEmpty(first.getChildrenList()))
                 first.getChildrenList().forEach(second -> {
                     resultList.add(second);
-                    if (!CollectionUtils.isEmpty(second.getChildrenList()))
-                        second.getChildrenList().forEach(third -> {
-                            resultList.add(third);
-                        });
                 });
         });
 
@@ -160,9 +115,7 @@ public class CategoryBizService {
      */
     public List<Long> getCategoryFamily(Long categoryId) {
         CategoryDO categoryDO = categoryMapper.selectById(categoryId);
-        if (categoryDO.getLevel() == CategoryLevelType.THREE.getCode()) {
-            return Arrays.asList(categoryDO.getFirstLevelId(), categoryDO.getSecondLevelId(), categoryDO.getId());
-        } else if (categoryDO.getLevel() == CategoryLevelType.TWO.getCode()) {
+        if (categoryDO.getLevel() == CategoryLevelType.TWO.getCode().intValue()) {
             return Arrays.asList(categoryDO.getFirstLevelId(), categoryDO.getId());
         } else {
             return Arrays.asList(categoryDO.getId());

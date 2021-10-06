@@ -9,7 +9,9 @@ import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
+import com.iotechn.unimall.data.dto.order.OrderRefundRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
+import com.iotechn.unimall.data.enums.PlatformType;
 
 /**
  * Created by rize on 2019/7/4.
@@ -36,9 +38,11 @@ public interface OrderService {
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
     @HttpMethod(description = "微信小程序预先支付")
-    public Object wxPrepay(
+    public Object prepay(
             @HttpParam(name = "parentOrderNo", type = HttpParamType.COMMON, description = "父单串号") String parentOrderNo,
             @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单串号") String orderNo,
+            @HttpParam(name = "platform", type = HttpParamType.COMMON, description = "平台", enums = PlatformType.class) Integer platform,
+            @HttpParam(name = "payChannel", type = HttpParamType.COMMON, description = "支付渠道") String payChannel,
             @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "ip地址") String ip,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
@@ -50,8 +54,7 @@ public interface OrderService {
 
     @HttpMethod(description = "用户申请退款")
     public String refund(
-            @NotNull @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单串号") String orderNo,
-            @HttpParam(name = "reason", type = HttpParamType.COMMON, description = "退款理由") String reason,
+            @NotNull @HttpParam(name = "refundRequest", type = HttpParamType.COMMON, description = "退款请求") OrderRefundRequestDTO refundRequest,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
     @HttpMethod(description = "取消订单")

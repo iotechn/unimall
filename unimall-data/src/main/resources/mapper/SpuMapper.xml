@@ -2,35 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.iotechn.unimall.data.mapper.SpuMapper">
 
-    <!--    TODO 完善搜索字段 -->
-    <select id="searchSpu" resultType="com.iotechn.unimall.data.dto.product.SpuItemDTO">
-        SELECT
-            *
-        FROM
-            unimall_spu AS p, unimall_location_spu AS l
-        WHERE
-            l.location_id = #{locationId} AND p.id = l.spu_id
-            <if test="categoryId != null">
-                AND p.category_id = #{categoryId}
-            </if>
-            <if test="title != null">
-                AND p.title LIKE CONCAT('%',#{title},'%')
-            </if>
-        ORDER BY
-            <if test="orderBy = 'TIME'">
-                p.id
-            </if>
-            <if test="orderBy = 'SALES'">
-                l.sales
-            </if>
-            <if test="orderBy = 'PRICE'">
-                p.price
-            </if>
-        <if test="!isAsc">
-            DESC
-        </if>
-    </select>
-
     <update id="incSales">
         UPDATE unimall_spu SET sales = sales + #{delta} WHERE id = #{spuId}
     </update>

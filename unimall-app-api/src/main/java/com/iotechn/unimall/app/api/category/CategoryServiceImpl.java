@@ -19,7 +19,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDTO> categoryList() throws ServiceException {
-        return categoryBizService.categoryThreeLevelTree();
+        return categoryBizService.categorySecondLevelTree();
     }
 
     /**

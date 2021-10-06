@@ -25,6 +25,12 @@ public class UserDO extends SuperDO {
     @ApiField(description = "用户登录密码 可空")
     private String password;
 
+    @ApiField(description = "密码盐值")
+    private String salt;
+
+    @ApiField(description = "支付宝小程序OPENID")
+    private String aliMpOpenId;
+
     /**
      * 需要扩展其他平台，使用横向扩展字段
      */
@@ -43,8 +49,20 @@ public class UserDO extends SuperDO {
     @ApiField(description = "头像URL")
     private String avatarUrl;
 
+    @ApiField(description = "省份")
+    private String province;
+
+    @ApiField(description = "市")
+    private String city;
+
+    @ApiField(description = "区")
+    private String county;
+
     @ApiField(description = "等级", enums = UserLevelType.class)
     private Integer level;
+
+    @ApiField(description = "VIP过期时间")
+    private Date vipExpiredTime;
 
     @ApiField(description = "出生日期")
     private Date birthday;

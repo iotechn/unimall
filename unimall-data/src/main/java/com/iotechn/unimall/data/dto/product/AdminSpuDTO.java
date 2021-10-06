@@ -24,19 +24,7 @@ public class AdminSpuDTO extends SuperDTO {
 
     @NotNull(message = "商品列表不能为空")
     @ApiField(description = "商品规格列表")
-    private List<AdminSkuDTO> skuList;
-
-    @NotNull(message = "请输入商品原价")
-    @ApiField(description = "商品原价（仅显示作用）")
-    private Integer originalPrice;
-
-    @NotNull(message = "请输入商品价格")
-    @ApiField(description = "价格（仅显示作用）")
-    private Integer price;
-
-    @NotNull(message = "请输入商品VIP价格")
-    @ApiField(description = "VIP价格（仅显示作用）")
-    private Integer vipPrice;
+    private List<SkuDO> skuList;
 
     @ApiField(description = "库存")
     private Integer stock;

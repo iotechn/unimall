@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.AppServiceException;
 import com.dobbinsoft.fw.core.exception.BizServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.pay.enums.PayChannelType;
+import com.dobbinsoft.fw.pay.model.request.MatrixPayRefundRequest;
 import com.dobbinsoft.fw.pay.model.request.PayRefundRequest;
+import com.dobbinsoft.fw.pay.model.result.MatrixPayRefundResult;
 import com.dobbinsoft.fw.pay.model.result.PayRefundResult;
-import com.dobbinsoft.fw.pay.service.pay.PayService;
+import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
-import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
-import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
@@ -18,7 +19,6 @@ import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.enums.PayChannelType;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.OrderMapper;
@@ -56,7 +56,7 @@ public class OrderBizService {
     private UserMapper userMapper;
 
     @Autowired
-    private PayService payService;
+    private MatrixPayService payService;
 
     @Autowired
     private DelayedMessageQueue delayedMessageQueue;
@@ -198,17 +198,17 @@ public class OrderBizService {
                 // TODO 现在已经取消loginType，应该从订单中取支付方式
                 Integer loginType = 1;
                 // 根据不同的的支付方式，进行退款
-                if (PayChannelType.WEPAY.getCode().equals(orderDO.getPayChannel())) {
+                if (PayChannelType.WX.getCode().equals(orderDO.getPayChannel())) {
                     //2.1.2 向微信支付平台发送退款请求
                     // TODO 设置平台
-                    PayRefundRequest payRefundRequest = new PayRefundRequest();
+                    MatrixPayRefundRequest payRefundRequest = new MatrixPayRefundRequest();
                     payRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? unimallWxProperties.getMiniAppId() : unimallWxProperties.getAppId());
                     payRefundRequest.setOutTradeNo(orderNo);
                     payRefundRequest.setOutRefundNo("refund_" + orderNo);
                     payRefundRequest.setRefundDesc("团购失败退款");
                     payRefundRequest.setTotalFee(orderDO.getPayPrice() - orderDO.getFreightPrice());
                     payRefundRequest.setRefundFee(orderDO.getPayPrice() - orderDO.getFreightPrice());
-                    PayRefundResult payRefundResult = payService.refundOrder(payRefundRequest);
+                    MatrixPayRefundResult payRefundResult = payService.refund(payRefundRequest);
                     if (!payRefundResult.getReturnCode().equals("SUCCESS")) {
                         logger.warn("[微信退款] 失败 : " + payRefundResult.getReturnMsg());
                         throw new BizServiceException(payRefundResult.getReturnMsg(),

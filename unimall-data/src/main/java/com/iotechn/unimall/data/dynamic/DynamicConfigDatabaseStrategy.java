@@ -37,7 +37,7 @@ public class DynamicConfigDatabaseStrategy implements DynamicStorageStrategy {
         } else {
             // 更新旧记录
             DynamicConfigDO updateDynamicConfigDO = new DynamicConfigDO();
-            updateDynamicConfigDO.setConfigKey(value);
+            updateDynamicConfigDO.setConfigValue(value);
             updateDynamicConfigDO.setGmtCreate(now);
             dynamicConfigMapper.update(updateDynamicConfigDO, new QueryWrapper<DynamicConfigDO>().eq("config_key", key));
         }

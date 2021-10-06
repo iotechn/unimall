@@ -3,29 +3,27 @@ package com.iotechn.unimall.admin.api.order;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.AdminServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.pay.model.request.MatrixPayRefundRequest;
 import com.dobbinsoft.fw.pay.model.request.PayRefundRequest;
+import com.dobbinsoft.fw.pay.model.result.MatrixPayRefundResult;
 import com.dobbinsoft.fw.pay.model.result.PayRefundResult;
-import com.dobbinsoft.fw.pay.service.pay.PayService;
+import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.Page;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
-import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
-import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.data.constant.LockConst;
-import com.iotechn.unimall.data.domain.OrderDO;
-import com.iotechn.unimall.data.domain.OrderSkuDO;
-import com.iotechn.unimall.data.domain.UserDO;
+import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
+import com.iotechn.unimall.data.dto.order.OrderRefundDTO;
 import com.iotechn.unimall.data.dto.order.OrderStatisticsDTO;
 import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
+import com.iotechn.unimall.data.enums.RefundStatusType;
 import com.iotechn.unimall.data.enums.UserLoginType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
-import com.iotechn.unimall.data.mapper.OrderMapper;
-import com.iotechn.unimall.data.mapper.OrderSkuMapper;
-import com.iotechn.unimall.data.mapper.SkuMapper;
+import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import com.iotechn.unimall.data.properties.UnimallWxPayProperties;
@@ -56,13 +54,19 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private OrderBizService orderBizService;
 
     @Autowired
-    private PayService payService;
+    private MatrixPayService matrixPayService;
 
     @Autowired
     private OrderMapper orderMapper;
 
     @Autowired
     private OrderSkuMapper orderSkuMapper;
+
+    @Autowired
+    private OrderRefundMapper orderRefundMapper;
+
+    @Autowired
+    private OrderRefundSkuMapper orderRefundSkuMapper;
 
     @Autowired
     private SkuMapper skuMapper;
@@ -100,6 +104,29 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public OrderRefundDTO refundDetail(Long orderId, Long adminId) throws ServiceException {
+        OrderDO orderDO = orderMapper.selectById(orderId);
+        if (orderDO.getStatus().intValue() != OrderStatusType.REFUNDING.getCode()) {
+            throw new AdminServiceException(ExceptionDefinition.ORDER_NOT_REFUNDING);
+        }
+        // 获取商品
+        OrderRefundDO orderRefundDO = orderRefundMapper.selectOne(
+                new QueryWrapper<OrderRefundDO>()
+                        .eq("order_id", orderId)
+                        .orderByDesc("id")
+                        .last(" LIMIT 1"));
+        List<OrderRefundSkuDO> skuList = orderRefundSkuMapper.selectList(
+                new QueryWrapper<OrderRefundSkuDO>()
+                        .eq("order_refund_id", orderRefundDO.getId()));
+        OrderRefundDTO orderRefundDTO = new OrderRefundDTO();
+        BeanUtils.copyProperties(orderRefundDO, orderRefundDTO);
+        orderRefundDTO.setSkuList(skuList);
+        return orderRefundDTO;
+    }
+
+    // TODO 商品部分退款
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public String refund(String orderNo, Integer type, Integer sum, Long adminId) throws ServiceException {
         if (lockComponent.tryLock(LockConst.ORDER_REFUND_LOCK + orderNo, 30)) {
             try {
@@ -119,7 +146,14 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                         updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
                     }
                     updateOrderDO.setGmtUpdate(new Date());
+                    //2.2. 更改订单表状态
                     orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
+                    //2.3. 更改退款表状态
+                    OrderRefundDO orderRefundDO = new OrderRefundDO();
+                    orderRefundDO.setStatus(RefundStatusType.REJECT.getCode());
+                    orderRefundMapper.update(orderRefundDO,
+                            new QueryWrapper<OrderRefundDO>()
+                                    .eq("order_id", orderDO.getId()));
                     return "ok";
                 } else if (type == 1) {
                     String keyPath = unimallWxPayProperties.getKeyPath();
@@ -131,6 +165,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     OrderDO updateOrderDO = new OrderDO();
                     updateOrderDO.setStatus(OrderStatusType.REFUNDED.getCode());
                     updateOrderDO.setGmtUpdate(new Date());
+                    //
                     //订单还库存
                     List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
                     orderSkuList.forEach(item -> {
@@ -151,7 +186,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     } else {
                         refundPrice = orderDO.getPayPrice() - orderDO.getFreightPrice();
                     }
-                    PayRefundRequest payRefundRequest = new PayRefundRequest();
+                    MatrixPayRefundRequest payRefundRequest = new MatrixPayRefundRequest();
                     payRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? unimallWxProperties.getMiniAppId() : unimallWxProperties.getMiniAppSecret());
                     // 判断订单是子单支付还是父单支付
                     String abstractOrderNo;
@@ -164,7 +199,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     payRefundRequest.setOutRefundNo("refund_" + abstractOrderNo);
                     payRefundRequest.setTotalFee(orderDO.getPayPrice());
                     payRefundRequest.setRefundFee(refundPrice);
-                    PayRefundResult wxPayRefundResult = payService.refundOrder(payRefundRequest);
+                    MatrixPayRefundResult wxPayRefundResult = matrixPayService.refund(payRefundRequest);
                     if (!wxPayRefundResult.getReturnCode().equals("SUCCESS")) {
                         logger.warn("[在线退款] 失败 : " + wxPayRefundResult.getReturnMsg());
                         throw new AdminServiceException(wxPayRefundResult.getReturnMsg(),

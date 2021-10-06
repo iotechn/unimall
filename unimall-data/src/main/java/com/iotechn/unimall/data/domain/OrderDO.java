@@ -5,7 +5,6 @@ import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.enums.PayChannelType;
 import lombok.Data;
 
 import java.util.Date;
@@ -84,7 +83,7 @@ public class OrderDO extends SuperDO {
     /**
      * 第三方支付渠道
      */
-    @ApiField(description = "第三方支付渠道", enums = PayChannelType.class)
+    @ApiField(description = "第三方支付渠道")
     private String payChannel;
 
     @ApiField(description = "支付时间")

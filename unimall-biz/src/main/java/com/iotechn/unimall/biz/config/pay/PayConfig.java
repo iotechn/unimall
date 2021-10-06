@@ -1,76 +1,120 @@
 package com.iotechn.unimall.biz.config.pay;
 
+import com.dobbinsoft.fw.pay.callback.PayHttpCallbackServlet;
 import com.dobbinsoft.fw.pay.config.PayProperties;
-import com.dobbinsoft.fw.pay.service.pay.PayService;
-import com.dobbinsoft.fw.pay.service.pay.PayServiceImpl;
-import com.iotechn.unimall.data.properties.UnimallAliPayProperties;
-import com.iotechn.unimall.data.properties.UnimallWxPayProperties;
+import com.dobbinsoft.fw.pay.handler.PayCallbackHandler;
+import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
+import com.dobbinsoft.fw.pay.service.pay.MatrixPayServiceImpl;
+import com.dobbinsoft.fw.support.properties.FwAliAppProperties;
+import com.dobbinsoft.fw.support.properties.FwWxPayProperties;
+import com.iotechn.unimall.biz.pay.OrderPayCallbackHandler;
+import com.iotechn.unimall.biz.pay.VipOrderPayCallbackHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class PayConfig {
 
     @Autowired
-    private UnimallWxPayProperties unimallWxPayProperties;
+    private FwWxPayProperties fwWxPayProperties;
 
     @Autowired
-    private UnimallAliPayProperties unimallAliPayProperties;
+    private FwAliAppProperties fwAliAppProperties;
 
     @Bean
-    public PayService payService() {
-        return new PayServiceImpl(new PayDynamicPropertiesImpl());
+    public MatrixPayService matrixPayService() {
+        return new MatrixPayServiceImpl(new PayDynamicPropertiesImpl());
     }
 
-//    @Bean
-//    public ConsignmentOrderPayCallbackHandler consignmentOrderPayCallbackHandler() {
-//        ConsignmentOrderPayCallbackHandler payOrderCallbackHandler = new ConsignmentOrderPayCallbackHandler();
-//        // 加入处理责任链
-//        AbstractPayCallbackHandler.append(payOrderCallbackHandler, payOrderCallbackHandler.getChainName());
-//        return payOrderCallbackHandler;
-//    }
+    @Bean
+    public OrderPayCallbackHandler orderPayCallbackHandler() {
+        return new OrderPayCallbackHandler();
+    }
+
+    @Bean
+    public VipOrderPayCallbackHandler vipOrderPayCallbackHandler() {
+        return new VipOrderPayCallbackHandler();
+    }
+
+    @Bean
+    public ServletRegistrationBean servletRegistrationBean() {
+        Map<String, PayCallbackHandler> urlHandlerMap = new HashMap<>();
+        urlHandlerMap.put("/cb/pay", orderPayCallbackHandler());
+        urlHandlerMap.put("/cb/vip", vipOrderPayCallbackHandler());
+        return new ServletRegistrationBean(new PayHttpCallbackServlet(matrixPayService(), urlHandlerMap), urlHandlerMap.keySet().toArray(new String[]{}));
+    }
+
 
     public class PayDynamicPropertiesImpl implements PayProperties {
 
         @Override
         public String getWxMchId() {
-            return unimallWxPayProperties.getMchId();
+            return fwWxPayProperties.getMchId();
         }
 
         @Override
         public String getWxMchKey() {
-            return unimallWxPayProperties.getMchKey();
+            return fwWxPayProperties.getMchKey();
         }
 
         @Override
         public String getWxNotifyUrl() {
-            return unimallWxPayProperties.getNotifyUrl();
+            return fwWxPayProperties.getNotifyUrl();
         }
 
         @Override
         public String getWxKeyPath() {
-            return unimallWxPayProperties.getKeyPath();
+            return fwWxPayProperties.getKeyPath();
         }
 
         @Override
         public String getAliGateway() {
-            return unimallAliPayProperties.getGateway();
+            return fwAliAppProperties.getAliGateway();
         }
 
         @Override
-        public String getAliMchPrivateKey() {
-            return unimallAliPayProperties.getMchPrivateKey();
+        public String getAliMiniAppId() {
+            return fwAliAppProperties.getMiniAppId();
         }
 
         @Override
-        public String getAliAliPublicKey() {
-            return unimallAliPayProperties.getAliPublicKey();
+        public String getAliMchMiniPrivateKey() {
+            return fwAliAppProperties.getMiniAppPrivateKey2();
         }
 
         @Override
-        public String getAliNotifyUrl() {
-            return unimallAliPayProperties.getNotifyUrl();
+        public String getAliAliMiniPublicKey() {
+            return fwAliAppProperties.getMiniAppPublicKey1();
+        }
+
+        @Override
+        public String getAliMiniNotifyUrl() {
+            return fwAliAppProperties.getMiniNotifyUrl();
+        }
+
+        @Override
+        public String getAliAppAppId() {
+            return fwAliAppProperties.getAppId();
+        }
+
+        @Override
+        public String getAliMchAppPrivateKey() {
+            return fwAliAppProperties.getAppPrivateKey2();
+        }
+
+        @Override
+        public String getAliAliAppPublicKey() {
+            return fwAliAppProperties.getAppPublicKey1();
+        }
+
+        @Override
+        public String getAliAppNotifyUrl() {
+            return fwAliAppProperties.getAppNotifyUrl();
         }
 
     }

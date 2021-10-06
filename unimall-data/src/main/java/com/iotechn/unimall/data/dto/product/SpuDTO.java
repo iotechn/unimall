@@ -92,6 +92,9 @@ public class SpuDTO extends SuperDTO {
     @ApiField(description = "类目对象列表")
     private List<CategoryDTO> categoryList;
 
+    @ApiField(description = "类目全名称")
+    private String categoryFullTitle;
+
     /**
      * TODO 修改热评
      * 商品的第一页(前10条)评价
@@ -104,6 +107,9 @@ public class SpuDTO extends SuperDTO {
 
     @ApiField(description = "运费模板ID")
     private Long freightTemplateId;
+
+    @ApiField(description = "运费模板标题")
+    private String freightTemplateTitle;
 
     @ApiField(description = "运费模板实体")
     private FreightTemplateDTO freightTemplate;
@@ -154,18 +160,15 @@ public class SpuDTO extends SuperDTO {
 
     /*************************** 直接子表 *********************************/
 
-    @LeafTable
     @ApiField(description = "属性列表")
     private List<SpuAttributeDO> attributeList;
 
     /**
      * 商品规格枚举列表
      */
-    @LeafTable
     @ApiField(description = "商品规格枚举列表")
     private List<SpuSpecificationDO> specificationList;
 
-    @LeafTable
     @ApiField(description = "商品列表")
     private List<SkuDO> skuList;
 

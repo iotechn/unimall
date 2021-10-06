@@ -182,4 +182,9 @@ public class OpenPlatformStorageDatabaseImpl implements OpenPlatformStorageStrat
         openPlatformNotifyDO.setId(Long.parseLong(opNotify.getId()));
         return openPlatformNotifyMapper.updateById(openPlatformNotifyDO) > 0;
     }
+
+    @Override
+    public boolean customTryNotify() {
+        return false;
+    }
 }

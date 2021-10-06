@@ -21,6 +21,8 @@ public class UserDTO extends SuperDTO implements IdentityOwner {
     @ApiField(description = "用户手机号")
     private String phone;
 
+    @ApiField(description = "支付宝小程序OPENID")
+    private String aliMpOpenId;
     /**
      * 需要扩展其他平台，使用横向扩展字段
      */
@@ -38,6 +40,15 @@ public class UserDTO extends SuperDTO implements IdentityOwner {
 
     @ApiField(description = "头像URL")
     private String avatarUrl;
+
+    @ApiField(description = "省份")
+    private String province;
+
+    @ApiField(description = "市")
+    private String city;
+
+    @ApiField(description = "区")
+    private String county;
 
     @ApiField(description = "等级", enums = UserLevelType.class)
     private Integer level;

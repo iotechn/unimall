@@ -9,6 +9,7 @@ import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
+import com.iotechn.unimall.data.dto.order.OrderRefundDTO;
 import com.iotechn.unimall.data.dto.order.OrderStatisticsDTO;
 
 import java.util.List;
@@ -27,6 +28,11 @@ public interface AdminOrderService {
             @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单号") String orderNo,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
+    @HttpMethod(description = "退款详情", permission = "operation:order:refunddetail", permissionParentName = "运营管理", permissionName = "订单管理")
+    public OrderRefundDTO refundDetail(
+            @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单Id") Long orderId,
+            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
+
     @HttpMethod(description = "退款", permission = "operation:order:refund", permissionParentName = "运营管理", permissionName = "订单管理")
     public String refund(
             @NotNull @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单号") String orderNo,
@@ -43,7 +49,7 @@ public interface AdminOrderService {
 
     @HttpMethod(description = "详情", permission = "operation:order:detail", permissionParentName = "运营管理", permissionName = "订单管理")
     public OrderDTO detail(
-            @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单Id") Long orderNo,
+            @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单Id") Long orderId,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "根据传入时间和订单状态查询订单信息", permission = "operation:order:querytoexcel", permissionParentName = "运营管理", permissionName = "订单管理")

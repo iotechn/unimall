@@ -8,7 +8,6 @@ import com.dobbinsoft.fw.core.enums.BaseEnums;
 public enum CategoryLevelType implements BaseEnums<Integer> {
     ONE(0, "一级"),
     TWO(1, "二级"),
-    THREE(2, "三级"),
     ;
 
 

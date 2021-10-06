@@ -3,20 +3,21 @@ package com.iotechn.unimall.data.enums;
 import com.dobbinsoft.fw.core.enums.BaseEnums;
 
 /**
- * Created by rize on 2019/2/13.
+ * 退款状态
+ * Created by rize
  */
-public enum LocationType implements BaseEnums<Integer> {
-    STORE(1, "门店"),
-    WAREHOUSE(2, "仓库"),
-    VIRTUAL(3, "虚拟仓")
+public enum RefundStatusType implements BaseEnums<Integer> {
+    WAIT_AUDIT(0, "待审核"),
+    APPROVE(1, "同意"),
+    REJECT(2, "拒绝"),
     ;
 
-    LocationType(Integer code, String msg) {
+    RefundStatusType(int code, String msg) {
         this.code = code;
         this.msg = msg;
     }
 
-    private Integer code;
+    private int code;
 
     private String msg;
 

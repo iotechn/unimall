@@ -10,6 +10,4 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface UserMapper extends IMapper<UserDO> {
 
-    public UserDTO login(@Param("phone") String phone, @Param("cryptPassword") String cryptPassword);
-
 }

@@ -17,10 +17,11 @@ public class CallbackController {
 
     private static final Logger logger = LoggerFactory.getLogger(CallbackController.class);
 
-
-    @RequestMapping("/wxpay")
+    @RequestMapping("/erp/stock")
     @Transactional(rollbackFor = Exception.class)
-    public Object wxpay(@RequestBody String body) throws Exception {
+    public Object stock(@RequestBody String body) throws Exception {
+        // 验签
+        // 编辑库存
         return WxPayNotifyResponse.success("支付成功");
     }
 

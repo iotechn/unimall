@@ -19,6 +19,9 @@ public class CategoryDO extends SuperDO {
     @ApiField(description = "类目名称")
     private String title;
 
+    @ApiField(description = "第三方ERP ID")
+    private String thirdId;
+
     /**
      * 存储当前类目所属的一级类目，不存在为空
      */
@@ -26,23 +29,9 @@ public class CategoryDO extends SuperDO {
     @TableField("first_level_id")
     private Long firstLevelId;
 
-    /**
-     * 存储当前类目所属的二级类目，不存在为空
-     */
-    @ApiField(description = "二级类目ID")
-    @TableField("second_level_id")
-    private Long secondLevelId;
-
     @ApiField(description = "父节点")
     @TableField("parent_id")
     private Long parentId;
-
-    /**
-     * 图标
-     */
-    @ApiField(description = "图标URL")
-    @TableField("icon_url")
-    private String iconUrl;
 
     /**
      * 分类图片

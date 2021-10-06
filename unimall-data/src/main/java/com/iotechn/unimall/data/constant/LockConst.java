@@ -73,4 +73,21 @@ public class LockConst {
      */
     public static final String GROUP_SHOP_LOCK_LOCK = "GROUP_SHOP_LOCK_LOCK";
 
+    /**
+     * VipOrder状态锁
+     * VIP_ORDER_STATUS_LOCK: + orderId
+     */
+    public static final String VIP_ORDER_STATUS_LOCK = "VIP_ORDER_STATUS_LOCK:";
+
+    /**
+     * VipOrder退款锁
+     * VIP_ORDER_REFUND_LOCK: + orderId
+     */
+    public static final String VIP_ORDER_REFUND_LOCK = "VIP_ORDER_REFUND_LOCK:";
+
+    /**
+     * 批量生成VipOrder锁
+     */
+    public static final String VIP_ORDER_GENERATE_LOCK = "VIP_ORDER_GENERATE_LOCK";
+
 }

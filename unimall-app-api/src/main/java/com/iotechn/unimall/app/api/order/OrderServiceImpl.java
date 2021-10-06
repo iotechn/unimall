@@ -1,15 +1,19 @@
 package com.iotechn.unimall.app.api.order;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.AppServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.GeneratorUtil;
-import com.dobbinsoft.fw.pay.model.request.PayUnifiedOrderRequest;
-import com.dobbinsoft.fw.pay.service.pay.PayService;
+import com.dobbinsoft.fw.pay.enums.PayChannelType;
+import com.dobbinsoft.fw.pay.enums.PayPlatformType;
+import com.dobbinsoft.fw.pay.model.request.MatrixPayUnifiedOrderRequest;
+import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.Page;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
+import com.dobbinsoft.fw.support.properties.FwAliAppProperties;
 import com.dobbinsoft.fw.support.service.BaseService;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.iotechn.unimall.biz.executor.GlobalExecutor;
@@ -20,26 +24,25 @@ import com.iotechn.unimall.biz.service.freight.FreightTemplateBizService;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
+import com.iotechn.unimall.biz.service.pay.PayBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.constant.LockConst;
-import com.iotechn.unimall.data.domain.AddressDO;
-import com.iotechn.unimall.data.domain.OrderDO;
-import com.iotechn.unimall.data.domain.OrderSkuDO;
+import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.CouponUserDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
+import com.iotechn.unimall.data.dto.order.OrderDTO;
+import com.iotechn.unimall.data.dto.order.OrderRefundRequestDTO;
+import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
+import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.dto.product.GroupShopDTO;
 import com.iotechn.unimall.data.dto.product.GroupShopSkuDTO;
 import com.iotechn.unimall.data.dto.product.SkuDTO;
-import com.iotechn.unimall.data.dto.order.OrderDTO;
-import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
-import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.enums.*;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
-import com.iotechn.unimall.data.mapper.OrderMapper;
-import com.iotechn.unimall.data.mapper.OrderSkuMapper;
-import com.iotechn.unimall.data.mapper.SkuMapper;
+import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.model.FreightCalcModel;
 import com.iotechn.unimall.data.model.OrderCalcSkuModel;
 import com.iotechn.unimall.data.model.SkuStockInfoModel;
@@ -54,6 +57,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -80,10 +84,19 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     private OrderSkuMapper orderSkuMapper;
 
     @Autowired
+    private OrderRefundMapper orderRefundMapper;
+
+    @Autowired
+    private OrderRefundSkuMapper orderRefundSkuMapper;
+
+    @Autowired
     private CartBizService cartBizService;
 
     @Autowired
-    private PayService wxPayService;
+    private MatrixPayService payService;
+
+    @Autowired
+    private PayBizService payBizService;
 
     @Autowired
     private LockComponent lockComponent;
@@ -119,9 +132,6 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     private String ENV;
 
     @Autowired
-    private UnimallWxAppProperties unimallWxAppProperties;
-
-    @Autowired
     private UnimallOrderProperties unimallOrderProperties;
 
 
@@ -133,8 +143,12 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
             List<OrderRequestSkuDTO> skuList = orderRequest.getSkuList();
             boolean calcStockFlag = false;
             try {
+                UserDTO user = sessionUtil.getUser();
                 //用户会员等级
-                Integer userLevel = sessionUtil.getUser().getLevel();
+                Integer userLevel = user.getLevel();
+                if (user.getStatus().intValue() != UserStatusType.ACTIVE.getCode()) {
+                    throw new AppServiceException(ExceptionDefinition.ORDER_USER_IS_NOT_ACTIVE);
+                }
                 // 对Sku排序，防止相互拿锁，两边都无法结算的情况。
                 orderRequest.getSkuList().sort((o1, o2) -> (int) (o1.getSkuId() - o2.getSkuId()));
                 //参数强校验 START
@@ -161,35 +175,35 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
                     Long skuId = orderRequestSkuDTO.getSkuId();
                     skuIds.add(skuId);
-//                    OrderCalcSkuModel orderCalcSpuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + orderRequestSkuDTO.getSpuId(), OrderCalcSkuModel.class);
-//                    if (orderCalcSpuDTO == null) {
-//                        // 尝试从DB中读取
-//                        SpuDO spuFromDB = productBizService.getProductByIdFromDB(orderRequestSkuDTO.getSpuId());
-//                        if (spuFromDB == null || (spuFromDB.getStatus() == SpuStatusType.STOCK.getCode())) {
-//                            // 不存在的或下架的商品
-//                            statusErrorSkuList.add(skuId);
-//                            continue;
-//                        } else {
-//                            orderCalcSpuDTO = new OrderCalcSkuModel();
-//                            BeanUtils.copyProperties(spuFromDB, orderCalcSpuDTO);
-//                        }
-//
-//                    }
-//                    long surplus = cacheComponent.decrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuId, orderRequestSkuDTO.getNum());
-//                    if (surplus < 0) {
-//                        // 若余量小于0，则表示该商品不存在或库存不足。
-//                        SkuStockInfoModel skuStockInfo = new SkuStockInfoModel();
-//                        skuStockInfo.setSkuId(skuId);
-//                        skuStockInfo.setExpect(orderRequestSkuDTO.getNum());
-//                        // 扣减之后的余量 + 用户期望量 = 扣减之前的余量
-//                        skuStockInfo.setSurplus((int) surplus + orderRequestSkuDTO.getNum());
-//                        stockErrorSkuList.add(skuStockInfo);
-//                        continue;
-//                    }
-//                    // 将SkuId设置进去
-//                    orderCalcSpuDTO.setSkuId(skuId);
-//                    orderCalcSpuDTO.setNum(orderRequestSkuDTO.getNum());
-//                    calcSkuList.add(orderCalcSpuDTO);
+                    OrderCalcSkuModel orderCalcSpuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + orderRequestSkuDTO.getSpuId(), OrderCalcSkuModel.class);
+                    if (orderCalcSpuDTO == null) {
+                        // 尝试从DB中读取
+                        SpuDO spuFromDB = productBizService.getProductByIdFromDB(orderRequestSkuDTO.getSpuId());
+                        if (spuFromDB == null || (spuFromDB.getStatus() == SpuStatusType.STOCK.getCode())) {
+                            // 不存在的或下架的商品
+                            statusErrorSkuList.add(skuId);
+                            continue;
+                        } else {
+                            orderCalcSpuDTO = new OrderCalcSkuModel();
+                            BeanUtils.copyProperties(spuFromDB, orderCalcSpuDTO);
+                        }
+
+                    }
+                    long surplus = cacheComponent.decrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuId, orderRequestSkuDTO.getNum());
+                    if (surplus < 0) {
+                        // 若余量小于0，则表示该商品不存在或库存不足。
+                        SkuStockInfoModel skuStockInfo = new SkuStockInfoModel();
+                        skuStockInfo.setSkuId(skuId);
+                        skuStockInfo.setExpect(orderRequestSkuDTO.getNum());
+                        // 扣减之后的余量 + 用户期望量 = 扣减之前的余量
+                        skuStockInfo.setSurplus((int) surplus + orderRequestSkuDTO.getNum());
+                        stockErrorSkuList.add(skuStockInfo);
+                        continue;
+                    }
+                    // 将SkuId设置进去
+                    orderCalcSpuDTO.setSkuId(skuId);
+                    orderCalcSpuDTO.setNum(orderRequestSkuDTO.getNum());
+                    calcSkuList.add(orderCalcSpuDTO);
                 }
 
                 calcStockFlag = true;
@@ -394,9 +408,9 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 return parentOrderNo;
             } catch (Exception e) {
                 if (calcStockFlag) {
-//                    for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
-//                        cacheComponent.incrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + orderRequestSkuDTO.getSkuId(), orderRequestSkuDTO.getNum());
-//                    }
+                    for (OrderRequestSkuDTO orderRequestSkuDTO : skuList) {
+                        cacheComponent.incrementHashKey(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + orderRequestSkuDTO.getSkuId(), orderRequestSkuDTO.getNum());
+                    }
                 }
                 if (e instanceof ServiceException) {
                     // 服务异常
@@ -430,46 +444,19 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Object wxPrepay(String parentOrderNo, String orderNo, String ip, Long userId) throws ServiceException {
+    public Object prepay(String parentOrderNo, String orderNo, Integer platform, String payChannel, String ip, Long userId) throws ServiceException {
         int actualPrice = this.checkPrepay(parentOrderNo, orderNo, userId);
-        // TODO 有前端来决定支付方式
-        Integer loginType = 1;
-        String appId;
-        String tradeType;
-        if (UserLoginType.MP_WEIXIN.getCode() == loginType) {
-            appId = unimallWxAppProperties.getMiniAppId();
-            tradeType = WxPayConstants.TradeType.JSAPI;
-        } else if (UserLoginType.APP_WEIXIN.getCode() == loginType || UserLoginType.REGISTER.getCode() == loginType) {
-            appId = unimallWxAppProperties.getAppId();
-            tradeType = WxPayConstants.TradeType.APP;
-        } else if (UserLoginType.H5_WEIXIN.getCode() == loginType) {
-            appId = unimallWxAppProperties.getH5AppId();
-            tradeType = WxPayConstants.TradeType.JSAPI;
-        } else {
-            throw new AppServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
-        }
-        // TODO 支付渠道设置
-        PayUnifiedOrderRequest orderRequest = new PayUnifiedOrderRequest();
-        // 设置微信请求基本信息
-        orderRequest.setAppid(appId);
-        // 区分回调 直接通过 S 来判断
-        orderRequest.setOutTradeNo(StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo);
-        // TODO 由前端决定支付方式后，获取OPEN_ID
-        orderRequest.setOpenid(sessionUtil.getUser().getWxMpOpenId());
-        orderRequest.setBody("buy_" + (StringUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo));
-        orderRequest.setTotalFee(actualPrice);
-        orderRequest.setSpbillCreateIp(ip);
-        orderRequest.setTradeType(tradeType);
-        return wxPayService.createOrder(orderRequest);
+        // 前端来决定支付方式
+        return payBizService.commonPrepay(ObjectUtils.isEmpty(parentOrderNo) ? orderNo : parentOrderNo, actualPrice, platform, payChannel, ip);
     }
 
     private int checkPrepay(String parentOrderNo, String orderNo, Long userId) throws ServiceException {
         // 两个都为空 和 两个都不为空是不合法的
-        if ((StringUtils.isEmpty(parentOrderNo) && StringUtils.isEmpty(orderNo)) || (!StringUtils.isEmpty(parentOrderNo) && !StringUtils.isEmpty(orderNo))) {
+        if ((ObjectUtils.isEmpty(parentOrderNo) && ObjectUtils.isEmpty(orderNo)) || (!ObjectUtils.isEmpty(parentOrderNo) && !ObjectUtils.isEmpty(orderNo))) {
             throw new AppServiceException(ExceptionDefinition.ORDER_PARAM_CHECK_FAILED);
         }
         List<OrderDO> orderList;
-        if (!StringUtils.isEmpty(parentOrderNo))
+        if (!ObjectUtils.isEmpty(parentOrderNo))
             orderList = orderBizService.checkOrderExistByParentNo(parentOrderNo, userId);
         else
             orderList = orderBizService.checkOrderExistByNo(orderNo, userId);
@@ -489,11 +476,11 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     @Transactional(rollbackFor = Exception.class)
     public Object offlinePrepay(String parentOrderNo, String orderNo, Long userId) throws ServiceException {
         // 两个都为空 和 两个都不为空是不合法的
-        if ((StringUtils.isEmpty(parentOrderNo) && StringUtils.isEmpty(orderNo)) || (!StringUtils.isEmpty(parentOrderNo) && !StringUtils.isEmpty(orderNo))) {
+        if ((ObjectUtils.isEmpty(parentOrderNo) && ObjectUtils.isEmpty(orderNo)) || (!ObjectUtils.isEmpty(parentOrderNo) && !ObjectUtils.isEmpty(orderNo))) {
             throw new AppServiceException(ExceptionDefinition.ORDER_PARAM_CHECK_FAILED);
         }
         List<OrderDO> orderList;
-        if (!StringUtils.isEmpty(parentOrderNo))
+        if (!ObjectUtils.isEmpty(parentOrderNo))
             orderList = orderBizService.checkOrderExistByParentNo(parentOrderNo, userId);
         else
             orderList = orderBizService.checkOrderExistByNo(orderNo, userId);
@@ -544,7 +531,9 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String refund(String orderNo, String reason, Long userId) throws ServiceException {
+    public String refund(OrderRefundRequestDTO refundRequest, Long userId) throws ServiceException {
+        String orderNo = refundRequest.getOrderNo();
+        String reason = refundRequest.getReason();
         OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (PayChannelType.OFFLINE.getCode().equals(orderDO.getPayChannel())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
@@ -553,11 +542,72 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setRefundReason(reason);
             updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());
+            // 1. 更改主表状态
             orderBizService.changeOrderSubStatus(orderNo, orderDO.getStatus(), updateOrderDO);
+            // 2. 增加退款申请记录
+            OrderRefundDO orderRefundDO = new OrderRefundDO();
+            orderRefundDO.setOrderId(orderDO.getId());
+            orderRefundDO.setOrderNo(orderNo);
+            // 2.1. 计算OrderRequest
+            // 2.1.1. 将优惠券优惠金额分散到每个SKU
+            Integer couponPrice = orderDO.getCouponPrice();
+            List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+            // 2.1.2. 建立一个退款金额映射表
+            Map<Long, Integer> returnPriceMap;
+            // 2.1.3. 建立一个最大可退数量映射表
+            Map<Long, OrderSkuDO> returnMaxMap;
+            if (couponPrice != null && couponPrice > 0) {
+                // 算总商品价格
+                int sum = orderSkuList.stream().mapToInt(item -> item.getPrice() * item.getNum()).sum();
+                // 按照比例扣减优惠金额
+                returnPriceMap = new HashMap<>();
+                returnMaxMap = new HashMap<>();
+                for (OrderSkuDO orderSkuDO : orderSkuList) {
+                    // num 被约分了
+                    int singleCouponPrice = couponPrice * orderSkuDO.getPrice() / sum;
+                    returnPriceMap.put(orderSkuDO.getSkuId(), orderSkuDO.getPrice() - singleCouponPrice);
+                    returnMaxMap.put(orderSkuDO.getSkuId(), orderSkuDO);
+                }
+            } else {
+                returnPriceMap = orderSkuList.stream().collect(Collectors.toMap(OrderSkuDO::getSkuId, OrderSkuDO::getPrice));
+                returnMaxMap = orderSkuList.stream().collect(Collectors.toMap(OrderSkuDO::getSkuId, v->v));
+            }
+            int refundPrice = 0;
+            List<OrderRefundSkuDO> skuList = refundRequest.getSkuList();
+            for (OrderRefundSkuDO orderRefundSkuDO : skuList) {
+                Long skuId = orderRefundSkuDO.getSkuId();
+                Integer price = returnPriceMap.get(skuId);
+                Integer maxReturn = returnMaxMap.get(skuId).getNum();
+                if (price == null) {
+                    throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
+                }
+                if (orderRefundSkuDO.getNum() > maxReturn) {
+                    throw new AppServiceException(ExceptionDefinition.ORDER_REFUND_NUM_CANNOT_GT_BUY);
+                }
+                refundPrice += price * orderRefundSkuDO.getNum();
+            }
+            orderRefundDO.setRefundPrice(refundPrice);
+            orderRefundMapper.insert(orderRefundDO);
+            // 3. 插入OrderRefundSku
+            Date now = new Date();
+            skuList.forEach(item -> {
+                OrderSkuDO orderSkuDO = returnMaxMap.get(item.getSkuId());
+                // 冗余商品信息
+                item.setSpuTitle(orderSkuDO.getSpuTitle());
+                item.setTitle(orderSkuDO.getTitle());
+                item.setBarCode(orderSkuDO.getBarCode());
+                item.setImg(orderSkuDO.getImg());
+                item.setUnit(orderSkuDO.getUnit());
+                item.setWeight(orderSkuDO.getWeight());
+                item.setOrderRefundId(orderRefundDO.getId());
+                item.setPrice(returnPriceMap.get(item.getSkuId()));
+                item.setGmtCreate(now);
+                item.setGmtUpdate(now);
+            });
+            orderRefundSkuMapper.insertBatchSomeColumn(skuList);
             GlobalExecutor.execute(() -> {
                 OrderDTO orderDTO = new OrderDTO();
                 BeanUtils.copyProperties(orderDO, orderDTO);
-                List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_no", orderDO.getOrderNo()));
                 orderDTO.setSkuList(orderSkuList);
                 adminNotifyBizService.refundOrder(orderDTO);
             });

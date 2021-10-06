@@ -5,7 +5,6 @@ import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.enums.PayChannelType;
 import com.iotechn.unimall.data.enums.SpuActivityType;
 import lombok.Data;
 
@@ -78,7 +77,7 @@ public class OrderDTO extends SuperDTO {
     /**
      * 第三方支付渠道
      */
-    @ApiField(description = "第三方支付渠道", enums = PayChannelType.class)
+    @ApiField(description = "第三方支付渠道")
     private String payChannel;
 
     @ApiField(description = "支付时间")
