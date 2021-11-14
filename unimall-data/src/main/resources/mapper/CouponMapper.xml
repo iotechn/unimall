@@ -43,22 +43,22 @@
         FROM
           unimall_coupon c
         LEFT JOIN unimall_category g on c.category_id = g.id
-        WHERE
-        1 = 1
-        <if test="title != null">
-            AND c.title like concat("%",#{title},"%")
-        </if>
-        <if test="type != null">
-            AND c.type = #{type}
-        </if>
-        <if test="status != null">
-          <if test="status >= 0">
-              AND c.status = #{status} AND (unix_timestamp(c.gmt_end) &gt; unix_timestamp(#{now}) or c.days is not null)
-          </if>
-          <if test="status &lt; 0">
-              AND unix_timestamp(c.gmt_end) &lt; unix_timestamp(#{now})
-          </if>
-        </if>
+        <where>
+            <if test="title != null">
+                AND c.title like concat("%",#{title},"%")
+            </if>
+            <if test="type != null">
+                AND c.type = #{type}
+            </if>
+            <if test="status != null">
+                <if test="status >= 0">
+                    AND c.status = #{status} AND (unix_timestamp(c.gmt_end) &gt; unix_timestamp(#{now}) or c.days is not null)
+                </if>
+                <if test="status &lt; 0">
+                    AND unix_timestamp(c.gmt_end) &lt; unix_timestamp(#{now})
+                </if>
+            </if>
+        </where>
         ORDER BY c.id DESC
     </select>
 

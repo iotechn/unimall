@@ -5,6 +5,7 @@ import com.iotechn.unimall.biz.client.handler.ErpStockChangeHandler;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * Erp对接客户端
@@ -26,9 +27,10 @@ public interface ErpClient {
 
     /**
      * 从ERP同步商品
+     * 返回同步结果信息
      * @return
      */
-    public boolean syncProducts() throws ServiceException;
+    public List<String> syncProducts() throws ServiceException;
 
     /**
      * 下销售制单 & 销售出库 & 销售收款
@@ -47,11 +49,6 @@ public interface ErpClient {
      * 调用库存更改（同步）
      */
     public void invokeStockChange(String barcode, BigDecimal stock);
-
-    /**
-     * 注册库存改变事件通知其
-     */
-    public void registerStockChangeHandler(ErpStockChangeHandler handler);
 
 
 }

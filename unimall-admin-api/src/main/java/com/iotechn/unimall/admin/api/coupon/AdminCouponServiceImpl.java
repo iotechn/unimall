@@ -121,28 +121,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
 
     @Override
     public Page<CouponAdminDTO> list(String title, Integer type, Integer status, Integer pageNo, Integer limit, Long adminId) throws ServiceException {
-        QueryWrapper<CouponDO> wrapper = new QueryWrapper();
-        Date now = new Date();
-        if (!StringUtils.isEmpty(title)) {
-            wrapper.like("title", title);
-        }
-        if (type != null) {
-            wrapper.eq("type", type);
-        }
-        if (status != null) {
-            if (status >= 0 && status < 2) {
-                wrapper.eq("status", status);
-                wrapper.and(i->i
-                        .gt("gmt_end", now)
-                        .or()
-                        .isNotNull("days"));
-            } else if (status < 0) {
-                wrapper.lt("gmt_end", now);
-            } else {
-                throw new AdminServiceException(ExceptionDefinition.COUPON_CHECK_DATA_FAILED);
-            }
-        }
-        Page<CouponAdminDTO> page = couponMapper.getAdminCouponList(Page.div(pageNo, limit, CouponAdminDTO.class), title, type, status, now, (pageNo - 1) * limit, limit);
+        Page<CouponAdminDTO> page = couponMapper.getAdminCouponList(Page.div(pageNo, limit, CouponAdminDTO.class), title, type, status, new Date());
         return page;
     }
 }

@@ -61,7 +61,7 @@ public class AdminSpuDTO extends SuperDTO {
     @ApiField(description = "类目ID")
     private Long categoryId;
 
-    @ApiField(description = "类目全路径（包含1、2、3级）用于回显")
+    @ApiField(description = "类目全路径（包含1、2级）用于回显")
     private List<Long> categoryIds;
 
     @ApiField(description = "类目路径名")

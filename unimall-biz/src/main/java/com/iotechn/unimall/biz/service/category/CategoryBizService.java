@@ -41,8 +41,8 @@ public class CategoryBizService {
                 .eq("level",1)
                 .orderByAsc("level"));
 
-        List<CategoryDO> firstLevelList = categoryDOS.stream().filter(item -> item.getLevel().intValue() == 0).collect(Collectors.toList());
-        List<CategoryDO> secondLevelList = categoryDOS.stream().filter(item -> item.getLevel().intValue() == 1).collect(Collectors.toList());
+        List<CategoryDO> firstLevelList = categoryDOS.stream().filter(item -> item.getLevel().intValue() == CategoryLevelType.ONE.getCode()).collect(Collectors.toList());
+        List<CategoryDO> secondLevelList = categoryDOS.stream().filter(item -> item.getLevel().intValue() == CategoryLevelType.TWO.getCode()).collect(Collectors.toList());
 
         // 以ID为键，组装后的DTO为值，提升组装速度
         HashMap<Long, CategoryDTO> speedUp = new HashMap<>();

@@ -24,6 +24,6 @@ public interface CouponMapper extends IMapper<CouponDO> {
 
     public List<CouponDTO> getActiveCoupons();
 
-    public Page<CouponAdminDTO> getAdminCouponList(IPage<CouponAdminDTO> page, @Param("title") String title, @Param("type") Integer type, @Param("status") Integer status, @Param("now") Date now, @Param("offset") Integer offset, @Param("limit") Integer limit);
+    public Page<CouponAdminDTO> getAdminCouponList(IPage<CouponAdminDTO> page, @Param("title") String title, @Param("type") Integer type, @Param("status") Integer status, @Param("now") Date now);
 
 }

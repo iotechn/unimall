@@ -40,9 +40,6 @@ public class CategoryDO extends SuperDO {
     @TableField("pic_url")
     private String picUrl;
 
-    /**
-     * 0,1,2三个等级
-     */
     @ApiField(description = "等级", enums = CategoryLevelType.class)
     private Integer level;
 

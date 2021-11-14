@@ -37,8 +37,8 @@ public class UnimallErpOpenPlatformProperties {
     private String dobbinClientPrivateKey;
 
     /**
-     * dobbin 商城关联的仓库
+     * 租户ID
      */
-    private String dobbinLocationId;
+    private String dobbinTenementId;
 
 }

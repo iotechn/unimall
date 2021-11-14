@@ -14,13 +14,15 @@ import com.iotechn.unimall.biz.client.ErpClient;
 import com.iotechn.unimall.biz.client.dobbin.model.*;
 import com.iotechn.unimall.biz.client.handler.ErpStockChangeHandler;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
-import com.iotechn.unimall.data.domain.CategoryDO;
-import com.iotechn.unimall.data.domain.SkuDO;
+import com.iotechn.unimall.data.domain.*;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.product.AdminSpuDTO;
 import com.iotechn.unimall.data.enums.CategoryLevelType;
+import com.iotechn.unimall.data.enums.StatusType;
 import com.iotechn.unimall.data.mapper.CategoryMapper;
+import com.iotechn.unimall.data.mapper.FreightTemplateMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
+import com.iotechn.unimall.data.mapper.SpuMapper;
 import com.iotechn.unimall.data.properties.UnimallErpOpenPlatformProperties;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,14 +31,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -46,7 +48,10 @@ public class DobbinErpClient implements ErpClient {
 
     private static final String ERP_GW = "https://console.dobbinsoft.com/erp/m.api";
 
-    private volatile ErpStockChangeHandler erpStockChangeHandler;
+    private static final String TENEMENT_ID_HEADER = "TENEMENTID";
+
+    @Autowired
+    private ErpStockChangeHandler erpStockChangeHandler;
 
     @Autowired
     private CategoryMapper categoryMapper;
@@ -55,7 +60,16 @@ public class DobbinErpClient implements ErpClient {
     private SkuMapper skuMapper;
 
     @Autowired
+    private SpuMapper spuMapper;
+
+    @Autowired
+    private FreightTemplateMapper freightTemplateMapper;
+
+    @Autowired
     private ProductBizService productBizService;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Autowired
     private UnimallErpOpenPlatformProperties unimallErpOpenPlatformProperties;
@@ -71,16 +85,24 @@ public class DobbinErpClient implements ErpClient {
             String json = okHttpClient.newCall(
                     new Request.Builder()
                             .url(ERP_GW)
+                            .addHeader(TENEMENT_ID_HEADER, unimallErpOpenPlatformProperties.getDobbinTenementId())
                             .post(requestBody).build())
                     .execute().body().string();
             List<ErpCategory> erpCategories = this.getListFromJson(json, ErpCategory.class);
             List<CategoryDO> sysCategories = categoryMapper.selectList(new QueryWrapper<CategoryDO>().isNotNull("third_id"));
-            Map<Long, CategoryDO> sysCategoryMap = sysCategories.stream().collect(Collectors.toMap(k -> {
-                return Long.parseLong(k.getThirdId());
-            }, v -> v));
+            Map<Long, CategoryDO> sysCategoryMap = sysCategories.stream().collect(Collectors.toMap(k -> Long.parseLong(k.getThirdId()), v -> v));
             for (ErpCategory firstCategory : erpCategories) {
                 CategoryDO sysFirstCategory = sysCategoryMap.get(firstCategory.getId());
                 if (sysFirstCategory != null) {
+                    // 1. 更新一级类目
+                    CategoryDO updateFirstCategory = new CategoryDO();
+                    updateFirstCategory.setLevel(CategoryLevelType.ONE.getCode());
+                    updateFirstCategory.setParentId(0L);
+                    updateFirstCategory.setFirstLevelId(0L);
+                    updateFirstCategory.setThirdId(firstCategory.getId().toString());
+                    updateFirstCategory.setTitle(firstCategory.getTitle());
+                    updateFirstCategory.setPicUrl(firstCategory.getImg());
+                    categoryMapper.update(updateFirstCategory, new QueryWrapper<CategoryDO>().eq("third_id", firstCategory.getId()));
                     // 已同步此类目，遍历是否有未同步的二级类目
                     this.commonsSecondCategory(sysCategoryMap, firstCategory, sysFirstCategory);
                 } else {
@@ -91,6 +113,7 @@ public class DobbinErpClient implements ErpClient {
                     newSysFirstCategory.setFirstLevelId(0L);
                     newSysFirstCategory.setThirdId(firstCategory.getId().toString());
                     newSysFirstCategory.setTitle(firstCategory.getTitle());
+                    newSysFirstCategory.setPicUrl(firstCategory.getImg());
                     categoryMapper.insert(newSysFirstCategory);
                     // 已同步此类目，遍历是否有未同步的二级类目
                     this.commonsSecondCategory(sysCategoryMap, firstCategory, newSysFirstCategory);
@@ -120,16 +143,27 @@ public class DobbinErpClient implements ErpClient {
                 newSysSecondCategory.setFirstLevelId(sysFirstCategory.getId());
                 newSysSecondCategory.setThirdId(secondCategory.getId().toString());
                 newSysSecondCategory.setTitle(secondCategory.getTitle());
+                newSysSecondCategory.setPicUrl(secondCategory.getImg());
                 categoryMapper.insert(newSysSecondCategory);
+            } else {
+                CategoryDO updateSysSecondCategory = new CategoryDO();
+                updateSysSecondCategory.setLevel(CategoryLevelType.TWO.getCode());
+                updateSysSecondCategory.setParentId(sysFirstCategory.getId());
+                updateSysSecondCategory.setFirstLevelId(sysFirstCategory.getId());
+                updateSysSecondCategory.setThirdId(secondCategory.getId().toString());
+                updateSysSecondCategory.setTitle(secondCategory.getTitle());
+                updateSysSecondCategory.setPicUrl(secondCategory.getImg());
+                categoryMapper.update(updateSysSecondCategory, new QueryWrapper<CategoryDO>().eq("third_id", secondCategory.getId()));
             }
         }
     }
 
     @Override
-    public boolean syncProducts() throws ServiceException {
+    public List<String> syncProducts() throws ServiceException {
         Map<String, String> listParams = new HashMap<>();
         listParams.put("_gp", "admin.erpsku");
         listParams.put("_mt", "list");
+        List<String> resInfo = new ArrayList<>();
         try {
             int pageNo = 1;
             boolean nextPage = true;
@@ -141,13 +175,14 @@ public class DobbinErpClient implements ErpClient {
                 String listJson = okHttpClient.newCall(
                         new Request.Builder()
                                 .url(ERP_GW)
+                                .addHeader(TENEMENT_ID_HEADER, unimallErpOpenPlatformProperties.getDobbinTenementId())
                                 .post(listRequestBody)
                                 .build())
                         .execute().body().string();
                 Page<ErpSku> page = this.getObjectFromJson(listJson, new TypeReference<Page<ErpSku>>() {
                 });
                 List<ErpSku> items = page.getItems();
-                for (ErpSku erpSku : items) {
+                inner: for (ErpSku erpSku : items) {
                     if (!ObjectUtils.isEmpty(erpSku.getBarCode())) {
                         // 请求详情，通过详情来进行同步
                         Map<String, String> detailParams = new HashMap<>();
@@ -160,18 +195,111 @@ public class DobbinErpClient implements ErpClient {
                         String detailJson = okHttpClient.newCall(
                                 new Request.Builder()
                                         .url(ERP_GW)
+                                        .addHeader(TENEMENT_ID_HEADER, unimallErpOpenPlatformProperties.getDobbinTenementId())
                                         .post(detailRequestBody)
                                         .build())
                                 .execute().body().string();
                         // 查看是否存在该商品，若存在，则走更新流程
                         ErpSku detailSku = this.getObjectFromJson(detailJson, ErpSku.class);
-                        SkuDO skuDO = skuMapper.selectOne(new QueryWrapper<SkuDO>().eq("bar_code", detailSku.getBarCode()));
-                        // TODO 同步信息
-                        AdminSpuDTO adminSpuDTO = new AdminSpuDTO();
-                        if (skuDO != null) {
-                            adminSpuDTO.setId(skuDO.getSpuId());
-                        }
-                        productBizService.create(adminSpuDTO);
+                        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                            @Override
+                            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                                try {
+                                    SkuDO skuFromDB = skuMapper.selectOne(new QueryWrapper<SkuDO>().eq("bar_code", detailSku.getBarCode()));
+                                    SpuDO spuFromDB = null;
+                                    if (skuFromDB != null) {
+                                        Long spuId = skuFromDB.getSpuId();
+                                        Integer count = skuMapper.selectCount(new QueryWrapper<SkuDO>().eq("spu_id", spuId));
+                                        spuFromDB = spuMapper.selectById(spuId);
+                                        if (count > 1) {
+                                            resInfo.add("放弃添加“" + detailSku.getTitle() + "”,该商品存在多个规格");
+                                            return;
+                                        }
+                                    }
+                                    // 同步基本信息
+                                    AdminSpuDTO adminSpuDTO = new AdminSpuDTO();
+                                    if (spuFromDB != null) {
+                                        adminSpuDTO.setId(spuFromDB.getId());
+                                    }
+                                    adminSpuDTO.setTitle(detailSku.getTitle());
+                                    FreightTemplateDO freightTemplateDO = freightTemplateMapper.selectOne(new QueryWrapper<FreightTemplateDO>().last(" limit 1"));
+                                    adminSpuDTO.setFreightTemplateId(freightTemplateDO.getId());
+                                    adminSpuDTO.setStatus(StatusType.ACTIVE.getCode());
+                                    adminSpuDTO.setImg(detailSku.getImg());
+                                    adminSpuDTO.setImgList(Arrays.asList(detailSku.getImg()));
+                                    String unit = detailSku.getSalesUnit() == null ? detailSku.getUnit() : detailSku.getSalesUnit();
+                                    adminSpuDTO.setUnit(unit);
+                                    // 新增可空直
+                                    if (skuFromDB == null) {
+                                        adminSpuDTO.setCategoryId(0L);
+                                        Long erpCategoryId = detailSku.getCategoryId();
+                                        if (erpCategoryId != null) {
+                                            CategoryDO categoryDO = categoryMapper.selectOne(new QueryWrapper<CategoryDO>().eq("third_id", erpCategoryId));
+                                            if (categoryDO != null) {
+                                                adminSpuDTO.setCategoryId(categoryDO.getId());
+                                            }
+                                        }
+                                        adminSpuDTO.setDescription("暂无介绍");
+                                        adminSpuDTO.setDetail("暂无详情");
+                                        List<SpuAttributeDO> list = detailSku.getAttributeList().stream().map(item -> {
+                                            SpuAttributeDO spuAttributeDO = new SpuAttributeDO();
+                                            spuAttributeDO.setAttribute(item.getName());
+                                            spuAttributeDO.setValue(item.getAttribute());
+                                            return spuAttributeDO;
+                                        }).collect(Collectors.toList());
+                                        adminSpuDTO.setAttributeList(list);
+                                        SpuSpecificationDO spuSpecificationDO = new SpuSpecificationDO();
+                                        spuSpecificationDO.setTitle("规格");
+                                        adminSpuDTO.setSpecificationList(Arrays.asList(spuSpecificationDO));
+                                        if (skuFromDB != null) {
+                                            adminSpuDTO.setId(skuFromDB.getSpuId());
+                                        }
+                                    } else {
+                                        adminSpuDTO.setCategoryId(spuFromDB.getCategoryId());
+                                        adminSpuDTO.setDescription(spuFromDB.getDescription());
+                                        adminSpuDTO.setDetail(spuFromDB.getDetail());
+                                        adminSpuDTO.setStatus(spuFromDB.getStatus());
+                                    }
+                                    List<ErpSkuPrice> priceList = detailSku.getPriceList();
+                                    for (ErpSkuPrice erpSkuPrice : priceList) {
+                                        if (erpSkuPrice.getUnit().equals(unit)) {
+                                            if (erpSkuPrice.getSalesPrice() == null) {
+                                                resInfo.add("放弃添加“" + detailSku.getTitle() + "”,ERP系统不存在销售价格");
+                                                return;
+                                            } else {
+                                                SkuDO newSkuDO = new SkuDO();
+                                                newSkuDO.setBarCode(detailSku.getBarCode());
+                                                newSkuDO.setPrice(erpSkuPrice.getSalesPrice());
+                                                if (skuFromDB == null) {
+                                                    newSkuDO.setOriginalPrice(erpSkuPrice.getSalesPrice());
+                                                    newSkuDO.setVipPrice(erpSkuPrice.getSalesPrice());
+                                                    newSkuDO.setSpecification("规格_标准");
+                                                    newSkuDO.setWeight(newSkuDO.getWeight() == null ? 1 : newSkuDO.getWeight());
+                                                    newSkuDO.setTitle("标准");
+                                                    newSkuDO.setStock(0);
+                                                } else {
+                                                    newSkuDO.setOriginalPrice(skuFromDB.getOriginalPrice());
+                                                    newSkuDO.setVipPrice(skuFromDB.getVipPrice());
+                                                    newSkuDO.setSpecification(skuFromDB.getSpecification());
+                                                    newSkuDO.setWeight(skuFromDB.getWeight());
+                                                    newSkuDO.setTitle(skuFromDB.getTitle());
+                                                    newSkuDO.setStock(skuFromDB.getStock());
+                                                }
+                                                adminSpuDTO.setSkuList(Arrays.asList(newSkuDO));
+                                            }
+                                        }
+                                    }
+                                    if (skuFromDB == null) {
+                                        productBizService.create(adminSpuDTO);
+                                    } else {
+                                        productBizService.edit(adminSpuDTO);
+                                    }
+                                } catch (Exception e) {
+                                    logger.error("[同步SKU] 异常", e);
+                                    status.setRollbackOnly();
+                                }
+                            }
+                        });
                     }
                 }
                 if (!page.hasNext()) {
@@ -180,7 +308,7 @@ public class DobbinErpClient implements ErpClient {
                 pageNo++;
             } while (nextPage);
             logger.info("[开放ERP 同步商品] 成功！");
-            return true;
+            return resInfo;
         } catch (IOException e) {
             throw new ThirdPartServiceException(CoreExceptionDefinition.THIRD_PART_IO_EXCEPTION);
         }
@@ -220,6 +348,7 @@ public class DobbinErpClient implements ErpClient {
             String json = this.okHttpClient.newCall(
                     new Request.Builder()
                             .url(ERP_GW)
+                            .addHeader(TENEMENT_ID_HEADER, unimallErpOpenPlatformProperties.getDobbinTenementId())
                             .post(listRequestBody)
                             .build()).execute().body().string();
             getObjectFromJson(json);
@@ -255,6 +384,7 @@ public class DobbinErpClient implements ErpClient {
             String json = this.okHttpClient.newCall(
                     new Request.Builder()
                             .url(ERP_GW)
+                            .addHeader(TENEMENT_ID_HEADER, unimallErpOpenPlatformProperties.getDobbinTenementId())
                             .post(listRequestBody)
                             .build()).execute().body().string();
             getObjectFromJson(json);
@@ -270,10 +400,6 @@ public class DobbinErpClient implements ErpClient {
         this.erpStockChangeHandler.onStockChange(barcode, stock);
     }
 
-    @Override
-    public void registerStockChangeHandler(ErpStockChangeHandler handler) {
-        this.erpStockChangeHandler = handler;
-    }
 
     private JSONObject getObjectFromJson(String json) throws ServiceException {
         JSONObject jsonObject = JSONObject.parseObject(json);

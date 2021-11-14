@@ -25,6 +25,8 @@ import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -592,6 +594,29 @@ public class ProductBizService {
         });
     }
 
+    /**
+     * 调整商品库存
+     *
+     * @param barCode
+     * @param stock
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.MANDATORY)
+    public boolean adjustSkuStock(String barCode, Integer stock) {
+        SkuDO skuFromDB = skuMapper.selectOne(new QueryWrapper<SkuDO>().select("id", "stock").eq("bar_code", barCode));
+        if (skuFromDB == null || skuFromDB.getStock().intValue() == stock.intValue()) {
+            return false;
+        }
+        SkuDO skuDO = new SkuDO();
+        skuDO.setId(skuFromDB.getId());
+        skuDO.setStock(stock);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
+            }
+        });
+        return skuMapper.updateById(skuDO) > 0;
+    }
 
     /**
      * 1.放入各个类目ZSET

@@ -117,6 +117,27 @@ public class PayConfig {
             return fwAliAppProperties.getAppNotifyUrl();
         }
 
+        // Unimall 暂无Web PC版
+        @Override
+        public String getAliWebAppId() {
+            return null;
+        }
+
+        @Override
+        public String getAliMchWebPrivateKey() {
+            return null;
+        }
+
+        @Override
+        public String getAliAliWebPublicKey() {
+            return null;
+        }
+
+        @Override
+        public String getAliWebNotifyUrl() {
+            return null;
+        }
+
     }
 
 }

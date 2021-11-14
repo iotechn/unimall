@@ -60,7 +60,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public CategoryDO create(String title, Long parentId, String iconUrl, String picUrl, Long adminId) throws ServiceException {
+    public CategoryDO create(String title, Long parentId, String picUrl, Long adminId) throws ServiceException {
         CategoryDO parent = null;
         CategoryDO categoryDO = new CategoryDO();
         if (!parentId.equals(0l)) {
@@ -75,7 +75,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
                 categoryDO.setFirstLevelId(parent.getFirstLevelId());
             }
         } else {
-            categoryDO.setLevel(0);
+            categoryDO.setLevel(CategoryLevelType.ONE.getCode());
         }
         categoryDO.setParentId(parentId);
         categoryDO.setPicUrl(picUrl);
@@ -120,10 +120,10 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CategoryDTO update(Long id, String title, Long parentId, String iconUrl, String picUrl, Long adminId) throws ServiceException {
-        if (id == null || parentId == null) {
-            throw new AdminServiceException(ExceptionDefinition.CATEGORY_OR_PARENT_NODE_IS_EMPTY);
+        CategoryDO categoryParent = null;
+        if (parentId.longValue() != 0L) {
+            categoryMapper.selectById(parentId);
         }
-        CategoryDO categoryParent = categoryMapper.selectById(parentId);
         CategoryDO category = categoryMapper.selectById(id);
 
         // 1. 检验类目是否存在,非一级类目的父类目是否存在
