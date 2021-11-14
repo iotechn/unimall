@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Configuration
 public class DelayedMessageQueueConfig {
 
-    @Bean
+    @Bean("messageHandleRouter")
     public Map<Integer, RedisNotifyHandler> messageHandleRouter(List<RedisNotifyHandler> redisNotifyHandlerListdfssfsd) {
         return redisNotifyHandlerListdfssfsd.stream().collect(Collectors.toMap(RedisNotifyHandler::getCode, v -> v));
     }

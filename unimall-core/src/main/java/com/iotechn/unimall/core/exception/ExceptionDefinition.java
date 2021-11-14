@@ -8,11 +8,8 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition THIRD_PART_SERVICE_EXCEPTION =
             new ServiceExceptionDefinition(0, "第三方服务异常");
 
-    public static final ServiceExceptionDefinition PLUGIN_EXCEPTION =
-            new ServiceExceptionDefinition(1, "插件异常: ${0}");
-
     public static final ServiceExceptionDefinition THIRD_PART_IO_EXCEPTION =
-            new ServiceExceptionDefinition(2, "第三方网络异常");
+            new ServiceExceptionDefinition(1, "第三方网络异常");
 
     public static final ServiceExceptionDefinition APP_UNKNOWN_EXCEPTION =
             new ServiceExceptionDefinition(10000, "系统未知异常");
