@@ -62,7 +62,7 @@ public class UserDO extends SuperDO {
     private Integer level;
 
     @ApiField(description = "VIP过期时间")
-    private Date vipExpiredTime;
+    private Date gmtVipExpire;
 
     @ApiField(description = "出生日期")
     private Date birthday;

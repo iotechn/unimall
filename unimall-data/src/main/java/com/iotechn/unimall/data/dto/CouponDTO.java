@@ -20,6 +20,9 @@ public class CouponDTO extends SuperDTO {
     @ApiField(description = "类型", enums = CouponType.class)
     private Integer type;
 
+    @ApiField(description = "是否是vip专享")
+    private Integer isVip;
+
     @ApiField(description = "优惠券描述")
     private String description;
 

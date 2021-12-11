@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.exception.PayServiceException;
-import com.dobbinsoft.fw.pay.handler.PayCallbackHandler;
+import com.dobbinsoft.fw.pay.handler.MatrixPayCallbackHandler;
+import com.dobbinsoft.fw.pay.model.notify.MatrixPayNotifyResponse;
 import com.dobbinsoft.fw.pay.model.notify.MatrixPayOrderNotifyResult;
-import com.dobbinsoft.fw.pay.model.result.PayNotifyResponse;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
 import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
@@ -26,14 +26,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class OrderPayCallbackHandler implements PayCallbackHandler {
+public class OrderPayCallbackHandler implements MatrixPayCallbackHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderPayCallbackHandler.class);
 
@@ -59,9 +61,15 @@ public class OrderPayCallbackHandler implements PayCallbackHandler {
     private AdminNotifyBizService adminNotifyBizService;
 
     @Override
-    public Object handle(MatrixPayOrderNotifyResult result) {
+    public void beforeCheckSign(HttpServletRequest httpServletRequest) {
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Object handle(MatrixPayOrderNotifyResult result, HttpServletRequest request) {
         try {
-            logger.info("处理{}支付平台的订单支付", result.getPayChannelType().getMsg());
+            logger.info("处理{}支付平台的订单支付", result.getPayChannel().getMsg());
             logger.info(JSONObject.toJSONString(result));
             /* 之前传过去的我们系统的订单ID */
             // 现在是不知道是父订单还是普通订单
@@ -81,7 +89,7 @@ public class OrderPayCallbackHandler implements PayCallbackHandler {
             }
 
             if (CollectionUtils.isEmpty(orderDOList)) {
-                return PayNotifyResponse.fail("订单不存在 orderNo=" + orderAbstractNo);
+                return MatrixPayNotifyResponse.fail("订单不存在 orderNo=" + orderAbstractNo);
             }
 
             int status = orderDOList.get(0).getStatus().intValue();
@@ -90,19 +98,19 @@ public class OrderPayCallbackHandler implements PayCallbackHandler {
             for (OrderDO orderDO : orderDOList) {
                 actualPrice += orderDO.getActualPrice();
                 if (orderDO.getStatus().intValue() != status) {
-                    return PayNotifyResponse.fail("订单子单状态不一致");
+                    return MatrixPayNotifyResponse.fail("订单子单状态不一致");
                 }
             }
 
             if (status != OrderStatusType.UNPAY.getCode()) {
-                return PayNotifyResponse.success("订单已经处理过了");
+                return MatrixPayNotifyResponse.success("订单已经处理过了");
             }
 
             Integer totalFee = result.getTotalFee();
 
             // 检查支付订单金额
             if (!totalFee.equals(actualPrice)) {
-                return PayNotifyResponse.fail(orderAbstractNo + " : 支付金额不符合 totalFee=" + totalFee);
+                return MatrixPayNotifyResponse.fail(orderAbstractNo + " : 支付金额不符合 totalFee=" + totalFee);
             }
 
             /**************** 在此之前都没有 数据库修改 操作 所以前面是直接返回错误的 **********************/
@@ -111,11 +119,12 @@ public class OrderPayCallbackHandler implements PayCallbackHandler {
             Date now = new Date();
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setPayId(payId);
-            updateOrderDO.setPayChannel(result.getPayChannelType().getCode());
+            updateOrderDO.setPayChannel(result.getPayChannel().getCode());
             updateOrderDO.setPayPrice(result.getTotalFee());
             updateOrderDO.setGmtPay(now);
             updateOrderDO.setGmtUpdate(now);
             updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
+            updateOrderDO.setAppId(result.getAppid());
             List<OrderSkuDO> orderSkuDOList;
 
             if (isParent) {
@@ -205,10 +214,9 @@ public class OrderPayCallbackHandler implements PayCallbackHandler {
                 delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), subOrderNo);
                 logger.info("[订单微信支付成功] orderNo:" + subOrderNo);
             }
-            return PayNotifyResponse.success("支付成功");
+            return MatrixPayNotifyResponse.success("支付成功");
         } catch (ServiceException e) {
             throw new PayServiceException(e.getMessage());
         }
     }
-
 }

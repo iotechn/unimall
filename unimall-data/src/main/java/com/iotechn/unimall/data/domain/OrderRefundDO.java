@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.domain;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import com.iotechn.unimall.data.enums.RefundStatusType;
@@ -9,6 +10,7 @@ import lombok.Data;
  * 订单退款申请表
  */
 @Data
+@TableName("unimall_order_refund")
 public class OrderRefundDO extends SuperDO {
 
     @ApiField(description = "订单ID")

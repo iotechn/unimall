@@ -30,4 +30,7 @@ public interface CouponService {
     public List<CouponUserDTO> getUserCoupons(
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
+    @HttpMethod(description = "获取会员用户可领取优惠券")
+    public List<CouponDTO> getVipCoupons() throws ServiceException;
+
 }

@@ -1,12 +1,21 @@
 package com.iotechn.unimall.app.api.vip;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.AppServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.GeneratorUtil;
+import com.dobbinsoft.fw.pay.enums.PayChannelType;
+import com.dobbinsoft.fw.pay.enums.PayPlatformType;
+import com.dobbinsoft.fw.pay.exception.MatrixPayException;
+import com.dobbinsoft.fw.pay.model.request.MatrixPayUnifiedOrderRequest;
+import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.properties.FwAliAppProperties;
+import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
+import com.dobbinsoft.fw.support.properties.FwWxPayProperties;
 import com.dobbinsoft.fw.support.service.BaseService;
-import com.iotechn.unimall.biz.service.pay.PayBizService;
+import com.iotechn.unimall.biz.util.PaySelector;
 import com.iotechn.unimall.data.domain.VipOrderDO;
 import com.iotechn.unimall.data.domain.VipTemplateDO;
 import com.iotechn.unimall.data.dto.AdminDTO;
@@ -15,13 +24,13 @@ import com.iotechn.unimall.data.enums.VipOrderStatusType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.VipOrderMapper;
 import com.iotechn.unimall.data.mapper.VipTemplateMapper;
+import groovyjarjarantlr.PythonCharFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-
-import java.util.List;
 
 @Service
 public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements VipOrderService {
@@ -33,17 +42,25 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
     private VipOrderMapper vipOrderMapper;
 
     @Autowired
-    private PayBizService payBizService;
+    private MatrixPayService matrixPayService;
 
-    @Value("${com.iotechn.unimall.machine-no}")
+    @Autowired
+    private FwWxPayProperties fwWxPayProperties;
+
+    @Value("${com.dobbinsoft.fw.machine-no}")
     private String MACHINE_NO;
 
-    @Value("${com.iotechn.unimall.env}")
+    @Value("${com.dobbinsoft.fw.env}")
     private String ENV;
+
+    @Autowired
+    private PaySelector paySelector;
+
+    private static final Logger logger = LoggerFactory.getLogger(VipOrderServiceImpl.class);
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Object prepay(Long templateId, String ip, Integer platform, String payChannel, Long userId) throws ServiceException {
+    public Object prepay(Integer payPlatform, String payChannel, Long templateId, String ip, Long userId) throws ServiceException {
         VipTemplateDO vipTemplateDO = templateMapper.selectById(templateId);
         if (vipTemplateDO == null || 1 != vipTemplateDO.getDisplay().intValue()) {
             throw new AppServiceException(ExceptionDefinition.VIP_TEMPLATE_NULL_OR_NOT_DISPLAY);
@@ -53,21 +70,34 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
         vipOrderDO.setDayNum(vipTemplateDO.getDayNum());
         vipOrderDO.setPrice(vipTemplateDO.getPrice());
         vipOrderDO.setStatus(VipOrderStatusType.WAIT_BUY.getCode());
-        vipOrderDO.setPayChannel(payChannel);
         vipOrderDO.setTemplateId(vipTemplateDO.getId());
         vipOrderDO.setOrderNo(orderNo);
         vipOrderDO.setUserId(userId);
         vipOrderDO.setTitle(vipTemplateDO.getTitle());
         vipOrderDO.setDescription(vipTemplateDO.getDescription());
         vipOrderMapper.insert(vipOrderDO);
-        // 前端来决定支付方式
-        return payBizService.commonPrepay(orderNo, vipTemplateDO.getPrice(), platform, payChannel, ip);
-    }
-
-    @Override
-    public String check(String orderNo, String phone, Long userId) throws ServiceException {
-        check(orderNo, phone);
-        return "ok";
+        try {
+            // 前端来决定支付方式
+            MatrixPayUnifiedOrderRequest orderRequest = new MatrixPayUnifiedOrderRequest();
+            paySelector.packPayChannel(orderRequest, payPlatform, payChannel);
+            orderRequest.setNotifyUrl(fwWxPayProperties.getNotifyUrl() + "/vip");
+            // 区分回调 直接通过 S 来判断
+            orderRequest.setOutTradeNo(orderNo);
+            orderRequest.setOpenid(sessionUtil.getUser().getWxMpOpenId());
+            orderRequest.setBody("vip_" + orderNo);
+            orderRequest.setTotalFee(vipOrderDO.getPrice());
+            orderRequest.setSpbillCreateIp(ip);
+            orderRequest.setPayPlatform(PayPlatformType.getByCode(payPlatform));
+            orderRequest.setPayChannel(PayChannelType.getByCode(payChannel));
+            Object object = matrixPayService.createOrder(orderRequest);
+            return object;
+        } catch (MatrixPayException e) {
+            logger.error("[Matrix支付] 异常", e);
+            throw new AppServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+        } catch (Exception e) {
+            logger.error("[预付款异常]", e);
+            throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+        }
     }
 
     @Override
@@ -80,17 +110,4 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
         return vipOrderMapper.selectPage(Page.div(pageNo, limit, VipOrderDO.class), wrapper);
     }
 
-    private VipOrderDO check(String orderNo, String phone) throws ServiceException {
-        QueryWrapper<VipOrderDO> wrapper = new QueryWrapper<>();
-        wrapper.eq("order_no", orderNo);
-        List<VipOrderDO> vipOrderDOS = vipOrderMapper.selectList(wrapper);
-        if (CollectionUtils.isEmpty(vipOrderDOS)) {
-            throw new AppServiceException(ExceptionDefinition.VIP_ORDER_CHECK_FAIL);
-        }
-        VipOrderDO vipOrderDO = vipOrderDOS.get(0);
-        if (!phone.equals(vipOrderDO.getPhone())) {
-            throw new AppServiceException(ExceptionDefinition.VIP_ORDER_CHECK_FAIL);
-        }
-        return vipOrderDO;
-    }
 }

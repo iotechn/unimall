@@ -86,6 +86,9 @@ public class OrderDO extends SuperDO {
     @ApiField(description = "第三方支付渠道")
     private String payChannel;
 
+    @ApiField(description = "选择支付的AppId")
+    private String appId;
+
     @ApiField(description = "支付时间")
     private Date gmtPay;
 

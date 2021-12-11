@@ -11,7 +11,6 @@ import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRefundRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
-import com.iotechn.unimall.data.enums.PlatformType;
 
 /**
  * Created by rize on 2019/7/4.
@@ -41,7 +40,7 @@ public interface OrderService {
     public Object prepay(
             @HttpParam(name = "parentOrderNo", type = HttpParamType.COMMON, description = "父单串号") String parentOrderNo,
             @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单串号") String orderNo,
-            @HttpParam(name = "platform", type = HttpParamType.COMMON, description = "平台", enums = PlatformType.class) Integer platform,
+            @HttpParam(name = "platform", type = HttpParamType.COMMON, description = "平台") Integer platform,
             @HttpParam(name = "payChannel", type = HttpParamType.COMMON, description = "支付渠道") String payChannel,
             @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "ip地址") String ip,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;

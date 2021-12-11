@@ -1,7 +1,6 @@
 package com.iotechn.unimall.biz.service.user;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.domain.VipOrderDO;
@@ -122,13 +121,13 @@ public class UserBizService {
         Date now = new Date();
         Calendar calendar = Calendar.getInstance();
         if(UserLevelType.VIP.getCode() == userDO.getLevel().intValue()){
-            calendar.setTime(userDO.getVipExpiredTime());
+            calendar.setTime(userDO.getGmtVipExpire());
         }else {
             calendar.setTime(now);
         }
         calendar.add(Calendar.DATE,vipOrder.getDayNum());
         Date time = calendar.getTime();
-        userDO.setVipExpiredTime(time);
+        userDO.setGmtVipExpire(time);
         userDO.setLevel(UserLevelType.VIP.getCode());
         userDO.setId(userDO.getId());
         userMapper.updateById(userDO);

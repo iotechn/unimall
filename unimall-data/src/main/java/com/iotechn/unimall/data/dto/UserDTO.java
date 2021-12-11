@@ -53,6 +53,9 @@ public class UserDTO extends SuperDTO implements IdentityOwner {
     @ApiField(description = "等级", enums = UserLevelType.class)
     private Integer level;
 
+    @ApiField(description = "VIP过期时间")
+    private Date gmtVipExpire;
+
     @ApiField(description = "出生日期")
     private Date birthday;
 
@@ -68,6 +71,11 @@ public class UserDTO extends SuperDTO implements IdentityOwner {
     @ApiField(description = "状态", enums = StatusType.class)
     private Integer status;
 
+    /**
+     * com.dobbinsoft.fw.pay.enums.PayPlatformType
+     */
+    @ApiField(description = "登录平台PayPlatformType")
+    private Integer platform;
     /**
      * 登录成功，包装此参数
      */

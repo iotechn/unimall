@@ -26,6 +26,9 @@ public class CouponAdminDTO extends SuperDTO {
     @ApiField(description = "类型", enums = CouponType.class)
     private Integer type;
 
+    @ApiField(description = "是否VIP专享")
+    private Integer isVip;
+
     @ApiField(description = "描述")
     private String description;
 

@@ -36,7 +36,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public CouponDO create(String title, Integer type, String description, Integer total, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Long gmtStart, Long gmtEnd, Long adminId) throws ServiceException {
+    public CouponDO create(String title, Integer type, Integer isVip, String description, Integer total, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Long gmtStart, Long gmtEnd, Long adminId) throws ServiceException {
         Date start = null;
         Date end = null;
         if (gmtEnd != null && gmtStart != null) {
@@ -47,6 +47,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         CouponDO couponDO = new CouponDO();
         couponDO.setTitle(title);
         couponDO.setType(type);
+        couponDO.setIsVip(isVip);
         couponDO.setDescription(description);
         couponDO.setTotal(total);
         couponDO.setSurplus(total);
@@ -83,11 +84,12 @@ public class AdminCouponServiceImpl implements AdminCouponService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean edit(Long id, String title, Integer type, String description, Integer total, Integer surplus, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Date gmtStart, Date gmtEnd, Long adminId) throws ServiceException {
+    public Boolean edit(Long id, String title, Integer type, Integer isVip, String description, Integer total, Integer surplus, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Date gmtStart, Date gmtEnd, Long adminId) throws ServiceException {
         CouponDO couponDO = new CouponDO();
         couponDO.setId(id);
         couponDO.setTitle(title);
         couponDO.setType(type);
+        couponDO.setIsVip(isVip);
         couponDO.setDescription(description);
         couponDO.setTotal(total);
         couponDO.setSurplus(total);

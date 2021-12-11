@@ -10,6 +10,7 @@ import com.dobbinsoft.fw.core.Const;
 import com.dobbinsoft.fw.core.exception.AppServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.GeneratorUtil;
+import com.dobbinsoft.fw.pay.enums.PayPlatformType;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.properties.FwAliAppProperties;
 import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
@@ -197,10 +198,10 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 updateUserDO.setAliMpOpenId(currentUserDO.getAliMpOpenId());
                 existUserDO.setAliMpOpenId(currentUserDO.getAliMpOpenId());
             }
-            userMapper.update(updateUserDO,
-                    new QueryWrapper<UserDO>().eq("phone", phone));
             // 2.2. 删除旧的user，并更新session
             userMapper.deleteById(currentUserDO.getId());
+            userMapper.update(updateUserDO,
+                    new QueryWrapper<UserDO>().eq("phone", phone));
             UserDTO userDTO = new UserDTO();
             BeanUtils.copyProperties(existUserDO, userDTO);
             userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
@@ -264,7 +265,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
 
     @Override
     @Transactional
-    public UserDTO login(String phone, String password, String ip) throws ServiceException {
+    public UserDTO login(String phone, String password, Integer platform, String ip) throws ServiceException {
         UserDO userDO = userMapper.selectOne(new QueryWrapper<UserDO>().eq("phone", phone));
         String cryptPassword = Md5Crypt.md5Crypt(password.getBytes(), "$1$" + userDO.getSalt());
         if (userDO == null || !cryptPassword.equals(userDO.getPassword())) {
@@ -276,6 +277,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         }
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(userDO, userDTO);
+        userDTO.setPlatform(platform);
         String accessToken = GeneratorUtil.genSessionId();
         //放入SESSION专用Redis数据源中
         userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
@@ -296,16 +298,16 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UserDTO thirdPartLogin(Integer loginType, String ip, String raw) throws ServiceException {
+    public UserDTO thirdPartLogin(Integer loginType, Integer platform, String ip, String raw) throws ServiceException {
         try {
             if (UserLoginType.MP_WEIXIN.getCode().intValue() == loginType) {
-                return wechatSafeLogin(UserLoginType.MP_WEIXIN.getCode(), ip, raw);
+                return wechatSafeLogin(UserLoginType.MP_WEIXIN.getCode(), platform, ip, raw);
             } else if (UserLoginType.H5_WEIXIN.getCode().intValue() == loginType) {
-                return wechatH5Login(ip, raw);
+                return wechatH5Login(ip, platform, raw);
             } else if (UserLoginType.APP_WEIXIN.getCode().intValue() == loginType) {
-                return wechatAppLogin(ip, raw);
+                return wechatAppLogin(ip, platform, raw);
             } else if (UserLoginType.MP_ALI.getCode().intValue() == loginType) {
-                return alipayMpLogin(ip, raw);
+                return alipayMpLogin(ip, platform, raw);
             } else {
                 throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_NOT_SUPPORT);
             }
@@ -349,6 +351,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                     UserDTO user = sessionUtil.getUser();
                     user.setPhone(purePhoneNumber);
                     user.setStatus(UserStatusType.ACTIVE.getCode());
+                    user.setPlatform(PayPlatformType.MP.getCode());
                     userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(user));
                 }
                 return purePhoneNumber;
@@ -450,7 +453,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
      * @return
      * @throws Exception
      */
-    private UserDTO wechatSafeLogin(Integer loginType, String ip, String raw) throws Exception {
+    private UserDTO wechatSafeLogin(Integer loginType, Integer platform, String ip, String raw) throws Exception {
         //微信第三方登录
         JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
         String code = thirdPartJsonObject.getString("code");
@@ -494,6 +497,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
             String accessToken = GeneratorUtil.genSessionId();
             UserDTO userDTO = new UserDTO();
             BeanUtils.copyProperties(userDO, userDTO);
+            userDTO.setPlatform(platform);
             userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
             userDTO.setAccessToken(accessToken);
             return userDTO;
@@ -512,7 +516,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
      * @return
      * @throws Exception
      */
-    private UserDTO wechatH5Login(String ip, String raw) throws Exception {
+    private UserDTO wechatH5Login(String ip, Integer platform, String raw) throws Exception {
         //H5 微信公众号网页登录
         String json = okHttpClient.newCall(
                 new Request.Builder().url("https://api.weixin.qq.com/sns/oauth2/access_token?appid="
@@ -553,6 +557,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 String accessToken = GeneratorUtil.genSessionId();
                 UserDTO userDTO = new UserDTO();
                 BeanUtils.copyProperties(userDO, userDTO);
+                userDTO.setPlatform(platform);
                 userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
                 userDTO.setAccessToken(accessToken);
                 return userDTO;
@@ -570,7 +575,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
      * @return
      * @throws Exception
      */
-    private UserDTO wechatAppLogin(String ip, String raw) throws Exception {
+    private UserDTO wechatAppLogin(String ip, Integer platform, String raw) throws Exception {
         //UNI-APP 的 微信APP登录 APPSecret是保存在前端的。这点非常不安全。但是用了他的框架，也没有办法
         JSONObject jsonObject = JSONObject.parseObject(raw);
         JSONObject authResult = jsonObject.getJSONObject("authResult");
@@ -602,6 +607,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         String accessToken = GeneratorUtil.genSessionId();
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(userDO, userDTO);
+        userDTO.setPlatform(platform);
         userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
         userDTO.setAccessToken(accessToken);
         return userDTO;
@@ -613,7 +619,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
      * @param raw
      * @return
      */
-    private UserDTO alipayMpLogin(String ip, String raw) throws Exception {
+    private UserDTO alipayMpLogin(String ip, Integer platform, String raw) throws Exception {
         Factory.setOptions(this.aliMiniCode);
         JSONObject jsonObject = JSONObject.parseObject(raw);
         AlipaySystemOauthTokenResponse response = Factory.Base.OAuth().getToken(jsonObject.getString("code"));
@@ -643,6 +649,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         String accessToken = GeneratorUtil.genSessionId();
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(userDO, userDTO);
+        userDTO.setPlatform(platform);
         userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
         userDTO.setAccessToken(accessToken);
         return userDTO;

@@ -8,24 +8,19 @@ import com.dobbinsoft.fw.pay.model.result.MatrixPayRefundResult;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.Page;
-import com.iotechn.unimall.biz.service.user.UserBizService;
+import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
 import com.iotechn.unimall.biz.service.vip.VipOrderBizService;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.VipOrderDO;
-import com.iotechn.unimall.data.dto.VipOrderDTO;
 import com.iotechn.unimall.data.enums.VipOrderStatusType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.VipOrderMapper;
-import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
-import com.iotechn.unimall.data.properties.UnimallWxPayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.util.Date;
 
 @Service
@@ -40,27 +35,9 @@ public class AdminVipOrderServiceImpl implements AdminVipOrderService {
     @Autowired
     private LockComponent lockComponent;
     @Autowired
-    private UnimallWxPayProperties unimallWxPayProperties;
-    @Autowired
-    private UserBizService userBizService;
-    @Autowired
-    private UnimallWxAppProperties unimallWxProperties;
+    private FwWxAppProperties fwWxAppProperties;
     @Autowired
     private MatrixPayService matrixPayService;
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public String bind(Long id, String phone, Long adminId) throws ServiceException {
-        VipOrderDO vipOrderDO = vipOrderMapper.selectById(id);
-        if (vipOrderDO.getStatus().intValue() != VipOrderStatusType.WAIT_EXCHANGE.getCode()) {
-            throw new AdminServiceException(ExceptionDefinition.VIP_ORDER_STATUS_ERROR);
-        }
-        VipOrderDO update = new VipOrderDO();
-        update.setPhone(phone);
-        update.setId(id);
-        vipOrderMapper.updateById(update);
-        return "ok";
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -76,15 +53,9 @@ public class AdminVipOrderServiceImpl implements AdminVipOrderService {
         String lockKey = LockConst.VIP_ORDER_REFUND_LOCK + id;
         if (lockComponent.tryLock(lockKey, 30)) {
             try {
-                String keyPath = unimallWxPayProperties.getKeyPath();
-                if (!new File(keyPath).exists()) {
-                    throw new AdminServiceException(ExceptionDefinition.ORDER_REFUND_KEY_PATH_ERROR);
-                }
-
-                //2.2.2 向微信支付平台发送退款请求
+                //2.2.2 向支付平台发送退款请求
                 MatrixPayRefundRequest matrixPayRefundRequest = new MatrixPayRefundRequest();
-                // TODO
-                matrixPayRefundRequest.setAppid("");
+                matrixPayRefundRequest.setAppid(fwWxAppProperties.getMiniAppId());
                 matrixPayRefundRequest.setOutTradeNo(vipOrderDO.getOrderNo());
                 matrixPayRefundRequest.setOutRefundNo("refund_VIP_" + vipOrderDO.getOrderNo());
                 matrixPayRefundRequest.setTotalFee(vipOrderDO.getPrice());
@@ -105,7 +76,7 @@ public class AdminVipOrderServiceImpl implements AdminVipOrderService {
             } catch (ServiceException e) {
                 throw e;
             } catch (Exception e) {
-                logger.error("[微信退款] 异常", e);
+                logger.error("[退款] 异常", e);
                 throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
             } finally {
                 lockComponent.release(lockKey);
@@ -116,7 +87,7 @@ public class AdminVipOrderServiceImpl implements AdminVipOrderService {
     }
 
     @Override
-    public Page<VipOrderDTO> list(String orderNo, Integer status, String phone, Long templateId, Integer pageNo, Integer limit, Long adminId) throws ServiceException {
+    public Page<VipOrderDO> list(String orderNo, Integer status, String phone, Long templateId, Integer pageNo, Integer limit, Long adminId) throws ServiceException {
         QueryWrapper<VipOrderDO> wrapper = new QueryWrapper<>();
         if (orderNo != null) {
             wrapper.eq("order_no", orderNo);
@@ -130,11 +101,7 @@ public class AdminVipOrderServiceImpl implements AdminVipOrderService {
         if (templateId != null) {
             wrapper.eq("template_id", templateId);
         }
-        Page<VipOrderDO> rawPage = vipOrderMapper.selectPage(Page.div(pageNo, limit, VipOrderDO.class), wrapper);
-        return rawPage.trans(item -> {
-            VipOrderDTO dto = new VipOrderDTO();
-            BeanUtils.copyProperties(item, dto);
-            return dto;
-        });
+        wrapper.orderByDesc("id");
+        return vipOrderMapper.selectPage(Page.div(pageNo, limit, VipOrderDO.class), wrapper);
     }
 }

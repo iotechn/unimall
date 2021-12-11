@@ -25,6 +25,13 @@ public class CouponDO extends SuperDO {
     @ApiField(description = "类型", enums = CouponType.class)
     private Integer type;
 
+    /**
+     * 是否是vip专享
+     * 0:不是，1:是
+     */
+    @ApiField(description = "是否是vip专享")
+    private Integer isVip;
+
     @ApiField(description = "优惠券描述")
     private String description;
 

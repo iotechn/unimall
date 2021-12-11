@@ -43,6 +43,7 @@ public interface UserService {
     public UserDTO login(
             @NotNull(message = "请输入手机号") @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "用户手机号") String phone,
             @NotNull(message = "请输入密码") @TextFormat(lengthMin = 8, lengthMax = 18, notChinese = true, message = "密码长度8到18位") @HttpParam(name = "password", type = HttpParamType.COMMON, description = "用户密码") String password,
+            @NotNull @HttpParam(name = "platform", type = HttpParamType.COMMON, description = "登录平台") Integer platform,
             @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "登录IP") String ip) throws ServiceException;
 
     @HttpMethod(description = "用户注销")
@@ -58,6 +59,7 @@ public interface UserService {
      * 若用户手机已经存在（例如，先从支付宝登录、后用微信登录，使用同一个手机号、系统会将OPEN_ID合并到之前的账号上）
      *
      * @param loginType
+     * @param platform 登录平台 与 PayPlatform一致
      * @param ip
      * @param raw
      * @return
@@ -66,6 +68,7 @@ public interface UserService {
     @HttpMethod(description = "第三方登录")
     public UserDTO thirdPartLogin(
             @NotNull @HttpParam(name = "loginType", type = HttpParamType.COMMON, description = "第三方代号", enums = UserLoginType.class) Integer loginType,
+            @NotNull @HttpParam(name = "platform", type = HttpParamType.COMMON, description = "登录平台") Integer platform,
             @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "用户Ip") String ip,
             @NotNull @HttpParam(name = "raw", type = HttpParamType.COMMON, description = "第三方平台返回的数据") String raw) throws ServiceException;
 

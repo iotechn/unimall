@@ -1,21 +1,16 @@
 package com.iotechn.unimall.app.api.order;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.AppServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.GeneratorUtil;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
-import com.dobbinsoft.fw.pay.enums.PayPlatformType;
-import com.dobbinsoft.fw.pay.model.request.MatrixPayUnifiedOrderRequest;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.Page;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
-import com.dobbinsoft.fw.support.properties.FwAliAppProperties;
 import com.dobbinsoft.fw.support.service.BaseService;
-import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.address.AddressBizService;
 import com.iotechn.unimall.biz.service.cart.CartBizService;
@@ -47,7 +42,6 @@ import com.iotechn.unimall.data.model.FreightCalcModel;
 import com.iotechn.unimall.data.model.OrderCalcSkuModel;
 import com.iotechn.unimall.data.model.SkuStockInfoModel;
 import com.iotechn.unimall.data.properties.UnimallOrderProperties;
-import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -125,10 +119,10 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     @Autowired
     private DelayedMessageQueue delayedMessageQueue;
 
-    @Value("${com.iotechn.unimall.machine-no}")
+    @Value("${com.dobbinsoft.fw.machine-no}")
     private String MACHINE_NO;
 
-    @Value("${com.iotechn.unimall.env}")
+    @Value("${com.dobbinsoft.fw.env}")
     private String ENV;
 
     @Autowired

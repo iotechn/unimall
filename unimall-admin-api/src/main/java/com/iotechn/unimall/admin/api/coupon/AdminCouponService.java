@@ -27,6 +27,7 @@ public interface AdminCouponService {
     public CouponDO create(
             @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "优惠卷标题") String title,
             @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "优惠卷类别，如满减") Integer type,
+            @NotNull @HttpParam(name = "isVip", type = HttpParamType.COMMON, description = "是否vip专享") Integer isVip,
             @HttpParam(name = "description", type = HttpParamType.COMMON, description = "优惠卷描述") String description,
             @NotNull @HttpParam(name = "total", type = HttpParamType.COMMON, description = "优惠卷总数") Integer total,
             @NotNull @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "用户限制领取") Integer limit,
@@ -49,6 +50,7 @@ public interface AdminCouponService {
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "优惠卷ID") Long id,
             @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "优惠卷标题") String title,
             @NotNull @HttpParam(name = "type", type = HttpParamType.COMMON, description = "优惠卷类别，如满减") Integer type,
+            @NotNull @HttpParam(name = "isVip", type = HttpParamType.COMMON, description = "是否vip专享") Integer isVip,
             @HttpParam(name = "description", type = HttpParamType.COMMON, description = "优惠卷描述") String description,
             @NotNull @HttpParam(name = "total", type = HttpParamType.COMMON, description = "优惠卷总数") Integer total,
             @NotNull @HttpParam(name = "surplus", type = HttpParamType.COMMON, description = "优惠卷剩余") Integer surplus,

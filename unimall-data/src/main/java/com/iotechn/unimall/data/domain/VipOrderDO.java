@@ -1,6 +1,5 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.support.domain.SuperDO;
@@ -18,27 +17,23 @@ public class VipOrderDO extends SuperDO {
     @ApiField(description = "续费天数")
     private Integer dayNum;
 
-    private Integer source;
-
     private Integer price;
-
-    private Integer commission;
 
     private Long templateId;
 
     private Integer status;
 
-    private String phone;
-
     private Date gmtPay;
 
+    @ApiField(description = "支付渠道")
     private String payChannel;
+
+    @ApiField(description = "支付时用的AppId")
+    private String appId;
 
     private String payId;
 
     private Long userId;
-
-    private Long shareId;
 
     private String title;
 

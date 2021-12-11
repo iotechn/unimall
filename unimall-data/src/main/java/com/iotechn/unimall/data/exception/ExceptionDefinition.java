@@ -207,6 +207,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition COUPON_CHECK_DATA_FAILED =
             new ServiceExceptionDefinition(14006, "优惠券审核数据失败");
 
+    public static final ServiceExceptionDefinition COUPON_IS_VIP_ONLY =
+            new ServiceExceptionDefinition(14008, "优惠券是Vip专享券，您不能领取");
+
 
     public static final ServiceExceptionDefinition ADDRESS_QUERY_FAILED =
             new ServiceExceptionDefinition(16001, "这是个有地址却没有默认地址的用户");

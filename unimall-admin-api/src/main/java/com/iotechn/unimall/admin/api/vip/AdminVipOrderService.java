@@ -9,16 +9,10 @@ import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.core.annotation.param.Range;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.model.Page;
-import com.iotechn.unimall.data.dto.VipOrderDTO;
+import com.iotechn.unimall.data.domain.VipOrderDO;
 
 @HttpOpenApi(group = "admin.vip.order", description = "VIP订单")
 public interface AdminVipOrderService {
-
-    @HttpMethod(description = "绑定电话", permission = "vip:order:bind", permissionParentName = "VIP管理", permissionName = "VIP卡管理")
-    public String bind(
-            @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "ID") Long id,
-            @NotNull @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "ID") String phone,
-            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "退款", permission = "vip:order:refund", permissionParentName = "VIP管理", permissionName = "VIP卡管理")
     public String refund(
@@ -26,7 +20,7 @@ public interface AdminVipOrderService {
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "查询", permission = "vip:order:list", permissionParentName = "VIP管理", permissionName = "VIP卡管理")
-    public Page<VipOrderDTO> list(
+    public Page<VipOrderDO> list(
             @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单号或者叫会员卡号") String orderNo,
             @HttpParam(name = "status", type = HttpParamType.COMMON, description = "状态") Integer status,
             @HttpParam(name = "phone", type = HttpParamType.COMMON, description = "手机号") String phone,
