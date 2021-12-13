@@ -1,7 +1,6 @@
-package com.iotechn.unimall.biz.client;
+package com.iotechn.unimall.biz.client.erp;
 
 import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.iotechn.unimall.biz.client.handler.ErpStockChangeHandler;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 
 import java.math.BigDecimal;
@@ -36,14 +35,14 @@ public interface ErpClient {
      * 下销售制单 & 销售出库 & 销售收款
      * @return
      */
-    public boolean takeSalesHeader(OrderDTO dto) throws ServiceException;
+    public void takeSalesHeader(String orderNo) throws ServiceException;
 
     /**
      * 下退货入库单 & 销售退款单
      * 当在商户后台点确认的时候，需要STOCK RETURN退货单，来补充库存
      * @return
      */
-    public boolean takeStockReturnOrder(OrderDTO dto) throws ServiceException;
+    public void takeStockReturnOrder(String orderNo) throws ServiceException;
 
     /**
      * 调用库存更改（同步）

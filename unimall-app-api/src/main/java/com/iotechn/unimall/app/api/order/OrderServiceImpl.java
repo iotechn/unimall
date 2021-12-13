@@ -11,6 +11,7 @@ import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.Page;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
 import com.dobbinsoft.fw.support.service.BaseService;
+import com.iotechn.unimall.biz.client.erp.ErpClient;
 import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.address.AddressBizService;
 import com.iotechn.unimall.biz.service.cart.CartBizService;
@@ -127,6 +128,9 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
 
     @Autowired
     private UnimallOrderProperties unimallOrderProperties;
+
+    @Autowired
+    private ErpClient erpClient;
 
 
     @Override
@@ -505,6 +509,8 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 }
                 orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.UNPAY.getCode(), groupShopUpdateDO);
             } else {
+                // 下销售制单
+                erpClient.takeSalesHeader(orderDO.getOrderNo());
                 OrderDO updateOrderDO = new OrderDO();
                 updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
                 updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());

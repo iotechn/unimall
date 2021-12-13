@@ -86,6 +86,18 @@ public class LockConst {
     public static final String VIP_ORDER_REFUND_LOCK = "VIP_ORDER_REFUND_LOCK:";
 
     /**
+     * 用户会员过期乐观锁
+     * VIP_EXPIRE_LOCK
+     */
+    public static final String VIP_EXPIRE_LOCK = "VIP_EXPIRE_LOCK";
+
+    /**
+     * 用户会员支付超时乐观锁
+     * VIP_PAY_TIMEOUT_LOCK
+     */
+    public static final String VIP_PAY_TIMEOUT_LOCK = "VIP_PAY_TIMEOUT_LOCK";
+
+    /**
      * 批量生成VipOrder锁
      */
     public static final String VIP_ORDER_GENERATE_LOCK = "VIP_ORDER_GENERATE_LOCK";

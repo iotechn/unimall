@@ -183,6 +183,10 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition ORDER_APP_PAY_MUST_CHANNEL =
             new ServiceExceptionDefinition(13034, "APP支付必须选择渠道");
 
+    public static final ServiceExceptionDefinition ORDER_ERP_STOCK_CHANGE_FAILED =
+            new ServiceExceptionDefinition(13034, "APP支付必须选择渠道");
+
+
     public static final ServiceExceptionDefinition COUPON_ISSUE_OVER =
             new ServiceExceptionDefinition(14001, "优惠券已经领完～");
 
@@ -317,8 +321,8 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition GROUP_SHOP_SKU_PRICE_ERROR =
             new ServiceExceptionDefinition(21004, "团购商品sku价格为空,或者为0");
 
-    public static final ServiceExceptionDefinition GROUP_SHOP_SKU_GROUP_SHOP_ID_ERROR =
-            new ServiceExceptionDefinition(21005, "团购商品sku的团购商品spuID和传入的不一致");
+    public static final ServiceExceptionDefinition GROUP_SHOP_SPU_NO_EXITS =
+            new ServiceExceptionDefinition(21010, "团购商品spu不存在");
 
     public static final ServiceExceptionDefinition GROUP_SHOP_SPU_ADD_SQL_QUERY_ERROR =
             new ServiceExceptionDefinition(21006, "团购商品spu添加出误");

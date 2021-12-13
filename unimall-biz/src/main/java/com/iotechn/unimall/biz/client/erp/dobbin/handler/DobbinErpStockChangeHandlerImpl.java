@@ -1,6 +1,6 @@
-package com.iotechn.unimall.biz.client.dobbin.handler;
+package com.iotechn.unimall.biz.client.erp.dobbin.handler;
 
-import com.iotechn.unimall.biz.client.handler.ErpStockChangeHandler;
+import com.iotechn.unimall.biz.client.erp.handler.ErpStockChangeHandler;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

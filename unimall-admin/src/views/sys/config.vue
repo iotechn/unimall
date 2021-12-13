@@ -384,45 +384,6 @@
     </el-card>
 
     <el-card class="box-card">
-      <h3>搜索引擎</h3>
-      <el-form ref="searchDataForm" :model="searchDataForm" label-width="150px">
-
-        <el-form-item label="启用(需要重启)" prop="enable">
-          <el-select v-model="searchDataForm.enable" placeholder="请选择搜索引擎">
-            <el-option
-              :value="'db'"
-              :label="'不使用'"
-            />
-            <el-option
-              :value="'opensearch'"
-              :label="'阿里云OpenSearch'"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item v-if="searchDataForm.enable == 'opensearch'" label="AccessKeyId" prop="openSearchAccessKeyId">
-          <el-input v-model="searchDataForm.openSearchAccessKeyId" />
-        </el-form-item>
-
-        <el-form-item v-if="searchDataForm.enable == 'opensearch'" label="AccessKeySecret" prop="openSearchAccessKeySecret">
-          <el-input v-model="searchDataForm.openSearchAccessKeySecret" />
-        </el-form-item>
-
-        <el-form-item v-if="searchDataForm.enable == 'opensearch'" label="API 网关地址" prop="openSearchHost">
-          <el-input v-model="searchDataForm.openSearchHost" />
-        </el-form-item>
-
-      </el-form>
-
-      <div class="op-container">
-        <el-button :loading="submiting" type="primary" @click="handleSave('searchDataForm', prefixs.searchDataPrefix)">保存更改</el-button>
-        <el-button :loading="submiting" type="primary" @click="handleSearchEngineInit()">初始化</el-button>
-        <el-button :loading="submiting" type="primary" @click="handleSearchEngineRebuild()">重建引擎数据</el-button>
-      </div>
-
-    </el-card>
-
-    <el-card class="box-card">
       <h3>进销存开放平台</h3>
       <el-form ref="erpDataForm" :model="erpDataForm" label-width="150px">
 
@@ -463,6 +424,8 @@
 
       <div class="op-container">
         <el-button :loading="submiting" type="primary" @click="handleSave('erpDataForm', prefixs.erpDataPrefix)">保存更改</el-button>
+        <el-button v-if="erpDataForm.enable == 'dobbin'" :loading="submiting" type="primary" @click="syncCategory">同步库存</el-button>
+        <el-button v-if="erpDataForm.enable == 'dobbin'" :loading="submiting" type="primary" @click="syncProduct">同步商品</el-button>
       </div>
 
     </el-card>
@@ -470,8 +433,7 @@
   </div>
 </template>
 <script>
-
-import { initSearchEngine, rebuildSearchEngine, reloadPropertiesSearchEngine } from '@/api/search'
+import { syncCategory, syncProduct } from '@/api/erp'
 import { uploadLocalPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
 import { getData, save } from '@/api/config'
@@ -570,51 +532,46 @@ export default {
             title: '成功',
             message: '保存成功'
           })
-          if (prefix === this.prefixs.searchDataPrefix) {
-            // 重新加载属性
-            this.$notify.warning({
-              type: 'warning',
-              title: '注意！Attention！',
-              message: '若更换搜索引擎实现，请重启后端服务以使IoC加载实例',
-              position: 'bottom-left',
-              duration: 0
-            })
-            reloadPropertiesSearchEngine().then(reloadRes => {
-
-            })
-          }
         })
         .catch(failres => {
           this.submiting = false
         })
     },
-    handleSearchEngineInit() {
+    syncCategory() {
       this.submiting = true
-      initSearchEngine().then(res => {
+      this.$notify.success({
+        type: 'success',
+        title: '成功',
+        message: '已经开始类目同步任务'
+      })
+      syncCategory().then(res => {
+        this.submiting = false
         this.$notify.success({
           type: 'success',
           title: '成功',
-          message: '初始化引擎成功'
+          message: '类目同步成功！'
         })
+      }).catch(failres => {
         this.submiting = false
       })
-        .catch(failres => {
-          this.submiting = false
-        })
     },
-    handleSearchEngineRebuild() {
+    syncProduct() {
       this.submiting = true
-      rebuildSearchEngine().then(res => {
+      this.$notify.success({
+        type: 'success',
+        title: '成功',
+        message: '已经开始商品同步任务'
+      })
+      syncProduct().then(res => {
+        this.submiting = false
         this.$notify.success({
           type: 'success',
           title: '成功',
-          message: '重建搜索引擎数据成功!'
+          message: '商品同步成功！'
         })
+      }).catch(failres => {
         this.submiting = false
       })
-        .catch(failres => {
-          this.submiting = false
-        })
     }
   }
 }

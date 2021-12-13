@@ -2,6 +2,7 @@ package com.iotechn.unimall.biz.pay;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.exception.AppServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.exception.PayServiceException;
@@ -9,6 +10,7 @@ import com.dobbinsoft.fw.pay.handler.MatrixPayCallbackHandler;
 import com.dobbinsoft.fw.pay.model.notify.MatrixPayNotifyResponse;
 import com.dobbinsoft.fw.pay.model.notify.MatrixPayOrderNotifyResult;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
+import com.iotechn.unimall.biz.client.erp.ErpClient;
 import com.iotechn.unimall.biz.executor.GlobalExecutor;
 import com.iotechn.unimall.biz.service.groupshop.GroupShopBizService;
 import com.iotechn.unimall.biz.service.notify.AdminNotifyBizService;
@@ -20,6 +22,7 @@ import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.SpuActivityType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import org.slf4j.Logger;
@@ -47,6 +50,9 @@ public class OrderPayCallbackHandler implements MatrixPayCallbackHandler {
 
     @Autowired
     private OrderMapper orderMapper;
+
+    @Autowired
+    private ErpClient erpClient;
 
     @Autowired
     private ProductBizService productBizService;
@@ -159,10 +165,12 @@ public class OrderPayCallbackHandler implements MatrixPayCallbackHandler {
                             }
                             orderBizService.changeOrderSubStatus(subOrder.getOrderNo(), OrderStatusType.UNPAY.getCode(), groupShopUpdateDO);
                         } else {
+                            erpClient.takeSalesHeader(subOrder.getOrderNo());
                             orderBizService.changeOrderSubStatus(subOrder.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
                         }
                     }
                 } else {
+                    // 因为现在只有团购需要分单，所以这种情况并不会发生
                     // 走普通商品 并且更新状态 可以打包更新
                     orderBizService.changeOrderParentStatus(orderAbstractNo, OrderStatusType.UNPAY.getCode(), updateOrderDO, orderDOList.size());
                 }
@@ -189,6 +197,7 @@ public class OrderPayCallbackHandler implements MatrixPayCallbackHandler {
                     }
                     orderBizService.changeOrderSubStatus(orderAbstractNo, OrderStatusType.UNPAY.getCode(), groupShopUpdateDO);
                 } else {
+                    erpClient.takeSalesHeader(orderDOList.get(0).getOrderNo());
                     orderBizService.changeOrderSubStatus(orderAbstractNo, OrderStatusType.UNPAY.getCode(), updateOrderDO);
                 }
             }

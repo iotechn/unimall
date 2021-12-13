@@ -1,7 +1,6 @@
-package com.iotechn.unimall.biz.client.dobbin.model;
+package com.iotechn.unimall.biz.client.erp.dobbin.model;
 
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
-import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

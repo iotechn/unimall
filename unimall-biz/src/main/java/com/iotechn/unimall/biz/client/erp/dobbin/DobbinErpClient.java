@@ -1,4 +1,4 @@
-package com.iotechn.unimall.biz.client.dobbin;
+package com.iotechn.unimall.biz.client.erp.dobbin;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -10,19 +10,15 @@ import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ThirdPartServiceException;
 import com.dobbinsoft.fw.support.component.open.OpenPlatformUtil;
 import com.dobbinsoft.fw.support.model.Page;
-import com.iotechn.unimall.biz.client.ErpClient;
-import com.iotechn.unimall.biz.client.dobbin.model.*;
-import com.iotechn.unimall.biz.client.handler.ErpStockChangeHandler;
+import com.iotechn.unimall.biz.client.erp.ErpClient;
+import com.iotechn.unimall.biz.client.erp.dobbin.model.*;
+import com.iotechn.unimall.biz.client.erp.handler.ErpStockChangeHandler;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.data.domain.*;
-import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.product.AdminSpuDTO;
 import com.iotechn.unimall.data.enums.CategoryLevelType;
 import com.iotechn.unimall.data.enums.StatusType;
-import com.iotechn.unimall.data.mapper.CategoryMapper;
-import com.iotechn.unimall.data.mapper.FreightTemplateMapper;
-import com.iotechn.unimall.data.mapper.SkuMapper;
-import com.iotechn.unimall.data.mapper.SpuMapper;
+import com.iotechn.unimall.data.mapper.*;
 import com.iotechn.unimall.data.properties.UnimallErpOpenPlatformProperties;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -30,7 +26,6 @@ import okhttp3.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -41,12 +36,13 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
 public class DobbinErpClient implements ErpClient {
 
     private OkHttpClient okHttpClient = new OkHttpClient();
 
-    private static final String ERP_GW = "https://console.dobbinsoft.com/erp/m.api";
+    private static final String ERP_GW = "http://test.dobbinsoft.com/erp/m.api";
+
+//    private static final String ERP_GW = "https://console.dobbinsoft.com/erp/m.api";
 
     private static final String TENEMENT_ID_HEADER = "TENEMENTID";
 
@@ -61,6 +57,12 @@ public class DobbinErpClient implements ErpClient {
 
     @Autowired
     private SpuMapper spuMapper;
+
+    @Autowired
+    private OrderMapper orderMapper;
+
+    @Autowired
+    private OrderSkuMapper orderSkuMapper;
 
     @Autowired
     private FreightTemplateMapper freightTemplateMapper;
@@ -315,18 +317,22 @@ public class DobbinErpClient implements ErpClient {
     }
 
     @Override
-    public boolean takeSalesHeader(OrderDTO dto) throws ServiceException {
+    public void takeSalesHeader(String orderNo) throws ServiceException {
+        OrderDO orderDO = orderMapper.selectOne(
+                    new QueryWrapper<OrderDO>()
+                            .eq("order_no", orderNo));
         ErpSalesHeader erpSalesHeader = new ErpSalesHeader();
-        erpSalesHeader.setPlaceCode(dto.getOrderNo());
-        erpSalesHeader.setRecvConsignee(dto.getConsignee());
-        erpSalesHeader.setRecvAddress(dto.getProvince() + " " + dto.getCity() + " " + dto.getCounty());
-        erpSalesHeader.setRecvPhone(dto.getPhone());
-        erpSalesHeader.setTotal(dto.getActualPrice());
+        erpSalesHeader.setPlaceCode(orderDO.getOrderNo());
+        erpSalesHeader.setRecvConsignee(orderDO.getConsignee());
+        erpSalesHeader.setRecvAddress(orderDO.getProvince() + " " + orderDO.getCity() + " " + orderDO.getCounty());
+        erpSalesHeader.setRecvPhone(orderDO.getPhone());
+        erpSalesHeader.setTotal(orderDO.getActualPrice());
         erpSalesHeader.setDeposit(0);
-        erpSalesHeader.setGmtSales(dto.getGmtCreate());
-        erpSalesHeader.setMono(dto.getMono());
+        erpSalesHeader.setGmtSales(orderDO.getGmtCreate());
+        erpSalesHeader.setMono(orderDO.getMono());
         erpSalesHeader.setTaxRate(0);
-        List<ErpSalesHeaderSku> skuList = dto.getSkuList().stream().map(item -> {
+        List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+        List<ErpSalesHeaderSku> skuList = orderSkuList.stream().map(item -> {
             ErpSalesHeaderSku erpSalesHeaderSku = new ErpSalesHeaderSku();
             erpSalesHeaderSku.setBarCode(item.getBarCode());
             erpSalesHeaderSku.setUnit(item.getUnit());
@@ -353,17 +359,20 @@ public class DobbinErpClient implements ErpClient {
                             .build()).execute().body().string();
             getObjectFromJson(json);
             logger.info("[开放ERP 下发销售单] 成功！");
-            return true;
         } catch (IOException e) {
             throw new ThirdPartServiceException(CoreExceptionDefinition.THIRD_PART_IO_EXCEPTION);
         }
     }
 
     @Override
-    public boolean takeStockReturnOrder(OrderDTO dto) throws ServiceException {
+    public void takeStockReturnOrder(String orderNo) throws ServiceException {
+        OrderDO orderDO = orderMapper.selectOne(
+                new QueryWrapper<OrderDO>()
+                        .eq("order_no", orderNo));
         ErpPlaceRefund erpPlaceRefund = new ErpPlaceRefund();
-        erpPlaceRefund.setPlaceCode(dto.getOrderNo());
-        List<ErpPlaceRefundSku> skuList = dto.getSkuList().stream().map(item -> {
+        erpPlaceRefund.setPlaceCode(orderDO.getOrderNo());
+        List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
+        List<ErpPlaceRefundSku> skuList = orderSkuList.stream().map(item -> {
             ErpPlaceRefundSku erpPlaceRefundSku = new ErpPlaceRefundSku();
             erpPlaceRefundSku.setBarCode(item.getBarCode());
             erpPlaceRefundSku.setQuantity(new BigDecimal(item.getNum()));
@@ -389,7 +398,6 @@ public class DobbinErpClient implements ErpClient {
                             .build()).execute().body().string();
             getObjectFromJson(json);
             logger.info("[开放ERP 下发退款] 成功！");
-            return true;
         } catch (IOException e) {
             throw new ThirdPartServiceException(CoreExceptionDefinition.THIRD_PART_IO_EXCEPTION);
         }

@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.erp;
 
 import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.iotechn.unimall.biz.client.ErpClient;
+import com.iotechn.unimall.biz.client.erp.ErpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,4 +22,5 @@ public class AdminErpServiceImpl implements AdminErpService {
         erpClient.syncProducts();
         return "ok";
     }
+
 }
