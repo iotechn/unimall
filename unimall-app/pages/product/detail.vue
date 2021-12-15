@@ -4,7 +4,7 @@
       <swiper indicator-dots circular="true" duration="400">
         <swiper-item v-for="(item,index) in product.imgList" :key="index" class="swiper-item">
           <view class="image-wrapper">
-            <image :src="item + '?x-oss-process=style/600px'" class="loaded" mode="aspectFill" />
+            <image :src="item + style(600)" class="loaded" mode="aspectFill" />
           </view>
         </swiper-item>
       </swiper>
@@ -210,7 +210,7 @@
       <view class="mask" />
       <view class="layer attr-content">
         <view class="a-t">
-          <image v-if="product.img" :src="(selectedSku.img?selectedSku.img:product.img) + '?x-oss-process=style/200px'" />
+          <image v-if="product.img" :src="(selectedSku.img?selectedSku.img:product.img) + style(200)" />
           <view class="right">
             <text class="price">
               ¥{{ isVip ? (selectedSku.vipPrice / 100.0) : selectedSku.price / 100.0 }} <text v-if="selectedSku && selectedSku.priceTag" class="coupon-tip">
@@ -266,7 +266,8 @@ export default {
   },
   data() {
     return {
-      spuId: undefined,
+      style: this.$api.style,
+	  spuId: undefined,
       product: {
         freightTemplate: undefined,
         skuList: [],

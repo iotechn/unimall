@@ -2,7 +2,7 @@
   <view class="page">
     <view v-for="(item, index) in orderDetail.skuList" :key="index">
       <view class="goods-box-single">
-        <image class="goods-img" :src="item.img + '?x-oss-process=style/200px'" mode="aspectFill" />
+        <image class="goods-img" :src="item.img + style(200)" mode="aspectFill" />
         <view class="right">
           <text class="title clamp">
             {{ item.spuTitle }}
@@ -44,7 +44,7 @@
             <view class="uni-uploader__files">
               <block v-for="(image,imgIndex) in item.imgs" :key="imgIndex">
                 <view class="uni-uploader__file" style="position: relative;">
-                  <image class="uni-uploader__img" :src="image + '?x-oss-process=style/200px'" @tap="previewImage" />
+                  <image class="uni-uploader__img" :src="image + style(200)" @tap="previewImage" />
                   <view class="close-view" @click="close(item, index, imgIndex)">
                     x
                   </view>
@@ -69,6 +69,7 @@
 export default {
   data() {
     return {
+      style: this.$api.style,
       stars: [1, 2, 3, 4, 5],
       imageList: [],
       sendDate: {

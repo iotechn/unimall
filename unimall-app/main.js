@@ -202,6 +202,14 @@ const prePage = () => {
 
 const globalData = {}
 
+export function style(width) {
+  if (config.OSS_PROVIDER === 'aliyun') {
+    return '?x-oss-process=style/' + width + 'px'
+  } else if (config.OSS_PROVIDER === 'qcloud') {
+    return '?imageMogr2/thumbnail/' + width + 'x/interlace/0'
+  }
+}
+
 Vue.config.productionTip = false
 Vue.prototype.$fire = new Vue()
 Vue.prototype.$store = store
@@ -214,7 +222,8 @@ Vue.prototype.$api = {
   isVip,
   setUserInfo,
   config,
-  globalData
+  globalData,
+  style
 }
 // #ifdef H5
 Vue.prototype.$jweixin = jweixin

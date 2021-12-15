@@ -8,7 +8,7 @@
     <scroll-view scroll-with-animation scroll-y class="right-aside" :scroll-top="tabScrollTop">
       <view class="s-list">
         <view v-for="sitem in slist" :key="sitem.id" class="s-item" @click="navToList(sitem.id)">
-          <image :src="sitem.picUrl + '?x-oss-process=style/200px'" />
+          <image :src="sitem.picUrl + style(200)" />
           <text>{{ sitem.title }}</text>
         </view>
       </view>
@@ -20,6 +20,7 @@
 export default {
   data() {
     return {
+      style: this.$api.style,
       sizeCalcState: false,
       tabScrollTop: 0,
       currentId: 1,

@@ -15,7 +15,7 @@
     <view class="goods-list">
       <view v-for="(item, index) in productList" :key="index" class="goods-item" @click="navToDetailPage(item)">
         <view class="image-wrapper">
-          <image :src="item.img + '?x-oss-process=style/400px'" mode="aspectFill" />
+          <image :src="item.img + style(200)" mode="aspectFill" />
         </view>
         <text class="title clamp">
           {{ item.title }}
@@ -42,7 +42,8 @@ export default {
   },
   data() {
     return {
-      cateMaskState: 0, // 分类面板展开状态
+      style: this.$api.style,
+	  cateMaskState: 0, // 分类面板展开状态
       headerPosition: 'fixed',
       headerTop: '0px',
       loadingType: 'more', // 加载更多状态

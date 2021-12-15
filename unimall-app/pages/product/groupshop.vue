@@ -7,7 +7,7 @@
         <navigator class="groupshop-item" :class="{'b-b': index!==groupShopList.length-1}" :url="'/pages/product/detail?id=' + item.spuId + '&gid=' + item.id">
           <view class="image-wrapper">
             <image
-              :src="item.img + '?x-oss-process=style/200px'"
+              :src="item.img + style(200)"
               :class="[item.loaded]"
               mode="aspectFill"
               lazy-load
@@ -49,7 +49,8 @@ export default {
   },
   data() {
     return {
-      groupShopList: [],
+      style: this.$api.style,
+	  groupShopList: [],
       pageNo: 1,
       loadingType: 'more'
     }

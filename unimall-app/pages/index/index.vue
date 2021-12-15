@@ -77,7 +77,7 @@
           class="g-swiper-item"
         >
           <view class="g-item left" @click="navToWindowSuggestSpu(index)">
-            <image :src="item.img + '?x-oss-process=style/400px'" mode="aspectFill" />
+            <image :src="item.img + style(400)" mode="aspectFill" />
             <view class="t-box">
               <text class="title clamp">
                 {{ item.title }}
@@ -144,7 +144,7 @@
             class="floor-item"
             @click="navToDetailPage(spuItem.id)"
           >
-            <image :src="spuItem.img + '?x-oss-process=style/200px'" mode="aspectFill" />
+            <image :src="spuItem.img + style(200)" mode="aspectFill" />
             <text class="title clamp">
               {{ spuItem.title }}
             </text>
@@ -181,7 +181,7 @@
         @click="navToDetailPage(item.id)"
       >
         <view class="image-wrapper">
-          <image :src="item.img + '?x-oss-process=style/400px'" mode="aspectFill" />
+          <image :src="item.img + style(400)" mode="aspectFill" />
         </view>
         <text class="title clamp">
           {{ item.title }}
@@ -200,6 +200,7 @@ export default {
   data() {
     return {
       uni,
+	  style: this.$api.style,
       titleNViewBackground: '',
       swiperCurrent: 0,
       swiperLength: 0,

@@ -7,7 +7,7 @@
         <view class="favorite-item" :class="{'b-b': index!==favoriteList.length-1}" @click="toProductDetail(item)">
           <view class="image-wrapper">
             <image
-              :src="item.img + '?x-oss-process=style/200px'"
+              :src="item.img + style(200)"
               :class="[item.loaded]"
               mode="aspectFill"
               lazy-load
@@ -48,7 +48,8 @@ export default {
   },
   data() {
     return {
-      favoriteList: [],
+      style: this.$api.style,
+	  favoriteList: [],
       pageNo: 1,
       loadingType: 'more',
       isVip: false

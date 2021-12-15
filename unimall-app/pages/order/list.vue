@@ -32,11 +32,11 @@
 
               <scroll-view v-if="item.skuList.length > 1" class="goods-box" scroll-x>
                 <view v-for="(skuItem, skuIndex) in item.skuList" :key="skuIndex" class="goods-item">
-                  <image class="goods-img" :src="skuItem.img + '?x-oss-process=style/200px'" mode="aspectFill" />
+                  <image class="goods-img" :src="skuItem.img + style(200)" mode="aspectFill" />
                 </view>
               </scroll-view>
               <view v-for="(skuItem, skuIndex) in item.skuList" v-show="item.skuList.length === 1" :key="skuIndex" class="goods-box-single">
-                <image class="goods-img" :src="skuItem.img + '?x-oss-process=style/200px'" mode="aspectFill" />
+                <image class="goods-img" :src="skuItem.img + style(200)" mode="aspectFill" />
                 <view class="right">
                   <text class="title clamp">
                     {{ skuItem.spuTitle }}
@@ -120,11 +120,11 @@
 
               <scroll-view v-if="item.skuList.length > 1" class="goods-box" scroll-x>
                 <view v-for="(skuItem, skuIndex) in item.skuList" :key="skuIndex" class="goods-item">
-                  <image class="goods-img" :src="skuItem.img + '?x-oss-process=style/200px'" mode="aspectFill" />
+                  <image class="goods-img" :src="skuItem.img + style(200)" mode="aspectFill" />
                 </view>
               </scroll-view>
               <view v-for="(skuItem, skuIndex) in item.skuList" v-show="item.skuList.length === 1" :key="skuIndex" class="goods-box-single">
-                <image class="goods-img" :src="skuItem.img + '?x-oss-process=style/200px'" mode="aspectFill" />
+                <image class="goods-img" :src="skuItem.img + style(200)" mode="aspectFill" />
                 <view class="right">
                   <text class="title clamp">
                     {{ skuItem.spuTitle }}
@@ -210,6 +210,7 @@ export default {
   },
   data() {
     return {
+      style: this.$api.style,
       statusMap: {
         10: '未付款',
         12: '正在拼团',

@@ -76,7 +76,7 @@
           <text>浏览历史</text>
         </view>
         <scroll-view v-if="footprintList.length > 0" scroll-x class="h-list">
-          <image v-for="(item, index ) in footprintList" :key="index" :src="item.img + '?x-oss-process=style/200px'" mode="aspectFill" @longpress="deleteFootprint(item)" @click="navTo('/pages/product/detail?id=' + item.id)" />
+          <image v-for="(item, index ) in footprintList" :key="index" :src="item.img + style(200)" mode="aspectFill" @longpress="deleteFootprint(item)" @click="navTo('/pages/product/detail?id=' + item.id)" />
         </scroll-view>
         <list-cell icon="icon-dizhi" icon-color="#5fcda2" title="地址管理" @eventClick="navTo('/pages/address/list')" />
         <list-cell icon="icon-shoucang_xuanzhongzhuangtai" icon-color="#54b4ef" title="我的收藏" @eventClick="navTo('/pages/product/favorite')" />
@@ -103,7 +103,8 @@ export default {
   },
   data() {
     return {
-      coverTransform: 'translateY(0px)',
+      style: this.$api.style,
+	  coverTransform: 'translateY(0px)',
       coverTransition: '0s',
       moving: false,
       footprintList: [],

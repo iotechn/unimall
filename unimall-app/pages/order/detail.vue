@@ -26,7 +26,7 @@
     <view class="goods-section">
       <!-- 商品列表 -->
       <view v-for="(item, index) in orderDetail.skuList" :key="index" class="g-item">
-        <image :src="item.img + '?x-oss-process=style/200px'" />
+        <image :src="item.img + style(200)" />
         <view class="right">
           <text class="title clamp">
             {{ item.spuTitle }}
@@ -180,7 +180,8 @@ export default {
   },
   data() {
     return {
-      orderId: '',
+      style: this.$api.style,
+	  orderId: '',
       orderDetail: {
         skuList: [],
         totalOriginalPrice: 0,

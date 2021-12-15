@@ -26,7 +26,7 @@
     <view class="goods-section">
       <!-- 商品列表 -->
       <view v-for="(item, index) in orderReqeust.skuList" :key="index" class="g-item">
-        <image :src="(item.skuImg?item.skuImg:item.spuImg) + '?x-oss-process=style/200px'" />
+        <image :src="(item.skuImg?item.skuImg:item.spuImg) + style(200)" />
         <view class="right">
           <text class="title clamp">
             {{ (item.groupShopId ? '[团购]' : '') + item.title }}
@@ -169,7 +169,8 @@
 export default {
   data() {
     return {
-      orderReqeust: {
+      style: this.$api.style,
+	  orderReqeust: {
         skuList: [],
         totalOriginalPrice: 0,
         totalPrice: 0, // 商品折扣（仅算VIP和限时打折）后总价

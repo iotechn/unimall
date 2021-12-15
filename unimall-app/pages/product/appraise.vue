@@ -18,7 +18,7 @@
             {{ item.content }}
           </text>
           <view v-if="item.imgList && item.imgList.length > 0" class="imgs">
-            <image v-for="(imgItem, imgIndex) in item.imgList" :key="imgIndex" class="ig" :src="imgItem + '?x-oss-process=style/200px'" @click="previewImg(item.imgList, imgIndex)" />
+            <image v-for="(imgItem, imgIndex) in item.imgList" :key="imgIndex" class="ig" :src="imgItem + style(200)" @click="previewImg(item.imgList, imgIndex)" />
           </view>
           <view class="bot">
             <text class="attr">
@@ -45,7 +45,8 @@ export default {
   },
   data() {
     return {
-      page: {},
+      style: this.$api.style,
+	  page: {},
       spuId: undefined,
       loadingType: 'more'
     }

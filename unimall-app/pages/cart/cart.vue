@@ -26,7 +26,7 @@
           >
             <view class="image-wrapper">
               <image
-                :src="(item.skuImg?item.skuImg:item.spuImg) + '?x-oss-process=style/200px'"
+                :src="(item.skuImg?item.skuImg:item.spuImg) + style(200)"
                 :class="loadedItemIds.has(item.id) ? 'loaded': ''"
                 mode="aspectFill"
                 lazy-load
@@ -107,6 +107,7 @@ export default {
   },
   data() {
     return {
+	  style: this.$api.style,
       totalItems: 0, // 总数量
       total: 0, // 总价格
       allChecked: false, // 全选状态  true|false
