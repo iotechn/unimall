@@ -52,8 +52,21 @@
           <el-input v-model="wxPayDataForm.notifyUrl" placeholder="https://api.example.com/cb/wxpay" />
         </el-form-item>
 
-        <el-form-item label="文件系统证书地址" prop="keyPath">
-          <el-input v-model="wxPayDataForm.keyPath" placeholder="文件系统中退款证书的位置 eg: /cert/apiclient_cert.p12" />
+        <el-form-item>
+          <el-upload
+            :auto-upload="false"
+            :on-change="onCertChange"
+            :multiple="false"
+            :show-file-list="false"
+            class="upload-demo"
+            accept=".p12"
+            drag
+            action="https://jsonplaceholder.typicode.com/posts/">
+            <i class="el-icon-upload"/>
+            <div v-if="file" class="el-upload__text"><em>{{ file.name }}</em></div>
+            <div v-else class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div slot="tip" class="el-upload__tip">只能上传.p12文件</div>
+          </el-upload>
         </el-form-item>
 
       </el-form>
@@ -206,31 +219,64 @@
     </el-card>
 
     <el-card class="box-card">
-      <h3>阿里云OSS配置(需要重启)</h3>
+      <h3>OSS配置(需要重启)</h3>
       <el-form ref="ossDataForm" :model="ossDataForm" label-width="150px">
 
-        <el-form-item label="AccessKeyId" prop="accessKeyId">
-          <el-input v-model="ossDataForm.accessKeyId" />
+        <el-form-item label="启用" prop="enable">
+          <el-select v-model="ossDataForm.enable" placeholder="请选择存储平台">
+            <el-option
+              :value="'mock'"
+              :label="'控制台模拟'"
+            />
+            <el-option
+              :value="'aliyun'"
+              :label="'阿里云'"
+            />
+            <el-option
+              :value="'qcloud'"
+              :label="'腾讯云'"
+            />
+          </el-select>
         </el-form-item>
 
-        <el-form-item label="AccessKeySecret" prop="accessKeySecret">
-          <el-input v-model="ossDataForm.accessKeySecret" />
+        <el-form-item v-if="ossDataForm.enable === 'aliyun'" label="AccessKeyId" prop="aliAccessKeyId">
+          <el-input v-model="ossDataForm.aliAccessKeyId" />
         </el-form-item>
 
-        <el-form-item label="EndPoint" prop="endpoint">
-          <el-input v-model="ossDataForm.endpoint" />
+        <el-form-item v-if="ossDataForm.enable === 'aliyun'" label="AccessKeySecret" prop="aliAccessKeySecret">
+          <el-input v-model="ossDataForm.aliAccessKeySecret" />
         </el-form-item>
 
-        <el-form-item label="bucket" prop="bucket">
-          <el-input v-model="ossDataForm.bucket" />
+        <el-form-item v-if="ossDataForm.enable === 'aliyun'" label="EndPoint" prop="aliEndpoint">
+          <el-input v-model="ossDataForm.aliEndpoint" />
         </el-form-item>
 
-        <el-form-item label="图片路径" prop="dir">
-          <el-input v-model="ossDataForm.dir" />
+        <el-form-item v-if="ossDataForm.enable === 'aliyun'" label="Bucket" prop="aliBucket">
+          <el-input v-model="ossDataForm.aliBucket" />
         </el-form-item>
 
-        <el-form-item label="Base Url" prop="baseUrl">
-          <el-input v-model="ossDataForm.baseUrl" />
+        <el-form-item v-if="ossDataForm.enable === 'aliyun'" label="Base Url" prop="aliBaseUrl">
+          <el-input v-model="ossDataForm.aliBaseUrl" />
+        </el-form-item>
+
+        <el-form-item v-if="ossDataForm.enable === 'qcloud'" label="SecretId" prop="qcloudSecretId">
+          <el-input v-model="ossDataForm.qcloudSecretId" />
+        </el-form-item>
+
+        <el-form-item v-if="ossDataForm.enable === 'qcloud'" label="SecretKey" prop="qcloudSecretKey">
+          <el-input v-model="ossDataForm.qcloudSecretKey" />
+        </el-form-item>
+
+        <el-form-item v-if="ossDataForm.enable === 'qcloud'" label="Region" prop="qcloudRegion">
+          <el-input v-model="ossDataForm.qcloudRegion" />
+        </el-form-item>
+
+        <el-form-item v-if="ossDataForm.enable === 'qcloud'" label="Bucket" prop="qcloudBucket">
+          <el-input v-model="ossDataForm.qcloudBucket" />
+        </el-form-item>
+
+        <el-form-item v-if="ossDataForm.enable === 'qcloud'" label="Base Url" prop="qcloudBaseUrl">
+          <el-input v-model="ossDataForm.qcloudBaseUrl" />
         </el-form-item>
 
       </el-form>
@@ -285,59 +331,6 @@
 
         <el-form-item label="管理登录有效期(分)" prop="adminSessionPeriod">
           <el-input-number :precision="0" v-model="systemDataForm.adminSessionPeriod" />
-        </el-form-item>
-
-        <el-form-item label="游客访问" prop="guest">
-          <el-select v-model="systemDataForm.guest" placeholder="默认不可游客访问">
-            <el-option
-              :value="'true'"
-              :label="'允许'"
-            />
-            <el-option
-              :value="'false'"
-              :label="'不允许'"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="SSL Crt 路径" prop="sslCrtPath">
-          <el-input v-model="systemDataForm.sslCrtPath" />
-        </el-form-item>
-
-        <el-form-item label="SSL Crt 上传">
-          <el-upload
-            :action="uploadLocalPath"
-            :headers="headers"
-            :data="{
-              fsf: systemDataForm.sslCrtPath
-            }"
-            accept=".crt,.pem"
-            class="upload-demo"
-            drag>
-            <i class="el-icon-upload"/>
-            <div class="el-upload__text">将Crt/Pem文件拖到此处，或<em>点击上传</em></div>
-            <div slot="tip" class="el-upload__tip">Docker用户请勿修改上传路径，只能上传crt/pem纯文本文件</div>
-          </el-upload>
-        </el-form-item>
-
-        <el-form-item label="SSL Key 路径" prop="sslKeyPath">
-          <el-input v-model="systemDataForm.sslKeyPath" />
-        </el-form-item>
-
-        <el-form-item label="SSL Key 上传">
-          <el-upload
-            :action="uploadLocalPath"
-            :headers="headers"
-            :data="{
-              fsf: systemDataForm.sslKeyPath
-            }"
-            class="upload-demo"
-            accept=".key"
-            drag>
-            <i class="el-icon-upload"/>
-            <div class="el-upload__text">将Key文件拖到此处，或<em>点击上传</em></div>
-            <div slot="tip" class="el-upload__tip">Docker用户请勿修改上传路径，只能上传key文件纯文本文件</div>
-          </el-upload>
         </el-form-item>
 
       </el-form>
@@ -434,15 +427,13 @@
 </template>
 <script>
 import { syncCategory, syncProduct } from '@/api/erp'
-import { uploadLocalPath } from '@/api/storage'
 import { getToken } from '@/utils/auth'
 import { getData, save } from '@/api/config'
 export default {
   name: 'SysConfig',
   data() {
     return {
-      // 为上传SSL证书等文件
-      uploadLocalPath,
+      file: '',
       // 请按照此命名规范命名
       prefixs: {
         wxAppDataPrefix: 'WX_APP_CONFIG:',
@@ -572,6 +563,16 @@ export default {
       }).catch(failres => {
         this.submiting = false
       })
+    },
+    onCertChange(file) {
+      this.file = file
+      const reader = new FileReader()
+      /* 当读取操作成功完成时调用*/
+      reader.onload = async(e) => {
+        const base64Str = reader.result // 取得数据 这里的this指向FileReader（）对象的实例reader
+        this.wxPayDataForm.keyContent = base64Str
+      }
+      reader.readAsDataURL(file.raw) // 异步读取文件内容，结果用data:url的字符串形式表示
     }
   }
 }

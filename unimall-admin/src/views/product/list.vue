@@ -11,7 +11,7 @@
       <el-button v-permission="['product:product:list']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
       <el-button v-permission="['product:product:create']" class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">添加</el-button>
       <el-button v-permission="['product:product:batchdelete']" :disabled="selectedIds.length === 0" class="filter-item" type="danger" icon="el-icon-delete" @click="handleBatchDelete">批量删除</el-button>
-      <el-button v-permission="['product:product:rebuild']" :loading="saving" type="primary" @click="handleProductRebuild">重建商品缓存</el-button>
+      <el-button v-permission="['product:product:rebuild']" :loading="rebuilding" class="filter-item" type="primary" @click="handleProductRebuild">重建商品缓存</el-button>
     </div>
 
     <!-- 查询结果 -->
@@ -150,7 +150,8 @@ export default {
       },
       goodsDetail: '',
       detailDialogVisible: false,
-      selectedIds: []
+      selectedIds: [],
+      rebuilding: false
     }
   },
   created() {
@@ -310,16 +311,16 @@ export default {
         type: 'warning',
         customClass: 'custom-notify'
       }).then(() => {
-        this.saving = true
+        this.rebuilding = true
         rebuildProductCache().then(res => {
           this.$notify.success({
             title: '成功',
             customClass: 'custom-notify',
             message: '正在重建1分钟内完成'
           })
-          this.saving = false
+          this.rebuilding = false
         }).catch(res => {
-          this.saving = false
+          this.rebuilding = false
         })
       })
     }

@@ -24,14 +24,10 @@
       <el-table-column align="center" label="套餐天数" prop="dayNum" />
       <el-table-column align="center" label="描述" prop="description" min-width="200" />
       <el-table-column align="center" label="套餐原价" prop="originalPrice">
-        <template slot-scope="scope">
-          ￥{{ scope.row.originalPrice / 100 }}
-        </template>
+        <template slot-scope="scope">￥{{ scope.row.originalPrice / 100 }}</template>
       </el-table-column>
       <el-table-column align="center" label="套餐现价" prop="price">
-        <template slot-scope="scope">
-          ￥{{ scope.row.price / 100 }}
-        </template>
+        <template slot-scope="scope">￥{{ scope.row.price / 100 }}</template>
       </el-table-column>
       <el-table-column align="center" label="前端能否展示" prop="display">
         <template slot-scope="scope">

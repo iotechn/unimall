@@ -1,5 +1,6 @@
 package com.iotechn.unimall.admin.api.config;
 
+import cn.hutool.core.codec.Base64;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
@@ -39,4 +40,5 @@ public class AdminSysConfigServiceImpl implements AdminSysConfigService {
         }
         return "ok";
     }
+
 }

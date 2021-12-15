@@ -16,6 +16,7 @@ import com.iotechn.unimall.biz.pay.OrderPayCallbackHandler;
 import com.iotechn.unimall.biz.pay.VipOrderPayCallbackHandler;
 import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
+import jodd.util.Base64;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.ObjectUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -110,12 +112,11 @@ public class PayConfig {
 
         @Override
         public byte[] getWxCert() {
-            try {
-                return FileUtils.readFileToByteArray(new File(fwWxPayProperties.getKeyPath()));
-            } catch (IOException e) {
-                logger.error("[证书不存在] path:" + fwWxPayProperties.getKeyPath());
-                return null;
+            String keyContent = fwWxPayProperties.getKeyContent();
+            if (!ObjectUtils.isEmpty(keyContent)) {
+                return Base64.decode(fwWxPayProperties.getKeyContent());
             }
+            return new byte[0];
         }
 
         @Override
