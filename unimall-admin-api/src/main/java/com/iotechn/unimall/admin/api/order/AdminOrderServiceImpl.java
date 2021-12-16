@@ -4,30 +4,25 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.AdminServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
-import com.dobbinsoft.fw.pay.enums.PayPlatformType;
 import com.dobbinsoft.fw.pay.model.request.MatrixPayRefundRequest;
 import com.dobbinsoft.fw.pay.model.result.MatrixPayRefundResult;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.Page;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
-import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
 import com.dobbinsoft.fw.support.properties.FwWxPayProperties;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
-import com.iotechn.unimall.biz.service.user.UserBizService;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.OrderDO;
-import com.iotechn.unimall.data.domain.OrderRefundDO;
-import com.iotechn.unimall.data.domain.OrderRefundSkuDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
-import com.iotechn.unimall.data.dto.order.OrderRefundDTO;
 import com.iotechn.unimall.data.dto.order.OrderStatisticsDTO;
 import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
-import com.iotechn.unimall.data.enums.RefundStatusType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
-import com.iotechn.unimall.data.mapper.*;
+import com.iotechn.unimall.data.mapper.OrderMapper;
+import com.iotechn.unimall.data.mapper.OrderSkuMapper;
+import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,25 +60,13 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private OrderSkuMapper orderSkuMapper;
 
     @Autowired
-    private OrderRefundMapper orderRefundMapper;
-
-    @Autowired
-    private OrderRefundSkuMapper orderRefundSkuMapper;
-
-    @Autowired
     private SkuMapper skuMapper;
 
     @Autowired
     private LockComponent lockComponent;
 
     @Autowired
-    private UserBizService userBizService;
-
-    @Autowired
     private DelayedMessageQueue delayedMessageQueue;
-
-    @Autowired
-    private FwWxAppProperties fwWxAppProperties;
 
     @Autowired
     private UnimallOrderProperties unimallOrderProperties;
@@ -102,28 +85,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             wrapper.eq("status", status);
         }
         return orderMapper.selectPage(Page.div(page, limit, OrderDO.class), wrapper);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public OrderRefundDTO refundDetail(Long orderId, Long adminId) throws ServiceException {
-        OrderDO orderDO = orderMapper.selectById(orderId);
-        if (orderDO.getStatus().intValue() != OrderStatusType.REFUNDING.getCode()) {
-            throw new AdminServiceException(ExceptionDefinition.ORDER_NOT_REFUNDING);
-        }
-        // 获取商品
-        OrderRefundDO orderRefundDO = orderRefundMapper.selectOne(
-                new QueryWrapper<OrderRefundDO>()
-                        .eq("order_id", orderId)
-                        .orderByDesc("id")
-                        .last(" LIMIT 1"));
-        List<OrderRefundSkuDO> skuList = orderRefundSkuMapper.selectList(
-                new QueryWrapper<OrderRefundSkuDO>()
-                        .eq("order_refund_id", orderRefundDO.getId()));
-        OrderRefundDTO orderRefundDTO = new OrderRefundDTO();
-        BeanUtils.copyProperties(orderRefundDO, orderRefundDTO);
-        orderRefundDTO.setSkuList(skuList);
-        return orderRefundDTO;
     }
 
     @Override
@@ -149,12 +110,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     updateOrderDO.setGmtUpdate(new Date());
                     //2.2. 更改订单表状态
                     orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
-                    //2.3. 更改退款表状态
-                    OrderRefundDO orderRefundDO = new OrderRefundDO();
-                    orderRefundDO.setStatus(RefundStatusType.REJECT.getCode());
-                    orderRefundMapper.update(orderRefundDO,
-                            new QueryWrapper<OrderRefundDO>()
-                                    .eq("order_id", orderDO.getId()));
                     return "ok";
                 } else if (type == 1) {
                     String keyPath = fwWxPayProperties.getKeyPath();
@@ -173,7 +128,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                         skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
                     });
                     orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
-                    Long userId = orderDO.getUserId();
                     //2.2.2 向微信支付平台发送退款请求
                     Integer refundPrice = null;
                     if (sum != null) {
@@ -198,6 +152,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     payRefundRequest.setOutRefundNo("refund_" + abstractOrderNo);
                     payRefundRequest.setTotalFee(orderDO.getPayPrice());
                     payRefundRequest.setRefundFee(refundPrice);
+                    payRefundRequest.setAppid(orderDO.getAppId());
                     MatrixPayRefundResult matrixPayRefundResult = matrixPayService.refund(payRefundRequest);
                     if (!matrixPayRefundResult.getReturnCode().equals("SUCCESS")) {
                         logger.warn("[在线退款] 失败 : " + matrixPayRefundResult.getReturnMsg());

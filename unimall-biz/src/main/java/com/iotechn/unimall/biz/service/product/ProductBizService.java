@@ -260,18 +260,22 @@ public class ProductBizService {
                         cacheComponent.delZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + oldCid, "P" + spuDO.getId());
                     }
                     // 3.1.1.2 添加新列表中的值
-                    List<Long> newCategoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
-                    for (Long newCid : newCategoryFamily) {
-                        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + newCid, spuDO.getId(), "P" + spuDO.getId());
-                        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + newCid, spuDO.getPrice(), "P" + spuDO.getId());
-                        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + newCid, spuFromDB.getSales(), "P" + spuDO.getId());
+                    if (spuDO.getStatus().intValue() == StatusType.ACTIVE.getCode()) {
+                        List<Long> newCategoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
+                        for (Long newCid : newCategoryFamily) {
+                            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + newCid, spuDO.getId(), "P" + spuDO.getId());
+                            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + newCid, spuDO.getPrice(), "P" + spuDO.getId());
+                            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + newCid, spuFromDB.getSales(), "P" + spuDO.getId());
+                        }
                     }
                 }
                 List<Long> categoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
                 if (spuFromDB.getPrice().intValue() != spuDO.getPrice().intValue()) {
                     // 3.1.2.若二者Price不一致，则表示商品更新了价格 更新列表缓存
-                    for (Long categoryId : categoryFamily) {
-                        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + categoryId, spuDO.getPrice(), "P" + spuDO.getId());
+                    if (spuDO.getStatus().intValue() == StatusType.ACTIVE.getCode()) {
+                        for (Long categoryId : categoryFamily) {
+                            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + categoryId, spuDO.getPrice(), "P" + spuDO.getId());
+                        }
                     }
                 }
                 // 3.2. 更新基本信息缓存
@@ -281,6 +285,10 @@ public class ProductBizService {
                 cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuDO.getId(), basicSpuDTO);
                 // 3.3. 删除详细信息缓存
                 cacheComponent.delHashKey(CacheConst.PRT_SPU_DETAIL_HASH_BUCKET, "P" + spuDO.getId());
+                // 3.4. 更新Sku库存缓存
+                for (SkuDO skuDO : spuDTO.getSkuList()) {
+                    cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
+                }
                 // 4 更新搜索引擎
                 ProductBizService.this.transmissionSearchEngine(spuDO.getId());
             }
@@ -628,14 +636,16 @@ public class ProductBizService {
     public void createSpuCache(SpuDO spuDO) {
         // 1. 放入类目缓存
         List<Long> categoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
-        for (Long categoryId : categoryFamily) {
-            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + categoryId, spuDO.getId(), "P" + spuDO.getId());
-            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + categoryId, spuDO.getPrice(), "P" + spuDO.getId());
-            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + categoryId, 0, "P" + spuDO.getId());
+        if (spuDO.getStatus().intValue() == StatusType.ACTIVE.getCode()) {
+            for (Long categoryId : categoryFamily) {
+                cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + categoryId, spuDO.getId(), "P" + spuDO.getId());
+                cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + categoryId, spuDO.getPrice(), "P" + spuDO.getId());
+                cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + categoryId, 0, "P" + spuDO.getId());
+            }
+            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + null, spuDO.getId(), "P" + spuDO.getId());
+            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + null, spuDO.getPrice(), "P" + spuDO.getId());
+            cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + null, 0, "P" + spuDO.getId());
         }
-        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_ID_ZSET + null, spuDO.getId(), "P" + spuDO.getId());
-        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_PRICE_ZSET + null, spuDO.getPrice(), "P" + spuDO.getId());
-        cacheComponent.putZSet(CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + null, 0, "P" + spuDO.getId());
         // 2. 放入Hash表中
         spuDO.setDetail(null);
         SpuDTO newSpuDTO = new SpuDTO();

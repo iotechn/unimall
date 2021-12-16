@@ -3,8 +3,8 @@
 	<view :status="checkStatus" v-if="lotusAddressData.visible" class="lotus-address-mask">
 		<view class="lotus-address-box">
 			<view class="lotus-address-action">
-				<text @tap="cancelPicker" class="lotus-address-action-cancel">取消</text>
-				<text @tap="chosedVal" class="lotus-address-action-affirm">确认</text>
+				<text @click.stop="cancelPicker" class="lotus-address-action-cancel">取消</text>
+				<text @click.stop="chosedVal" class="lotus-address-action-affirm">确认</text>
 			</view>
 			<view class="lotus-address-picker-box">
 				<!--省-->

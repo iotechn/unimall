@@ -241,7 +241,7 @@ public class AdminProductServiceImpl implements AdminProductService {
         // 4. spu specificationList
         List<SpuSpecificationDO> specificationList = spuSpecificationMapper.selectList(
                 new QueryWrapper<SpuSpecificationDO>()
-                        .eq("spu_id", spuId).orderByAsc("title"));
+                        .eq("spu_id", spuId));
         adminSpuDTO.setSpecificationList(specificationList);
         return adminSpuDTO;
     }

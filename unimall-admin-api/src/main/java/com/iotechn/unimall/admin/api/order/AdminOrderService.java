@@ -9,7 +9,6 @@ import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
-import com.iotechn.unimall.data.dto.order.OrderRefundDTO;
 import com.iotechn.unimall.data.dto.order.OrderStatisticsDTO;
 
 import java.util.List;
@@ -26,11 +25,6 @@ public interface AdminOrderService {
             @HttpParam(name = "limit", type = HttpParamType.COMMON, description = "页码长度", valueDef = "20") Integer limit,
             @HttpParam(name = "status", type = HttpParamType.COMMON, description = "订单状态") Integer status,
             @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单号") String orderNo,
-            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
-
-    @HttpMethod(description = "退款详情", permission = "operation:order:refunddetail", permissionParentName = "运营管理", permissionName = "订单管理")
-    public OrderRefundDTO refundDetail(
-            @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单Id") Long orderId,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "退款", permission = "operation:order:refund", permissionParentName = "运营管理", permissionName = "订单管理")

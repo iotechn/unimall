@@ -118,51 +118,52 @@ const request = (_gp, _mt, data = {}, failCallback) => {
 }
 
 const uploadImg = (successCallback) => {
+  if (!userInfo || !userInfo.accessToken) {
+    userInfo = uni.getStorageSync('userInfo')
+  }
+  const accessToken = userInfo ? userInfo.accessToken : ''
   const baseUrl = config.baseUrl
   uni.chooseImage({
     sizeType: ['compressed'],
     success: function(res) {
       for (let i = 0; i < res.tempFilePaths.length; i++) {
-        uni.request({
-          url: baseUrl + '/upload',
-          method: 'get',
-          success: function(signRes) {
-            uni.showLoading({
-              title: '图片上传中'
-            })
-            const fileName = ('imgs/' + random_string(15) + get_suffix(res.tempFilePaths[i]))
-            uni.uploadFile({
-              url: signRes.data.baseUrl,
-              filePath: res.tempFilePaths[i],
-              name: 'file',
-              formData: {
-                name: res.tempFilePaths[i],
-                key: fileName,
-                policy: signRes.data.policy,
-                OSSAccessKeyId: signRes.data.accessid,
-                success_action_status: '200',
-                signature: signRes.data.signature
-              },
-              success: function(uploadRes) {
-                uni.hideLoading()
-                if (uploadRes.statusCode === 200) {
-                  if (successCallback) {
-                    successCallback(signRes.data.baseUrl + fileName)
-                  } else {
-                    uni.showToast({
-                      title: '上传成功',
-                      icon: 'none'
-                    })
-                  }
-                } else {
-                  uni.hideLoading()
-                  uni.showToast({
-                    title: '网络错误 code=' + uploadRes.statusCode,
-                    icon: 'none'
-                  })
-                }
+        uni.showLoading({
+          title: '图片上传中'
+        })
+        const fileName = ('imgs/' + random_string(15) + get_suffix(res.tempFilePaths[i]))
+        uni.uploadFile({
+          url: baseUrl + '/upload/user',
+          filePath: res.tempFilePaths[i],
+          name: 'file',
+          formData: {
+            name: res.tempFilePaths[i],
+            key: fileName
+          },
+          header: {
+            // #ifdef MP-WEIXIN
+            APPID: uni.getAccountInfoSync().miniProgram.appId,
+            // #endif
+            ACCESSTOKEN: accessToken
+          },
+          success: function(uploadRes) {
+            uni.hideLoading()
+            console.log(uploadRes)
+            if (uploadRes.statusCode === 200) {
+              if (successCallback) {
+                successCallback(JSON.parse(uploadRes.data).url)
+              } else {
+                uni.showToast({
+                  title: '上传成功',
+                  icon: 'none'
+                })
               }
-            })
+            } else {
+              uni.hideLoading()
+              uni.showToast({
+                title: '网络错误 code=' + uploadRes.statusCode,
+                icon: 'none'
+              })
+            }
           }
         })
       }
@@ -170,9 +171,10 @@ const uploadImg = (successCallback) => {
   })
 }
 
+
 function get_suffix(filename) {
   const pos = filename.lastIndexOf('.')
-  const suffix = ''
+  let suffix = ''
   if (pos !== -1) {
     suffix = filename.substring(pos)
   }
@@ -183,7 +185,7 @@ function random_string(len) {
   len = len || 32
   const chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678'
   const maxPos = chars.length
-  const pwd = ''
+  let pwd = ''
   for (let i = 0; i < len; i++) {
     pwd += chars.charAt(Math.floor(Math.random() * maxPos))
   }

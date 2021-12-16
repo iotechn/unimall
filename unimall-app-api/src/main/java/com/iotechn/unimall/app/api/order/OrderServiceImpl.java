@@ -24,13 +24,15 @@ import com.iotechn.unimall.biz.service.pay.PayBizService;
 import com.iotechn.unimall.biz.service.product.ProductBizService;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.constant.LockConst;
-import com.iotechn.unimall.data.domain.*;
+import com.iotechn.unimall.data.domain.AddressDO;
+import com.iotechn.unimall.data.domain.OrderDO;
+import com.iotechn.unimall.data.domain.OrderSkuDO;
+import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.CouponUserDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
-import com.iotechn.unimall.data.dto.order.OrderRefundRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestSkuDTO;
 import com.iotechn.unimall.data.dto.product.GroupShopDTO;
@@ -38,7 +40,9 @@ import com.iotechn.unimall.data.dto.product.GroupShopSkuDTO;
 import com.iotechn.unimall.data.dto.product.SkuDTO;
 import com.iotechn.unimall.data.enums.*;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
-import com.iotechn.unimall.data.mapper.*;
+import com.iotechn.unimall.data.mapper.OrderMapper;
+import com.iotechn.unimall.data.mapper.OrderSkuMapper;
+import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.model.FreightCalcModel;
 import com.iotechn.unimall.data.model.OrderCalcSkuModel;
 import com.iotechn.unimall.data.model.SkuStockInfoModel;
@@ -77,12 +81,6 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
 
     @Autowired
     private OrderSkuMapper orderSkuMapper;
-
-    @Autowired
-    private OrderRefundMapper orderRefundMapper;
-
-    @Autowired
-    private OrderRefundSkuMapper orderRefundSkuMapper;
 
     @Autowired
     private CartBizService cartBizService;
@@ -531,9 +529,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String refund(OrderRefundRequestDTO refundRequest, Long userId) throws ServiceException {
-        String orderNo = refundRequest.getOrderNo();
-        String reason = refundRequest.getReason();
+    public String refund(String orderNo, String reason, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (PayChannelType.OFFLINE.getCode().equals(orderDO.getPayChannel())) {
             throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
@@ -542,72 +538,11 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setRefundReason(reason);
             updateOrderDO.setStatus(OrderStatusType.REFUNDING.getCode());
-            // 1. 更改主表状态
             orderBizService.changeOrderSubStatus(orderNo, orderDO.getStatus(), updateOrderDO);
-            // 2. 增加退款申请记录
-            OrderRefundDO orderRefundDO = new OrderRefundDO();
-            orderRefundDO.setOrderId(orderDO.getId());
-            orderRefundDO.setOrderNo(orderNo);
-            // 2.1. 计算OrderRequest
-            // 2.1.1. 将优惠券优惠金额分散到每个SKU
-            Integer couponPrice = orderDO.getCouponPrice();
-            List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
-            // 2.1.2. 建立一个退款金额映射表
-            Map<Long, Integer> returnPriceMap;
-            // 2.1.3. 建立一个最大可退数量映射表
-            Map<Long, OrderSkuDO> returnMaxMap;
-            if (couponPrice != null && couponPrice > 0) {
-                // 算总商品价格
-                int sum = orderSkuList.stream().mapToInt(item -> item.getPrice() * item.getNum()).sum();
-                // 按照比例扣减优惠金额
-                returnPriceMap = new HashMap<>();
-                returnMaxMap = new HashMap<>();
-                for (OrderSkuDO orderSkuDO : orderSkuList) {
-                    // num 被约分了
-                    int singleCouponPrice = couponPrice * orderSkuDO.getPrice() / sum;
-                    returnPriceMap.put(orderSkuDO.getSkuId(), orderSkuDO.getPrice() - singleCouponPrice);
-                    returnMaxMap.put(orderSkuDO.getSkuId(), orderSkuDO);
-                }
-            } else {
-                returnPriceMap = orderSkuList.stream().collect(Collectors.toMap(OrderSkuDO::getSkuId, OrderSkuDO::getPrice));
-                returnMaxMap = orderSkuList.stream().collect(Collectors.toMap(OrderSkuDO::getSkuId, v->v));
-            }
-            int refundPrice = 0;
-            List<OrderRefundSkuDO> skuList = refundRequest.getSkuList();
-            for (OrderRefundSkuDO orderRefundSkuDO : skuList) {
-                Long skuId = orderRefundSkuDO.getSkuId();
-                Integer price = returnPriceMap.get(skuId);
-                Integer maxReturn = returnMaxMap.get(skuId).getNum();
-                if (price == null) {
-                    throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
-                }
-                if (orderRefundSkuDO.getNum() > maxReturn) {
-                    throw new AppServiceException(ExceptionDefinition.ORDER_REFUND_NUM_CANNOT_GT_BUY);
-                }
-                refundPrice += price * orderRefundSkuDO.getNum();
-            }
-            orderRefundDO.setRefundPrice(refundPrice);
-            orderRefundMapper.insert(orderRefundDO);
-            // 3. 插入OrderRefundSku
-            Date now = new Date();
-            skuList.forEach(item -> {
-                OrderSkuDO orderSkuDO = returnMaxMap.get(item.getSkuId());
-                // 冗余商品信息
-                item.setSpuTitle(orderSkuDO.getSpuTitle());
-                item.setTitle(orderSkuDO.getTitle());
-                item.setBarCode(orderSkuDO.getBarCode());
-                item.setImg(orderSkuDO.getImg());
-                item.setUnit(orderSkuDO.getUnit());
-                item.setWeight(orderSkuDO.getWeight());
-                item.setOrderRefundId(orderRefundDO.getId());
-                item.setPrice(returnPriceMap.get(item.getSkuId()));
-                item.setGmtCreate(now);
-                item.setGmtUpdate(now);
-            });
-            orderRefundSkuMapper.insertBatchSomeColumn(skuList);
             GlobalExecutor.execute(() -> {
                 OrderDTO orderDTO = new OrderDTO();
                 BeanUtils.copyProperties(orderDO, orderDTO);
+                List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_no", orderDO.getOrderNo()));
                 orderDTO.setSkuList(orderSkuList);
                 adminNotifyBizService.refundOrder(orderDTO);
             });

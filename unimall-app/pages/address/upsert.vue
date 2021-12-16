@@ -21,7 +21,6 @@
       <view placeholder="请选择城市" style="width: 100%; height: 60rpx" @click="lotusAddressData.visible = true">
         <text>{{ addressData.province + ' ' + addressData.city + ' ' + addressData.county }}</text>
         <lotus-address
-          v-if="lotusAddressData.visible"
           v-show="lotusAddressData.visible"
           :lotus-address-data="lotusAddressData"
           @choseVal="choseValue"

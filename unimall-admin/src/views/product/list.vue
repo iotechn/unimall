@@ -254,22 +254,21 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).catch(() => {
-        return false
       }).then(() => {
         freezeOrActivtion(row.id, status).then(response => {
           this.$notify.success({
             title: '成功',
             message: sign + '成功'
           })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1, response.data.data)
+          this.getList()
         }).catch(response => {
           this.$notify.error({
             title: '失败',
             message: response.data.errmsg
           })
         })
+      }).catch(() => {
+        return false
       })
     },
     handleSelectionChange(e) {

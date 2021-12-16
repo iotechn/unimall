@@ -21,7 +21,7 @@
           <text
             v-for="(value,key) in stars"
             :key="key"
-            class="appraise-star"
+            class="yticon icon-shoucang_xuanzhongzhuangtai appraise-star"
             :class="key < orderDetail.skuList[index].score ? 'active' : ''"
             @tap="chooseStar(value,index)"
           />
@@ -164,12 +164,6 @@ export default {
 <style lang="scss">
 page {
 	background-color: #FFFFFF;
-}
-@font-face {
-	font-family: uniicons;
-	font-weight: normal;
-	font-style: normal;
-	src: url('https://img-cdn-qiniu.dcloud.net.cn/fonts/uni.ttf') format('truetype');
 }
 view{
 	font-size: 28upx;

@@ -9,7 +9,6 @@ import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
-import com.iotechn.unimall.data.dto.order.OrderRefundRequestDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
 
 /**
@@ -53,7 +52,8 @@ public interface OrderService {
 
     @HttpMethod(description = "用户申请退款")
     public String refund(
-            @NotNull @HttpParam(name = "refundRequest", type = HttpParamType.COMMON, description = "退款请求") OrderRefundRequestDTO refundRequest,
+            @NotNull @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单串号") String orderNo,
+            @HttpParam(name = "reason", type = HttpParamType.COMMON, description = "退款理由") String reason,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
     @HttpMethod(description = "取消订单")
