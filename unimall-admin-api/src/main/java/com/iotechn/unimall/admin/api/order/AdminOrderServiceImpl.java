@@ -115,7 +115,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 } else if (type == 1) {
                     if (orderDO.getPayChannel().equalsIgnoreCase(PayChannelType.WX.getCode())) {
                         String keyContentBase64 = fwWxPayProperties.getKeyContent();
-                        if (!ObjectUtils.isEmpty(keyContentBase64)) {
+                        if (ObjectUtils.isEmpty(keyContentBase64)) {
                             throw new AdminServiceException(ExceptionDefinition.ORDER_REFUND_KEY_PATH_ERROR);
                         }
                     }
