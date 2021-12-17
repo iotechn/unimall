@@ -26,7 +26,7 @@
       </view>
     </scroll-view>
     <!-- /////////////// -->
-    <view class="coupon">
+    <view v-if="couponList.length > 0" class="coupon">
       <view class="coupon-title">
         开卡专享券
       </view>
@@ -70,7 +70,10 @@ export default {
     return {
       payCardList: [],
       currentIndex: 0,
-      selectedPayCard: {},
+      selectedPayCard: {
+		description: '',
+		dayNum: 0
+	  },
       couponList: [],
       buyLock: false
     }
@@ -82,6 +85,16 @@ export default {
     }
     this.$api.request('vip.template', 'list').then(res => {
       this.payCardList = res.data
+	  if (this.payCardList.length === 0) {
+		uni.showModal({
+		  title: '提示',
+		  content: '商户未添加会员任何套餐',
+		  confirmText: '确定',
+		  success: () => {
+		    uni.navigateBack()
+		  }
+		})
+	  }
       this.selectedPayCard = this.payCardList[0]
       uni.setStorageSync('payCard', this.selectedPayCard)
       this.getVipCoupon()

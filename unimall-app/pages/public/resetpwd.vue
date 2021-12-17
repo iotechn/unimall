@@ -6,10 +6,10 @@
     <!-- 设置白色背景防止软键盘把下部绝对定位元素顶上来盖住输入框等 -->
     <view class="wrapper">
       <view class="left-top-sign">
-        REGISTER
+        RESET
       </view>
       <view class="welcome">
-        欢迎加入！
+        重置密码！
       </view>
       <view class="input-content">
         <view class="input-item">
@@ -49,16 +49,16 @@
             maxlength="20"
             data-key="password"
             @input="inputChange"
-            @confirm="doRegister"
+            @confirm="doReset"
           >
         </view>
       </view>
-      <button class="confirm-btn" :disabled="registering" @click="doRegister">
-        注册
+      <button class="confirm-btn" :disabled="resetting" @click="doReset">
+        重置
       </button>
     </view>
-    <view class="register-section">
-      已经有账号？
+    <view class="reset-section">
+      想起来了？
       <text @click="toLogin">
         马上登录
       </text>
@@ -76,7 +76,7 @@ export default {
     return {
       phone: '',
       password: '',
-      registering: false,
+      resetting: false,
       sendText: '获取验证码',
       sendDisabled: false
     }
@@ -124,10 +124,10 @@ export default {
         }, 1000)
       })
     },
-    async doRegister() {
+    async doReset() {
       const that = this
-      that.registering = true
-      that.$api.request('user', 'register', {
+      that.resetting = true
+      that.$api.request('user', 'resetPassword', {
         phone: that.phone,
         password: that.password,
         verifyCode: that.verifyCode
@@ -135,10 +135,9 @@ export default {
         uni.showToast({
           title: failres.errmsg
         })
-        that.registering = false
+        that.resetting = false
       }).then(res => {
-        // 注册成功
-        that.registering = false
+        that.resetting = false
         uni.redirectTo({
           url: './login'
         })
@@ -299,7 +298,7 @@ export default {
 		margin-top: 40upx;
 	}
 
-	.register-section {
+	.reset-section {
 		position: absolute;
 		left: 0;
 		bottom: 50upx;

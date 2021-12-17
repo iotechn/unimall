@@ -268,7 +268,7 @@ export default {
       adUnionTypeMap,
       adTypeMap,
       adStatusMap,
-      USELESS_PIC: 'https://www.baidu.com/img/flexible/logo/pc/result.png',
+      USELESS_PIC: 'https://img.dobbinsoft.com/static/zhanwei.png',
       // 常量 END
       dialogLoading: false,
       spuTree: [],

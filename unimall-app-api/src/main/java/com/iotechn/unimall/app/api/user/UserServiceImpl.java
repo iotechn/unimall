@@ -122,12 +122,13 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         Date now = new Date();
         UserDO userDO = new UserDO();
         userDO.setPhone(phone);
-        userDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0, 7)));
+        String salt = GeneratorUtil.genSalt();
+        userDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), "$1$" + salt));
         userDO.setLastLoginIp(ip);
         userDO.setGmtLastLogin(now);
         userDO.setGmtUpdate(now);
         userDO.setGmtCreate(now);
-        userDO.setSalt(GeneratorUtil.genSalt());
+        userDO.setSalt(salt);
         userMapper.insert(userDO);
         //返回用户DTO
         cacheComponent.del(CacheConst.USER_VERIFY_CODE_PREFIX + phone);
@@ -237,7 +238,9 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         //3.校验成功，重置密码
         UserDO updateUserDO = new UserDO();
         updateUserDO.setId(id);
-        updateUserDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), "$1$" + phone.substring(0, 7)));
+        String salt = GeneratorUtil.genSalt();
+        updateUserDO.setSalt(salt);
+        updateUserDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), "$1$" + salt));
         updateUserDO.setGmtUpdate(new Date());
         if (userMapper.updateById(updateUserDO) > 0) {
             cacheComponent.del(CacheConst.USER_VERIFY_CODE_PREFIX + phone);
@@ -267,8 +270,11 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
     @Transactional
     public UserDTO login(String phone, String password, Integer platform, String ip) throws ServiceException {
         UserDO userDO = userMapper.selectOne(new QueryWrapper<UserDO>().eq("phone", phone));
+        if (userDO == null) {
+            throw new AppServiceException(ExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);
+        }
         String cryptPassword = Md5Crypt.md5Crypt(password.getBytes(), "$1$" + userDO.getSalt());
-        if (userDO == null || !cryptPassword.equals(userDO.getPassword())) {
+        if (!cryptPassword.equals(userDO.getPassword())) {
             throw new AppServiceException(ExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);
         }
         //检查帐号是否已经冻结

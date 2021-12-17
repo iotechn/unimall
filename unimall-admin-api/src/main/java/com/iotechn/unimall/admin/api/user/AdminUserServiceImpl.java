@@ -1,6 +1,7 @@
 package com.iotechn.unimall.admin.api.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.util.GeneratorUtil;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.UserMapper;
@@ -42,7 +43,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
         Date now = new Date();
         user.setId(null);
-        user.setPassword(Md5Crypt.md5Crypt(user.getPassword().getBytes(), "$1$" + user.getPhone().substring(0,7)));
+        String salt = GeneratorUtil.genSalt();
+        user.setPassword(Md5Crypt.md5Crypt(user.getPassword().getBytes(), "$1$" + salt));
+        user.setSalt(salt);
         user.setGmtCreate(now);
         user.setGmtUpdate(now);
         return userMapper.insert(user) > 0;
@@ -70,9 +73,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         Date now = new Date();
         user.setGmtUpdate(now);
 
+        String salt = GeneratorUtil.genSalt();
         if(user.getPassword() != null) {
-            user.setPassword(Md5Crypt.md5Crypt(user.getPassword().getBytes(), "$1$" + user.getPhone().substring(0, 7)));
+            user.setPassword(Md5Crypt.md5Crypt(user.getPassword().getBytes(), "$1$" + salt));
         }
+        user.setSalt(salt);
         return userMapper.updateById(user) > 0;
     }
 

@@ -85,7 +85,7 @@
       <button v-if="loginType === 'phone'" class="confirm-btn" :disabled="logining" @click="toLogin">
         登录
       </button>
-      <view v-if="loginType === 'phone'" class="forget-section">
+      <view v-if="loginType === 'phone'" class="forget-section" @click="toReset">
         忘记密码?
       </view>
     </view>
@@ -139,6 +139,11 @@ export default {
         url: '/pages/public/register'
       })
     },
+	toReset() {
+	  uni.redirectTo({
+	    url: '/pages/public/resetpwd'
+	  })
+	},
     async toLogin() {
       const that = this
       if (that.phone.length !== 11) {
@@ -314,7 +319,7 @@ export default {
       that.logining = true
       const loginType = 2
       uni.showLoading({
-        title: '正在同步消息'
+        title: '登录中'
       })
       uni.login({
         provider: 'weixin',
@@ -322,12 +327,16 @@ export default {
           that.$api.request('user', 'thirdPartLogin', {
             loginType: loginType,
             raw: JSON.stringify(wxres),
-			platform: PLATFORM_APP
+			      platform: PLATFORM_APP
           }, failres => {
             that.$api.msg(failres.errmsg)
             uni.hideLoading()
           }).then(res => {
             that.logining = false
+            uni.hideLoading()
+            uni.showLoading({
+              title: '正在同步消息'
+            })
             uni.getUserInfo({
               lang: 'zh_CN',
               success: (e) => {
@@ -337,7 +346,7 @@ export default {
                 e.userInfo.nickname = e.userInfo.nickName
                 that.syncUserInfo(loginData, e.userInfo)
                 if (loginData.status === 2) {
-                // 未完善手机号，小程序，要求同步信息
+                  // 未完善手机号，小程序，要求同步信息
                   uni.redirectTo({
                     url: '/pages/public/bind'
                   })
@@ -354,6 +363,11 @@ export default {
               }
             })
           })
+        },
+        fail: (e) => {
+          uni.hideLoading()
+          that.$api.msg(e.errMsg)
+          console.log(e)
         }
       })
     },

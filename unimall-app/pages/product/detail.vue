@@ -245,7 +245,7 @@
           </view>
           <text>数量</text>
           <view style="height: 70upx; margin-bottom: 100upx; margin-top: 15upx; position: relative;">
-            <uni-number-box class="step" :min="1" :value="buyNum" :is-min="buyNum===1" :index="index" @eventChange="numberChange" />
+            <uni-number-box class="step" :min="1" :value="buyNum" :is-min="buyNum===1" @eventChange="numberChange" />
           </view>
           <button class="btn" @click="toggleSpec">
             完成
