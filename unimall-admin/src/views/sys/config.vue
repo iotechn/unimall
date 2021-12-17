@@ -570,7 +570,7 @@ export default {
       /* 当读取操作成功完成时调用*/
       reader.onload = async(e) => {
         const base64Str = reader.result // 取得数据 这里的this指向FileReader（）对象的实例reader
-        this.wxPayDataForm.keyContent = base64Str
+        this.wxPayDataForm.keyContent = base64Str.replace('data:application/x-pkcs12;base64,', '')
       }
       reader.readAsDataURL(file.raw) // 异步读取文件内容，结果用data:url的字符串形式表示
     }

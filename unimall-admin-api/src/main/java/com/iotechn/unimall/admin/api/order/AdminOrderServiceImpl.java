@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
@@ -112,9 +113,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
                     return "ok";
                 } else if (type == 1) {
-                    String keyPath = fwWxPayProperties.getKeyPath();
-                    if (!new File(keyPath).exists()) {
-                        throw new AdminServiceException(ExceptionDefinition.ORDER_REFUND_KEY_PATH_ERROR);
+                    if (orderDO.getPayChannel().equalsIgnoreCase(PayChannelType.WX.getCode())) {
+                        String keyContentBase64 = fwWxPayProperties.getKeyContent();
+                        if (!ObjectUtils.isEmpty(keyContentBase64)) {
+                            throw new AdminServiceException(ExceptionDefinition.ORDER_REFUND_KEY_PATH_ERROR);
+                        }
                     }
                     //2.2 店主同意退款
                     //2.2.1 先流转状态
