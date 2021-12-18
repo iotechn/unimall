@@ -1,18 +1,18 @@
 package com.iotechn.unimall.admin.api.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.GeneratorUtil;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.UserMapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
-import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.support.model.Page;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Date;
 
@@ -111,9 +111,10 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (status != null) {
             wrapper.eq("status", status);
         }
-        if (!StringUtils.isEmpty(nickname)) {
+        if (!ObjectUtils.isEmpty(nickname)) {
             wrapper.like("nickname", nickname);
         }
+        wrapper.orderByDesc("id");
         return userMapper.selectPage(Page.div(pageNo, limit, UserDO.class), wrapper);
     }
     

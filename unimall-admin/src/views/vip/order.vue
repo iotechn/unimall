@@ -23,11 +23,9 @@
       <el-table-column align="center" label="卡标题" prop="title" />
       <el-table-column align="center" label="描述" min-width="200" prop="description" />
       <el-table-column align="center" label="会员卡号" prop="orderNo" />
-      <el-table-column align="center" label="套餐天数" prop="dayNum" />
-      <el-table-column align="center" label="会员卡价格" prop="price">
-        <template slot-scope="scope">
-          ￥{{ scope.row.price / 100 }}
-        </template>
+      <el-table-column align="center" label="套餐天数" prop="dayNum" width="80" />
+      <el-table-column align="center" label="会员卡价格" prop="price" width="100">
+        <template slot-scope="scope">￥{{ scope.row.price / 100 }}</template>
       </el-table-column>
       <el-table-column align="center" label="状态" prop="source">
         <template slot-scope="scope">

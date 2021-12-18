@@ -1,10 +1,8 @@
 package com.iotechn.unimall.biz.handler;
 
 import com.dobbinsoft.fw.core.exception.AppServiceException;
-import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.mq.DelayedMessageHandler;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
-import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
@@ -12,17 +10,15 @@ import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Date;
 
+@Component
 public class OrderAutoConfirmHandler implements DelayedMessageHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderAutoConfirmHandler.class);
-
-    @Autowired
-    private LockComponent lockComponent;
 
     @Autowired
     private OrderBizService orderBizService;
@@ -31,7 +27,6 @@ public class OrderAutoConfirmHandler implements DelayedMessageHandler {
     private TransactionTemplate transactionTemplate;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public int handle(String orderNo) {
         Integer execute = transactionTemplate.execute(transactionStatus -> {
             try {

@@ -3,11 +3,9 @@ package com.iotechn.unimall.biz.handler;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.AppServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
-import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.mq.DelayedMessageHandler;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.data.constant.CacheConst;
-import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.enums.DMQHandlerType;
@@ -18,6 +16,7 @@ import com.iotechn.unimall.data.mapper.SkuMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -25,12 +24,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.Date;
 import java.util.List;
 
+@Component
 public class OrderAutoCancelHandler implements DelayedMessageHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderAutoCancelHandler.class);
-
-    @Autowired
-    private LockComponent lockComponent;
 
     @Autowired
     private OrderBizService orderBizService;

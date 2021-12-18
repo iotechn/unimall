@@ -173,7 +173,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             } catch (ServiceException e) {
                 throw e;
             } catch (Exception e) {
-                logger.error("[微信退款] 异常", e);
+                logger.error("[在线退款] 异常", e);
                 throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
             } finally {
                 lockComponent.release(LockConst.ORDER_REFUND_LOCK + orderNo);

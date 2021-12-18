@@ -179,7 +179,7 @@ export default {
           uni.switchTab({
             url: '/pages/user/user'
           })
-        // #endif
+          // #endif
         }).then(userRes => {
           uni.setStorageSync('userInfo', userRes.data)
           that.$store.commit('login', userRes.data)

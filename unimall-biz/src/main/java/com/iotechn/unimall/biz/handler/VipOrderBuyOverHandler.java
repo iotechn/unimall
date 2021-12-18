@@ -7,9 +7,13 @@ import com.iotechn.unimall.data.domain.VipOrderDO;
 import com.iotechn.unimall.data.enums.DMQHandlerType;
 import com.iotechn.unimall.data.enums.VipOrderStatusType;
 import com.iotechn.unimall.data.mapper.VipOrderMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
+@Component
 public class VipOrderBuyOverHandler implements DelayedMessageHandler {
 
     @Autowired
@@ -21,6 +25,8 @@ public class VipOrderBuyOverHandler implements DelayedMessageHandler {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    private static final Logger logger = LoggerFactory.getLogger(VipOrderBuyOverHandler.class);
+
     @Override
     public int handle(String value) {
         Integer res = transactionTemplate.execute(status -> {
@@ -28,6 +34,7 @@ public class VipOrderBuyOverHandler implements DelayedMessageHandler {
                 Long id = Long.valueOf(value);
                 VipOrderDO vipOrderDO = vipOrderMapper.selectById(id);
                 vipOrderBizService.changeOrderParentStatus(vipOrderDO.getId(), VipOrderStatusType.BUY_OVER.getCode(), VipOrderStatusType.WAIT_REFUND.getCode());
+                logger.info("[Vip开通订单] 支付超时 Vip OrderNo:" + vipOrderDO.getOrderNo());
             } catch (Exception e) {
                 status.setRollbackOnly();
                 return 0;
