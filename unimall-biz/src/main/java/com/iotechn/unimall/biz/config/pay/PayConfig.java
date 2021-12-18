@@ -23,7 +23,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -43,9 +45,106 @@ public class PayConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(PayConfig.class);
 
+    private abstract class AbstractPayProperties implements PayProperties {
+        @Override
+        public String getWxAppId() {
+            return null;
+        }
+
+        @Override
+        public String getWxMchId() {
+            return null;
+        }
+
+        @Override
+        public String getWxMchKey() {
+            return null;
+        }
+
+        @Override
+        public String getWxNotifyUrl() {
+            return null;
+        }
+
+        @Override
+        public byte[] getWxCert() {
+            return new byte[0];
+        }
+
+        @Override
+        public String getAliGateway() {
+            return fwAliAppProperties.getAliGateway();
+        }
+
+        @Override
+        public String getAliNotifyUrl() {
+            return fwAliAppProperties.getAppNotifyUrl();
+        }
+    }
+
     @Bean
     public MatrixPayService matrixPayService() {
-        return new MatrixPayServiceImpl(new PayDynamicPropertiesImpl());
+        MatrixPayServiceImpl matrixPayService = new MatrixPayServiceImpl(new PayDynamicPropertiesImpl());
+        List<PayProperties> payProperties = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(fwAliAppProperties.getMiniAppId())) {
+            payProperties.add(new AbstractPayProperties() {
+                @Override
+                public String getAliAppId() {
+                    return fwAliAppProperties.getMiniAppId();
+                }
+
+                @Override
+                public String getAliMchPrivateKey() {
+                    return fwAliAppProperties.getMiniAppPrivateKey2();
+                }
+
+                @Override
+                public String getAliAliPublicKey() {
+                    return fwAliAppProperties.getMiniAppPublicKey1();
+                }
+            });
+        }
+        if (!ObjectUtils.isEmpty(fwAliAppProperties.getAppId())) {
+            payProperties.add(new AbstractPayProperties() {
+                @Override
+                public String getAliAppId() {
+                    return fwAliAppProperties.getAppId();
+                }
+
+                @Override
+                public String getAliMchPrivateKey() {
+                    return fwAliAppProperties.getAppPrivateKey2();
+                }
+
+                @Override
+                public String getAliAliPublicKey() {
+                    return fwAliAppProperties.getAppPublicKey1();
+                }
+            });
+        }
+        if (!ObjectUtils.isEmpty(fwAliAppProperties.getWapAppId())) {
+            payProperties.add(new AbstractPayProperties() {
+                @Override
+                public String getAliAppId() {
+                    return fwAliAppProperties.getWapAppId();
+                }
+
+                @Override
+                public String getAliMchPrivateKey() {
+                    return fwAliAppProperties.getWapAppPrivateKey2();
+                }
+
+                @Override
+                public String getAliAliPublicKey() {
+                    return fwAliAppProperties.getWapAppPublicKey1();
+                }
+            });
+        }
+        /**
+         * 先将支付宝client加载到内存
+         */
+        matrixPayService.configWarmUp(payProperties);
+        return matrixPayService;
     }
 
     @Bean

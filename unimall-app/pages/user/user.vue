@@ -8,7 +8,7 @@
         </view>
         <view class="info-box">
           <text class="username" @click="toLogin">
-            {{ hasLogin? (userInfo.nickname || '未设置昵称') : '立即登录' }}
+            {{ hasLogin ? (userInfo.nickname || '未设置昵称') : '立即登录' }}
           </text>
         </view>
       </view>
@@ -117,26 +117,6 @@ export default {
   },
   onLoad() {
   },
-  // #ifndef MP
-  onNavigationBarButtonTap(e) {
-    const index = e.index
-    if (index === 0) {
-      this.navTo('/pages/set/set')
-    } else if (index === 1) {
-      // #ifdef APP-PLUS
-      const pages = getCurrentPages()
-      const page = pages[pages.length - 1]
-      const currentWebview = page.$getAppWebview()
-      currentWebview.hideTitleNViewButtonRedDot({
-        index
-      })
-      // #endif
-      uni.navigateTo({
-        url: '/pages/notice/notice'
-      })
-    }
-  },
-  // #endif
   computed: {
     ...mapState(['hasLogin', 'userInfo'])
   },
@@ -190,9 +170,9 @@ export default {
     },
 
     /**
-			 * 统一跳转接口,拦截未登录路由
-			 * navigator标签现在默认没有转场动画，所以用view
-			 */
+     * 统一跳转接口,拦截未登录路由
+     * navigator标签现在默认没有转场动画，所以用view
+     */
     navTo(url) {
       if (!this.hasLogin) {
         url = '/pages/public/login'
@@ -203,12 +183,12 @@ export default {
     },
 
     /**
-			 *  会员卡下拉和回弹
-			 *  1.关闭bounce避免ios端下拉冲突
-			 *  2.由于touchmove事件的缺陷（以前做小程序就遇到，比如20跳到40，h5反而好很多），下拉的时候会有掉帧的感觉
-			 *    transition设置0.1秒延迟，让css来过渡这段空窗期
-			 *  3.回弹效果可修改曲线值来调整效果，推荐一个好用的bezier生成工具 http://cubic-bezier.com/
-			 */
+     *  会员卡下拉和回弹
+     *  1.关闭bounce避免ios端下拉冲突
+     *  2.由于touchmove事件的缺陷（以前做小程序就遇到，比如20跳到40，h5反而好很多），下拉的时候会有掉帧的感觉
+     *    transition设置0.1秒延迟，让css来过渡这段空窗期
+     *  3.回弹效果可修改曲线值来调整效果，推荐一个好用的bezier生成工具 http://cubic-bezier.com/
+     */
     coverTouchstart(e) {
       if (pageAtTop === false) {
         return
@@ -263,13 +243,13 @@ export default {
 		padding: 100upx 30upx 0;
 		position:relative;
 		.bg{
-			position:absolute;
-			left: 0;
-			top: 0;
-			width: 100%;
-			height: 100%;
-			filter: blur(1px);
-			opacity: .7;
+    position:absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    filter: blur(1px);
+    opacity: .7;
 		}
 	}
 	.user-info-box{
@@ -279,15 +259,15 @@ export default {
 		position:relative;
 		z-index: 1;
 		.portrait{
-			width: 130upx;
-			height: 130upx;
-			border:5upx solid #fff;
-			border-radius: 50%;
+    width: 130upx;
+    height: 130upx;
+    border:5upx solid #fff;
+    border-radius: 50%;
 		}
 		.username{
-			font-size: $font-lg + 6upx;
-			color: $font-color-dark;
-			margin-left: 20upx;
+    font-size: $font-lg + 6upx;
+    color: $font-color-dark;
+    margin-left: 20upx;
 		}
 	}
 
@@ -302,39 +282,39 @@ export default {
 		position: relative;
 		padding: 20upx 24upx;
 		.card-bg{
-			position:absolute;
-			top: 20upx;
-			right: 0;
-			width: 380upx;
-			height: 260upx;
+    position:absolute;
+    top: 20upx;
+    right: 0;
+    width: 380upx;
+    height: 260upx;
 		}
 		.b-btn{
-			position: absolute;
-			right: 20upx;
-			top: 16upx;
-			width: 132upx;
-			height: 40upx;
-			text-align: center;
-			line-height: 40upx;
-			font-size: 22upx;
-			color: #36343c;
-			border-radius: 20px;
-			background: linear-gradient(left, #f9e6af, #ffd465);
-			z-index: 1;
+    position: absolute;
+    right: 20upx;
+    top: 16upx;
+    width: 132upx;
+    height: 40upx;
+    text-align: center;
+    line-height: 40upx;
+    font-size: 22upx;
+    color: #36343c;
+    border-radius: 20px;
+    background: linear-gradient(left, #f9e6af, #ffd465);
+    z-index: 1;
 		}
 		.tit{
-			font-size: $font-base+2upx;
-			color: #f7d680;
-			margin-bottom: 28upx;
-			.yticon{
-				color: #f6e5a3;
-				margin-right: 16upx;
-			}
+    font-size: $font-base+2upx;
+    color: #f7d680;
+    margin-bottom: 28upx;
+    .yticon{
+    	color: #f6e5a3;
+    	margin-right: 16upx;
+    }
 		}
 		.e-b{
-			font-size: $font-sm;
-			color: #d8cba9;
-			margin-top: 10upx;
+    font-size: $font-sm;
+    color: #d8cba9;
+    margin-top: 10upx;
 		}
 	}
 	.cover-container{
@@ -345,26 +325,26 @@ export default {
 		background: #f5f5f5;
 		padding-bottom: 20upx;
 		.arc{
-			position:absolute;
-			left: 0;
-			top: -34upx;
-			width: 100%;
-			height: 36upx;
+    position:absolute;
+    left: 0;
+    top: -34upx;
+    width: 100%;
+    height: 36upx;
 		}
 	}
 	.tj-sction{
 		@extend %section;
 		.tj-item{
-			@extend %flex-center;
-			flex-direction: column;
-			height: 140upx;
-			font-size: $font-sm;
-			color: #75787d;
+    @extend %flex-center;
+    flex-direction: column;
+    height: 140upx;
+    font-size: $font-sm;
+    color: #75787d;
 		}
 		.num{
-			font-size: $font-lg;
-			color: $font-color-dark;
-			margin-bottom: 8upx;
+    font-size: $font-lg;
+    color: $font-color-dark;
+    margin-bottom: 8upx;
 		}
 	}
 	.order-section{
@@ -372,20 +352,20 @@ export default {
 		padding: 28upx 0;
 		margin-top: 20upx;
 		.order-item{
-			@extend %flex-center;
-			width: 120upx;
-			height: 120upx;
-			border-radius: 10upx;
-			font-size: $font-sm;
-			color: $font-color-dark;
+    @extend %flex-center;
+    width: 120upx;
+    height: 120upx;
+    border-radius: 10upx;
+    font-size: $font-sm;
+    color: $font-color-dark;
 		}
 		.yticon{
-			font-size: 48upx;
-			margin-bottom: 18upx;
-			color: #fa436a;
+    font-size: 48upx;
+    margin-bottom: 18upx;
+    color: #fa436a;
 		}
 		.icon-shouhoutuikuan{
-			font-size:44upx;
+    font-size:44upx;
 		}
 	}
 	.history-section{
@@ -394,29 +374,29 @@ export default {
 		background: #fff;
 		border-radius:10upx;
 		.sec-header{
-			display:flex;
-			align-items: center;
-			font-size: $font-base;
-			color: $font-color-dark;
-			line-height: 40upx;
-			margin-left: 30upx;
-			.yticon{
-				font-size: 44upx;
-				color: #5eba8f;
-				margin-right: 16upx;
-				line-height: 40upx;
-			}
+    display:flex;
+    align-items: center;
+    font-size: $font-base;
+    color: $font-color-dark;
+    line-height: 40upx;
+    margin-left: 30upx;
+    .yticon{
+    	font-size: 44upx;
+    	color: #5eba8f;
+    	margin-right: 16upx;
+    	line-height: 40upx;
+    }
 		}
 		.h-list{
-			white-space: nowrap;
-			padding: 30upx 30upx 0;
-			image{
-				display:inline-block;
-				width: 160upx;
-				height: 160upx;
-				margin-right: 20upx;
-				border-radius: 10upx;
-			}
+    white-space: nowrap;
+    padding: 30upx 30upx 0;
+    image{
+    	display:inline-block;
+    	width: 160upx;
+    	height: 160upx;
+    	margin-right: 20upx;
+    	border-radius: 10upx;
+    }
 		}
 	}
 

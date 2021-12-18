@@ -327,7 +327,7 @@ export default {
           that.$api.request('user', 'thirdPartLogin', {
             loginType: loginType,
             raw: JSON.stringify(wxres),
-			      platform: PLATFORM_APP
+            platform: PLATFORM_APP
           }, failres => {
             that.$api.msg(failres.errmsg)
             uni.hideLoading()
@@ -345,6 +345,7 @@ export default {
                 that.$store.commit('login', res.data)
                 e.userInfo.nickname = e.userInfo.nickName
                 that.syncUserInfo(loginData, e.userInfo)
+                console.log(loginData)
                 if (loginData.status === 2) {
                   // 未完善手机号，小程序，要求同步信息
                   uni.redirectTo({
@@ -354,12 +355,16 @@ export default {
                   uni.navigateBack()
                 }
               },
+              fail: (e) => {
+                uni.hideLoading()
+                that.$api.msg(e.errMsg)
+                uni.navigateBack()
+              },
               complete: (e) => {
                 if (that.$api.prePage().loadData) {
                   that.$api.prePage().loadData()
                 }
                 uni.hideLoading()
-                uni.navigateBack()
               }
             })
           })

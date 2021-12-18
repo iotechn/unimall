@@ -110,6 +110,7 @@ public interface UserService {
 
     @HttpMethod(description = "获取用户信息")
     public UserDTO info(
+            @NotNull @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "token") String accessToken,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
 
 }

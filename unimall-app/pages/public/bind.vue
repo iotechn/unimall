@@ -295,7 +295,7 @@ page {
 		flex-direction: column;
 		align-items: flex-start;
 		justify-content: center;
-		padding: 0 30upx;
+		padding: 0 0 0 30upx;
 		background: $page-color-light;
 		height: 140upx;
 		border-radius: 4px;
@@ -323,7 +323,8 @@ page {
 			flex-direction: row;
 			display: flex;
 			justify-content:end;
-			flex-wrap: wrap
+			flex-wrap: wrap;
+      width: 100%;
 		}
 	}
 

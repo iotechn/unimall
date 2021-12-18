@@ -443,8 +443,10 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
     }
 
     @Override
-    public UserDTO info(Long userId) throws ServiceException {
-        return sessionUtil.getUser();
+    public UserDTO info(String accessToken, Long userId) throws ServiceException {
+        UserDTO user = sessionUtil.getUser();
+        user.setAccessToken(accessToken);
+        return user;
     }
 
 
