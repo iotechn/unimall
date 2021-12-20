@@ -118,7 +118,8 @@
         "title" : "unimall 多端商城",
         "domain" : "unimall.h5.iotechn.com",
         "router" : {
-            "mode" : "history"
+            "mode" : "history",
+            "base" : "/h5/"
         },
         "devServer" : {
             "disableHostCheck" : true

@@ -37,7 +37,7 @@
           >
         </view>
       </view>
-      <!-- #ifdef MP-WEIXIN || APP-PLUS -->
+      <!-- #ifdef MP-WEIXIN || APP-PLUS || H5 -->
       <button v-if="!loginType" class="confirm-btn" :disabled="logining" @click="chooseLoginType('wechat')">
         微信快速登录（推荐）
       </button>
@@ -47,11 +47,11 @@
         支付宝快速登录（推荐）
       </button>
       <!-- #endif -->
-	  <!-- #ifdef APP-PLUS -->
+      <!-- #ifdef APP-PLUS -->
       <button v-if="!loginType" class="confirm-btn" :disabled="logining" @click="chooseLoginType('phone')">
         手机注册登录
       </button>
-	  <!-- #endif -->
+      <!-- #endif -->
       <!-- #ifdef MP-WEIXIN -->
       <button
         v-if="loginType === 'wechat'"
@@ -120,7 +120,7 @@ export default {
     this.$api.logout()
   },
   onLoad(options) {
-
+    this.wechatH5LoginCallback(options)
   },
   methods: {
     ...mapMutations(['login']),
@@ -139,11 +139,11 @@ export default {
         url: '/pages/public/register'
       })
     },
-	toReset() {
-	  uni.redirectTo({
-	    url: '/pages/public/resetpwd'
-	  })
-	},
+    toReset() {
+      uni.redirectTo({
+        url: '/pages/public/resetpwd'
+      })
+    },
     async toLogin() {
       const that = this
       if (that.phone.length !== 11) {
@@ -161,7 +161,7 @@ export default {
               phone: that.phone,
               password: that.password,
               loginType: 1,
-			  platform: PLATFORM_MP,
+              platform: PLATFORM_MP,
               raw: JSON.stringify(wxres)
             }, failres => {
               that.logining = false
@@ -186,7 +186,7 @@ export default {
         that.$api.request('user', 'login', {
           phone: that.phone,
           password: that.password,
-		  platform: PLATFORM_APP
+          platform: PLATFORM_APP
         }, failres => {
           that.logining = false
           uni.showToast({
@@ -230,7 +230,7 @@ export default {
               that.$api.request('user', 'thirdPartLogin', {
                 loginType: loginType,
                 raw: raw,
-				platform: PLATFORM_MP
+                platform: PLATFORM_MP
               }, failres => {
                 that.$api.msg(failres.errmsg)
                 uni.hideLoading()
@@ -275,7 +275,7 @@ export default {
           that.$api.request('user', 'thirdPartLogin', {
             loginType: loginType,
             raw: JSON.stringify(alires),
-			platform: PLATFORM_MP
+            platform: PLATFORM_MP
           }, failres => {
             that.$api.msg(failres.errmsg)
             that.logining = false
@@ -378,7 +378,7 @@ export default {
     },
     wechatH5Login() {
       const that = this
-      const href = window.location.origin
+      const href = window.location.href
       const page = that.$api.prePage()
       let prePath = '/pages/index/index'
       if (page) {
@@ -386,6 +386,48 @@ export default {
       }
       window.location = 'https://open.weixin.qq.com/connect/oauth2/authorize?' +
 				'appid=' + that.$api.config.h5Appid + '&redirect_uri=' + escape(href) + '&response_type=code&scope=snsapi_userinfo&state=' + escape(prePath) + '#wechat_redirect'
+    },
+    wechatH5LoginCallback(options) {
+      // #ifdef H5
+      // H5进入，有可能是回调进来的
+      if (options.code && options.state) {
+        const that = this
+        that.logining = true
+        that.$api.request('user', 'thirdPartLogin', {
+          loginType: 3,
+          raw: options.code,
+          platform: PLATFORM_WAP
+        }, failres => {
+          that.logining = false
+          that.$api.msg(failres.errmsg)
+        }).then(res => {
+          // 登录成功，重定向到指定目标
+          that.logining = false
+          const loginData = res.data
+          that.$store.commit('login', loginData)
+          uni.setStorageSync('userInfo', loginData)
+          debugger
+          if (loginData.status === 2) {
+            // 未完善手机号，小程序，要求同步信息
+            uni.redirectTo({
+              url: '/pages/public/bind'
+            })
+          } else {
+            // 不能重定向到tabbar页面
+            if (options.state === '/pages/cart/cart' || options.state === '/pages/user/user' ||
+              options.state === '/pages/index/index' || options.state === '/pages/category/category') {
+              uni.switchTab({
+                url: options.state
+              })
+            } else {
+              uni.redirectTo({
+                url: options.state
+              })
+            }
+          }
+        })
+      }
+      // #endif
     },
     syncUserInfo(loginData, userInfo) {
       const that = this

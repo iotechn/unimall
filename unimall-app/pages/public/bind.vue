@@ -184,10 +184,10 @@ export default {
           uni.setStorageSync('userInfo', userRes.data)
           that.$store.commit('login', userRes.data)
           that.$api.setUserInfo(userRes.data)
-          // #ifndef MP-ALIPAY
+          // #ifndef MP-ALIPAY || H5
           uni.navigateBack()
           // #endif
-          // #ifdef MP-ALIPAY
+          // #ifdef MP-ALIPAY || H5
           uni.switchTab({
             url: '/pages/user/user'
           })

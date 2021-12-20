@@ -195,6 +195,9 @@ function random_string(len) {
 const prePage = () => {
   const pages = getCurrentPages()
   const prePage = pages[pages.length - 2]
+  if (!prePage) {
+    return null
+  }
   let res = prePage.$vm
   // #ifdef H5
   res = prePage

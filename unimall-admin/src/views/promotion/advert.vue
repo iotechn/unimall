@@ -359,7 +359,7 @@ export default {
       this.cascaderData = []
       for (let i = 0; i < this.adTypeMap.length; i++) {
         if (this.adTypeMap[i].value === type) {
-          this.currentType = adTypeMap[i]
+          this.currentType = this.adTypeMap[i]
           if (!this.adTypeMap[i].picRequire) {
             // 随便填一张图片
             const defalutPic = this.USELESS_PIC
@@ -457,9 +457,9 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-      for (let i = 0; i < adTypeMap.length; i++) {
-        if (adTypeMap[i].value === row.dataForm.type) {
-          this.currentType = adTypeMap[i]
+      for (let i = 0; i < this.adTypeMap.length; i++) {
+        if (this.adTypeMap[i].value === row.type) {
+          this.currentType = this.adTypeMap[i]
         }
       }
     },
@@ -575,11 +575,6 @@ export default {
           for (let k = 0; k < this.spuTree[i].children[j].children.length; k++) {
             if (this.spuTree[i].children[j].children[k].value === id) {
               return [this.spuTree[i].value, this.spuTree[i].children[j].value, id]
-            }
-            for (let z = 0; z < this.spuTree[i].children[j].children[k].children.length; z++) {
-              if (this.spuTree[i].children[j].children[k].children[z].value === id) {
-                return [this.spuTree[i].value, this.spuTree[i].children[j].value, this.spuTree[i].children[j].children[k].value, id]
-              }
             }
           }
         }

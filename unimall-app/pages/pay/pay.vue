@@ -8,7 +8,7 @@
     </view>
 
     <view class="pay-type-list">
-      <!-- #ifdef MP-WEIXIN | APP-PLUS -->
+      <!-- #ifdef MP-WEIXIN | APP-PLUS || H5 -->
       <view class="type-item b-b" @click="changePayType('WX')">
         <text class="icon yticon icon-weixinzhifu" />
         <view class="con">

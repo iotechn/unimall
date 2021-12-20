@@ -218,38 +218,6 @@ export default {
     this.isVip = this.$api.isVip()
   },
   onLoad(options) {
-    // #ifdef H5
-    // H5进入，有可能是回调进来的
-    if (options.code && options.state) {
-      const that = this
-      that.logining = true
-      that.$api.request('user', 'thirdPartLogin', {
-        loginType: 3,
-        raw: options.code,
-		platform: PLATFORM_WAP
-      }, failres => {
-        that.logining = false
-        that.$api.msg(failres.errmsg)
-      }).then(res => {
-        // 登录成功，重定向到指定目标
-        that.logining = false
-        that.$store.commit('login', res.data)
-        uni.setStorageSync('userInfo', res.data)
-        // 重定向到
-        // 不能重定向到tabbar页面
-        if (options.state === '/pages/cart/cart' || options.state === '/pages/user/user' ||
-					options.state === '/pages/index/index' || options.state === '/pages/category/category') {
-          uni.switchTab({
-            url: options.state
-          })
-        } else {
-          uni.redirectTo({
-            url: options.state
-          })
-        }
-      })
-    }
-    // #endif
     this.loadData()
   },
   methods: {

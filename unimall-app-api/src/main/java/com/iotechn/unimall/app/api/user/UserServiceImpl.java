@@ -539,6 +539,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 String accessToken = GeneratorUtil.genSessionId();
                 UserDTO userDTO = new UserDTO();
                 BeanUtils.copyProperties(userDO, userDTO);
+                userDTO.setPlatform(platform);
                 userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
                 userDTO.setAccessToken(accessToken);
                 return userDTO;
