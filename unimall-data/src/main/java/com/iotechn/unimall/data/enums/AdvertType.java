@@ -1,5 +1,7 @@
 package com.iotechn.unimall.data.enums;
 
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+
 /**
  * Created with IntelliJ IDEA.
  * Description:
@@ -7,7 +9,7 @@ package com.iotechn.unimall.data.enums;
  * Date: 2020-03-26
  * Time: 下午6:46
  */
-public enum AdvertType {
+public enum AdvertType implements BaseEnums<Integer> {
 
     CAROUSEL(1, "轮播"),
     CATEGORY_PICK(2, "分类精选"),
@@ -25,7 +27,7 @@ public enum AdvertType {
 
     private String msg;
 
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 

@@ -1,6 +1,8 @@
 package com.iotechn.unimall.data.dto.appraise;
 
-import com.iotechn.unimall.data.dto.SuperDTO;
+import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -11,10 +13,15 @@ import java.util.List;
 @date  2019/7/6 - 14:26
 */
 @Data
+@ApiEntity(description = "评价请求实体")
 public class AppraiseRequestDTO extends SuperDTO {
 
+    @ApiField(description = "订单ID")
     private Long orderId;
 
+    /**
+     * TODO 取调DTO名字
+     */
     private List<AppraiseRequestItemDTO> appraiseDTOList;
 
 }

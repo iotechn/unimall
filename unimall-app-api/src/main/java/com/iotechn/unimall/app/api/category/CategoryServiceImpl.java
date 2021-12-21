@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.category;
 
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
-import com.iotechn.unimall.core.exception.ServiceException;
 import com.iotechn.unimall.data.dto.CategoryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDTO> categoryList() throws ServiceException {
-        return categoryBizService.categoryThreeLevelTree();
+        return categoryBizService.categorySecondLevelTree();
     }
 
     /**

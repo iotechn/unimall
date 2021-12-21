@@ -1,10 +1,10 @@
 package com.iotechn.unimall.app.api.advert;
 
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.annotation.HttpParam;
-import com.iotechn.unimall.core.annotation.HttpParamType;
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.annotation.HttpMethod;
+import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
+import com.dobbinsoft.fw.core.annotation.HttpParam;
+import com.dobbinsoft.fw.core.annotation.HttpParamType;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AdvertDO;
 
 import java.util.List;
@@ -22,6 +22,6 @@ public interface AdvertService {
 
     @HttpMethod(description = "取得活跃广告")
     public List<AdvertDO> getActiveAd(
-            @HttpParam(name = "adType",type = HttpParamType.COMMON,description = "广告类型")Integer adType)throws ServiceException;
+            @HttpParam(name = "adType", type = HttpParamType.COMMON, description = "广告类型") Integer adType)throws ServiceException;
 
 }

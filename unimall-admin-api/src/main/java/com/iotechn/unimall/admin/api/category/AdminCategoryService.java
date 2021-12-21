@@ -1,15 +1,15 @@
 package com.iotechn.unimall.admin.api.category;
 
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.annotation.HttpParam;
-import com.iotechn.unimall.core.annotation.HttpParamType;
-import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.annotation.param.Range;
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.annotation.HttpMethod;
+import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
+import com.dobbinsoft.fw.core.annotation.HttpParam;
+import com.dobbinsoft.fw.core.annotation.HttpParamType;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
+import com.dobbinsoft.fw.core.annotation.param.Range;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.CategoryDO;
 import com.iotechn.unimall.data.dto.CategoryDTO;
-import com.iotechn.unimall.data.model.Page;
 
 import java.util.List;
 
@@ -20,16 +20,12 @@ import java.util.List;
 public interface AdminCategoryService {
 
     @HttpMethod(description = "获取二级类目树")
-    public List<CategoryDTO> categorySecondLevelTree() throws ServiceException;
-
-    @HttpMethod(description = "获取类目树")
     public List<CategoryDTO> categoryTree() throws ServiceException;
 
     @HttpMethod(description = "创建", permission = "product:category:create", permissionParentName = "商品管理", permissionName = "类目管理")
     public CategoryDO create(
             @NotNull @HttpParam(name = "title", type = HttpParamType.COMMON, description = "类目标题") String title,
             @HttpParam(name = "parentId", type = HttpParamType.COMMON, description = "类目父节点", valueDef = "0") Long parentId,
-            @HttpParam(name = "iconUrl", type = HttpParamType.COMMON, description = "类目图标") String iconUrl,
             @HttpParam(name = "picUrl", type = HttpParamType.COMMON, description = "类目图片") String picUrl,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 

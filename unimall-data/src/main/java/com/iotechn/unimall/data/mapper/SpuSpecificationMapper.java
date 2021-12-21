@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.dobbinsoft.fw.support.mapper.IMapper;
 import com.iotechn.unimall.data.domain.SpuSpecificationDO;
 
 import java.util.List;
@@ -11,7 +12,5 @@ import java.util.List;
  * Time: 17:35
  */
 public interface SpuSpecificationMapper extends IMapper<SpuSpecificationDO> {
-
-    public Integer batchInsert(List<SpuSpecificationDO> list);
 
 }

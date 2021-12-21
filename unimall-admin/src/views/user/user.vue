@@ -67,7 +67,7 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" width="100px" label="用户ID" prop="id" sortable />
+      <el-table-column align="center" width="80" label="用户ID" prop="id" />
 
       <el-table-column align="center" label="昵称" prop="nickname" />
 
@@ -83,10 +83,6 @@
         <template slot-scope="scope">
           <el-tag>{{ scope.row.level | levelDicFilter }}</el-tag>
         </template>
-      </el-table-column>
-
-      <el-table-column align="center" label="生日" prop="birthday">
-        <template slot-scope="scope">{{ scope.row.birthday | formatDate }}</template>
       </el-table-column>
 
       <el-table-column align="center" label="状态" prop="status">
@@ -227,7 +223,6 @@ export default {
         phone: undefined,
         gender: undefined,
         nickname: undefined,
-        birthday: undefined,
         status: undefined,
         password: undefined
       },
@@ -273,7 +268,6 @@ export default {
         phone: undefined,
         gender: undefined,
         nickname: undefined,
-        birthday: undefined,
         status: undefined
       }
     },

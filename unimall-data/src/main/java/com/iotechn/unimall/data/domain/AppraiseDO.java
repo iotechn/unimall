@@ -1,7 +1,9 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
 /*
@@ -10,20 +12,25 @@ import lombok.Data;
 */
 @TableName("unimall_appraise")
 @Data
-public class AppraiseDO extends SuperDO{
+@ApiEntity(description = "评论领域模型")
+public class AppraiseDO extends SuperDO {
 
-    @TableField("spu_id")
+    @ApiField(description = "评论商品ID")
     private Long spuId;
-    @TableField("sku_id")
+
+    @ApiField(description = "评论规格ID")
     private Long skuId;
-    @TableField("order_id")
+
+    @ApiField(description = "购买订单")
     private Long orderId;
-    @TableField("user_id")
+
+    @ApiField(description = "评论的用户ID")
     private Long userId;
 
-    //评论内容
+    @ApiField(description = "评论的文字内容")
     private String content;
-    //评论星数
+
+    @ApiField(description = "打分")
     private Integer score;
 
 

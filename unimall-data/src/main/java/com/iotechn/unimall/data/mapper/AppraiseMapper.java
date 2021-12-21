@@ -1,12 +1,11 @@
 package com.iotechn.unimall.data.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.dobbinsoft.fw.support.mapper.IMapper;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
-import com.iotechn.unimall.data.model.Page;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /*
 @author kbq
@@ -20,7 +19,7 @@ public interface AppraiseMapper extends IMapper<AppraiseDO> {
      * @param userId
      * @return
      */
-    public Page<AppraiseResponseDTO> selectUserAppraisePage(IPage page, @Param("userId")Long userId);
+    public Page<AppraiseResponseDTO> selectUserAppraisePage(IPage page, @Param("userId") Long userId);
 
     /**
      * 根据商品spu_id，分页获取所有评价
@@ -28,7 +27,7 @@ public interface AppraiseMapper extends IMapper<AppraiseDO> {
      * @param spuId
      * @return
      */
-    public Page<AppraiseResponseDTO> selectSpuAppraisePage(IPage page, @Param("spuId")Long spuId);
+    public Page<AppraiseResponseDTO> selectSpuAppraisePage(IPage page, @Param("spuId") Long spuId);
 
     //根据评价ID，查询评价
     public AppraiseResponseDTO selectOneById(@Param("appraiseId") Long appraiseId);

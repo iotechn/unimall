@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.dobbinsoft.fw.support.mapper.IMapper;
 import com.iotechn.unimall.data.domain.CouponUserDO;
 import com.iotechn.unimall.data.dto.CouponUserDTO;
 import org.apache.ibatis.annotations.Param;

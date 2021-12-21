@@ -1,7 +1,8 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.dobbinsoft.fw.support.mapper.IMapper;
 import com.iotechn.unimall.data.domain.SkuDO;
-import com.iotechn.unimall.data.dto.goods.SkuDTO;
+import com.iotechn.unimall.data.dto.product.SkuDTO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public interface SkuMapper extends IMapper<SkuDO> {
 
     public SkuDTO getSkuDTOById(Long skuId);
 
-    public Integer decSkuStock(@Param("skuId") Long skuId,@Param("stock") Integer stock);
+    public Integer decSkuStock(@Param("skuId") Long skuId, @Param("stock") Integer stock);
 
     public Integer returnSkuStock(@Param("skuId") Long skuId, @Param("stock") Integer stock);
 

@@ -1,9 +1,11 @@
 package com.iotechn.unimall.data.enums;
 
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+
 /**
  * Created by rize on 2019/2/13.
  */
-public enum UserLevelType {
+public enum UserLevelType implements BaseEnums<Integer> {
     COMMON(0, "普通会员"),
     VIP(1, "VIP会员"),
     ;
@@ -17,7 +19,7 @@ public enum UserLevelType {
 
     private String msg;
 
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 

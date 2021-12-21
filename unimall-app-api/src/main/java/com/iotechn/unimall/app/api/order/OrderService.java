@@ -1,15 +1,15 @@
 package com.iotechn.unimall.app.api.order;
 
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.annotation.HttpParam;
-import com.iotechn.unimall.core.annotation.HttpParamType;
-import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.annotation.HttpMethod;
+import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
+import com.dobbinsoft.fw.core.annotation.HttpParam;
+import com.dobbinsoft.fw.core.annotation.HttpParamType;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderRequestDTO;
-import com.iotechn.unimall.data.model.Page;
 
 /**
  * Created by rize on 2019/7/4.
@@ -36,9 +36,11 @@ public interface OrderService {
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
     @HttpMethod(description = "微信小程序预先支付")
-    public Object wxPrepay(
+    public Object prepay(
             @HttpParam(name = "parentOrderNo", type = HttpParamType.COMMON, description = "父单串号") String parentOrderNo,
             @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单串号") String orderNo,
+            @HttpParam(name = "platform", type = HttpParamType.COMMON, description = "平台") Integer platform,
+            @HttpParam(name = "payChannel", type = HttpParamType.COMMON, description = "支付渠道") String payChannel,
             @NotNull @HttpParam(name = "ip", type = HttpParamType.IP, description = "ip地址") String ip,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 

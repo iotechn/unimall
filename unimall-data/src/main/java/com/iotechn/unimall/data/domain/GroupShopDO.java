@@ -1,7 +1,11 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.support.domain.SuperDO;
+import com.iotechn.unimall.data.enums.GroupShopAutomaticRefundType;
+import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
 import java.util.Date;
@@ -15,45 +19,38 @@ import java.util.Date;
 */
 
 @Data
+@ApiEntity(description = "团购领域模型")
 @TableName("unimall_group_shop")
 public class GroupShopDO extends SuperDO {
 
-    @TableField("spu_id")
+    @ApiField(description = "商品ID")
     private Long spuId;
 
-    /**
-     *  rize: 冗余的团购Sku最低价
-     */
-    @TableField("min_price")
+    @ApiField(description = "冗余的团购Sku最低价")
     private Integer minPrice;
 
-    @TableField("max_price")
+    @ApiField(description = "冗余的团购SKu最高价")
     private Integer maxPrice;
 
-    @TableField("gmt_start")
+    @ApiField(description = "活动开始时间")
     private Date gmtStart;
 
-    @TableField("gmt_end")
+    @ApiField(description = "活动结束时间")
     private Date gmtEnd;
 
     /**
      * 团购最小人数
      */
-    @TableField("min_num")
+    @ApiField(description = "团购最小人数")
     private Integer minNum;
 
-    @TableField("buyer_num")
+    @ApiField(description = "当前已付款人数")
     private Integer buyerNum;
 
-    /**
-     * 团购人数未满,是否自动退款,默认自动退款,1是自动退款,0不自动退款
-     */
-    @TableField("automatic_refund")
+    @ApiField(description = "团购人数未满执行策略", enums = GroupShopAutomaticRefundType.class)
     private Integer automaticRefund;
 
-    /**
-     * 团购商品的状态,1是可使用状态,0是过期已经不可使用状态
-     */
+    @ApiField(description = "团购状态", enums = StatusType.class)
     private Integer status;
 
 }

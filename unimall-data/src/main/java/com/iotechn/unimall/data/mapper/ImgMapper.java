@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.dobbinsoft.fw.support.mapper.IMapper;
 import com.iotechn.unimall.data.domain.ImgDO;
 import org.apache.ibatis.annotations.Param;
 
@@ -11,7 +12,5 @@ import java.util.List;
 public interface ImgMapper extends IMapper<ImgDO> {
 
     public List<String> getImgs(@Param("bizType") Integer bizType, @Param("bizId") Long bizId);
-
-    public Integer insertImgs(List<ImgDO> imgs);
 
 }

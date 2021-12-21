@@ -1,8 +1,8 @@
 package com.iotechn.unimall.app.api.footprint;
 
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.CacheComponent;
 import com.iotechn.unimall.data.domain.SpuDO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

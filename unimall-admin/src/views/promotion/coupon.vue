@@ -43,17 +43,23 @@
       highlight-current-row
       style="white-space: pre-line"
     >
-      <el-table-column align="center" label="优惠券ID" prop="id" sortable />
+      <el-table-column align="center" label="优惠券ID" prop="id" width="80" />
 
-      <el-table-column align="center" label="优惠券名称" prop="title" />
+      <el-table-column align="center" label="名称" prop="title" />
 
-      <el-table-column align="center" label="优惠券类型" prop="type">
+      <el-table-column align="center" label="会员" prop="isVip">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.isVip ? 'success' : ''">{{ scope.row.isVip | isVipFilter }}</el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="类型" prop="type">
         <template slot-scope="scope">{{ couponTypeMap[scope.row.type-1]?couponTypeMap[scope.row.type-1].name:'错误类型' }}</template>
       </el-table-column>
 
       <el-table-column align="center" label="介绍" prop="description" />
 
-      <el-table-column align="center" label="优惠券数量" prop="total">
+      <el-table-column align="center" label="数量" prop="total">
         <template slot-scope="scope">{{ scope.row.total >= 0 ? scope.row.total : "不限" }}</template>
       </el-table-column>
 
@@ -85,7 +91,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column v-show="false" align="center" label="使用类目ID" prop="categoryId" width="100" />
+      <!-- <el-table-column v-show="false" align="center" label="使用类目ID" prop="categoryId" width="100" /> -->
 
       <el-table-column align="center" label="领券相对天数" prop="days">
         <template slot-scope="scope">{{ scope.row.days != null ? scope.row.days : "无" }}</template>
@@ -147,6 +153,12 @@
           <el-select v-model="dataForm.type" :disabled="dialogStatus === 'update'">
             <el-option v-for="(item,index) in couponTypeOptions" :key="index" :label="item.name" :value="item.value" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="领取者" prop="isVip">
+          <el-radio-group v-model="dataForm.isVip" :disabled="dialogStatus === 'update'">
+            <el-radio :label="1">Vip专享</el-radio>
+            <el-radio :label="0">普通券</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item label="介绍" prop="description" >
           <el-input v-model="dataForm.description" :disabled="dialogStatus === 'update'"/>
@@ -304,6 +316,13 @@ export default {
       } else {
         return '错误状态'
       }
+    },
+    isVipFilter(isVip) {
+      if (isVip === 1) {
+        return '会员专享'
+      } else {
+        return '普通'
+      }
     }
   },
   data() {
@@ -327,6 +346,7 @@ export default {
         id: undefined,
         title: undefined,
         type: 1,
+        isVip: 0,
         description: undefined,
         total: 0,
         discount: 0,
@@ -356,7 +376,8 @@ export default {
         limit: [{ required: true, message: '优惠券限领不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
         discount: [{ required: true, message: '优惠券折扣金额不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
         min: [{ required: true, message: '优惠券使用门栏不能为空', trigger: 'blur' }, { pattern: /^[0-9]*$/, message: '请输入整数' }, { min: 1, max: 9, message: '大于1,小于1亿' }],
-        status: [{ required: true, message: '优惠券状态不能为空', trigger: 'blur' }]
+        status: [{ required: true, message: '优惠券状态不能为空', trigger: 'blur' }],
+        isVip: [{ required: true, message: '请选择领取者', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -371,8 +392,7 @@ export default {
         .then(response => {
           // 为过期优惠卷赋负值
           response.data.data.items.forEach(item => {
-            var now = new Date()
-            if (item.gmtEnd < now) {
+            if (item.gmtEnd && item.gmtEnd.getTime() < response.data.timestamp) {
               item.status = -1
             }
             item.discount = item.discount / 100
@@ -403,6 +423,7 @@ export default {
         min: 0,
         limit: 0,
         type: 1,
+        isVip: 0,
         status: 1,
         goodsType: 0,
         goodsValue: undefined,
@@ -524,34 +545,6 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    // 本来用来修改的，但是技术有限，暂且放置
-    // updateData() {
-    //   this.$refs['dataForm'].validate(valid => {
-    //     if (valid) {
-    //       updateCoupon(this.dataForm)
-    //         .then(() => {
-    //           for (const v of this.list) {
-    //             if (v.id === this.dataForm.id) {
-    //               const index = this.list.indexOf(v)
-    //               this.list.splice(index, 1, this.dataForm)
-    //               break
-    //             }
-    //           }
-    //           this.dialogFormVisible = false
-    //           this.$notify.success({
-    //             title: '成功',
-    //             message: '更新优惠券成功'
-    //           })
-    //         })
-    //         .catch(response => {
-    //           this.$notify.error({
-    //             title: '失败',
-    //             message: response.data.errmsg
-    //           })
-    //         })
-    //     }
-    //   })
-    // },
     // 删除优惠卷
     handleDelete(row) {
       this.$confirm('此操作将永久删除该优惠卷' + row.title + ', 是否继续?', '提示', {

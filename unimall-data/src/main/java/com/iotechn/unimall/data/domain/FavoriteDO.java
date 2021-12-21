@@ -1,7 +1,9 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
 /*
@@ -10,12 +12,13 @@ import lombok.Data;
 用户收藏商品
 */
 @Data
+@ApiEntity(description = "用户收藏")
 @TableName("unimall_favorite")
-public class FavoriteDO extends SuperDO{
+public class FavoriteDO extends SuperDO {
 
-    @TableField("user_id")
+    @ApiField(description = "用户ID")
     private Long userId;
 
-    @TableField("spu_id")
+    @ApiField(description = "商品ID")
     private Long spuId;
 }

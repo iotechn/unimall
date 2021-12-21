@@ -1,9 +1,11 @@
 package com.iotechn.unimall.data.enums;
 
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+
 /**
  * Created by rize on 2019/7/2.
  */
-public enum  SpuStatusType {
+public enum  SpuStatusType implements BaseEnums<Integer> {
     STOCK(0, "库存中"),
     SELLING(1, "售卖中"),
             ;
@@ -17,7 +19,7 @@ public enum  SpuStatusType {
 
     private String msg;
 
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 

@@ -1,10 +1,10 @@
 package com.iotechn.unimall.data.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.iotechn.unimall.data.annotation.SearchField;
-import com.iotechn.unimall.data.annotation.SearchTable;
-import com.iotechn.unimall.data.enums.SearchEngineTokenizerType;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.support.domain.SuperDO;
+import com.iotechn.unimall.data.enums.SpuActivityType;
+import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
 import java.util.Date;
@@ -13,123 +13,103 @@ import java.util.Date;
  * Created by rize on 2019/7/1.
  */
 @Data
-@SearchTable("unimall_spu")
 @TableName("unimall_spu")
 public class SpuDO extends SuperDO {
-
-    @SearchField("id")
-    @TableField("id")
-    private Long id;
 
     /**
      * 商品原价
      */
-    @SearchField("original_price")
-    @TableField("original_price")
+    @ApiField(description = "商品原价（仅显示作用）")
     private Integer originalPrice;
 
     /**
      * 商品价格 单位 分
      */
-    @SearchField("price")
+    @ApiField(description = "价格（仅显示作用）")
     private Integer price;
 
     /**
      * 会员价格
      */
-    @SearchField("vip_price")
-    @TableField("vip_price")
+    @ApiField(description = "VIP价格（仅显示作用）")
     private Integer vipPrice;
 
     /**
      * 商品标题
      */
-    @SearchField(value = "title", tokenizer = SearchEngineTokenizerType.STAND)
+    @ApiField(description = "商品标题")
     private String title;
 
     /**
      * 商品销量
      */
-    @SearchField("sales")
+    @ApiField(description = "当前销量")
     private Integer sales;
 
     /**
      * 商品主图（冗余信息）
      */
-    @SearchField("img")
+    @ApiField(description = "商品主图")
     private String img;
 
     /**
      * 商品详情
      */
+    @ApiField(description = "富文本详情")
     private String detail;
 
     /**
      * 商品一句话描述
      */
-    @SearchField(value = "description", tokenizer = SearchEngineTokenizerType.STAND)
+    @ApiField(description = "商品描述")
     private String description;
 
     /**
      * 商品类目id
      */
-    @SearchField("category_id")
-    @TableField("category_id")
+    @ApiField(description = "所属类目ID")
     private Long categoryId;
 
     /**
      * 运费模板Id
      */
-    @SearchField("freight_template_id")
-    @TableField("freight_template_id")
+    @ApiField(description = "运费模板ID")
     private Long freightTemplateId;
 
     /**
      * 单位
      */
-    @SearchField("unit")
+    @ApiField(description = "计量单位")
     private String unit;
 
     /**
      * 商品状态
      */
-    @SearchField("status")
+    @ApiField(description = "状态", enums = StatusType.class)
     private Integer status;
 
     /**
      * 当前商品所参加的促销活动类型
      */
-    @SearchField("activity_type")
-    @TableField("activity_type")
+    @ApiField(description = "促销活动类型", enums = SpuActivityType.class)
     private Integer activityType;
 
     /**
      * 当前商品所参加促销活动ID
      */
-    @SearchField("activity_id")
-    @TableField("activity_id")
+    @ApiField(description = "促销活动ID")
     private Long activityId;
 
     /**
      * 当前商品参加促销活动开始时间
      */
-    @SearchField("gmt_activity_start")
-    @TableField("gmt_activity_start")
+    @ApiField(description = "活动开始时间")
     private Date gmtActivityStart;
 
     /**
      * 当前商品参加促销活动结束时间
      */
-    @SearchField("gmt_activity_end")
-    @TableField("gmt_activity_end")
+    @ApiField(description = "活动结束时间")
     private Date gmtActivityEnd;
-
-    @SearchField("gmt_update")
-    @TableField("gmt_update")
-    private Date gmtUpdate;
-
-    @SearchField("gmt_create")
-    @TableField("gmt_create")
-    private Date gmtCreate;
 
 }

@@ -36,7 +36,6 @@ export function parseTime(time, cFormat) {
 }
 
 export function formatGmt(time) {
-  debugger
   const d = new Date(time)
   return (
     d.getMonth() +

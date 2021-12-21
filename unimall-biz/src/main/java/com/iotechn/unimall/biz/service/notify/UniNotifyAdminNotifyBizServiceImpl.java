@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.service.notify;
 
-import com.iotechn.unimall.core.util.SHAUtil;
+import cn.hutool.crypto.SecureUtil;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.properties.UnimallAdminNotifyProperties;
 import okhttp3.FormBody;
@@ -85,6 +85,6 @@ public class UniNotifyAdminNotifyBizServiceImpl implements AdminNotifyBizService
             sortSet.add(formBody.value(i));
         }
         sortSet.add(this.unimallAdminNotifyProperties.getUniNotifyAppSecret());
-        return SHAUtil.sha256Encode(URLEncoder.encode(sortSet.stream().collect(Collectors.joining()), "utf-8"));
+        return SecureUtil.sha256(URLEncoder.encode(sortSet.stream().collect(Collectors.joining()), "utf-8"));
     }
 }

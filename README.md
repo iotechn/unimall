@@ -1,7 +1,7 @@
-![](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/banner.png)
+![](https://img.dobbinsoft.com/static/banner.jpg)
 ---
 
- [![Release Version](https://img.shields.io/badge/release-2.0.0-brightgreen.svg)](https://gitee.com/iotechn/unimall) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://gitee.com/iotechn/unimall/pulls)
+ [![Release Version](https://img.shields.io/badge/release-3.0.0-brightgreen.svg)](https://gitee.com/iotechn/unimall) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://gitee.com/iotechn/unimall/pulls)
 
 
 [(English Documents Available)](readme_en.md)
@@ -13,12 +13,11 @@ Unimall 针对中小商户、企业和个人学习者开发。使用Java编码�
 Unimall社区版源码包含:
 
 - Java 后端服务
-    - unimall-launcher: 启动器（打包打这个就行）
+    - unimall-runner: 启动器（打包打这个就行）
     - unimall-admin-api: 提供管理员管理系统的WebApi
     - unimall-app-api: 提供APP、小程序、H5用户请求的WebApi
     - unimall-biz: 提供通用业务代码
     - unimall-data: 提供数据模型以及数据访问层封装
-    - unimall-core: 提供注解、工具类等
     
 - Vue 前端页面
     - unimall-admin: 基于element-ui的后台管理页面
@@ -26,37 +25,37 @@ Unimall社区版源码包含:
 
 - sql: 数据库初始化SQL脚本
 
-## About this repository
+## About this repository 关于
 
 - release: 已经发布的分支
 - develop: 正在开发的分支
-   - develope-v2: 此分支已经完全测试过，但还没上过生产，可直接使用
+   - develope-v3: 此分支已经完全测试过，但还没上过生产，可直接使用
 
-## Contact
+## Contact 联系
 
-QQ讨论群：656676341(1群已满) 940197916(2群) (进群前，请在网页右上角点star)
+QQ讨论群：656676341(1群已满) 940197916(2群已满) **936569693(3群)** (进群前，请在网页右上角点**star**)
 
-微信：18584669549 (若微信群二维码超100人，请加此微信备注意图，接受邀请)
+微信：dobbinsoft (微信群二维码超100人，请加此微信备注意图，接受邀请)
 
-微信群(初建)：
+微信群：
 
 ![front](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/wx.png)
 
-## Experience
+## Experience 体验
 
 - Client
   
-  - 扫描下面二维码体验不同终端
+  - 扫描下面二维码体验不同终端 **（体验APP使用浏览器扫码）**
   
 
-![qr](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/qr.png)
+![qr](https://img.dobbinsoft.com/static/qr.jpg)
 
 - Pages
 
 ![front](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/front.jpg)
 
 - Admin
-  - 后台演示地址: [http://unimallv2.iotechn.com/](http://unimallv2.iotechn.com/)
+  - 后台演示地址: [https://unimall.v3.dobbinsoft.com](https://unimall.v3.dobbinsoft.com)
   - 登录名:guest 密码:123456 验证码:666666 (guest仅有只读权限，无读配置权限)
 - Pages
 
@@ -67,109 +66,81 @@ QQ讨论群：656676341(1群已满) 940197916(2群) (进群前，请在网页右
 ![front](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/b5.png)
 
 
-## New Features (v2)
-| 描述 | 演示 |
-|:--------|:-------:|
-| - 完全重新设计商品缓存，可实现无数据库访问商品访问，大幅度提高QPS | 无 |
-| - 支持注解式简单切面缓存，大幅度降低冗余代码 | ![cahce](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/cache.png) |
-| - 支持搜索引擎Aliyun OpenSearch，可支持高频文字检索 | 无 |
-| - 修复v1中由于缓存更新不及时，无法及时显示销量问题 | 无 |
-| - 支持动态配置，配置文件可做到可视化配置；之后Unimall项目中只需要静态配置MySql 与 Redis 即可 | ![config](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/config.png) |
-| - 支持多维度SKU，例如衣服可增加规格维度: 颜色、尺寸| ![sku_attr](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/sku_attr.png) |
-| - 升级持久层框架由mybatis-plus 2 至 mybatis-plus 3，引入分页插件 | 无 |
-| - 修改类目管理方式，改为直观三级树形式 | 无 |
-| - 增加管理员操作日志 | 无 |
+## New Features (v3) 新特性v3
+| 描述 |
+|:--------|
+| - 框架： 支持对象、字段注解生成文档 |
+| - 框架： 添加数据库扩展 |
+| - 框架： 支持滑动窗口Api限流 |
+| - 框架： 对接腾讯云对象存储 |
+| - 框架： 支持开放平台 |
+| - 功能： 添加用户在线支付开通、续费VIP |
+| - 功能： 对接App支付宝在线支付 |
+| - 功能： 对接支持道宾云ERP进销存系统 ⭐ |
 
 
 
-## The Framework
+## The Framework 架构
 
 ![framework](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/framework.png)
 
 
-
-## Getting started
+## Getting started 快速开始
 
 服务器可根据自身业务来选购，单机环境推荐2C4G
 
-##### docker 运行：
+##### 方式一： docker 运行
 
-~~~shell
-1.拉去镜像：
-	docker pull registry.cn-hangzhou.aliyuncs.com/nujukeji/unimall:2.0
-2.运行容器（执行这一步是会xshell可能会断开连接，重连即可）：
-	docker run -it -d  -p 80:80 -p 8080:8080 --name unimall --privileged=true registry.cn-hangzhou.aliyuncs.com/nujukeji/unimall:2.0 /usr/sbin/init
-3.访问电脑配置hosts IP映射：
-	docker运行环境IP demo.easycampus.cn
-4.访问网址：
-	http://demo.easycampus.cn/
-5.运行命令：docker exec -it unimall /bin/bash
-  进入docker容器中 tail -100f /unimall.log 即可查看打印的发送验证码。
-~~~
+视频教程： 
+
+文档教程：[点击查看](./docs/docker.01.env.md)
+
+
+##### 方式二： 编译运行 
+
+视频教程：
+
+文档教程：[文档1](./docs/build.01.env.md) [文档2](./docs/build.02.backend.md) [文档3](./docs/build.03.front.md)
 
 
 
-##### ① 基础运行环境
+## Document 文档
 
-| 运行环境 | 版本号 |
-|:--------|:--------|
-|  MySQL   |  5.7+（推荐）  |
-|  JDK   |  1.8+（推荐）  |
-|  Redis   |  4+   |
-|  Nginx  |  只要Web容器就可以了  |
+##### 框架v3文档
 
-请参考 [CentOS7.4 安装 MySQL5.7](https://github.com/iotechn/document-basic/blob/master/CentOS7.4_Install_MySQL5.7.md)
+| 依赖                                   | 解释                   |
+| -------------------------------------- | ---------------------- |
+| [core](../../../dobbinfw-core)         | 核心包                 |
+| [support](../../../dobbinfw-support)   | 支持包，非常重要的文档 |
+| [launcher](../../../dobbinfw-launcher) | 启动器，非常重要的文档 |
+| [dobbinfw](../../../dobbinfw) | 脚手架文档 |
 
-请参考 [CentOS 安装 JDK8](https://github.com/iotechn/document-basic/blob/master/CentOS_Install_JDK8.md)
+## Copyright 版权
 
-请参照CentOS [安装 NodeJs 8.15.0](https://github.com/iotechn/document-basic/blob/master/CentOS_Install_NodeJS_8.15.0.md)
+本项目后端由重庆驽驹科技有限公司开发，禁止未经授权用于商业用途。个人学习可免费使用。
 
-Redis安装可直接使用yum安装 
+如需**商业授权**，请使用以下两种方式授权。
 
-	yum install redis
+1. 在DEMO小程序中购买商用授权商品。
 
-安装完成后使用 redis-cli 命令，若能进入，则表示redis安装完成
-
-##### ② 后台管理系统编译运行指南
-
-[编译运行指南](doc/run.md)
-
-##### ③ 编译部署前后端代码
-
-项目部署分为 Server 、 App 、 Admin 三个部分
-
-[部署Step1:Java后台编译&部署](doc/server.md)
-
-[部署Step2:App编译打包](doc/app.md)
-
-[部署Step3:Admin编译打包](doc/admin.md)
-
-##### ④ 二次开发文档
-
-[二次开发文档](doc/2develop.md)
-
-## Copyright
-
-本项目后端由重庆驽驹科技有限公司开发，禁止未经授权用于商业用途。个人学习可免费使用。如需商业授权，请进DEMO小程序购买。
-
-1.淘宝授权：https://item.taobao.com/item.htm?spm=a2126o.11854294.0.0.5f164831jltJlx&id=615046003598 2.直接在小程序中购买商用授权商品
+2. 淘宝授权：[点击跳转](https://item.taobao.com/item.htm?spm=a2126o.11854294.0.0.5f164831jltJlx&id=615046003598 ) 
 
 已授权公司查询(由于是后面统计的，有些未统计到，请用订单号来添加)
-http://www.dobbinsoft.com/authorization.html
+https://www.dobbinsoft.com/authorization.html
 
-![证书](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/cert.jpg)
+![证书](https://img.dobbinsoft.com/static/UnimallCert.jpg)
 
 前端代码使用的 mix.R 的开源模板，在此模板的基础上对接了Unimall后端Api，作者说不做商用限制，保留原地址，所以授权仅针对后端代码商用授权。
 
 mix模板地址：https://ext.dcloud.net.cn/plugin?id=200
 
-## Service
+## Service 服务
 
-### 项目定制开发服务
+##### 一、项目定制开发服务
 
-若需要软件需求外包，小程序、App、网站、微信定制开发，请联系微信：18584669549 （请备注意图）
+若需要软件需求外包，小程序、App、网站、微信定制开发，请联系微信：dobbinsoft（请备注意图）
 
-### 电商小程序 SaaS 服务 (无代码快速上线微信小程序)
+##### 二、电商小程序 SaaS 服务 (无代码快速上线微信小程序)
 
 对于缺少技术的创业团队来说，使用SaaS服务即可解决掉技术问题。简单的说，就是由我们为客户统一运维，每年付一定的钱给我们就行了。
 
@@ -185,16 +156,10 @@ Unimall SaaS版每年980元。这个价格就和服务器的价格差不多，�
 
 
 
-支持试用：如果您已经有了自己的小程序，直接来试用下吧。微信扫描一下二维码直接购买，可获取免登录链接，或直接PC访问腾讯云市场链接。
+支持试用：https://console.dobbinsoft.com/
 
-![saas](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/saas.png)
+注册账号，即可免费试用，试用规则： 未上线，不记时间，上线后，可免费试用7天。
 
-腾讯云市场链接：[https://market.cloud.tencent.com/products/18338](https://market.cloud.tencent.com/products/18338) 
-
-
-
-点击“购买”旁边的“试用7天”，可立即试用。
-
-## Contributing
+## Contributing 贡献
 
 如果你有好的意见或建议，欢迎给我们提 Issues 或 Pull Requests，为Unimall开源商城贡献力量。关于分支/issue及PR。

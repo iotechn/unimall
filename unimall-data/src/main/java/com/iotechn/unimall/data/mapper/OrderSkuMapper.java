@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.dobbinsoft.fw.support.mapper.IMapper;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
 import com.iotechn.unimall.data.dto.order.OrderStatisticsDTO;
 import org.apache.ibatis.annotations.Param;

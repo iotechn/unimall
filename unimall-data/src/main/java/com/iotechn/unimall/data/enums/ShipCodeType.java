@@ -1,9 +1,11 @@
 package com.iotechn.unimall.data.enums;
 
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+
 /**
  * Created by rize on 2019/2/11.
  */
-public enum ShipCodeType {
+public enum ShipCodeType implements BaseEnums<String> {
     SF("SF","顺丰速运"),
     HTKY("HTKY", "百世快递"),
     ZTO("ZTO", "中通快递"),
@@ -39,15 +41,6 @@ public enum ShipCodeType {
 
     public String getMsg() {
         return msg;
-    }
-
-    public static ShipCodeType getByCode(String code) {
-        for (ShipCodeType type : values()) {
-            if (type.getCode().equals(code)) {
-                return type;
-            }
-        }
-        return OTHERS;
     }
 
 }

@@ -1,15 +1,13 @@
 package com.iotechn.unimall.app.api.groupshop;
 
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.annotation.HttpParam;
-import com.iotechn.unimall.core.annotation.HttpParamType;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
-import com.iotechn.unimall.data.model.Page;
+import com.dobbinsoft.fw.core.annotation.HttpMethod;
+import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
+import com.dobbinsoft.fw.core.annotation.HttpParam;
+import com.dobbinsoft.fw.core.annotation.HttpParamType;
+import com.dobbinsoft.fw.support.model.Page;
+import com.iotechn.unimall.data.dto.product.GroupShopDTO;
 
 import java.rmi.ServerException;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.

@@ -6,7 +6,8 @@
         <el-form-item label="商品名称" prop="title">
           <el-input v-model="product.title" />
         </el-form-item>
-        <el-form-item label="原始价格" prop="originalPriceRaw">
+
+        <!-- <el-form-item label="原始价格" prop="originalPriceRaw">
           <el-input v-model="product.originalPriceRaw" placeholder="0.00">
             <template slot="append">元</template>
           </el-input>
@@ -24,9 +25,9 @@
 
         <el-form-item label="剩余库存" prop="stock">
           <el-input v-model="product.stock" :disabled="true" placeholder="0"/>
-        </el-form-item>
+        </el-form-item> -->
 
-        <el-form-item label="运费模板" prop="freightTemplate">
+        <el-form-item label="运费模板" prop="freightTemplateId">
           <el-select v-model="product.freightTemplateId" placeholder="选择商品运费模板">
             <el-option v-for="(item, index) in freightList" :key="index" :label="item.title" :value="item.id"/>
           </el-select>
@@ -60,7 +61,7 @@
           <el-input v-model="product.unit" placeholder="件 / 个 / 盒" />
         </el-form-item>
 
-        <el-form-item label="所属类目" prop="category">
+        <el-form-item label="所属类目" prop="categoryId">
           <el-cascader
             :options="categoryList"
             :props="{label:'title', value:'id', children:'childrenList'}"
@@ -85,8 +86,8 @@
       <h3>商品参数</h3>
       <el-button :plain="true" type="primary" @click="handleAttributeShow">添加</el-button>
       <el-table :data="attributes">
-        <el-table-column property="attribute" label="商品参数名称" />
-        <el-table-column property="value" label="商品参数值" />
+        <el-table-column property="attribute" label="参数名称" />
+        <el-table-column property="value" label="参数值" />
         <el-table-column
           align="center"
           label="操作"
@@ -110,10 +111,10 @@
           label-width="100px"
           style="width: 400px; margin-left:50px;"
         >
-          <el-form-item label="商品参数名称" prop="attribute">
+          <el-form-item label="参数名称" prop="attribute">
             <el-input v-model="attributeForm.attribute" />
           </el-form-item>
-          <el-form-item label="商品参数值" prop="value">
+          <el-form-item label="参数值" prop="value">
             <el-input v-model="attributeForm.value" />
           </el-form-item>
         </el-form>
@@ -125,7 +126,9 @@
     </el-card>
 
     <el-card class="box-card">
-      <h3>规格维度</h3>
+      <h3><span style="color: red"> * </span><span>规格维度</span><el-tooltip class="item" effect="dark" content="添加例如 颜色，尺码等规格维度（至少存在一个规格维度）" placement="top-start">
+        <i class="el-icon-question" />
+      </el-tooltip></h3>
       <el-button :plain="true" type="primary" @click="createSpecDialogShow">添加</el-button>
       <el-table :data="specList">
         <el-table-column property="id" label="维度Id"/>
@@ -171,7 +174,7 @@
 
     <el-card class="box-card">
       <div slot="header" class="clearfix">
-        <h4>商品(Sku)详情</h4>
+        <h3><span style="color: red"> * </span><span>商品(Sku)详情</span></h3>
         <el-button :plain="true" type="primary" @click="skuBatchPriceVisiable = true">批量定价</el-button>
       </div>
       <div v-for="(item, index) in specList" :key="index" class="tag-group">
@@ -322,8 +325,8 @@
 
     <div class="op-container">
       <el-button @click="handleCancel">取消</el-button>
-      <el-button v-if="!product.id" type="primary" @click="handleCreate">保存商品</el-button>
-      <el-button v-if="product.id" type="primary" @click="handleEdit">更新商品</el-button>
+      <el-button v-if="!product.id" type="primary" @click="handleUpsert('create')">保存商品</el-button>
+      <el-button v-if="product.id" type="primary" @click="handleUpsert('edit')">更新商品</el-button>
     </div>
   </div>
 </template>
@@ -366,25 +369,24 @@ export default {
       skuStatus: '',
       specStatus: '',
       rules: {
+        categoryId: [
+          { required: true, message: '请选择商品类目', trigger: 'blur' }
+        ],
         status: [
           { required: true, message: '请选择商品状态', trigger: 'blur' }
         ],
         title: [
           { required: true, message: '商品名称不能为空', trigger: 'blur' }
         ],
-        priceRaw: [
-          { required: true, message: '商品现价不能为空', trigger: 'blur' }
-        ],
-        originalPriceRaw: [
-          { required: true, message: '商品原价不能为空', trigger: 'blur' }
-        ],
-        vipPriceRaw: [
-          { required: true, message: '商品ViP价格不能为空', trigger: 'blur' }
-        ],
         unit: [
           { required: true, message: '物件单位不能为空', trigger: 'blur' }
         ],
-        detail: [{ required: true, message: '请填写商品详情', trigger: 'blur' }]
+        detail: [
+          { required: true, message: '请填写商品详情', trigger: 'blur' }
+        ],
+        freightTemplateId: [
+          { required: true, message: '请选择运费模板', trigger: 'blur' }
+        ]
       },
       specRules: {
         title: [
@@ -492,6 +494,11 @@ export default {
               }
             })
           }
+          this.product.skuList.sort((sku1, sku2) => {
+            const key1 = this.getSortKey(sku1.specification)
+            const key2 = this.getSortKey(sku2.specification)
+            return key1.localeCompare(key2)
+          })
           this.skuTableData = JSON.parse(JSON.stringify(this.product.skuList))
         })
       }
@@ -504,17 +511,26 @@ export default {
         this.freightList = response.data.data
       })
     },
+    getSortKey(specification) {
+      // 尺码_S,颜色_经典款短袖黑色A
+      const array1 = specification.split(',')
+      let str = ''
+      for (let i = 0; i < array1.length; i++) {
+        const array2 = array1[i].split('_')
+        str += array2[0] + '_'
+      }
+      for (let i = 0; i < array1.length; i++) {
+        const array2 = array1[i].split('_')
+        str += array2[1] + '_'
+      }
+      // 尺码_颜色_S_经典款短袖黑色A_
+      return str
+    },
     handleCategoryChange(value) {
       this.product.categoryId = value[value.length - 1]
     },
     handleCancel: function() {
       this.$router.push({ path: '/product/list' })
-    },
-    handleCreate: function() {
-      this.handleUpsert('create')
-    },
-    handleEdit: function() {
-      this.handleUpsert('edit')
     },
     /**
      * 执行更新添加操作，传入操作action字符串: 'create', 'edit'
@@ -532,10 +548,10 @@ export default {
               title: '失败',
               message: '请添加类型（Sku）'
             })
-          } else if (this.categoryIds.length !== 3) {
+          } else if (this.categoryIds.length !== 2) {
             this.$notify.error({
               title: '失败',
-              message: '请选择（第三级）类目'
+              message: '请选择（第二级）类目'
             })
           } else if (this.product.imgList.length === 0) {
             this.$notify.error({
@@ -543,7 +559,7 @@ export default {
               message: '请上传至少一张图片'
             })
           } else {
-            this.product.categoryId = this.categoryIds[2]
+            this.product.categoryId = this.categoryIds[1]
             this.product.price = parseInt(this.product.priceRaw * 100)
             this.product.originalPrice = parseInt(this.product.originalPriceRaw * 100)
             this.product.vipPrice = parseInt(this.product.vipPriceRaw * 100)

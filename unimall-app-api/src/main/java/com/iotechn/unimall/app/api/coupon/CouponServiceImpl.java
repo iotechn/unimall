@@ -1,19 +1,23 @@
 package com.iotechn.unimall.app.api.coupon;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.LockComponent;
+import com.dobbinsoft.fw.support.model.KVModel;
+import com.dobbinsoft.fw.support.service.BaseService;
 import com.iotechn.unimall.data.constant.LockConst;
-import com.iotechn.unimall.core.exception.AppServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.LockComponent;
 import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.domain.CouponUserDO;
+import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.CouponDTO;
 import com.iotechn.unimall.data.dto.CouponUserDTO;
+import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.enums.StatusType;
+import com.iotechn.unimall.data.enums.UserLevelType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.CouponMapper;
 import com.iotechn.unimall.data.mapper.CouponUserMapper;
-import com.iotechn.unimall.data.model.KVModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +35,7 @@ import java.util.stream.Collectors;
  * Created by rize on 2019/7/4.
  */
 @Service
-public class CouponServiceImpl implements CouponService {
+public class CouponServiceImpl extends BaseService<UserDTO, AdminDTO> implements CouponService {
 
     @Autowired
     private CouponMapper couponMapper;
@@ -53,6 +57,11 @@ public class CouponServiceImpl implements CouponService {
                 CouponDO couponDO = couponMapper.selectById(couponId);
                 if (couponDO.getStatus() == StatusType.LOCK.getCode()) {
                     throw new AppServiceException(ExceptionDefinition.COUPON_HAS_LOCKED);
+                }
+                if (couponDO.getIsVip().intValue() == 1) {
+                    if (sessionUtil.getUser().getLevel() != UserLevelType.VIP.getCode()) {
+                        throw new AppServiceException(ExceptionDefinition.COUPON_IS_VIP_ONLY);
+                    }
                 }
                 Date now = new Date();
                 if (couponDO.getGmtEnd() != null && couponDO.getGmtEnd().getTime() < now.getTime()) {
@@ -150,5 +159,10 @@ public class CouponServiceImpl implements CouponService {
     @Override
     public List<CouponUserDTO> getUserCoupons(Long userId) throws ServiceException {
         return couponUserMapper.getUserCoupons(userId);
+    }
+
+    @Override
+    public List<CouponDTO> getVipCoupons() throws ServiceException {
+        return couponMapper.getActiveCoupons().stream().filter(item -> item.getIsVip().intValue() == 1).collect(Collectors.toList());
     }
 }

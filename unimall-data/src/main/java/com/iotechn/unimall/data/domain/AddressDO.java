@@ -5,43 +5,39 @@ package com.iotechn.unimall.data.domain;
 @date  2019/7/4 - 21:29
 */
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
+import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
 @Data
+@ApiEntity(description = "地址领域模型")
 @TableName("unimall_address")
-public class AddressDO extends SuperDO{
+public class AddressDO extends SuperDO {
 
-    /**
-     * 省份
-     */
+    @ApiField(description = "省份")
     private String province;
-    /**
-     * 市
-     */
+
+    @ApiField(description = "城市")
     private String city;
-    /**
-     * 行政区/镇
-     */
+
+    @ApiField(description = "行政区/镇")
     private String county;
-    /**
-     * 详细地址
-     */
+
+    @ApiField(description = "详细地址")
     private String address;
-    /**
-     * 是否是默认地址
-     */
-    @TableField("default_address")
+
+    @ApiField(description = "是否是默认地址")
     private Integer defaultAddress;
 
-    @TableField("user_id")
+    @ApiField(description = "所属用户ID")
     private Long userId;
 
+    @ApiField(description = "签收手机号")
     private String phone;
-    /**
-     * 收件人
-     */
+
+    @ApiField(description = "签收人姓名")
     private String consignee;
 
 

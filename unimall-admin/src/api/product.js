@@ -103,3 +103,13 @@ export function freezeOrActivtion(id, status) {
     })
   })
 }
+
+export function rebuildProductCache() {
+  return request({
+    method: 'post',
+    data: Qs.stringify({
+      _gp: 'admin.product',
+      _mt: 'rebuildProductCache'
+    })
+  })
+}

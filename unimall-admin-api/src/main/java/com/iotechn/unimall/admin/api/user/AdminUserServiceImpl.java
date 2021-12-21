@@ -1,16 +1,18 @@
 package com.iotechn.unimall.admin.api.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.core.exception.AdminServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.util.GeneratorUtil;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.UserDO;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.UserMapper;
-import com.iotechn.unimall.data.model.Page;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Date;
 
@@ -29,7 +31,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean create(Long adminId, UserDO user) throws ServiceException {
+    public Boolean create(UserDO user, Long adminId) throws ServiceException {
         if (user == null){
             throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
@@ -41,7 +43,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         }
         Date now = new Date();
         user.setId(null);
-        user.setPassword(Md5Crypt.md5Crypt(user.getPassword().getBytes(), "$1$" + user.getPhone().substring(0,7)));
+        String salt = GeneratorUtil.genSalt();
+        user.setPassword(Md5Crypt.md5Crypt(user.getPassword().getBytes(), "$1$" + salt));
+        user.setSalt(salt);
         user.setGmtCreate(now);
         user.setGmtUpdate(now);
         return userMapper.insert(user) > 0;
@@ -49,14 +53,14 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean delete(Long adminId, Long id, String nickname) throws ServiceException {
+    public Boolean delete(Long id, Long adminId) throws ServiceException {
         return userMapper.delete(new QueryWrapper<UserDO>()
                 .eq("id", id)) > 0;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean edit(Long adminId, UserDO user) throws ServiceException {
+    public Boolean edit(UserDO user, Long adminId) throws ServiceException {
         if (user == null || user.getId() == null){
             throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
@@ -69,14 +73,16 @@ public class AdminUserServiceImpl implements AdminUserService {
         Date now = new Date();
         user.setGmtUpdate(now);
 
+        String salt = GeneratorUtil.genSalt();
         if(user.getPassword() != null) {
-            user.setPassword(Md5Crypt.md5Crypt(user.getPassword().getBytes(), "$1$" + user.getPhone().substring(0, 7)));
+            user.setPassword(Md5Crypt.md5Crypt(user.getPassword().getBytes(), "$1$" + salt));
         }
+        user.setSalt(salt);
         return userMapper.updateById(user) > 0;
     }
 
     @Override
-    public Boolean editStatus(Long adminId, Long userId, Integer status) throws ServiceException {
+    public Boolean editStatus(Long userId, Integer status, Long adminId) throws ServiceException {
         if(userId == null || status == null || (status != 0 && status != 1)){
             throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
@@ -91,8 +97,25 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public Page<UserDO> list(Long adminId, Long id, String nickname, Integer level, Integer gender, Integer status, Integer pageNo, Integer limit) throws ServiceException {
-        return userMapper.getUserList(Page.div(pageNo, limit, UserDO.class), id,nickname,level,gender,status);
+    public Page<UserDO> list(Long id, String nickname, Integer level, Integer gender, Integer status, Integer pageNo, Integer limit, Long adminId) throws ServiceException {
+        QueryWrapper<UserDO> wrapper = new QueryWrapper<>();
+        if (id != null) {
+            wrapper.eq("id", id);
+        }
+        if (level != null) {
+            wrapper.eq("level", level);
+        }
+        if (gender != null) {
+            wrapper.eq("gender", gender);
+        }
+        if (status != null) {
+            wrapper.eq("status", status);
+        }
+        if (!ObjectUtils.isEmpty(nickname)) {
+            wrapper.like("nickname", nickname);
+        }
+        wrapper.orderByDesc("id");
+        return userMapper.selectPage(Page.div(pageNo, limit, UserDO.class), wrapper);
     }
     
 }

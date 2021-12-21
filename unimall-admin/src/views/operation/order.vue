@@ -12,6 +12,7 @@
       />
       <el-select
         v-model="listQuery.status"
+        clearable
         style="width: 200px"
         class="filter-item"
         placeholder="请选择订单状态"
@@ -230,7 +231,7 @@
       </el-form>
     </el-dialog>
 
-    <el-dialog :visible.sync="adminMonoDialogVisible" title="发货">
+    <el-dialog :visible.sync="adminMonoDialogVisible" title="客服备注">
       <el-form
         status-icon
         label-position="left"

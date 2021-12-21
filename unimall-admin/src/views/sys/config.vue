@@ -31,7 +31,7 @@
       </el-form>
 
       <div class="op-container">
-        <el-button v-permission="['promote:merchant:create']" :loading="submiting" type="primary" @click="handleSave('wxAppDataForm', prefixs.wxAppDataPrefix)">保存更改</el-button>
+        <el-button :loading="submiting" type="primary" @click="handleSave('wxAppDataForm', prefixs.wxAppDataPrefix)">保存更改</el-button>
       </div>
 
     </el-card>
@@ -52,14 +52,83 @@
           <el-input v-model="wxPayDataForm.notifyUrl" placeholder="https://api.example.com/cb/wxpay" />
         </el-form-item>
 
-        <el-form-item label="文件系统证书地址" prop="keyPath">
-          <el-input v-model="wxPayDataForm.keyPath" placeholder="文件系统中退款证书的位置 eg: /cert/apiclient_cert.p12" />
+        <el-form-item>
+          <el-upload
+            :auto-upload="false"
+            :on-change="onCertChange"
+            :multiple="false"
+            :show-file-list="false"
+            class="upload-demo"
+            accept=".p12"
+            drag
+            action="https://jsonplaceholder.typicode.com/posts/">
+            <i class="el-icon-upload"/>
+            <div v-if="file" class="el-upload__text"><em>{{ file.name }}</em></div>
+            <div v-else class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div slot="tip" class="el-upload__tip">只能上传.p12文件</div>
+          </el-upload>
         </el-form-item>
 
       </el-form>
 
       <div class="op-container">
-        <el-button v-permission="['promote:merchant:create']" :loading="submiting" type="primary" @click="handleSave('wxPayDataForm', prefixs.wxPayDataPrefix)">保存更改</el-button>
+        <el-button :loading="submiting" type="primary" @click="handleSave('wxPayDataForm', prefixs.wxPayDataPrefix)">保存更改</el-button>
+      </div>
+
+    </el-card>
+
+    <el-card class="box-card">
+      <h3>支付宝APP配置</h3>
+      <el-form ref="aliAppDataForm" :model="aliAppDataForm" label-width="150px">
+
+        <el-form-item label="网关地址" prop="aliGateway">
+          <el-input v-model="aliAppDataForm.aliGateway" placeholder="https://openapi.alipay.com/gateway.do" />
+        </el-form-item>
+
+        <el-form-item label="小程序 AppId" prop="miniAppId">
+          <el-input v-model="aliAppDataForm.miniAppId" placeholder="2021002140688403" />
+        </el-form-item>
+
+        <el-form-item label="小程序 支付宝公钥" prop="miniAppPublicKey1">
+          <el-input v-model="aliAppDataForm.miniAppPublicKey1" placeholder="" />
+        </el-form-item>
+
+        <el-form-item label="小程序 应用公钥" prop="miniAppPublicKey2">
+          <el-input v-model="aliAppDataForm.miniAppPublicKey2" placeholder="" />
+        </el-form-item>
+
+        <el-form-item label="小程序 应用私钥" prop="miniAppPrivateKey2">
+          <el-input v-model="aliAppDataForm.miniAppPrivateKey2" placeholder="" />
+        </el-form-item>
+
+        <el-form-item label="小程序 支付回调URL" prop="miniNotifyUrl">
+          <el-input v-model="aliAppDataForm.miniNotifyUrl" placeholder="" />
+        </el-form-item>
+
+        <el-form-item label="APP AppId" prop="appId">
+          <el-input v-model="aliAppDataForm.appId" placeholder="2021002140688403" />
+        </el-form-item>
+
+        <el-form-item label="APP 支付宝公钥" prop="appPublicKey1">
+          <el-input v-model="aliAppDataForm.appPublicKey1" placeholder="" />
+        </el-form-item>
+
+        <el-form-item label="APP 应用公钥" prop="appPublicKey2">
+          <el-input v-model="aliAppDataForm.appPublicKey2" placeholder="" />
+        </el-form-item>
+
+        <el-form-item label="APP 应用私钥" prop="appPrivateKey2">
+          <el-input v-model="aliAppDataForm.appPrivateKey2" placeholder="" />
+        </el-form-item>
+
+        <el-form-item label="APP 支付回调URL" prop="appNotifyUrl">
+          <el-input v-model="aliAppDataForm.appNotifyUrl" placeholder="" />
+        </el-form-item>
+
+      </el-form>
+
+      <div class="op-container">
+        <el-button :loading="submiting" type="primary" @click="handleSave('aliAppDataForm', prefixs.aliAppDataPrefix)">保存更改</el-button>
       </div>
 
     </el-card>
@@ -150,31 +219,64 @@
     </el-card>
 
     <el-card class="box-card">
-      <h3>阿里云OSS配置(需要重启)</h3>
+      <h3>OSS配置(需要重启)</h3>
       <el-form ref="ossDataForm" :model="ossDataForm" label-width="150px">
 
-        <el-form-item label="AccessKeyId" prop="accessKeyId">
-          <el-input v-model="ossDataForm.accessKeyId" />
+        <el-form-item label="启用" prop="enable">
+          <el-select v-model="ossDataForm.enable" placeholder="请选择存储平台">
+            <el-option
+              :value="'mock'"
+              :label="'控制台模拟'"
+            />
+            <el-option
+              :value="'aliyun'"
+              :label="'阿里云'"
+            />
+            <el-option
+              :value="'qcloud'"
+              :label="'腾讯云'"
+            />
+          </el-select>
         </el-form-item>
 
-        <el-form-item label="AccessKeySecret" prop="accessKeySecret">
-          <el-input v-model="ossDataForm.accessKeySecret" />
+        <el-form-item v-if="ossDataForm.enable === 'aliyun'" label="AccessKeyId" prop="aliAccessKeyId">
+          <el-input v-model="ossDataForm.aliAccessKeyId" />
         </el-form-item>
 
-        <el-form-item label="EndPoint" prop="endpoint">
-          <el-input v-model="ossDataForm.endpoint" />
+        <el-form-item v-if="ossDataForm.enable === 'aliyun'" label="AccessKeySecret" prop="aliAccessKeySecret">
+          <el-input v-model="ossDataForm.aliAccessKeySecret" />
         </el-form-item>
 
-        <el-form-item label="bucket" prop="bucket">
-          <el-input v-model="ossDataForm.bucket" />
+        <el-form-item v-if="ossDataForm.enable === 'aliyun'" label="EndPoint" prop="aliEndpoint">
+          <el-input v-model="ossDataForm.aliEndpoint" />
         </el-form-item>
 
-        <el-form-item label="图片路径" prop="dir">
-          <el-input v-model="ossDataForm.dir" />
+        <el-form-item v-if="ossDataForm.enable === 'aliyun'" label="Bucket" prop="aliBucket">
+          <el-input v-model="ossDataForm.aliBucket" />
         </el-form-item>
 
-        <el-form-item label="Base Url" prop="baseUrl">
-          <el-input v-model="ossDataForm.baseUrl" />
+        <el-form-item v-if="ossDataForm.enable === 'aliyun'" label="Base Url" prop="aliBaseUrl">
+          <el-input v-model="ossDataForm.aliBaseUrl" />
+        </el-form-item>
+
+        <el-form-item v-if="ossDataForm.enable === 'qcloud'" label="SecretId" prop="qcloudSecretId">
+          <el-input v-model="ossDataForm.qcloudSecretId" />
+        </el-form-item>
+
+        <el-form-item v-if="ossDataForm.enable === 'qcloud'" label="SecretKey" prop="qcloudSecretKey">
+          <el-input v-model="ossDataForm.qcloudSecretKey" />
+        </el-form-item>
+
+        <el-form-item v-if="ossDataForm.enable === 'qcloud'" label="Region" prop="qcloudRegion">
+          <el-input v-model="ossDataForm.qcloudRegion" />
+        </el-form-item>
+
+        <el-form-item v-if="ossDataForm.enable === 'qcloud'" label="Bucket" prop="qcloudBucket">
+          <el-input v-model="ossDataForm.qcloudBucket" />
+        </el-form-item>
+
+        <el-form-item v-if="ossDataForm.enable === 'qcloud'" label="Base Url" prop="qcloudBaseUrl">
+          <el-input v-model="ossDataForm.qcloudBaseUrl" />
         </el-form-item>
 
       </el-form>
@@ -231,59 +333,6 @@
           <el-input-number :precision="0" v-model="systemDataForm.adminSessionPeriod" />
         </el-form-item>
 
-        <el-form-item label="游客访问" prop="guest">
-          <el-select v-model="systemDataForm.guest" placeholder="默认不可游客访问">
-            <el-option
-              :value="'true'"
-              :label="'允许'"
-            />
-            <el-option
-              :value="'false'"
-              :label="'不允许'"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="SSL Crt 路径" prop="sslCrtPath">
-          <el-input v-model="systemDataForm.sslCrtPath" />
-        </el-form-item>
-
-        <el-form-item label="SSL Crt 上传">
-          <el-upload
-            :action="uploadLocalPath"
-            :headers="headers"
-            :data="{
-              fsf: systemDataForm.sslCrtPath
-            }"
-            accept=".crt,.pem"
-            class="upload-demo"
-            drag>
-            <i class="el-icon-upload"/>
-            <div class="el-upload__text">将Crt/Pem文件拖到此处，或<em>点击上传</em></div>
-            <div slot="tip" class="el-upload__tip">Docker用户请勿修改上传路径，只能上传crt/pem纯文本文件</div>
-          </el-upload>
-        </el-form-item>
-
-        <el-form-item label="SSL Key 路径" prop="sslKeyPath">
-          <el-input v-model="systemDataForm.sslKeyPath" />
-        </el-form-item>
-
-        <el-form-item label="SSL Key 上传">
-          <el-upload
-            :action="uploadLocalPath"
-            :headers="headers"
-            :data="{
-              fsf: systemDataForm.sslKeyPath
-            }"
-            class="upload-demo"
-            accept=".key"
-            drag>
-            <i class="el-icon-upload"/>
-            <div class="el-upload__text">将Key文件拖到此处，或<em>点击上传</em></div>
-            <div slot="tip" class="el-upload__tip">Docker用户请勿修改上传路径，只能上传key文件纯文本文件</div>
-          </el-upload>
-        </el-form-item>
-
       </el-form>
 
       <div class="op-container">
@@ -328,40 +377,48 @@
     </el-card>
 
     <el-card class="box-card">
-      <h3>搜索引擎</h3>
-      <el-form ref="searchDataForm" :model="searchDataForm" label-width="150px">
+      <h3>进销存开放平台</h3>
+      <el-form ref="erpDataForm" :model="erpDataForm" label-width="150px">
 
-        <el-form-item label="启用(需要重启)" prop="enable">
-          <el-select v-model="searchDataForm.enable" placeholder="请选择搜索引擎">
+        <el-form-item label="启用" prop="enable">
+          <el-select v-model="erpDataForm.enable" placeholder="请选择服务提供者">
             <el-option
-              :value="'db'"
+              :value="'disable'"
               :label="'不使用'"
             />
             <el-option
-              :value="'opensearch'"
-              :label="'阿里云OpenSearch'"
+              :value="'dobbin'"
+              :label="'道宾云'"
             />
           </el-select>
         </el-form-item>
 
-        <el-form-item v-if="searchDataForm.enable == 'opensearch'" label="AccessKeyId" prop="openSearchAccessKeyId">
-          <el-input v-model="searchDataForm.openSearchAccessKeyId" />
+        <el-form-item v-if="erpDataForm.enable == 'dobbin'" label="租户ID" prop="dobbinTenementId">
+          <el-input v-model="erpDataForm.dobbinTenementId" />
         </el-form-item>
 
-        <el-form-item v-if="searchDataForm.enable == 'opensearch'" label="AccessKeySecret" prop="openSearchAccessKeySecret">
-          <el-input v-model="searchDataForm.openSearchAccessKeySecret" />
+        <el-form-item v-if="erpDataForm.enable == 'dobbin'" label="ClientCode" prop="dobbinClientCode">
+          <el-input v-model="erpDataForm.dobbinClientCode" />
         </el-form-item>
 
-        <el-form-item v-if="searchDataForm.enable == 'opensearch'" label="API 网关地址" prop="openSearchHost">
-          <el-input v-model="searchDataForm.openSearchHost" />
+        <el-form-item v-if="erpDataForm.enable == 'dobbin'" label="ServerPublicKey" prop="dobbinServerPublicKey">
+          <el-input v-model="erpDataForm.dobbinServerPublicKey" />
+        </el-form-item>
+
+        <el-form-item v-if="erpDataForm.enable == 'dobbin'" label="ClientPublicKey" prop="dobbinClientPublicKey">
+          <el-input v-model="erpDataForm.dobbinClientPublicKey" />
+        </el-form-item>
+
+        <el-form-item v-if="erpDataForm.enable == 'dobbin'" label="ClientPrivateKey" prop="dobbinClientPrivateKey">
+          <el-input v-model="erpDataForm.dobbinClientPrivateKey" />
         </el-form-item>
 
       </el-form>
 
       <div class="op-container">
-        <el-button :loading="submiting" type="primary" @click="handleSave('searchDataForm', prefixs.searchDataPrefix)">保存更改</el-button>
-        <el-button :loading="submiting" type="primary" @click="handleSearchEngineInit()">初始化</el-button>
-        <el-button :loading="submiting" type="primary" @click="handleSearchEngineRebuild()">重建引擎数据</el-button>
+        <el-button :loading="submiting" type="primary" @click="handleSave('erpDataForm', prefixs.erpDataPrefix)">保存更改</el-button>
+        <el-button v-if="erpDataForm.enable == 'dobbin'" :loading="submiting" type="primary" @click="syncCategory">同步库存</el-button>
+        <el-button v-if="erpDataForm.enable == 'dobbin'" :loading="submiting" type="primary" @click="syncProduct">同步商品</el-button>
       </div>
 
     </el-card>
@@ -369,31 +426,31 @@
   </div>
 </template>
 <script>
-
-import { initSearchEngine, rebuildSearchEngine, reloadPropertiesSearchEngine } from '@/api/search'
-import { uploadLocalPath } from '@/api/storage'
+import { syncCategory, syncProduct } from '@/api/erp'
 import { getToken } from '@/utils/auth'
 import { getData, save } from '@/api/config'
 export default {
   name: 'SysConfig',
   data() {
     return {
-      // 为上传SSL证书等文件
-      uploadLocalPath,
+      file: '',
       // 请按照此命名规范命名
       prefixs: {
         wxAppDataPrefix: 'WX_APP_CONFIG:',
         wxPayDataPrefix: 'WX_PAY_CONFIG:',
+        aliAppDataPrefix: 'ALI_APP_CONFIG:',
         smsDataPrefix: 'SMS_CONFIG:',
         ossDataPrefix: 'OSS_CONFIG:',
         orderDataPrefix: 'ORDER_CONFIG:',
         advertDataPrefix: 'ADVERT_CONFIG:',
         searchDataPrefix: 'OPEN_SEARCH_CONFIG:',
         systemDataPrefix: 'SYSTEM_CONFIG:',
-        adminNotifyDataPrefix: 'ADMIN_NOTIFY_CONFIG:'
+        adminNotifyDataPrefix: 'ADMIN_NOTIFY_CONFIG:',
+        erpDataPrefix: 'ADMIN_ERP_OPEN_PLATFORM_PREFIX:'
       },
       wxAppDataForm: {},
       wxPayDataForm: {},
+      aliAppDataForm: {},
       smsDataForm: {},
       ossDataForm: {},
       orderDataForm: {},
@@ -401,6 +458,7 @@ export default {
       searchDataForm: {},
       systemDataForm: {},
       adminNotifyDataForm: {},
+      erpDataForm: {},
       submiting: false
     }
   },
@@ -429,8 +487,8 @@ export default {
         for (let i = 0; i < arr.length; i++) {
           const cfg = arr[i]
           for (const prefix in this.prefixs) {
-            if (cfg.key.startsWith(this.prefixs[prefix])) {
-              this[prefix.replace('Prefix', 'Form')][cfg.key.replace(this.prefixs[prefix], '')] = cfg.value
+            if (cfg.configKey.startsWith(this.prefixs[prefix])) {
+              this[prefix.replace('Prefix', 'Form')][cfg.configKey.replace(this.prefixs[prefix], '')] = cfg.configValue
             }
           }
         }
@@ -451,8 +509,8 @@ export default {
       const configs = []
       for (const attr in dataForm) {
         const obj = {
-          key: attr,
-          value: dataForm[attr]
+          configKey: attr,
+          configValue: dataForm[attr]
         }
         configs.push(obj)
       }
@@ -465,51 +523,56 @@ export default {
             title: '成功',
             message: '保存成功'
           })
-          if (prefix === this.prefixs.searchDataPrefix) {
-            // 重新加载属性
-            this.$notify.warning({
-              type: 'warning',
-              title: '注意！Attention！',
-              message: '若更换搜索引擎实现，请重启后端服务以使IoC加载实例',
-              position: 'bottom-left',
-              duration: 0
-            })
-            reloadPropertiesSearchEngine().then(reloadRes => {
-
-            })
-          }
         })
         .catch(failres => {
           this.submiting = false
         })
     },
-    handleSearchEngineInit() {
+    syncCategory() {
       this.submiting = true
-      initSearchEngine().then(res => {
+      this.$notify.success({
+        type: 'success',
+        title: '成功',
+        message: '已经开始类目同步任务'
+      })
+      syncCategory().then(res => {
+        this.submiting = false
         this.$notify.success({
           type: 'success',
           title: '成功',
-          message: '初始化引擎成功'
+          message: '类目同步成功！'
         })
+      }).catch(failres => {
         this.submiting = false
       })
-        .catch(failres => {
-          this.submiting = false
-        })
     },
-    handleSearchEngineRebuild() {
+    syncProduct() {
       this.submiting = true
-      rebuildSearchEngine().then(res => {
+      this.$notify.success({
+        type: 'success',
+        title: '成功',
+        message: '已经开始商品同步任务'
+      })
+      syncProduct().then(res => {
+        this.submiting = false
         this.$notify.success({
           type: 'success',
           title: '成功',
-          message: '重建搜索引擎数据成功!'
+          message: '商品同步成功！'
         })
+      }).catch(failres => {
         this.submiting = false
       })
-        .catch(failres => {
-          this.submiting = false
-        })
+    },
+    onCertChange(file) {
+      this.file = file
+      const reader = new FileReader()
+      /* 当读取操作成功完成时调用*/
+      reader.onload = async(e) => {
+        const base64Str = reader.result // 取得数据 这里的this指向FileReader（）对象的实例reader
+        this.wxPayDataForm.keyContent = base64Str.replace('data:application/x-pkcs12;base64,', '')
+      }
+      reader.readAsDataURL(file.raw) // 异步读取文件内容，结果用data:url的字符串形式表示
     }
   }
 }

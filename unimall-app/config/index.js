@@ -1,7 +1,9 @@
-const config = {
-  baseUrl: 'http://127.0.0.1:8081',
-  // baseUrl: 'https://demo.easycampus.cn',
-  h5Appid: 'wxb66b599f7f61b46f',
-  debug: false
+let ENV_CONFIG
+if (process.env.NODE_ENV === 'development') {
+  // 开发环境
+  ENV_CONFIG = require('./.env.dev.js')
+} else {
+  // 生产环境
+  ENV_CONFIG = require('./.env.prod.js')
 }
-module.exports = config
+module.exports = ENV_CONFIG

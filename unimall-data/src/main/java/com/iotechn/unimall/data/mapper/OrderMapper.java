@@ -1,8 +1,9 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.dobbinsoft.fw.support.mapper.IMapper;
+import com.dobbinsoft.fw.support.model.KVModel;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
-import com.iotechn.unimall.data.model.KVModel;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;

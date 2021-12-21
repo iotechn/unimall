@@ -10,16 +10,16 @@
             default-expand-all>
             <span slot-scope="{ node, data }" class="custom-tree-node">
               <div class="title-size">
-                <el-image v-show="data.level === 2" :src="data.picUrl" class="c-img"/>
+                <el-image v-show="data.level === 1" :src="data.picUrl" class="c-img"/>
                 {{ data.title }}
-                <el-tag v-show="data.id !== 0" :type="data.level === 0 ? 'danger' : (data.level === 1 ? 'warning' : 'success')">
-                  {{ data.level === 0 ? '一级' : (data.level === 1 ? '二级' : '三级') }}
+                <el-tag v-show="data.id !== 0" :type="data.level === 0 ? 'danger' : 'success'">
+                  {{ data.level === 0 ? '一级' : '二级' }}
                 </el-tag>
               </div>
 
               <span>
                 <el-button
-                  v-show="data.level !== 2 "
+                  v-show="data.level !== 1"
                   type="primary"
                   size="mini"
                   round
@@ -72,7 +72,7 @@
             :action="uploadPath"
             :show-file-list="false"
             :on-success="pirUploadSuccessHandle"
-            :before-upload="onBeforeUpload"
+            :before-upload="beforeFileUplod"
             class="avatar-uploader"
             accept=".jpg, .jpeg, .png, .gif"
           >
@@ -92,11 +92,11 @@
 
 <script>
 import { createCategory, updateCategory, deleteCategory, categoryTree } from '@/api/category'
-import { uploadPath } from '@/api/storage'
+import { uploadPath, beforeFileUplod } from '@/api/storage'
 import { getToken } from '@/utils/auth'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
-const categoryLevelMap = [{ text: '一级类目', value: 0 }, { text: '二级类目', value: 1 }, { text: '三级类目', value: 2 }]
+const categoryLevelMap = [{ text: '一级类目', value: 0 }, { text: '二级类目', value: 1 }]
 export default {
   name: 'Category',
   components: { Pagination },
@@ -111,6 +111,7 @@ export default {
   data() {
     return {
       categoryLevelMap,
+      beforeFileUplod,
       uploadPath,
       list: [],
       dialogOptions: undefined,
@@ -240,7 +241,7 @@ export default {
         this.submiting = true
         createCategory(this.dataForm)
           .then(response => {
-            if (response.data.data.level < 2) {
+            if (response.data.data.level < 1) {
               response.data.data.childrenList = []
             }
             this.currentParent.childrenList.push(response.data.data)
@@ -268,7 +269,6 @@ export default {
               this.current.title = res.data.data.title
               this.current.iconUrl = res.data.data.iconUrl
               this.current.picUrl = res.data.data.picUrl
-              debugger
               this.dialogFormVisible = false
               this.$notify.success({
                 title: '成功',
@@ -283,25 +283,6 @@ export default {
             })
         }
       })
-    },
-    // 上传图片前调用
-    onBeforeUpload(file) {
-      const isIMAGE = file.type === 'image/jpeg' || 'image/gif' || 'image/png' || 'image/jpg'
-      const isLt1M = file.size / 1024 / 1024 < 1
-
-      if (!isIMAGE) {
-        this.$message.error('上传文件只能是图片格式!')
-      }
-      if (!isLt1M) {
-        this.$message.error('上传文件大小不能超过 1MB!')
-      }
-      return isIMAGE && isLt1M
-    },
-    // icon上传图片了处理图片
-    iconUploadSuccessHandle(e) {
-      this.dataForm.iconUrl = e.url
-      this.dialogFormVisible = false
-      this.dialogFormVisible = true
     },
     // pir上传图片了处理图片
     pirUploadSuccessHandle(e) {

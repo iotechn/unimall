@@ -1,5 +1,6 @@
 package com.iotechn.unimall.data.mapper;
 
+import com.dobbinsoft.fw.support.mapper.IMapper;
 import com.iotechn.unimall.data.domain.SpuDO;
 import org.apache.ibatis.annotations.Param;
 
@@ -23,7 +24,7 @@ public interface SpuMapper extends IMapper<SpuDO> {
      * @param delta
      * @return
      */
-    public Integer incSales(@Param("spuId") Long spuId,@Param("delta") Integer delta);
+    public Integer incSales(@Param("spuId") Long spuId, @Param("delta") Integer delta);
 
     public List<SpuDO> getSpuTitleAll();
 

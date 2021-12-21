@@ -1,6 +1,5 @@
 package com.iotechn.unimall.data.model;
 
-import com.iotechn.unimall.data.dto.SuperDTO;
 import lombok.Data;
 
 /**
@@ -11,7 +10,7 @@ import lombok.Data;
  * Time: 15:57
  */
 @Data
-public class OrderCalcSkuModel extends SuperDTO {
+public class OrderCalcSkuModel {
 
     // 前端请求的数据，欲购买的SKU与欲购买的数量
 

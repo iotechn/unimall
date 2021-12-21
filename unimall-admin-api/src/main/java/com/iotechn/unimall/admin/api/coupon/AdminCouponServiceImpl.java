@@ -1,14 +1,14 @@
 package com.iotechn.unimall.admin.api.coupon;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.core.exception.AdminServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.dto.CouponAdminDTO;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.CouponMapper;
 import com.iotechn.unimall.data.mapper.CouponUserMapper;
-import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +36,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public CouponDO create(String title, Integer type, String description, Integer total, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Long gmtStart, Long gmtEnd, Long adminId) throws ServiceException {
+    public CouponDO create(String title, Integer type, Integer isVip, String description, Integer total, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Long gmtStart, Long gmtEnd, Long adminId) throws ServiceException {
         Date start = null;
         Date end = null;
         if (gmtEnd != null && gmtStart != null) {
@@ -47,6 +47,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         CouponDO couponDO = new CouponDO();
         couponDO.setTitle(title);
         couponDO.setType(type);
+        couponDO.setIsVip(isVip);
         couponDO.setDescription(description);
         couponDO.setTotal(total);
         couponDO.setSurplus(total);
@@ -83,11 +84,12 @@ public class AdminCouponServiceImpl implements AdminCouponService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean edit(Long id, String title, Integer type, String description, Integer total, Integer surplus, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Date gmtStart, Date gmtEnd, Long adminId) throws ServiceException {
+    public Boolean edit(Long id, String title, Integer type, Integer isVip, String description, Integer total, Integer surplus, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Date gmtStart, Date gmtEnd, Long adminId) throws ServiceException {
         CouponDO couponDO = new CouponDO();
         couponDO.setId(id);
         couponDO.setTitle(title);
         couponDO.setType(type);
+        couponDO.setIsVip(isVip);
         couponDO.setDescription(description);
         couponDO.setTotal(total);
         couponDO.setSurplus(total);
@@ -121,28 +123,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
 
     @Override
     public Page<CouponAdminDTO> list(String title, Integer type, Integer status, Integer pageNo, Integer limit, Long adminId) throws ServiceException {
-        QueryWrapper<CouponDO> wrapper = new QueryWrapper();
-        Date now = new Date();
-        if (!StringUtils.isEmpty(title)) {
-            wrapper.like("title", title);
-        }
-        if (type != null) {
-            wrapper.eq("type", type);
-        }
-        if (status != null) {
-            if (status >= 0 && status < 2) {
-                wrapper.eq("status", status);
-                wrapper.and(i->i
-                        .gt("gmt_end", now)
-                        .or()
-                        .isNotNull("days"));
-            } else if (status < 0) {
-                wrapper.lt("gmt_end", now);
-            } else {
-                throw new AdminServiceException(ExceptionDefinition.COUPON_CHECK_DATA_FAILED);
-            }
-        }
-        Page<CouponAdminDTO> page = couponMapper.getAdminCouponList(Page.div(pageNo, limit, CouponAdminDTO.class), title, type, status, now, (pageNo - 1) * limit, limit);
+        Page<CouponAdminDTO> page = couponMapper.getAdminCouponList(Page.div(pageNo, limit, CouponAdminDTO.class), title, type, status, new Date());
         return page;
     }
 }

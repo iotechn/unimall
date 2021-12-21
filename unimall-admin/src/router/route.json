@@ -215,6 +215,42 @@
    },
    {
       "redirect":"noredirect",
+      "path":"/vip",
+      "children":[
+         {
+            "path":"template",
+            "meta":{
+               "noCache":true,
+               "perms":[
+                  "vip:template:list"
+               ],
+               "title":"VIP模板管理"
+            },
+            "name":"vipTemplate",
+            "page":"/vip/template"
+         },
+         {
+            "path":"order",
+            "meta":{
+               "noCache":true,
+               "perms":[
+                  "vip:order:list"
+               ],
+               "title":"VIP卡管理"
+            },
+            "name":"vipOrder",
+            "page":"/vip/order"
+         }
+      ],
+      "meta":{
+         "icon":"qq",
+         "title":"VIP管理"
+      },
+      "name":"vipManage",
+      "alwaysShow":true
+   },
+   {
+      "redirect":"noredirect",
       "path":"/sys",
       "children":[
          {
@@ -280,30 +316,6 @@
          "title":"系统管理"
       },
       "name":"sysManage",
-      "alwaysShow":true
-   },
-   {
-      "redirect":"noredirect",
-      "path":"/tools",
-      "children":[
-         {
-            "path":"generator",
-            "meta":{
-               "noCache":true,
-               "perms":[
-                  ""
-               ],
-               "title":"代码生成器"
-            },
-            "name":"tools",
-            "page":"/tools/generator"
-         }
-      ],
-      "meta":{
-         "icon":"tools",
-         "title":"实用工具"
-      },
-      "name":"toolsManage",
       "alwaysShow":true
    },
    {

@@ -7,6 +7,7 @@ package com.iotechn.unimall.data.constant;
  * Time: 12:11
  */
 public class LockConst {
+
     /**
      * 领取优惠券加的锁
      * COUPON_LOCK: + couponId
@@ -71,4 +72,34 @@ public class LockConst {
      *
      */
     public static final String GROUP_SHOP_LOCK_LOCK = "GROUP_SHOP_LOCK_LOCK";
+
+    /**
+     * VipOrder状态锁
+     * VIP_ORDER_STATUS_LOCK: + orderId
+     */
+    public static final String VIP_ORDER_STATUS_LOCK = "VIP_ORDER_STATUS_LOCK:";
+
+    /**
+     * VipOrder退款锁
+     * VIP_ORDER_REFUND_LOCK: + orderId
+     */
+    public static final String VIP_ORDER_REFUND_LOCK = "VIP_ORDER_REFUND_LOCK:";
+
+    /**
+     * 用户会员过期乐观锁
+     * VIP_EXPIRE_LOCK
+     */
+    public static final String VIP_EXPIRE_LOCK = "VIP_EXPIRE_LOCK";
+
+    /**
+     * 用户会员支付超时乐观锁
+     * VIP_PAY_TIMEOUT_LOCK
+     */
+    public static final String VIP_PAY_TIMEOUT_LOCK = "VIP_PAY_TIMEOUT_LOCK";
+
+    /**
+     * 批量生成VipOrder锁
+     */
+    public static final String VIP_ORDER_GENERATE_LOCK = "VIP_ORDER_GENERATE_LOCK";
+
 }

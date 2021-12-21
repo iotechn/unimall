@@ -1,11 +1,12 @@
 package com.iotechn.unimall.data.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.dobbinsoft.fw.support.mapper.IMapper;
+import com.dobbinsoft.fw.support.model.KVModel;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.dto.CouponAdminDTO;
 import com.iotechn.unimall.data.dto.CouponDTO;
-import com.iotechn.unimall.data.model.KVModel;
-import com.iotechn.unimall.data.model.Page;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -23,6 +24,6 @@ public interface CouponMapper extends IMapper<CouponDO> {
 
     public List<CouponDTO> getActiveCoupons();
 
-    public Page<CouponAdminDTO> getAdminCouponList(IPage<CouponAdminDTO> page, @Param("title")String title, @Param("type") Integer type, @Param("status")Integer status, @Param("now")Date now, @Param("offset") Integer offset, @Param("limit") Integer limit);
+    public Page<CouponAdminDTO> getAdminCouponList(IPage<CouponAdminDTO> page, @Param("title") String title, @Param("type") Integer type, @Param("status") Integer status, @Param("now") Date now);
 
 }

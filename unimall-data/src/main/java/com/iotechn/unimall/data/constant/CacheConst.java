@@ -66,19 +66,18 @@ public class CacheConst {
     public static final String FOOTPRINT_LRU = "FOOTPRINT_LRU:";
     /**=========================== 足迹缓存 END =============================**/
 
-    /**=========================== 商铺信息缓存 START =============================**/
-    /**
-     * 存储商铺信息
-     */
-    public static final String MERCHANT_INFO = "MERCHANT_INFO";
-    /**=========================== 商铺信息缓存 END =============================**/
-
 
     public static final String USER_OFFICIAL_WECHAT_ACCESS = "USER_OFFICIAL_WECHAT_ACCESS";
 
     public static final String USER_OFFICIAL_WECHAT_TICKET = "USER_OFFICIAL_WECHAT_TICKET";
 
     public static final String USER_MINI_WECHAT_ACCESS = "USER_MINI_WECHAT_ACCESS";
+
+    /**
+     * 用户一键登录临时令牌
+     * USER_ONE_KEY_LOGIN: + 临时令牌
+     */
+    public static final String USER_ONE_KEY_LOGIN_TEMP_TOKEN = "USER_ONE_KEY_LOGIN:";
 
     /**=========================== 商品缓存 START =============================**/
 
@@ -125,14 +124,17 @@ public class CacheConst {
 
     /**=========================== 商品缓存 END ===============================**/
 
-    /**=========================== 动态配置 START =============================**/
+
+    /**=========================== VIP缓存 START =============================**/
 
     /**
-     * 动态配置缓存
-     * DYNAMIC_CACHE: + KEY
+     * 前端显示模板
+     * VIP_TEMPLATE_LIST
      */
-    public static final String DYNAMIC_CACHE = "DYNAMIC_CACHE:";
+    public static final String VIP_TEMPLATE_LIST = "VIP_TEMPLATE_LIST";
 
-    /**=========================== 动态配置 END ===============================**/
+    /**=========================== VIP缓存 END ===============================**/
+
+
 
 }

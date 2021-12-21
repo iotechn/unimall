@@ -11,6 +11,7 @@
       <el-button v-permission="['product:product:list']" class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">查找</el-button>
       <el-button v-permission="['product:product:create']" class="filter-item" type="primary" icon="el-icon-edit" @click="handleCreate">添加</el-button>
       <el-button v-permission="['product:product:batchdelete']" :disabled="selectedIds.length === 0" class="filter-item" type="danger" icon="el-icon-delete" @click="handleBatchDelete">批量删除</el-button>
+      <el-button v-permission="['product:product:rebuild']" :loading="rebuilding" class="filter-item" type="primary" @click="handleProductRebuild">重建商品缓存</el-button>
     </div>
 
     <!-- 查询结果 -->
@@ -51,48 +52,52 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="商品ID" prop="id" />
+      <el-table-column align="center" label="商品ID" prop="id" width="80" />
 
-      <el-table-column align="center" min-width="100" label="名称" prop="title" />
+      <el-table-column align="center" min-width="220" label="名称" prop="title" />
 
-      <el-table-column align="center" property="img" label="图片">
+      <el-table-column align="center" label="图片" width="80" prop="img">
         <template slot-scope="scope">
-          <img :src="scope.row.img + '?x-oss-process=style/100px'" width="40" >
+          <el-popover placement="right" trigger="hover">
+            <!--trigger属性值：hover、click、focus 和 manual-->
+            <img :src="scope.row.img" height="230" >
+            <img slot="reference" :src="scope.row.img" height="23" >
+          </el-popover>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="商品详细介绍" prop="detail">
+      <el-table-column align="center" label="富文本" prop="detail" width="80">
         <template slot-scope="scope">
           <el-dialog :visible.sync="detailDialogVisible" title="商品详情">
             <div v-html="goodsDetail" />
           </el-dialog>
-          <el-button type="primary" size="mini" @click="showDetail(scope.row)">查看</el-button>
+          <el-button type="text" size="mini" @click="showDetail(scope.row)">查看</el-button>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="类目ID" prop="categoryId" />
+      <el-table-column align="center" label="类目" prop="categoryFullTitle" />
 
-      <el-table-column align="center" label="邮费模板ID" prop="freightTemplateId" />
+      <el-table-column align="center" label="邮费模板" prop="freightTemplateTitle" />
 
-      <el-table-column align="center" label="销量" prop="sales" />
+      <el-table-column align="center" label="销量" prop="sales" width="80" />
 
-      <el-table-column align="center" label="单位" prop="unit" />
+      <el-table-column align="center" label="价格" prop="sales" width="80" >
+        <template slot-scope="scope">￥{{ scope.row.price / 100.0 }}</template>
+      </el-table-column>
 
-      <el-table-column align="center" label="是否在售" prop="status">
+      <el-table-column align="center" label="VIP格" prop="sales" width="80" >
+        <template slot-scope="scope">￥{{ scope.row.vipPrice / 100.0 }}</template>
+      </el-table-column>
+
+      <el-table-column align="center" label="单位" prop="unit" width="80" />
+
+      <el-table-column align="center" label="状态" prop="status" width="90">
         <template slot-scope="scope">
           <el-tag
             :type="scope.row.status == 1 ? 'success' : 'info' "
           >{{ scope.row.status == 1 ? '在售' : '未售' }}</el-tag>
         </template>
       </el-table-column>
-
-      <el-table-column
-        align="center"
-        max-width="300"
-        min-width="300"
-        label="描述"
-        prop="description"
-      />
 
       <el-table-column align="center" label="操作" width="250" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -122,6 +127,7 @@
 import { listProduct, deleteProduct, detailProduct, freezeOrActivtion, batchDeleteProduct } from '@/api/product'
 import BackToTop from '@/components/BackToTop'
 import { categoryTree } from '@/api/category'
+import { rebuildProductCache } from '@/api/product'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
 export default {
@@ -144,7 +150,8 @@ export default {
       },
       goodsDetail: '',
       detailDialogVisible: false,
-      selectedIds: []
+      selectedIds: [],
+      rebuilding: false
     }
   },
   created() {
@@ -157,9 +164,9 @@ export default {
       listProduct(this.listQuery)
         .then(response => {
           response.data.data.items.forEach(item => {
-            item.price = item.price / 100
-            item.originalPrice = item.originalPrice / 100
-            item.vipPrice = item.vipPrice / 100
+            item.price = item.price
+            item.originalPrice = item.originalPrice
+            item.vipPrice = item.vipPrice
           })
           this.list = response.data.data.items
           this.total = response.data.data.total
@@ -247,22 +254,21 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).catch(() => {
-        return false
       }).then(() => {
         freezeOrActivtion(row.id, status).then(response => {
           this.$notify.success({
             title: '成功',
             message: sign + '成功'
           })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1, response.data.data)
+          this.getList()
         }).catch(response => {
           this.$notify.error({
             title: '失败',
             message: response.data.errmsg
           })
         })
+      }).catch(() => {
+        return false
       })
     },
     handleSelectionChange(e) {
@@ -295,6 +301,26 @@ export default {
           })
       }).catch(() => {
         return false
+      })
+    },
+    handleProductRebuild() {
+      this.$confirm('重建商品缓存，在短期内有损系统性能，是否继续?', '提示', {
+        confirmButtonText: '立即重建',
+        cancelButtonText: '再想想',
+        type: 'warning',
+        customClass: 'custom-notify'
+      }).then(() => {
+        this.rebuilding = true
+        rebuildProductCache().then(res => {
+          this.$notify.success({
+            title: '成功',
+            customClass: 'custom-notify',
+            message: '正在重建1分钟内完成'
+          })
+          this.rebuilding = false
+        }).catch(res => {
+          this.rebuilding = false
+        })
       })
     }
   }

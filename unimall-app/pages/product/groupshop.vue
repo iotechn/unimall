@@ -1,97 +1,106 @@
 <template>
-	<view class="container">
-		<!-- 空白页 -->
-		<empty v-if="loadingType === 'nomore' && groupShopList.length === 0"></empty>
-		<view class="groupshop-list">
-			<block v-for="(item, index) in groupShopList" :key="index">
-				<navigator class="groupshop-item" :class="{'b-b': index!==groupShopList.length-1}" :url="'/pages/product/detail?id=' + item.spuId + '&gid=' + item.id">
-					<view class="image-wrapper">
-						<image :src="item.img + '?x-oss-process=style/200px'" :class="[item.loaded]" mode="aspectFill" lazy-load @load="onImageLoad('groupShopList', index)"
-						 @error="onImageError('groupShopList', index)"></image>
-					</view>
-					<view class="item-right">
-						<text class="clamp-title">{{item.title}}</text>
-						<view class="pro-box">
-						  	<view class="progress-box">
-						  		<progress :percent="100 * item.buyerNum / item.minNum" activeColor="#fa436a" active stroke-width="6" />
-						  	</view>
-							<text>{{item.minNum}}人成团</text>
-						</view>
-						<text class="bottom">
-							<!-- <text style="text-decoration:line-through;color: #6B6B6B;">¥{{item.originalPrice / 100.0}}</text> -->
-							<text class="price">¥{{item.minPrice / 100.0}}</text>
-							<text class="attr info">已拼团{{item.buyerNum}}件</text>
-						</text>
-					</view>
-				</navigator>
-			</block>
-		</view>
-
-
-	</view>
+  <view class="container">
+    <!-- 空白页 -->
+    <empty v-if="loadingType === 'nomore' && groupShopList.length === 0" />
+    <view class="groupshop-list">
+      <block v-for="(item, index) in groupShopList" :key="index">
+        <navigator class="groupshop-item" :class="{'b-b': index!==groupShopList.length-1}" :url="'/pages/product/detail?id=' + item.spuId + '&gid=' + item.id">
+          <view class="image-wrapper">
+            <image
+              :src="item.img + style(200)"
+              :class="[item.loaded]"
+              mode="aspectFill"
+              lazy-load
+              @load="onImageLoad('groupShopList', index)"
+              @error="onImageError('groupShopList', index)"
+            />
+          </view>
+          <view class="item-right">
+            <text class="clamp-title">
+              {{ item.title }}
+            </text>
+            <view class="pro-box">
+              <view class="progress-box">
+                <progress :percent="100 * item.buyerNum / item.minNum" activeColor="#fa436a" active stroke-width="6" />
+              </view>
+              <text>{{ item.minNum }}人成团</text>
+            </view>
+            <text class="bottom">
+              <!-- <text style="text-decoration:line-through;color: #6B6B6B;">¥{{item.originalPrice / 100.0}}</text> -->
+              <text class="price">
+                ¥{{ item.minPrice / 100.0 }}
+              </text>
+              <text class="attr info">
+                已拼团{{ item.buyerNum }}件
+              </text>
+            </text>
+          </view>
+        </navigator>
+      </block>
+    </view>
+  </view>
 </template>
 
 <script>
-	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
-	import empty from "@/components/empty";
-	export default {
-		components: {
-			uniLoadMore,
-			empty
-		},
-		data() {
-			return {
-				groupShopList: [],
-				pageNo: 1,
-				loadingType: 'more'
-			};
-		},
-		onLoad(options) {
-			this.loadData()
-		},
-		//下拉刷新
-		onPullDownRefresh() {
-			this.loadData('refresh');
-		},
-		//加载更多
-		onReachBottom() {
-			this.loadData();
-		},
-		methods: {
-			//获取收藏列表
-			loadData(type) {
-				const that = this
-				if (type === 'refresh') {
-					that.pageNo = 1
-					that.groupShopList = []
-					that.loadingType = 'more'
-				}
-				if (that.loadingType == 'more') {
-					that.loadingType = 'loading'
-					that.$api.request('groupshop', 'getGroupShopPage', {
-						pageNo: that.pageNo
-					}).then(res => {
-						that.pageNo = res.data.pageNo + 1
-						that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'nomore'
-						res.data.items.forEach(item => {
-							that.groupShopList.push(item);
-						})
-						if (type === 'refresh') {
-							uni.stopPullDownRefresh();
-						}
-					})
-				}
-			},
-			//监听image加载完成
-			onImageLoad(key, index) {
-				this.$set(this[key][index], 'loaded', 'loaded');
-			},
-			//监听image加载失败
-			onImageError(key, index) {
-				this[key][index].image = '/static/errorImage.jpg';
-			},
-		},
-	}
+import empty from '@/components/empty'
+export default {
+  components: {
+    empty
+  },
+  data() {
+    return {
+      style: this.$api.style,
+	  groupShopList: [],
+      pageNo: 1,
+      loadingType: 'more'
+    }
+  },
+  onLoad(options) {
+    this.loadData()
+  },
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.loadData('refresh')
+  },
+  // 加载更多
+  onReachBottom() {
+    this.loadData()
+  },
+  methods: {
+    // 获取收藏列表
+    loadData(type) {
+      const that = this
+      if (type === 'refresh') {
+        that.pageNo = 1
+        that.groupShopList = []
+        that.loadingType = 'more'
+      }
+      if (that.loadingType === 'more') {
+        that.loadingType = 'loading'
+        that.$api.request('groupshop', 'getGroupShopPage', {
+          pageNo: that.pageNo
+        }).then(res => {
+          that.pageNo = res.data.pageNo + 1
+          that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'nomore'
+          res.data.items.forEach(item => {
+            that.groupShopList.push(item)
+          })
+          if (type === 'refresh') {
+            uni.stopPullDownRefresh()
+          }
+        })
+      }
+    },
+    // 监听image加载完成
+    onImageLoad(key, index) {
+      this.$set(this[key][index], 'loaded', 'loaded')
+    },
+    // 监听image加载失败
+    onImageError(key, index) {
+      this[key][index].image = '/static/errorImage.jpg'
+    }
+  }
+}
 </script>
 
 <style lang="scss">
@@ -162,9 +171,9 @@
 				position: absolute;
 				bottom: 10upx;
 				left: 30upx;
-				
+
 			}
-			
+
 			.price {
 				color: $uni-color-primary;
 				font-size: 18px;
@@ -176,11 +185,11 @@
 				height: 50upx;
 				line-height: 50upx;
 			}
-			
+
 			.info {
 				margin-left: 10upx;
 			}
-			
+
 			.pro-box{
 				display:flex;
 				align-items:center;
@@ -188,16 +197,16 @@
 				font-size: $font-sm;
 				color: $font-base;
 				padding-right: 10upx;
-				
+
 				.progress-box{
 					flex: 1;
 					border-radius: 10px;
 					overflow: hidden;
 					margin-right: 8upx;
 				}
-				
+
 			}
-			
+
 			.price {
 				height: 50upx;
 				line-height: 50upx;

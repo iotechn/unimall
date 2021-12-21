@@ -1,9 +1,11 @@
 package com.iotechn.unimall.data.enums;
 
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+
 /**
  * Created by rize on 2019/2/13.
  */
-public enum CouponType {
+public enum CouponType implements BaseEnums<Integer> {
     COMMON(1, "普通券"),
     CDKEY(2, "兑换券"),
     ;
@@ -17,7 +19,7 @@ public enum CouponType {
 
     private String msg;
 
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 

@@ -1,121 +1,133 @@
 <template>
-	<view class="container">
-		<!-- 空白页 -->
-		<empty v-if="loadingType === 'nomore' && favoriteList.length === 0"></empty>
-		<view class="favorite-list">
-			<block v-for="(item, index) in favoriteList" :key="index">
-				<view class="favorite-item" :class="{'b-b': index!==favoriteList.length-1}"  @click="toProductDetail(item)" >
-					<view class="image-wrapper">
-						<image :src="item.img + '?x-oss-process=style/200px'" :class="[item.loaded]" mode="aspectFill" lazy-load @load="onImageLoad('favoriteList', index)"
-						 @error="onImageError('favoriteList', index)"></image>
-					</view>
-					<view class="item-right">
-						<text class="clamp title">{{item.title}}</text>
-						<text class="attr">{{item.description}}</text>
-						<text class="attr">累计销售{{item.sales}}件</text>
-						
-						<text class="price"><text v-if="item.originalPrice > (isVip?item.vipPrice:item.price)" style="text-decoration:line-through">¥{{item.originalPrice / 100.0}}</text>
-							¥{{(isVip?(item.vipPrice / 100.0 + ' [VIP]'):item.price / 100.0)}}</text>
-						
-					</view>
-					<text class="del-btn yticon icon-fork" @click.stop="deleteFavorite(item)"></text>
-				</view>
-			</block>
-		</view>
+  <view class="container">
+    <!-- 空白页 -->
+    <empty v-if="loadingType === 'nomore' && favoriteList.length === 0" />
+    <view class="favorite-list">
+      <block v-for="(item, index) in favoriteList" :key="index">
+        <view class="favorite-item" :class="{'b-b': index!==favoriteList.length-1}" @click="toProductDetail(item)">
+          <view class="image-wrapper">
+            <image
+              :src="item.img + style(200)"
+              :class="[item.loaded]"
+              mode="aspectFill"
+              lazy-load
+              @load="onImageLoad('favoriteList', index)"
+              @error="onImageError('favoriteList', index)"
+            />
+          </view>
+          <view class="item-right">
+            <text class="clamp title">
+              {{ item.title }}
+            </text>
+            <text class="attr">
+              {{ item.description }}
+            </text>
+            <text class="attr">
+              累计销售{{ item.sales }}件
+            </text>
 
-
-	</view>
+            <text class="price">
+              <text v-if="item.originalPrice > (isVip?item.vipPrice:item.price)" style="text-decoration:line-through">
+                ¥{{ item.originalPrice / 100.0 }}
+              </text>
+              ¥{{ (isVip?(item.vipPrice / 100.0 + ' [VIP]'):item.price / 100.0) }}
+            </text>
+          </view>
+          <text class="del-btn yticon icon-fork" @click.stop="deleteFavorite(item)" />
+        </view>
+      </block>
+    </view>
+  </view>
 </template>
 
 <script>
-	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
-	import empty from "@/components/empty";
-	export default {
-		components: {
-			uniLoadMore,
-			empty
-		},
-		data() {
-			return {
-				favoriteList: [],
-				pageNo: 1,
-				loadingType: 'more',
-				isVip: false
-			};
-		},
-		onShow() {
-			this.isVip = this.$api.isVip()
-		},
-		onLoad(options) {
-			this.loadData()
-		},
-		//下拉刷新
-		onPullDownRefresh() {
-			this.loadData('refresh');
-		},
-		//加载更多
-		onReachBottom() {
-			this.loadData();
-		},
-		methods: {
-			//获取收藏列表
-			loadData(type) {
-				const that = this
-				if (type === 'refresh') {
-					that.pageNo = 1
-					that.favoriteList = []
-					that.loadingType = 'more'
-				}
-				if (that.loadingType === 'more') {
-					that.loadingType = 'loading'
-					that.$api.request('favorite', 'list', {
-						pageNo: that.pageNo
-					}).then(res => {
-						that.pageNo = res.data.pageNo + 1
-						that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'nomore'
-						res.data.items.forEach(item => {
-							that.favoriteList.push(item);
-							if (type === 'refresh') {
-								uni.stopPullDownRefresh();
-							}
-						})
-					})
-				}
-			},
-			deleteFavorite(item) {
-				const that = this
-				uni.showModal({
-					title: '删除提示',
-					content: '您确定要删除该收藏吗？',
-					showCancel: true,
-					confirmText: '删除',
-					success: (e) => {
-						if (e.confirm) {
-							that.$api.request('favorite','delete', {
-								spuId : item.spuId
-							}).then(res => {
-								that.loadData('refresh')
-							})
-						}
-					},
-					fail: () => {}
-				})
-			},
-			toProductDetail(item) {
-				uni.navigateTo({
-					url: '/pages/product/detail?id=' + item.spuId
-				})
-			},
-			//监听image加载完成
-			onImageLoad(key, index) {
-				this.$set(this[key][index], 'loaded', 'loaded');
-			},
-			//监听image加载失败
-			onImageError(key, index) {
-				this[key][index].image = '/static/errorImage.jpg';
-			},
-		},
-	}
+import empty from '@/components/empty'
+export default {
+  components: {
+    empty
+  },
+  data() {
+    return {
+      style: this.$api.style,
+	  favoriteList: [],
+      pageNo: 1,
+      loadingType: 'more',
+      isVip: false
+    }
+  },
+  onShow() {
+    this.isVip = this.$api.isVip()
+  },
+  onLoad(options) {
+    this.loadData()
+  },
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.loadData('refresh')
+  },
+  // 加载更多
+  onReachBottom() {
+    this.loadData()
+  },
+  methods: {
+    // 获取收藏列表
+    loadData(type) {
+      const that = this
+      if (type === 'refresh') {
+        that.pageNo = 1
+        that.favoriteList = []
+        that.loadingType = 'more'
+      }
+      if (that.loadingType === 'more') {
+        that.loadingType = 'loading'
+        that.$api.request('favorite', 'list', {
+          pageNo: that.pageNo
+        }).then(res => {
+          that.pageNo = res.data.pageNo + 1
+          that.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'nomore'
+          res.data.items.forEach(item => {
+            that.favoriteList.push(item)
+            if (type === 'refresh') {
+              uni.stopPullDownRefresh()
+            }
+          })
+        })
+      }
+    },
+    deleteFavorite(item) {
+      const that = this
+      uni.showModal({
+        title: '删除提示',
+        content: '您确定要删除该收藏吗？',
+        showCancel: true,
+        confirmText: '删除',
+        success: (e) => {
+          if (e.confirm) {
+            that.$api.request('favorite', 'delete', {
+              spuId: item.spuId
+            }).then(res => {
+              that.loadData('refresh')
+            })
+          }
+        },
+        fail: () => {}
+      })
+    },
+    toProductDetail(item) {
+      uni.navigateTo({
+        url: '/pages/product/detail?id=' + item.spuId
+      })
+    },
+    // 监听image加载完成
+    onImageLoad(key, index) {
+      this.$set(this[key][index], 'loaded', 'loaded')
+    },
+    // 监听image加载失败
+    onImageError(key, index) {
+      this[key][index].image = '/static/errorImage.jpg'
+    }
+  }
+}
 </script>
 
 <style lang="scss">
@@ -214,5 +226,5 @@
 			}
 		}
 	}
-	
+
 </style>

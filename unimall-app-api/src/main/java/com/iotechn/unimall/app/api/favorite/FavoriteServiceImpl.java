@@ -1,15 +1,15 @@
 package com.iotechn.unimall.app.api.favorite;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.core.exception.AppServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.CacheComponent;
+import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.FavoriteDO;
 import com.iotechn.unimall.data.dto.FavoriteDTO;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.FavoriteMapper;
-import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

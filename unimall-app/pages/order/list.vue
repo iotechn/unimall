@@ -1,314 +1,435 @@
 <template>
-	<view class="content">
-		<view class="navbar">
-			<view v-for="(item, index) in navList" :key="index" class="nav-item" :class="{current: tabCurrentIndex === index}"
-			 @click="tabClick(index)">
-				{{item.text}}
-			</view>
-		</view>
+  <view class="content">
+    <view class="navbar">
+      <view
+        v-for="(item, index) in navList"
+        :key="index"
+        class="nav-item"
+        :class="{current: tabCurrentIndex === index}"
+        @click="tabClick(index)"
+      >
+        {{ item.text }}
+      </view>
+    </view>
+    <!-- 支付宝小程序 无法监听到 @change事件 -->
+    <!-- #ifndef MP-ALIPAY -->
+    <swiper :current="tabCurrentIndex" class="swiper-box" duration="300" @change="changeTab">
+      <swiper-item v-for="(tabItem,tabIndex) in navList" :key="tabIndex" class="tab-content">
+        <scroll-view class="list-scroll-content" scroll-y @scrolltolower="loadData">
+          <!-- 空白页 -->
+          <empty v-if="tabItem.loaded === true && tabItem.orderList.length === 0" />
+          <!-- 订单列表 -->
+          <view v-for="(item,index) in tabItem.orderList" :key="index" class="order-item">
+            <navigator :url="'/pages/order/detail?orderid=' + item.id">
+              <view class="i-top b-b">
+                <text class="time">
+                  {{ item.gmtCreate | dateFormat }}
+                </text>
+                <text class="state">
+                  {{ statusMap[item.status] }}
+                </text>
+              </view>
 
-		<swiper :current="tabCurrentIndex" class="swiper-box" duration="300" @change="changeTab">
-			<swiper-item class="tab-content" v-for="(tabItem,tabIndex) in navList" :key="tabIndex">
-				<scroll-view class="list-scroll-content" scroll-y @scrolltolower="loadData">
-					<!-- 空白页 -->
-					<empty v-if="tabItem.loaded === true && tabItem.orderList.length === 0"></empty>
+              <scroll-view v-if="item.skuList.length > 1" class="goods-box" scroll-x>
+                <view v-for="(skuItem, skuIndex) in item.skuList" :key="skuIndex" class="goods-item">
+                  <image class="goods-img" :src="skuItem.img + style(200)" mode="aspectFill" />
+                </view>
+              </scroll-view>
+              <view v-for="(skuItem, skuIndex) in item.skuList" v-show="item.skuList.length === 1" :key="skuIndex" class="goods-box-single">
+                <image class="goods-img" :src="skuItem.img + style(200)" mode="aspectFill" />
+                <view class="right">
+                  <text class="title clamp">
+                    {{ skuItem.spuTitle }}
+                  </text>
+                  <text class="attr-box">
+                    {{ skuItem.title }} x {{ skuItem.num }}
+                  </text>
+                  <text class="price">
+                    {{ skuItem.price / 100.0 }}
+                  </text>
+                </view>
+              </view>
 
-					<!-- 订单列表 -->
-					<view v-for="(item,index) in tabItem.orderList" :key="index" class="order-item">
-						<navigator :url="'/pages/order/detail?orderid=' + item.id">
-							<view class="i-top b-b">
-								<text class="time">{{item.gmtCreate | dateFormat}}</text>
-								<text class="state">{{statusMap[item.status]}}</text>
-							</view>
+              <view class="price-box">
+                共
+                <text class="num">
+                  {{ item.skuCount }}
+                </text>
+                件商品 实付款
+                <text class="price">
+                  {{ item.actualPrice / 100.0 }}
+                </text>
+              </view>
+            </navigator>
+            <view v-if="item.status == 10" class="action-box b-t">
+              <button :disabled="submiting" class="action-btn" @click="cancelOrder(item)">
+                取消订单
+              </button>
+              <button class="action-btn recom" @click="payOrder(item)">
+                立即支付
+              </button>
+            </view>
+            <view v-if="item.status == 20" class="action-box b-t">
+              <button :disabled="submiting" class="action-btn" @click="refundOrder(item)">
+                申请退款
+              </button>
+            </view>
+            <view v-if="item.status == 30" class="action-box b-t">
+              <button :disabled="submiting" class="action-btn" @click="refundOrder(item)">
+                申请退款
+              </button>
+              <button :disabled="submiting" class="action-btn" @click="showShipTrace(item)">
+                查看物流
+              </button>
+              <button :disabled="submiting" class="action-btn recom" @click="confirmOrder(item)">
+                确认收货
+              </button>
+            </view>
+            <view v-if="item.status == 40" class="action-box b-t">
+              <view>
+                <button :disabled="submiting" class="action-btn recom" @click="appraiseOrder(item)">
+                  立即评价
+                </button>
+              </view>
+            </view>
+          </view>
+          <!-- #ifndef MP-ALIPAY -->
+          <uni-load-more :status="tabItem.loadingType" />
+          <!-- #endif -->
+        </scroll-view>
+      </swiper-item>
+    </swiper>
+    <!-- #endif -->
+    <!-- #ifdef MP-ALIPAY -->
+    <view class="swiper-box" duration="300">
+      <view v-for="(tabItem,tabIndex) in navList" v-show="tabCurrentIndex === tabIndex" :key="tabIndex" class="tab-content">
+        <scroll-view class="list-scroll-content" scroll-y @scrolltolower="loadData">
+          <!-- 空白页 -->
+          <empty v-if="tabItem.loaded === true && tabItem.orderList.length === 0" />
+          <!-- 订单列表 -->
+          <view v-for="(item,index) in tabItem.orderList" :key="index" class="order-item">
+            <navigator :url="'/pages/order/detail?orderid=' + item.id">
+              <view class="i-top b-b">
+                <text class="time">
+                  {{ item.gmtCreate | dateFormat }}
+                </text>
+                <text class="state">
+                  {{ statusMap[item.status] }}
+                </text>
+              </view>
 
-							<scroll-view v-if="item.skuList.length > 1" class="goods-box" scroll-x>
-								<view v-for="(skuItem, skuIndex) in item.skuList" :key="skuIndex" class="goods-item">
-									<image class="goods-img" :src="skuItem.img + '?x-oss-process=style/200px'" mode="aspectFill"></image>
-								</view>
-							</scroll-view>
-							<view v-if="item.skuList.length === 1" class="goods-box-single" v-for="(skuItem, skuIndex) in item.skuList" :key="skuIndex">
-								<image class="goods-img" :src="skuItem.img + '?x-oss-process=style/200px'" mode="aspectFill"></image>
-								<view class="right">
-									<text class="title clamp">{{skuItem.spuTitle}}</text>
-									<text class="attr-box">{{skuItem.title}} x {{skuItem.num}}</text>
-									<text class="price">{{skuItem.price / 100.0}}</text>
-								</view>
-							</view>
+              <scroll-view v-if="item.skuList.length > 1" class="goods-box" scroll-x>
+                <view v-for="(skuItem, skuIndex) in item.skuList" :key="skuIndex" class="goods-item">
+                  <image class="goods-img" :src="skuItem.img + style(200)" mode="aspectFill" />
+                </view>
+              </scroll-view>
+              <view v-for="(skuItem, skuIndex) in item.skuList" v-show="item.skuList.length === 1" :key="skuIndex" class="goods-box-single">
+                <image class="goods-img" :src="skuItem.img + style(200)" mode="aspectFill" />
+                <view class="right">
+                  <text class="title clamp">
+                    {{ skuItem.spuTitle }}
+                  </text>
+                  <text class="attr-box">
+                    {{ skuItem.title }} x {{ skuItem.num }}
+                  </text>
+                  <text class="price">
+                    {{ skuItem.price / 100.0 }}
+                  </text>
+                </view>
+              </view>
 
-							<view class="price-box">
-								共
-								<text class="num">{{item.skuCount}}</text>
-								件商品 实付款
-								<text class="price">{{item.actualPrice / 100.0}}</text>
-							</view>
-						</navigator>
-						<view class="action-box b-t" v-if="item.status == 10">
-							<button :disabled="submiting" class="action-btn" @click="cancelOrder(item)">取消订单</button>
-							<button class="action-btn recom" @click="payOrder(item)">立即支付</button>
-						</view>
-						<view class="action-box b-t" v-if="item.status == 20">
-							<button :disabled="submiting" class="action-btn" @click="refundOrder(item)">申请退款</button>
-						</view>
-						<view class="action-box b-t" v-if="item.status == 30">
-							<button :disabled="submiting" class="action-btn" @click="refundOrder(item)">申请退款</button>
-							<button :disabled="submiting" class="action-btn" @click="showShipTrace(item)">查看物流</button>
-							<button :disabled="submiting" class="action-btn recom" @click="confirmOrder(item)">确认收货</button>
-						</view>
-						<view class="action-box b-t" v-if="item.status == 40">
-							<view >
-								<button :disabled="submiting" class="action-btn recom" @click="appraiseOrder(item)">立即评价</button>
-							</view>
-						</view>
-					</view>
-
-					<uni-load-more :status="tabItem.loadingType"></uni-load-more>
-
-				</scroll-view>
-			</swiper-item>
-		</swiper>
-		<neil-modal
-			:show="refundShow" 
-			@close="refundShow = false" 
-			title="退款" 
-			@cancel="refundShow = false" 
-			@confirm="refundConfirm">
-			<input v-show="refundShow" v-model="inputRefundReason" style="margin:20upx" placeholder="简要描述退款理由.." />
-		</neil-modal>
-	</view>
+              <view class="price-box">
+                共
+                <text class="num">
+                  {{ item.skuCount }}
+                </text>
+                件商品 实付款
+                <text class="price">
+                  {{ item.actualPrice / 100.0 }}
+                </text>
+              </view>
+            </navigator>
+            <view v-if="item.status == 10" class="action-box b-t">
+              <button :disabled="submiting" class="action-btn" @click="cancelOrder(item)">
+                取消订单
+              </button>
+              <button class="action-btn recom" @click="payOrder(item)">
+                立即支付
+              </button>
+            </view>
+            <view v-if="item.status == 20" class="action-box b-t">
+              <button :disabled="submiting" class="action-btn" @click="refundOrder(item)">
+                申请退款
+              </button>
+            </view>
+            <view v-if="item.status == 30" class="action-box b-t">
+              <button :disabled="submiting" class="action-btn" @click="refundOrder(item)">
+                申请退款
+              </button>
+              <button :disabled="submiting" class="action-btn" @click="showShipTrace(item)">
+                查看物流
+              </button>
+              <button :disabled="submiting" class="action-btn recom" @click="confirmOrder(item)">
+                确认收货
+              </button>
+            </view>
+            <view v-if="item.status == 40" class="action-box b-t">
+              <view>
+                <button :disabled="submiting" class="action-btn recom" @click="appraiseOrder(item)">
+                  立即评价
+                </button>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+    <!-- #endif -->
+    <neil-modal
+      :show="refundShow"
+      title="退款"
+      @close="refundShow = false"
+      @cancel="refundShow = false"
+      @confirm="refundConfirm"
+    >
+      <input v-show="refundShow" v-model="inputRefundReason" style="margin:20upx" placeholder="简要描述退款理由..">
+    </neil-modal>
+  </view>
 </template>
 
 <script>
-	import neilModal from '@/components/neil-modal/neil-modal.vue';
-	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
-	import empty from "@/components/empty";
-	export default {
+import neilModal from '@/components/neil-modal/neil-modal.vue'
+import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue'
+import empty from '@/components/empty'
+export default {
 
-		components: {
-			uniLoadMore,
-			empty,
-			neilModal
-		},
-		data() {
-			return {
-				statusMap: {
-					10: '未付款',
-					12: '正在拼团',
-					20: '待出库',
-					30: '待收货',
-					40: '待评价',
-					50: '已完成',
-					60: '退款中',
-					70: '已退款',
-					80: '已取消',
-					90: '已取消(系统)'
-				},
-				submiting: false,
-				refundShow: false,
-				inputRefundReason: '',
-				refundOrderItem: '',
-				tabCurrentIndex: 0,
-				navList: [{
-						state: 0,
-						text: '全部',
-						loadingType: 'more',
-						pageNo: 1,
-						orderList: []
-					},
-					{
-						state: 10,
-						text: '待付款',
-						loadingType: 'more',
-						pageNo: 1,
-						orderList: []
-					},
-					{
-						state: 20,
-						text: '待出库',
-						loadingType: 'more',
-						pageNo: 1,
-						orderList: []
-					},
-					{
-						state: 30,
-						text: '待收货',
-						loadingType: 'more',
-						pageNo: 1,
-						orderList: []
-					},
-					{
-						state: 40,
-						text: '待评价',
-						loadingType: 'more',
-						pageNo: 1,
-						orderList: []
-					},
-					{
-						state: 60,
-						text: '退款中',
-						loadingType: 'more',
-						pageNo: 1,
-						orderList: []
-					}
-				],
-			};
-		},
-		onLoad(options) {
-			/**
-			 * 修复app端点击除全部订单外的按钮进入时不加载数据的问题
-			 * 替换onLoad下代码即可
-			 */
-			this.tabCurrentIndex = 0
-			for (let i = 0; i < this.navList.length; i++) {
-				if (this.navList[i].state === parseInt(options.state)) {
-					this.tabCurrentIndex = i
-				}
-			}
-			// #ifndef MP
-			this.loadData()
-			// #endif
-			// #ifdef MP
-			if (options.state == 0) {
-				this.loadData()
-			}
-			// #endif
+  components: {
+    uniLoadMore,
+    empty,
+    neilModal
+  },
+  data() {
+    return {
+      style: this.$api.style,
+      statusMap: {
+        10: '未付款',
+        12: '正在拼团',
+        20: '待出库',
+        30: '待收货',
+        40: '待评价',
+        50: '已完成',
+        60: '退款中',
+        70: '已退款',
+        80: '已取消',
+        90: '已取消(系统)'
+      },
+      submiting: false,
+      refundShow: false,
+      inputRefundReason: '',
+      refundOrderItem: '',
+      tabCurrentIndex: 0,
+      navList: [{
+        state: 0,
+        text: '全部',
+        loadingType: 'more',
+        pageNo: 1,
+        orderList: []
+      },
+      {
+        state: 10,
+        text: '待付款',
+        loadingType: 'more',
+        pageNo: 1,
+        orderList: []
+      },
+      {
+        state: 20,
+        text: '待出库',
+        loadingType: 'more',
+        pageNo: 1,
+        orderList: []
+      },
+      {
+        state: 30,
+        text: '待收货',
+        loadingType: 'more',
+        pageNo: 1,
+        orderList: []
+      },
+      {
+        state: 40,
+        text: '待评价',
+        loadingType: 'more',
+        pageNo: 1,
+        orderList: []
+      },
+      {
+        state: 60,
+        text: '退款中',
+        loadingType: 'more',
+        pageNo: 1,
+        orderList: []
+      }
+      ]
+    }
+  },
+  onLoad(options) {
+    /**
+	 * 修复app端点击除全部订单外的按钮进入时不加载数据的问题
+	 * 替换onLoad下代码即可
+	 */
+    this.tabCurrentIndex = 0
+    for (let i = 0; i < this.navList.length; i++) {
+      if (this.navList[i].state === parseInt(options.state)) {
+        this.tabCurrentIndex = i
+      }
+    }
+    // #ifndef MP
+    this.loadData()
+    // #endif
+    // #ifdef MP
+    if (parseInt(options.state) === 0) {
+      this.loadData()
+    }
+    // #endif
+  },
 
-		},
-
-		methods: {
-			//获取订单列表
-			loadData(source) {
-				const that = this
-				//这里是将订单挂载到tab列表下
-				let index = that.tabCurrentIndex;
-				let navItem = that.navList[index];
-				let state = navItem.state;
-
-				if (source === 'tabChange' && navItem.loaded === true) {
-					//tab切换只有第一次需要加载数据
-					return;
-				}
-				if (navItem.loadingType === 'loading') {
-					//防止重复加载
-					return;
-				}
-
-				navItem.loadingType = 'loading';
-
-				let orderList = that.$api.request('order', 'getOrderPage', {
-					pageNo: navItem.pageNo,
-					status: navItem.state
-				}).then(res => {
-					navItem.pageNo = res.data.pageNo + 1
-					navItem.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'noMore'
-					res.data.items.forEach(item => {
-						navItem.orderList.push(item);
-						item.skuCount = 0
-						item.skuList.forEach(skuItem => {
-							item.skuCount += skuItem.num
-						})
-					})
-					//loaded新字段用于表示数据加载完毕，如果为空可以显示空白页
-					that.$set(navItem, 'loaded', true);
-				})
-			},
-
-			//swiper 切换
-			changeTab(e) {
-				this.tabCurrentIndex = e.target.current;
-				this.loadData('tabChange');
-			},
-			//顶部tab点击
-			tabClick(index) {
-				this.tabCurrentIndex = index;
-			},
-			payOrder(item) {
-				uni.navigateTo({
-					url: '/pages/pay/pay?orderno='+ item.orderNo + '&price=' + item.actualPrice
-				})
-			},
-			//取消订单
-			cancelOrder(item) {
-				const that = this
-				uni.showModal({
-					title: '取消？',
-					content: '您确定要取消此订单吗？',
-					success : (e) => {
-						if (e.confirm) {
-							that.submiting = true
-							that.$api.request('order', 'cancel', {
-								orderNo: item.orderNo
-							}, failres => {
-								that.submiting = false
-								that.$api.msg(failres.errmsg)
-							}).then(res => {
-								that.submiting = false
-								item.status = 80
-							})
-						}
-					}
-				})
-				
-			},
-			//订单退款
-			refundConfirm() {
-				const that = this
-				if (that.submiting) {
-					return
-				}
-				that.submiting = true
-				that.$api.request('order', 'refund', {
-					orderNo: that.refundOrderItem.orderNo,
-					reason: that.inputRefundReason
-				}, failres => {
-					that.submiting = false
-					that.$api.msg(failres.errmsg)
-				}).then(res => {
-					that.submiting = false
-					that.refundOrderItem.status = 60
-					that.$api.msg('申请退款成功！')
-				})
-			},
-			refundOrder(item) {
-				const that = this
-				that.refundOrderItem = item
-				that.refundShow = true
-				that.inputRefundReason = ''
-			},
-			//确认订单
-			confirmOrder(item) {
-				const that = this
-				uni.showModal({
-					title: '收货？',
-					content: '您确定要确认收货吗？',
-					success : (e) => {
-						if (e.confirm) {
-							that.submiting = true
-							that.$api.request('order', 'confirm', {
-								orderNo: item.orderNo
-							}, failres => {
-								that.submiting = false
-								that.$api.msg(failres.errmsg)
-							}).then(res => {
-								that.submiting = false
-								item.status = 40
-							})
-						}
-					}
-				})
-			},
-			showShipTrace(item) {
-				uni.navigateTo({
-					url: "/pages/order/trace?orderno=" + item.orderNo
-				})
-			},
-			//评价订单
-			appraiseOrder(item) {
-				uni.navigateTo({
-					url: '/pages/order/appraise?orderid=' + item.id
-				})
-			}
+  methods: {
+    // 获取订单列表
+    loadData(source) {
+      const that = this
+      // 这里是将订单挂载到tab列表下
+      const index = that.tabCurrentIndex
+      const navItem = that.navList[index]
+      if (source === 'tabChange' && navItem.loaded === true) {
+        // tab切换只有第一次需要加载数据
+        return
+      }
+      if (navItem.loadingType === 'loading') {
+        // 防止重复加载
+        return
+      }
+	  if (source === 'refresh') {
+		  navItem.pageNo = 1
+		  navItem.orderList = []
 		}
-	}
+      navItem.loadingType = 'loading'
+      that.$api.request('order', 'getOrderPage', {
+        pageNo: navItem.pageNo,
+        status: navItem.state
+      }).then(res => {
+        navItem.pageNo = res.data.pageNo + 1
+        navItem.loadingType = res.data.pageNo < res.data.totalPageNo ? 'more' : 'noMore'
+        res.data.items.forEach(item => {
+          navItem.orderList.push(item)
+          item.skuCount = 0
+          item.skuList.forEach(skuItem => {
+            item.skuCount += skuItem.num
+          })
+        })
+        // loaded新字段用于表示数据加载完毕，如果为空可以显示空白页
+        that.$set(navItem, 'loaded', true)
+      })
+    },
+    // swiper 切换
+    changeTab(e) {
+      this.tabCurrentIndex = e.target.current
+      this.loadData('tabChange')
+    },
+    // 顶部tab点击
+    tabClick(index) {
+      this.tabCurrentIndex = index
+      // #ifdef MP-ALIPAY
+      this.loadData('tabChange')
+      // #endif
+    },
+    payOrder(item) {
+      uni.navigateTo({
+        url: '/pages/pay/pay?orderno=' + item.orderNo + '&price=' + item.actualPrice
+      })
+    },
+    // 取消订单
+    cancelOrder(item) {
+      const that = this
+      uni.showModal({
+        title: '取消？',
+        content: '您确定要取消此订单吗？',
+        success: (e) => {
+          if (e.confirm) {
+            that.submiting = true
+            that.$api.request('order', 'cancel', {
+              orderNo: item.orderNo
+            }, failres => {
+              that.submiting = false
+              that.$api.msg(failres.errmsg)
+            }).then(res => {
+              that.submiting = false
+              item.status = 80
+            })
+          }
+        }
+      })
+    },
+    // 订单退款
+    refundConfirm() {
+      const that = this
+      if (that.submiting) {
+        return
+      }
+      that.submiting = true
+      that.$api.request('order', 'refund', {
+        orderNo: that.refundOrderItem.orderNo,
+        reason: that.inputRefundReason
+      }, failres => {
+        that.submiting = false
+        that.$api.msg(failres.errmsg)
+      }).then(res => {
+        that.submiting = false
+        that.refundOrderItem.status = 60
+        that.$api.msg('申请退款成功！')
+      })
+    },
+    refundOrder(item) {
+      const that = this
+      that.refundOrderItem = item
+      that.refundShow = true
+      that.inputRefundReason = ''
+    },
+    // 确认订单
+    confirmOrder(item) {
+      const that = this
+      uni.showModal({
+        title: '收货？',
+        content: '您确定要确认收货吗？',
+        success: (e) => {
+          if (e.confirm) {
+            that.submiting = true
+            that.$api.request('order', 'confirm', {
+              orderNo: item.orderNo
+            }, failres => {
+              that.submiting = false
+              that.$api.msg(failres.errmsg)
+            }).then(res => {
+              that.submiting = false
+              item.status = 40
+            })
+          }
+        }
+      })
+    },
+    showShipTrace(item) {
+      uni.navigateTo({
+        url: '/pages/order/trace?orderno=' + item.orderNo
+      })
+    },
+    // 评价订单
+    appraiseOrder(item) {
+      uni.navigateTo({
+        url: '/pages/order/appraise?orderid=' + item.id
+      })
+    }
+  }
+}
 </script>
 
 <style lang="scss">
@@ -319,11 +440,11 @@
 	}
 
 	.swiper-box {
-		height: calc(100% - 40px);
+		height: calc(100vh - 40px);
 	}
 
 	.list-scroll-content {
-		height: 100%;
+		height: calc(100vh - 40px);
 	}
 
 	.navbar {
@@ -533,7 +654,6 @@
 			}
 		}
 	}
-
 
 	/* load-more */
 	.uni-load-more {

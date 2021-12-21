@@ -2,25 +2,24 @@ package com.iotechn.unimall.admin.api.product;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.data.constant.CacheConst;
-import com.iotechn.unimall.core.exception.AdminServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.CacheComponent;
+import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.GroupShopDO;
 import com.iotechn.unimall.data.domain.SkuActivityPriceDO;
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuDO;
-import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
-import com.iotechn.unimall.data.dto.goods.GroupShopSkuDTO;
+import com.iotechn.unimall.data.dto.product.GroupShopDTO;
+import com.iotechn.unimall.data.dto.product.GroupShopSkuDTO;
 import com.iotechn.unimall.data.enums.GroupShopAutomaticRefundType;
 import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.enums.StatusType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.GroupShopMapper;
 import com.iotechn.unimall.data.mapper.SkuActivityPriceMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
-import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -84,7 +83,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         if (spuDO.getActivityId() != null && spuDO.getActivityType() != null
                 && spuDO.getActivityType() != SpuActivityType.NONE.getCode()
                 && spuDO.getGmtActivityEnd() != null && spuDO.getGmtActivityEnd().getTime() > System.currentTimeMillis()) {
-            throw new AdminServiceException(ExceptionDefinition.GOODS_SPU_EXIST_ACTIVITY);
+            throw new AdminServiceException(ExceptionDefinition.PRODUCT_SPU_EXIST_ACTIVITY);
         }
 
         // 3.创建团购活动信息
@@ -333,8 +332,9 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                cacheComponent.delPrefixKey(CacheConst.PRT_GROUP_SHOP_LIST);
-                cacheComponent.delHashKey(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId);
+//                cacheComponent.delPrefixKey(CacheConst.PRT_GROUP_SHOP_LIST);
+                // TODO 别忘记刷新商品缓存
+//                cacheComponent.delHashKey(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId);
             }
         });
     }

@@ -1,9 +1,11 @@
 package com.iotechn.unimall.data.enums;
 
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+
 /**
  * Created by rize on 2019/2/13.
  */
-public enum OrderStatusType {
+public enum OrderStatusType implements BaseEnums<Integer> {
     UNPAY(10, "未付款"),
     GROUP_SHOP_WAIT(12,"等待团购活动结束"),
     WAIT_STOCK(20, "待出库"),
@@ -24,7 +26,7 @@ public enum OrderStatusType {
 
     private String msg;
 
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 

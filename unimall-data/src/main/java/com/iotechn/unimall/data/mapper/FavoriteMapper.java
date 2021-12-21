@@ -1,9 +1,10 @@
 package com.iotechn.unimall.data.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.dobbinsoft.fw.support.mapper.IMapper;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.FavoriteDO;
 import com.iotechn.unimall.data.dto.FavoriteDTO;
-import com.iotechn.unimall.data.model.Page;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public interface FavoriteMapper extends IMapper<FavoriteDO> {
      * @param spuId
      * @return
      */
-    public FavoriteDTO getFavoriteById(@Param("userId") Long userId, @Param("favoriteId")Long favoriteId, @Param("spuId")Long spuId);
+    public FavoriteDTO getFavoriteById(@Param("userId") Long userId, @Param("favoriteId") Long favoriteId, @Param("spuId") Long spuId);
 
     public List<String> getUserFavoriteSpuIds(Long userId);
 

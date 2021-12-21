@@ -1,14 +1,14 @@
 package com.iotechn.unimall.app.api.product;
 
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.annotation.HttpParam;
-import com.iotechn.unimall.core.annotation.HttpParamType;
-import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.annotation.HttpMethod;
+import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
+import com.dobbinsoft.fw.core.annotation.HttpParam;
+import com.dobbinsoft.fw.core.annotation.HttpParamType;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.SpuDO;
-import com.iotechn.unimall.data.dto.goods.SpuDTO;
-import com.iotechn.unimall.data.model.Page;
+import com.iotechn.unimall.data.dto.product.SpuDTO;
 
 /**
  * Created by rize on 2019/7/1.

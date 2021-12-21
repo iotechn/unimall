@@ -1,5 +1,5 @@
 {
-    "name" : "unimall",
+    "name" : "Uni商城",
     "appid" : "__UNI__F5A85C4",
     "description" : "",
     "versionName" : "1.0.0",
@@ -54,6 +54,9 @@
                 "payment" : {
                     "weixin" : {
                         "appid" : "wx6e1355f89b03fd2e"
+                    },
+                    "alipay" : {
+                        "__platform__" : [ "ios", "android" ]
                     }
                 },
                 "oauth" : {
@@ -61,7 +64,8 @@
                         "appid" : "wx6e1355f89b03fd2e",
                         "appsecret" : "73b5a5c361a32518a88c45e4c5643153"
                     }
-                }
+                },
+                "ad" : {}
             },
             "icons" : {
                 "ios" : {
@@ -105,7 +109,7 @@
     "mp-weixin" : {
         /* 小程序特有相关 */
         "usingComponents" : true,
-        "appid" : "wx7393c9e390fd38ab",
+        "appid" : "wxa5c9e824dae2c62c",
         "setting" : {
             "urlCheck" : true
         }
@@ -114,10 +118,14 @@
         "title" : "unimall 多端商城",
         "domain" : "unimall.h5.iotechn.com",
         "router" : {
-            "mode" : "history"
+            "mode" : "history",
+            "base" : "/h5/"
         },
         "devServer" : {
             "disableHostCheck" : true
         }
+    },
+    "mp-alipay" : {
+        "appid" : "2021002140688403"
     }
 }

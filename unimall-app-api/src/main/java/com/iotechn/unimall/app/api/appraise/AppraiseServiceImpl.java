@@ -1,14 +1,14 @@
 package com.iotechn.unimall.app.api.appraise;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.iotechn.unimall.biz.service.storage.StorageBizService;
-import com.iotechn.unimall.data.constant.CacheConst;
+import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.storage.StorageClient;
 import com.iotechn.unimall.biz.service.appriaise.AppraiseBizService;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
-import com.iotechn.unimall.core.exception.AppServiceException;
-import com.iotechn.unimall.core.exception.ExceptionDefinition;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.component.CacheComponent;
+import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.AppraiseDO;
 import com.iotechn.unimall.data.domain.ImgDO;
 import com.iotechn.unimall.data.domain.OrderDO;
@@ -18,11 +18,11 @@ import com.iotechn.unimall.data.dto.appraise.AppraiseRequestItemDTO;
 import com.iotechn.unimall.data.dto.appraise.AppraiseResponseDTO;
 import com.iotechn.unimall.data.enums.BizType;
 import com.iotechn.unimall.data.enums.OrderStatusType;
+import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.AppraiseMapper;
 import com.iotechn.unimall.data.mapper.ImgMapper;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
-import com.iotechn.unimall.data.model.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,7 +58,7 @@ public class AppraiseServiceImpl implements AppraiseService {
     @Autowired
     private OrderBizService orderBizService;
     @Autowired
-    private StorageBizService storageBizService;
+    private StorageClient storageClient;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -154,7 +154,10 @@ public class AppraiseServiceImpl implements AppraiseService {
                 @Override
                 public void afterCommit() {
                     cacheComponent.delPrefixKey(CacheConst.PRT_APPRAISE_LIST + appraiseDO.getSpuId());
-                    storageBizService.delete(imgs);
+                    // TODO 异步
+                    for (String img : imgs) {
+                        storageClient.delete(img);
+                    }
                 }
             });
             return "ok";

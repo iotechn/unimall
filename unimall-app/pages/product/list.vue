@@ -1,166 +1,172 @@
 <template>
-	<view class="content">
-		<view class="navbar" :style="{position:headerPosition,top:headerTop}">
-			<view class="nav-item" :class="{current: filterIndex === 0}" @click="tabClick(0)">
-				销量优先
-			</view>
-			<view class="nav-item" :class="{current: filterIndex === 1}" @click="tabClick(1)">
-				<text>价格</text>
-				<view class="p-box">
-					<text :class="{active: priceOrder === 1 && filterIndex === 1}" class="yticon icon-shang"></text>
-					<text :class="{active: priceOrder === 2 && filterIndex === 1}" class="yticon icon-shang xia"></text>
-				</view>
-			</view>
-		</view>
-		<view class="goods-list">
-			<view v-for="(item, index) in productList" :key="index" class="goods-item" @click="navToDetailPage(item)">
-				<view class="image-wrapper">
-					<image :src="item.img + '?x-oss-process=style/400px'" mode="aspectFill"></image>
-				</view>
-				<text class="title clamp">{{item.title}}</text>
-				<view class="price-box">
-					<text class="price">{{isVip? (item.vipPrice / 100.0 + ' [VIP]') : (item.price / 100.0)}}</text>
-					<text>已售 {{item.sales?item.sales:0}}</text>
-				</view>
-			</view>
-		</view>
-		<uni-load-more :status="loadingType"></uni-load-more>
-
-	</view>
+  <view class="content">
+    <view class="navbar" :style="{position:headerPosition,top:headerTop}">
+      <view class="nav-item" :class="{current: filterIndex === 0}" @click="tabClick(0)">
+        销量优先
+      </view>
+      <view class="nav-item" :class="{current: filterIndex === 1}" @click="tabClick(1)">
+        <text>价格</text>
+        <view class="p-box">
+          <text :class="{active: priceOrder === 1 && filterIndex === 1}" class="yticon icon-shang" />
+          <text :class="{active: priceOrder === 2 && filterIndex === 1}" class="yticon icon-shang xia" />
+        </view>
+      </view>
+    </view>
+    <view class="goods-list">
+      <view v-for="(item, index) in productList" :key="index" class="goods-item" @click="navToDetailPage(item)">
+        <view class="image-wrapper">
+          <image :src="item.img + style(200)" mode="aspectFill" />
+        </view>
+        <text class="title clamp">
+          {{ item.title }}
+        </text>
+        <view class="price-box">
+          <text class="price">
+            {{ isVip? (item.vipPrice / 100.0 + ' [VIP]') : (item.price / 100.0) }}
+          </text>
+          <text>已售 {{ item.sales?item.sales:0 }}</text>
+        </view>
+      </view>
+    </view>
+    <!-- #ifndef MP-ALIPAY -->
+    <uni-load-more :status="loadingType" />
+    <!-- #endif -->
+  </view>
 </template>
 
 <script>
-	import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue';
-	export default {
-		components: {
-			uniLoadMore
-		},
-		data() {
-			return {
-				cateMaskState: 0, //分类面板展开状态
-				headerPosition: "fixed",
-				headerTop: "0px",
-				loadingType: 'more', //加载更多状态
-				filterIndex: 0,
-				priceOrder: 0, //1 价格从低到高 2价格从高到低
-				productList: [],
-				cateId: 0,
-				keyword: '',
-				pageNo: 1,
-				isVip: false
-			};
-		},
-		onShow() {
-			this.isVip = this.$api.isVip()
-		},
-		onLoad(options) {
-			// #ifdef H5
-			this.headerTop = document.getElementsByTagName('uni-page-head')[0].offsetHeight + 'px';
-			// #endif
-			this.cateId = options.tid ? options.tid : 0;
-			this.keyword = options.keyword ? options.keyword : ''
-			this.loadData();
-		},
-		onPageScroll(e) {
-			//兼容iOS端下拉时顶部漂移
-			if (e.scrollTop >= 0) {
-				this.headerPosition = "fixed";
-			} else {
-				this.headerPosition = "absolute";
-			}
-		},
-		//下拉刷新
-		onPullDownRefresh() {
-			this.loadData('refresh');
-		},
-		//加载更多
-		onReachBottom() {
-			this.loadData();
-		},
-		methods: {
-			//加载商品 ，带下拉刷新和上滑加载
-			async loadData(type = 'add', loading) {
-				//没有更多直接返回
-				if (type === 'add') {
-					if (this.loadingType === 'nomore') {
-						return;
-					}
-					this.loadingType = 'loading';
-				} else {
-					this.loadingType = 'more'
-				}
+import uniLoadMore from '@/components/uni-load-more/uni-load-more.vue'
+export default {
+  components: {
+    uniLoadMore
+  },
+  data() {
+    return {
+      style: this.$api.style,
+	  cateMaskState: 0, // 分类面板展开状态
+      headerPosition: 'fixed',
+      headerTop: '0px',
+      loadingType: 'more', // 加载更多状态
+      filterIndex: 0,
+      priceOrder: 0, // 1 价格从低到高 2价格从高到低
+      productList: [],
+      cateId: 0,
+      keyword: '',
+      pageNo: 1,
+      isVip: false
+    }
+  },
+  onShow() {
+    this.isVip = this.$api.isVip()
+  },
+  onLoad(options) {
+    // #ifdef H5
+    this.headerTop = document.getElementsByTagName('uni-page-head')[0].offsetHeight + 'px'
+    // #endif
+    this.cateId = options.tid ? options.tid : 0
+    this.keyword = options.keyword ? options.keyword : ''
+    this.loadData()
+  },
+  onPageScroll(e) {
+    // 兼容iOS端下拉时顶部漂移
+    if (e.scrollTop >= 0) {
+      this.headerPosition = 'fixed'
+    } else {
+      this.headerPosition = 'absolute'
+    }
+  },
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.loadData('refresh')
+  },
+  // 加载更多
+  onReachBottom() {
+    this.loadData()
+  },
+  methods: {
+    // 加载商品 ，带下拉刷新和上滑加载
+    async loadData(type = 'add', loading) {
+      // 没有更多直接返回
+      if (type === 'add') {
+        if (this.loadingType === 'nomore') {
+          return
+        }
+        this.loadingType = 'loading'
+      } else {
+        this.loadingType = 'more'
+      }
 
-				let orderByInfo = {}
-				if (this.filterIndex === 0) {
-					//销量排序
-					orderByInfo = {
-						orderBy: 'sales',
-						isAsc: false
-					}
-				}
-				if (this.filterIndex === 1) {
-					//价格排序 需要从新获取Page
-					orderByInfo = {
-						orderBy: 'price',
-						isAsc: this.priceOrder === 1
-					}
-				}
-				if (type === 'refresh') {
-					this.pageNo = 1
-				}
-				this.$api.request('product', 'getProductPage', {
-					categoryId: this.cateId,
-					title: this.keyword,
-					pageNo : this.pageNo,
-					...orderByInfo
-				}).then(res => {
-					let tempList = res.data.items
-					if (type === 'refresh') {
-						this.productList = [];
-					}
-					this.productList = this.productList.concat(tempList);
-					this.pageNo = res.data.pageNo + 1
-					this.loadingType = res.data.totalPageNo > res.data.pageNo ? 'more' : 'nomore';
-					if (type === 'refresh') {
-						if (loading == 1) {
-							uni.hideLoading()
-						} else {
-							uni.stopPullDownRefresh();
-						}
-					}
-				})
-			},
-			//筛选点击
-			tabClick(index) {
-				if (this.filterIndex === index && index !== 1) {
-					return;
-				}
-				this.filterIndex = index;
-				if (index === 1) {
-					this.priceOrder = this.priceOrder === 1 ? 2 : 1;
-				} else {
-					this.priceOrder = 0;
-				}
-				uni.pageScrollTo({
-					duration: 300,
-					scrollTop: 0
-				})
-				this.loadData('refresh', 1);
-				uni.showLoading({
-					title: '正在加载'
-				})
-			},
-			//详情
-			navToDetailPage(item) {
-				//测试数据没有写id，用title代替
-				let id = item.id;
-				uni.navigateTo({
-					url: `/pages/product/detail?id=${id}`
-				})
-			},
-			stopPrevent() {}
-		},
-	}
+      let orderByInfo = {}
+      if (this.filterIndex === 0) {
+        // 销量排序
+        orderByInfo = {
+          orderBy: 'sales',
+          isAsc: false
+        }
+      }
+      if (this.filterIndex === 1) {
+        // 价格排序 需要从新获取Page
+        orderByInfo = {
+          orderBy: 'price',
+          isAsc: this.priceOrder === 1
+        }
+      }
+      if (type === 'refresh') {
+        this.pageNo = 1
+      }
+      this.$api.request('product', 'getProductPage', {
+        categoryId: this.cateId,
+        title: this.keyword,
+        pageNo: this.pageNo,
+        ...orderByInfo
+      }).then(res => {
+        const tempList = res.data.items
+        if (type === 'refresh') {
+          this.productList = []
+        }
+        this.productList = this.productList.concat(tempList)
+        this.pageNo = res.data.pageNo + 1
+        this.loadingType = res.data.totalPageNo > res.data.pageNo ? 'more' : 'nomore'
+        if (type === 'refresh') {
+          if (loading === 1) {
+            uni.hideLoading()
+          } else {
+            uni.stopPullDownRefresh()
+          }
+        }
+      })
+    },
+    // 筛选点击
+    tabClick(index) {
+      if (this.filterIndex === index && index !== 1) {
+        return
+      }
+      this.filterIndex = index
+      if (index === 1) {
+        this.priceOrder = this.priceOrder === 1 ? 2 : 1
+      } else {
+        this.priceOrder = 0
+      }
+      uni.pageScrollTo({
+        duration: 300,
+        scrollTop: 0
+      })
+      this.loadData('refresh', 1)
+      uni.showLoading({
+        title: '正在加载'
+      })
+    },
+    // 详情
+    navToDetailPage(item) {
+      // 测试数据没有写id，用title代替
+      const id = item.id
+      uni.navigateTo({
+        url: `/pages/product/detail?id=${id}`
+      })
+    },
+    stopPrevent() {}
+  }
+}
 </script>
 
 <style lang="scss">

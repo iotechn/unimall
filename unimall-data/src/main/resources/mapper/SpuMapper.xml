@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iotechn.unimall.data.mapper.SpuMapper">
+
+    <update id="incSales">
+        UPDATE unimall_spu SET sales = sales + #{delta} WHERE id = #{spuId}
+    </update>
+
+    <select id="getSpuTitleByCategoryId" resultType="com.iotechn.unimall.data.domain.SpuDO">
+        SELECT id,title FROM unimall_spu WHERE category_id = #{categroyId}
+    </select>
+
+    <select id="getSpuTitleAll" resultType="com.iotechn.unimall.data.domain.SpuDO">
+        SELECT id,title,category_id as categoryId FROM unimall_spu ORDER BY category_id
+    </select>
+</mapper>

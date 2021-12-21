@@ -1,15 +1,15 @@
 package com.iotechn.unimall.admin.api.order;
 
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.annotation.HttpParam;
-import com.iotechn.unimall.core.annotation.HttpParamType;
-import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.annotation.HttpMethod;
+import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
+import com.dobbinsoft.fw.core.annotation.HttpParam;
+import com.dobbinsoft.fw.core.annotation.HttpParamType;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.dto.order.OrderStatisticsDTO;
-import com.iotechn.unimall.data.model.Page;
 
 import java.util.List;
 
@@ -43,7 +43,7 @@ public interface AdminOrderService {
 
     @HttpMethod(description = "详情", permission = "operation:order:detail", permissionParentName = "运营管理", permissionName = "订单管理")
     public OrderDTO detail(
-            @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单Id") Long orderNo,
+            @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单Id") Long orderId,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "根据传入时间和订单状态查询订单信息", permission = "operation:order:querytoexcel", permissionParentName = "运营管理", permissionName = "订单管理")

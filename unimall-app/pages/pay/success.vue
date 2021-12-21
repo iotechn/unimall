@@ -1,26 +1,43 @@
 <template>
-	<view class="content">
-		<text class="success-icon yticon icon-xuanzhong2"></text>
-		<text class="tit">支付成功</text>
-		
-		<view class="btn-group">
-			<navigator url="/pages/order/list?state=0" open-type="redirect" class="mix-btn">查看订单</navigator>
-			<navigator url="/pages/index/index" open-type="switchTab" class="mix-btn hollow">返回首页</navigator>
-		</view>
-	</view>
+  <view class="content">
+    <text class="success-icon yticon icon-xuanzhong2" />
+    <text class="tit">
+      支付成功
+    </text>
+
+    <view class="btn-group">
+      <navigator v-if="scene !== 'vip'" url="/pages/order/list?state=0" open-type="redirect" class="mix-btn">
+        查看订单
+      </navigator>
+      <navigator url="/pages/index/index" open-type="switchTab" class="mix-btn hollow">
+        返回首页
+      </navigator>
+    </view>
+  </view>
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				
-			}
-		},
-		methods: {
-			
-		}
-	}
+export default {
+  data() {
+    return {
+      scene: ''
+    }
+  },
+  onLoad(options) {
+    if (options.scene) {
+      const that = this
+      that.scene = options.scene
+      // 更新session
+      that.$api.request('user', 'getUser').then(res => {
+        uni.setStorageSync('userInfo', res.data)
+        that.$store.commit('login', res.data)
+      })
+    }
+  },
+  methods: {
+
+  }
+}
 </script>
 
 <style lang='scss'>

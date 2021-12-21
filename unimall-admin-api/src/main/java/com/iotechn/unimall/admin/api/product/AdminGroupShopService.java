@@ -1,14 +1,14 @@
 package com.iotechn.unimall.admin.api.product;
 
-import com.iotechn.unimall.core.annotation.HttpMethod;
-import com.iotechn.unimall.core.annotation.HttpOpenApi;
-import com.iotechn.unimall.core.annotation.HttpParam;
-import com.iotechn.unimall.core.annotation.HttpParamType;
-import com.iotechn.unimall.core.annotation.param.NotNull;
-import com.iotechn.unimall.core.annotation.param.Range;
-import com.iotechn.unimall.core.exception.ServiceException;
-import com.iotechn.unimall.data.dto.goods.GroupShopDTO;
-import com.iotechn.unimall.data.model.Page;
+import com.dobbinsoft.fw.core.annotation.HttpMethod;
+import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
+import com.dobbinsoft.fw.core.annotation.HttpParam;
+import com.dobbinsoft.fw.core.annotation.HttpParamType;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
+import com.dobbinsoft.fw.core.annotation.param.Range;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
+import com.iotechn.unimall.data.dto.product.GroupShopDTO;
 
 @HttpOpenApi(group = "admin.groupshop", description = "管理团购商品服务")
 public interface AdminGroupShopService {
@@ -19,7 +19,7 @@ public interface AdminGroupShopService {
             @NotNull @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "团购开始时间戳") Long gmtStart,
             @NotNull @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "团购结束时间戳") Long gmtEnd,
             @NotNull @Range(min = 1) @HttpParam(name = "minNum", type = HttpParamType.COMMON, description = "团购最低人数") Integer minNum,
-            @NotNull @HttpParam(name = "automaticRefund", type = HttpParamType.COMMON, description = "团购人数未满是否自动退款")  Integer automaticRefund,
+            @NotNull @HttpParam(name = "automaticRefund", type = HttpParamType.COMMON, description = "团购人数未满是否自动退款") Integer automaticRefund,
             @NotNull @HttpParam(name = "groupShopSkuList", type = HttpParamType.COMMON, description = "团购sku链表") String groupShopSkuListStr,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 
@@ -35,7 +35,7 @@ public interface AdminGroupShopService {
             @NotNull @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "团购开始时间戳") Long gmtStart,
             @NotNull @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "团购结束时间戳") Long gmtEnd,
             @NotNull @Range(min = 1) @HttpParam(name = "minNum", type = HttpParamType.COMMON, description = "团购最低人数") Integer minNum,
-            @NotNull @HttpParam(name = "automaticRefund", type = HttpParamType.COMMON, description = "团购人数未满是否自动退款")  Integer automaticRefund,
+            @NotNull @HttpParam(name = "automaticRefund", type = HttpParamType.COMMON, description = "团购人数未满是否自动退款") Integer automaticRefund,
             @NotNull @HttpParam(name = "groupShopSkuList", type = HttpParamType.COMMON, description = "团购sku链表") String groupShopSkuDOListStr,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws ServiceException;
 

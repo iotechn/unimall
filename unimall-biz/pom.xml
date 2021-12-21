@@ -1,64 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.iotechn</groupId>
-		<artifactId>unimall</artifactId>
-		<version>0.0.1-RELEASE</version>
-	</parent>
-	<groupId>com.iotechn</groupId>
-	<artifactId>unimall-biz</artifactId>
-	<version>0.0.1-RELEASE</version>
-	<name>unimall-biz</name>
-	<description>unimall 非公开BizService</description>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.iotechn</groupId>
+        <artifactId>unimall</artifactId>
+        <version>v3</version>
+    </parent>
+    <groupId>com.iotechn</groupId>
+    <artifactId>unimall-biz</artifactId>
+    <version>v3</version>
+    <name>unimall-biz</name>
+    <description>骨架DEMO BIZ</description>
+    <properties>
+        <java.version>1.8</java.version>
+    </properties>
+    <dependencies>
 
-	<properties>
-		<java.version>1.8</java.version>
-	</properties>
+        <dependency>
+            <groupId>com.iotechn</groupId>
+            <artifactId>unimall-data</artifactId>
+            <version>v3</version>
+        </dependency>
 
-	<dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>com.iotechn</groupId>
-			<artifactId>unimall-data</artifactId>
-			<version>0.0.1-RELEASE</version>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>com.iotechn</groupId>
-			<artifactId>unimall-core</artifactId>
-			<version>0.0.1-RELEASE</version>
-		</dependency>
+        <!-- lombok 工具 -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-		<!-- http客户端 -->
-		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-		</dependency>
-
-		<!-- 微信第三方封装Api -->
-		<dependency>
-			<groupId>com.github.binarywang</groupId>
-			<artifactId>weixin-java-pay</artifactId>
-		</dependency>
-
-
-	</dependencies>
+    </dependencies>
 
 </project>
