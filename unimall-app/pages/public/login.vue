@@ -382,7 +382,15 @@ export default {
       const page = that.$api.prePage()
       let prePath = '/pages/index/index'
       if (page) {
-        prePath = page.__page__.path
+        const options = page.__page__.options
+        let str = ''
+        for (const key in options) {
+          str += key
+          str += '='
+          str += options[key]
+          str += '&'
+        }
+        prePath = page.__page__.path + '?' + str
       }
       window.location = 'https://open.weixin.qq.com/connect/oauth2/authorize?' +
 				'appid=' + that.$api.config.h5Appid + '&redirect_uri=' + escape(href) + '&response_type=code&scope=snsapi_userinfo&state=' + escape(prePath) + '#wechat_redirect'
@@ -406,7 +414,6 @@ export default {
           const loginData = res.data
           that.$store.commit('login', loginData)
           uni.setStorageSync('userInfo', loginData)
-          debugger
           if (loginData.status === 2) {
             // 未完善手机号，小程序，要求同步信息
             uni.redirectTo({

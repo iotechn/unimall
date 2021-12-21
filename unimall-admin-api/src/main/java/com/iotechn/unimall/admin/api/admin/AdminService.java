@@ -32,7 +32,7 @@ public interface AdminService {
     public AdminDTO info(
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
-    @HttpMethod(description = "列表", openPlatform = true)
+    @HttpMethod(description = "列表", permission = "sys:admin:list", permissionParentName = "系统管理", permissionName = "管理员")
     public Page<AdminDTO> list(
             @HttpParam(name = "username", type = HttpParamType.COMMON, description = "管理员名称搜索") String username,
             @HttpParam(name = "page", type = HttpParamType.COMMON, description = "页码", valueDef = "1") Integer page,
