@@ -8,6 +8,7 @@ import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.component.LockComponent;
+import com.dobbinsoft.fw.support.component.MachineComponent;
 import com.dobbinsoft.fw.support.model.Page;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
 import com.dobbinsoft.fw.support.service.BaseService;
@@ -118,8 +119,8 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     @Autowired
     private DelayedMessageQueue delayedMessageQueue;
 
-    @Value("${com.dobbinsoft.fw.machine-no}")
-    private String MACHINE_NO;
+    @Autowired
+    private MachineComponent machineComponent;
 
     @Value("${com.dobbinsoft.fw.env}")
     private String ENV;
@@ -318,7 +319,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 // 使用优惠券的订单
                 Long useCouponOrderId = null;
                 // 生成一个父单号
-                String parentOrderNo = GeneratorUtil.genOrderId(this.MACHINE_NO, this.ENV);
+                String parentOrderNo = GeneratorUtil.genOrderId(this.machineComponent.getMachineNo() + "", this.ENV);
                 if (skuPrice > 0) {
                     // 这是普通商品
                     // 将普通商品(非团购等需要单独拆单的商品)的SkuList过滤出来

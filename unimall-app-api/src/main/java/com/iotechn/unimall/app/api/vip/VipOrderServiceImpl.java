@@ -1,6 +1,5 @@
 package com.iotechn.unimall.app.api.vip;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.AppServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
@@ -10,9 +9,8 @@ import com.dobbinsoft.fw.pay.enums.PayPlatformType;
 import com.dobbinsoft.fw.pay.exception.MatrixPayException;
 import com.dobbinsoft.fw.pay.model.request.MatrixPayUnifiedOrderRequest;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
+import com.dobbinsoft.fw.support.component.MachineComponent;
 import com.dobbinsoft.fw.support.model.Page;
-import com.dobbinsoft.fw.support.properties.FwAliAppProperties;
-import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
 import com.dobbinsoft.fw.support.properties.FwWxPayProperties;
 import com.dobbinsoft.fw.support.service.BaseService;
 import com.iotechn.unimall.biz.util.PaySelector;
@@ -24,7 +22,6 @@ import com.iotechn.unimall.data.enums.VipOrderStatusType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.VipOrderMapper;
 import com.iotechn.unimall.data.mapper.VipTemplateMapper;
-import groovyjarjarantlr.PythonCharFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +44,8 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
     @Autowired
     private FwWxPayProperties fwWxPayProperties;
 
-    @Value("${com.dobbinsoft.fw.machine-no}")
-    private String MACHINE_NO;
+    @Autowired
+    private MachineComponent machineComponent;
 
     @Value("${com.dobbinsoft.fw.env}")
     private String ENV;
@@ -65,7 +62,7 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
         if (vipTemplateDO == null || 1 != vipTemplateDO.getDisplay().intValue()) {
             throw new AppServiceException(ExceptionDefinition.VIP_TEMPLATE_NULL_OR_NOT_DISPLAY);
         }
-        String orderNo = GeneratorUtil.genOrderId(this.MACHINE_NO, this.ENV);
+        String orderNo = GeneratorUtil.genOrderId(this.machineComponent.getMachineNo() + "", this.ENV);
         VipOrderDO vipOrderDO = new VipOrderDO();
         vipOrderDO.setDayNum(vipTemplateDO.getDayNum());
         vipOrderDO.setPrice(vipTemplateDO.getPrice());

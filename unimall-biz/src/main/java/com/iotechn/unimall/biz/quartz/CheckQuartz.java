@@ -6,6 +6,7 @@ import com.dobbinsoft.fw.core.Const;
 import com.dobbinsoft.fw.core.exception.AdminServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.LockComponent;
+import com.dobbinsoft.fw.support.component.MachineComponent;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
 import com.iotechn.unimall.biz.client.erp.ErpClient;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
@@ -67,6 +68,8 @@ public class CheckQuartz {
     private TransactionTemplate transactionTemplate;
     @Autowired
     private StringRedisTemplate userRedisTemplate;
+    @Autowired
+    private MachineComponent machineComponent;
 
     /**
      * 此定时任务是算是保险，防止Redis延迟消息丢失的情况
@@ -302,6 +305,16 @@ public class CheckQuartz {
             } finally {
                 lockComponent.release(LockConst.VIP_PAY_TIMEOUT_LOCK);
             }
+        }
+    }
+
+    /**
+     * 续约机器号
+     */
+    @Scheduled(cron = "0 0/5 * * * ?")
+    public void renewMachineNo() {
+        if (this.machineComponent.isInit()) {
+            this.machineComponent.renew();
         }
     }
 

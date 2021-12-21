@@ -4,11 +4,15 @@ import com.anji.captcha.config.AjCaptchaAutoConfiguration;
 import com.dobbinsoft.fw.support.annotation.EnableDelayedMQ;
 import com.dobbinsoft.fw.support.annotation.EnableDynamicConfig;
 import com.dobbinsoft.fw.support.annotation.EnableOpenPlatform;
+import com.dobbinsoft.fw.support.component.MachineComponent;
 import org.mybatis.spring.annotation.MapperScan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration;
+import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication(
         scanBasePackages = {
@@ -28,8 +32,20 @@ import org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfig
 @EnableDelayedMQ
 public class UnimallRunnerApplication {
 
+    private static final Logger logger = LoggerFactory.getLogger(UnimallRunnerApplication.class);
+
     public static void main(String[] args) {
-        SpringApplication.run(UnimallRunnerApplication.class, args);
+        ConfigurableApplicationContext applicationContext = SpringApplication.run(UnimallRunnerApplication.class, args);
+        MachineComponent machineComponent = applicationContext.getBean(MachineComponent.class);
+        // 触发获取一个机器号
+        machineComponent.getMachineNo();
+        logger.info("[Unimall IoC] 系统初始化成功！");
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            // 当正常退出时，将机器号释放，以供其他机器使用
+            if (machineComponent.isInit()) {
+                machineComponent.release();
+            }
+        }));
     }
 
 }
