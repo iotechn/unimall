@@ -1,10 +1,12 @@
 package com.iotechn.unimall.runner;
 
 import com.anji.captcha.config.AjCaptchaAutoConfiguration;
+import com.dobbinsoft.fw.launcher.manager.IApiManager;
 import com.dobbinsoft.fw.support.annotation.EnableDelayedMQ;
 import com.dobbinsoft.fw.support.annotation.EnableDynamicConfig;
 import com.dobbinsoft.fw.support.annotation.EnableOpenPlatform;
 import com.dobbinsoft.fw.support.component.MachineComponent;
+import com.iotechn.unimall.admin.api.role.RoleServiceImpl;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +38,12 @@ public class UnimallRunnerApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext applicationContext = SpringApplication.run(UnimallRunnerApplication.class, args);
-        MachineComponent machineComponent = applicationContext.getBean(MachineComponent.class);
+        // 设置权限
+        IApiManager apiManager = applicationContext.getBean(IApiManager.class);
+        RoleServiceImpl roleService = applicationContext.getBean(RoleServiceImpl.class);
+        roleService.setPerms(apiManager.getPermissions());
         // 触发获取一个机器号
+        MachineComponent machineComponent = applicationContext.getBean(MachineComponent.class);
         machineComponent.getMachineNo();
         logger.info("[Unimall IoC] 系统初始化成功！");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

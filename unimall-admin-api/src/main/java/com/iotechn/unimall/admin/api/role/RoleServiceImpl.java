@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -39,9 +40,25 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private RolePermissionMapper rolePermissionMapper;
 
-    public static List<PermissionPoint> permDTOs = new LinkedList<>();
+    private List<PermissionPoint> permDTOs;
 
-    public static Set<String> allPermPoint = new HashSet<>();
+    private Set<String> allPermPoint = new HashSet<>();
+
+    public void setPerms(List<PermissionPoint> permDTOs) {
+        this.permDTOs = permDTOs;
+        this.getPermPoints(permDTOs);
+    }
+
+    private void getPermPoints(List<PermissionPoint> permDTOs) {
+        for (PermissionPoint permissionPoint : permDTOs) {
+            String api = permissionPoint.getApi();
+            if (ObjectUtils.isEmpty(api) && !ObjectUtils.isEmpty(permissionPoint.getChildren())) {
+                this.getPermPoints(permissionPoint.getChildren());
+            } else {
+                allPermPoint.add(permissionPoint.getId());
+            }
+        }
+    }
 
     @Override
     public Page<RoleDO> list(String name, Integer page, Integer limit, Long adminId) throws ServiceException {
