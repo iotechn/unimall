@@ -8,10 +8,10 @@ v3之后，将基础框架与业务相分离，这样做的主要目的是为了
 
 | 依赖（点击打开）                 | 解释                   |
 | -------------------------------- | ---------------------- |
-| [core](../../../dobbinfw-core)         | 核心包                 |
-| [support](../../../dobbinfw-support)   | 支持包，非常重要的文档 |
-| [launcher](../../../dobbinfw-launcher) | 启动器，非常重要的文档 |
-| [pay](../../../matrix-pay) | 支付包 |
+| [core](../../../../dobbinfw-core)         | 核心包                 |
+| [support](../../../../dobbinfw-support)   | 支持包，非常重要的文档 |
+| [launcher](../../../../dobbinfw-launcher) | 启动器，非常重要的文档 |
+| [pay](../../../../matrix-pay) | 支付包 |
 
 以上详细文档，请参照模块项目README。
 
