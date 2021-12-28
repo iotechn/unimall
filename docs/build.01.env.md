@@ -49,6 +49,7 @@ Complete!
 看到Complete！就安装完成了，使用下面命令启动mysql
 
 ```bash
+systemctl enable mysqld.service
 systemctl start mysqld.service
 ```
 
@@ -83,6 +84,8 @@ ALTER USER 'root'@'localhost' IDENTIFIED BY '1234newpwd!@#ABC';
 
 ```bash
 yum install -y redis
+systemctl enable redis.service
+systemctl start redis.service
 ```
 
 

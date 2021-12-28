@@ -400,7 +400,7 @@ export default {
       // 1. 验证是否是商品
       if (e !== undefined) {
         const tag = e[e.length - 1]
-        if (this.goodsOption === undefined || this.goodsOption === null || this.goodsOption.length <= 3) {
+        if (this.goodsOption === undefined || this.goodsOption === null || this.goodsOption.length <= 2) {
           this.$notify.error({
             title: '提示',
             message: '请选择商品'
