@@ -122,7 +122,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     public CategoryDTO update(Long id, String title, Long parentId, String iconUrl, String picUrl, Long adminId) throws ServiceException {
         CategoryDO categoryParent = null;
         if (parentId.longValue() != 0L) {
-            categoryMapper.selectById(parentId);
+            categoryParent = categoryMapper.selectById(parentId);
         }
         CategoryDO category = categoryMapper.selectById(id);
 
