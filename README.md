@@ -35,11 +35,9 @@ Unimall社区版源码包含:
 
 QQ讨论群：656676341(1群已满) 940197916(2群已满) **936569693(3群)** (进群前，请在网页右上角点**star**)
 
-微信：dobbinsoft (微信群二维码超100人，请加此微信备注意图，接受邀请)
+微信群： (微信群二维码超100人，请加此微信备注意图，接受邀请)
 
-微信群：
-
-![front](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/wx.png)
+![front](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/qr.jpeg?x-oss-process=style/400px)
 
 ## Experience 体验
 
