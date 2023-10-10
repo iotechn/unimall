@@ -199,7 +199,6 @@ const PLATFORM_WAP = 5
 export default {
   data() {
     return {
-      uni,
 	  style: this.$api.style,
       titleNViewBackground: '',
       swiperCurrent: 0,
