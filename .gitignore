@@ -42,7 +42,6 @@ mvnw.cmd
 ###properties###
 
 /unimall-runner/src/main/resources/application.properties
-/unimall-runner/src/main/resources/application-dev.properties
 /unimall-runner/src/main/resources/application-ops.properties
 
 ### target ###
