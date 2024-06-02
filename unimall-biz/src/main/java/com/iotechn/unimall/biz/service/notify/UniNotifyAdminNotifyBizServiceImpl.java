@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.service.notify;
 
-import cn.hutool.crypto.SecureUtil;
+import com.dobbinsoft.fw.support.utils.DigestUtils;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import com.iotechn.unimall.data.properties.UnimallAdminNotifyProperties;
 import okhttp3.FormBody;
@@ -9,7 +9,7 @@ import okhttp3.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 
 import java.net.URLEncoder;
 import java.util.Set;
@@ -85,6 +85,6 @@ public class UniNotifyAdminNotifyBizServiceImpl implements AdminNotifyBizService
             sortSet.add(formBody.value(i));
         }
         sortSet.add(this.unimallAdminNotifyProperties.getUniNotifyAppSecret());
-        return SecureUtil.sha256(URLEncoder.encode(sortSet.stream().collect(Collectors.joining()), "utf-8"));
+        return DigestUtils.sha256Hex(URLEncoder.encode(String.join("", sortSet), "utf-8"));
     }
 }

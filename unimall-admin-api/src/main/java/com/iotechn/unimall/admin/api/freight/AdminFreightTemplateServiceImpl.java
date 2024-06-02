@@ -1,9 +1,9 @@
 package com.iotechn.unimall.admin.api.freight;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
@@ -24,7 +24,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,7 +56,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
         FreightTemplateDO freightTemplateDO = newFreightTemplateDO(null,title,spuLocation,deliveryDeadline,defaultFreePrice,defaultFirstWeight,defaultFirstPrice,defaultContinueWeight,defaultContinuePrice);
 
         if (templateMapper.insert(freightTemplateDO) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_INSERT_FAILED);
+            throw new ServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_INSERT_FAILED);
         }
         insertCarriage(freightTemplateDO, carriageDOList);
         return "ok";
@@ -66,10 +66,10 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
     @Transactional(rollbackFor = Exception.class)
     public String delete(Long id, Long adminId) throws ServiceException {
         if (spuMapper.selectCount(new QueryWrapper<SpuDO>().eq("freight_template_id", id)) > 0) {
-            throw new AdminServiceException(ExceptionDefinition.FREIGHT_SPU_QUERY_HAS);
+            throw new ServiceException(ExceptionDefinition.FREIGHT_SPU_QUERY_HAS);
         }
         if (templateMapper.delete(new QueryWrapper<FreightTemplateDO>().eq("id", id)) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_DELETE_FAILED);
+            throw new ServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_DELETE_FAILED);
         }
         if (carriageMapper.delete(
                 new QueryWrapper<FreightTemplateCarriageDO>()
@@ -78,7 +78,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
             clearCache(id);
             return "ok";
         }
-        throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
+        throw new ServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
 
         FreightTemplateDO freightTemplateDO = newFreightTemplateDO(id,title,spuLocation,deliveryDeadline,defaultFreePrice,defaultFirstWeight,defaultFirstPrice,defaultContinueWeight,defaultContinuePrice);
         if (templateMapper.updateById(freightTemplateDO) <= 0) {    //如果主表修改失败
-            throw new AdminServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
+            throw new ServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_UPDATE_FAILED);
         }
         carriageMapper.delete(new QueryWrapper<FreightTemplateCarriageDO>().eq("template_id", id));
         insertCarriage(freightTemplateDO, carriageDOList);
@@ -121,12 +121,12 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
      * @throws ServiceException
      */
     private boolean insertCarriage(FreightTemplateDO freightTemplateDO, List carriageDOList) throws ServiceException {
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         if (CollectionUtils.isEmpty(carriageDOList)) {
             return true;
         }
         List<FreightTemplateCarriageDO> collect = (List<FreightTemplateCarriageDO>) carriageDOList.stream().map(item -> {
-            FreightTemplateCarriageDO t = JSONObject.toJavaObject((JSON) item, FreightTemplateCarriageDO.class);
+            FreightTemplateCarriageDO t = JacksonUtil.toJavaObject((JSON) item, FreightTemplateCarriageDO.class);
             return t;
         }).collect(Collectors.toList());
         //表中设定可默认值，所以就不检查是否为空
@@ -135,7 +135,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
             carriageDO.setGmtCreate(now);
             carriageDO.setGmtUpdate(now);
             if (carriageMapper.insert(carriageDO) <= 0) {
-                throw new AdminServiceException(ExceptionDefinition.FREIGHT_CARRIAGE_INSERT_FAILED);
+                throw new ServiceException(ExceptionDefinition.FREIGHT_CARRIAGE_INSERT_FAILED);
             }
         }
         return true;
@@ -143,7 +143,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
 
     private FreightTemplateDO newFreightTemplateDO(Long id, String title, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstWeight, Integer defaultFirstPrice, Integer defaultContinueWeight, Integer defaultContinuePrice){
         FreightTemplateDO freightTemplateDO = new FreightTemplateDO();
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         freightTemplateDO.setTitle(title);
         freightTemplateDO.setSpuLocation(spuLocation);
         freightTemplateDO.setDeliveryDeadline(deliveryDeadline);

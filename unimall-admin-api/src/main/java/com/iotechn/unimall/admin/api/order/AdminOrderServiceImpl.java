@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.order;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.model.request.MatrixPayRefundRequest;
@@ -32,10 +32,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,7 +95,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 //1.校验订单状态是否处于退款中
                 OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, null).get(0);
                 if (orderDO.getStatus() != OrderStatusType.REFUNDING.getCode()) {
-                    throw new AdminServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_REFUND);
+                    throw new ServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_REFUND);
                 }
                 //2.退款处理
                 if (type == 0) {
@@ -107,7 +107,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     } else {
                         updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
                     }
-                    updateOrderDO.setGmtUpdate(new Date());
+                    updateOrderDO.setGmtUpdate(LocalDateTime.now());
                     //2.2. 更改订单表状态
                     orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.REFUNDING.getCode(), updateOrderDO);
                     return "ok";
@@ -115,14 +115,14 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     if (orderDO.getPayChannel().equalsIgnoreCase(PayChannelType.WX.getCode())) {
                         String keyContentBase64 = fwWxPayProperties.getKeyContent();
                         if (ObjectUtils.isEmpty(keyContentBase64)) {
-                            throw new AdminServiceException(ExceptionDefinition.ORDER_REFUND_KEY_PATH_ERROR);
+                            throw new ServiceException(ExceptionDefinition.ORDER_REFUND_KEY_PATH_ERROR);
                         }
                     }
                     //2.2 店主同意退款
                     //2.2.1 先流转状态
                     OrderDO updateOrderDO = new OrderDO();
                     updateOrderDO.setStatus(OrderStatusType.REFUNDED.getCode());
-                    updateOrderDO.setGmtUpdate(new Date());
+                    updateOrderDO.setGmtUpdate(LocalDateTime.now());
                     //
                     //订单还库存
                     List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
@@ -134,7 +134,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     Integer refundPrice = null;
                     if (sum != null) {
                         if (sum.intValue() > orderDO.getPayPrice()) {
-                            throw new AdminServiceException(ExceptionDefinition.ORDER_REFUND_SUM_MOST_LOWER_THAN_PAY_PRICE);
+                            throw new ServiceException(ExceptionDefinition.ORDER_REFUND_SUM_MOST_LOWER_THAN_PAY_PRICE);
                         }
                         refundPrice = sum;
                     } else {
@@ -158,28 +158,28 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     MatrixPayRefundResult matrixPayRefundResult = matrixPayService.refund(payRefundRequest);
                     if (!matrixPayRefundResult.getReturnCode().equals("SUCCESS")) {
                         logger.warn("[在线退款] 失败 : " + matrixPayRefundResult.getReturnMsg());
-                        throw new AdminServiceException(matrixPayRefundResult.getReturnMsg(),
+                        throw new ServiceException(matrixPayRefundResult.getReturnMsg(),
                                 ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
                     }
                     if (!matrixPayRefundResult.getResultCode().equals("SUCCESS")) {
                         logger.warn("[在线退款] 失败 : " + matrixPayRefundResult.getReturnMsg());
-                        throw new AdminServiceException(matrixPayRefundResult.getReturnMsg(),
+                        throw new ServiceException(matrixPayRefundResult.getReturnMsg(),
                                 ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
                     }
                     return "ok";
                 } else {
-                    throw new AdminServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
+                    throw new ServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
                 }
             } catch (ServiceException e) {
                 throw e;
             } catch (Exception e) {
                 logger.error("[在线退款] 异常", e);
-                throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+                throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
             } finally {
                 lockComponent.release(LockConst.ORDER_REFUND_LOCK + orderNo);
             }
         } else {
-            throw new AdminServiceException(ExceptionDefinition.SYSTEM_BUSY);
+            throw new ServiceException(ExceptionDefinition.SYSTEM_BUSY);
         }
     }
 
@@ -188,7 +188,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     public String ship(String orderNo, String shipCode, String shipNo, Long adminId) throws ServiceException {
         orderBizService.checkOrderExistByNo(orderNo, null).get(0);
         OrderDO updateOrderDO = new OrderDO();
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         updateOrderDO.setGmtUpdate(now);
         updateOrderDO.setGmtShip(now);
         updateOrderDO.setStatus(OrderStatusType.WAIT_CONFIRM.getCode());
@@ -213,7 +213,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         QueryWrapper wrapper = new QueryWrapper();
         if (gmtStart != null && gmtEnd != null) {
             if (gmtStart > gmtStart) {
-                throw new AdminServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
+                throw new ServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
             }
             wrapper.between("gmt_create", new Date(gmtStart), new Date(gmtEnd));
         }
@@ -243,11 +243,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderDO.setId(orderId);
         orderDO.setAdminMonoLevel(level);
         orderDO.setAdminMono(mono);
-        orderDO.setGmtUpdate(new Date());
+        orderDO.setGmtUpdate(LocalDateTime.now());
         if (orderMapper.updateById(orderDO) > 0) {
             return "ok";
         }
-        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
@@ -259,7 +259,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             gmtEnd = System.currentTimeMillis();
         }
         if (gmtStart > gmtStart) {
-            throw new AdminServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
+            throw new ServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
         }
         List<OrderDO> orderDOS = orderMapper.selectList(
                 new QueryWrapper<OrderDO>()

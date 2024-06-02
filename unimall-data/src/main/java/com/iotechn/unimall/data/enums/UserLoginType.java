@@ -1,10 +1,12 @@
 package com.iotechn.unimall.data.enums;
 
 import com.dobbinsoft.fw.core.enums.BaseEnums;
+import lombok.Getter;
 
 /**
  * Created by rize on 2019/2/13.
  */
+@Getter
 public enum UserLoginType implements BaseEnums<Integer> {
     REGISTER(0, "手机注册"),
     MP_WEIXIN(1, "WX小程序登录"),
@@ -19,16 +21,8 @@ public enum UserLoginType implements BaseEnums<Integer> {
         this.msg = msg;
     }
 
-    private int code;
+    private Integer code;
 
     private String msg;
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
 
 }

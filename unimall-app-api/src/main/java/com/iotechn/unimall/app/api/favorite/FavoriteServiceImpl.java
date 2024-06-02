@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.favorite;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.model.Page;
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /*
 @author kbq
@@ -33,7 +33,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Transactional(rollbackFor = Exception.class)
     public String create(Long spuId, Long userId) throws ServiceException {
         //校验SPU是否存在
-        int count = favoriteMapper.selectCount(new QueryWrapper<FavoriteDO>()
+        Long count = favoriteMapper.selectCount(new QueryWrapper<FavoriteDO>()
                 .eq("user_id", userId)
                 .eq("spu_id", spuId));
         if (count > 0) {
@@ -41,7 +41,7 @@ public class FavoriteServiceImpl implements FavoriteService {
             cacheComponent.putHashRaw(CacheConst.PRT_USER_FAVORITE_HASH_BUCKET + spuId, "U" + userId, "1");
             return "ok";
         }
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         FavoriteDO favoriteDO = new FavoriteDO();
         favoriteDO.setSpuId(spuId);
         favoriteDO.setUserId(userId);
@@ -51,7 +51,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         if (favoriteMapper.insert(favoriteDO) > 0) {
             return "ok";
         }
-        throw new AppServiceException(ExceptionDefinition.APP_UNKNOWN_EXCEPTION);
+        throw new ServiceException(ExceptionDefinition.APP_UNKNOWN_EXCEPTION);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class FavoriteServiceImpl implements FavoriteService {
             cacheComponent.delHashKey(CacheConst.PRT_USER_FAVORITE_HASH_BUCKET + spuId, "U" + userId);
             return "ok";
         }
-        throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
+        throw new ServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
     }
 
     @Override

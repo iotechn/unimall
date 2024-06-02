@@ -1,7 +1,7 @@
 package com.iotechn.unimall.biz.service.freight;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.dobbinsoft.fw.core.enums.BaseEnums;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ThirdPartServiceException;
@@ -47,7 +47,7 @@ public class KdniaoTrackQueryAPI implements ShipTraceQuery {
         String msg = "";
         try {
             String orderTracesByJson = getOrderTracesByJson(shipCode, shipNo);
-            JSONObject jsonObject = JSONObject.parseObject(orderTracesByJson);
+            JacksonUtil jsonObject = JacksonUtil.parseObject(orderTracesByJson);
             ShipTraceDTO shipTraceDTO = new ShipTraceDTO();
             shipTraceDTO.setShipNo(shipNo);
             shipTraceDTO.setShipCode(shipCode);
@@ -57,8 +57,8 @@ public class KdniaoTrackQueryAPI implements ShipTraceQuery {
             if (!CollectionUtils.isEmpty(tracesFromJson)) {
                 for (int i = 0; i < tracesFromJson.size(); i++) {
                     ShipTraceItemDTO shipTraceItemDTO = new ShipTraceItemDTO();
-                    shipTraceItemDTO.setStation(tracesFromJson.getJSONObject(i).getString("AcceptStation"));
-                    shipTraceItemDTO.setTime(tracesFromJson.getJSONObject(i).getString("AcceptTime"));
+                    shipTraceItemDTO.setStation(tracesFromJson.getJacksonUtil(i).getString("AcceptStation"));
+                    shipTraceItemDTO.setTime(tracesFromJson.getJacksonUtil(i).getString("AcceptTime"));
                     traces.add(shipTraceItemDTO);
                 }
             }

@@ -1,6 +1,10 @@
 package com.iotechn.unimall.data.enums;
 
-public enum VipOrderStatusType {
+import com.dobbinsoft.fw.core.enums.BaseEnums;
+import lombok.Getter;
+
+@Getter
+public enum VipOrderStatusType implements BaseEnums<Integer> {
 
     WAIT_EXCHANGE(10, "待兑换"),
     EXCHANGE_OVER(20, "已兑换"),
@@ -15,16 +19,8 @@ public enum VipOrderStatusType {
         this.msg = msg;
     }
 
-    private int code;
+    private Integer code;
 
     private String msg;
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
 
 }

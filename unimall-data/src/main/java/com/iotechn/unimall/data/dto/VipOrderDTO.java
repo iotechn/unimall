@@ -3,7 +3,7 @@ package com.iotechn.unimall.data.dto;
 import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 public class VipOrderDTO extends SuperDTO {
@@ -24,7 +24,7 @@ public class VipOrderDTO extends SuperDTO {
 
     private String phone;
 
-    private Date gmtPay;
+    private LocalDateTime gmtPay;
 
     private String payChannel;
 

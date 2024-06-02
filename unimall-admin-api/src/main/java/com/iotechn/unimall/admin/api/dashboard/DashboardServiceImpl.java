@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,8 +32,8 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public Object integral(Long adminId) throws ServiceException {
         DashboardIntegralDTO dto = new DashboardIntegralDTO();
-        Integer orderWaitStock = orderMapper.selectCount(new QueryWrapper<OrderDO>().eq("status", OrderStatusType.WAIT_STOCK.getCode()));
-        Integer spuCount = spuMapper.selectCount(new QueryWrapper<SpuDO>());
+        Long orderWaitStock = orderMapper.selectCount(new QueryWrapper<OrderDO>().eq("status", OrderStatusType.WAIT_STOCK.getCode()));
+        Long spuCount = spuMapper.selectCount(new QueryWrapper<SpuDO>());
         List<KVModel<String, Long>> area = orderMapper.selectAreaStatistics();
         List<KVModel<String, Long>> channel = orderMapper.selectChannelStatistics();
         dto.setArea(area);
@@ -42,7 +42,7 @@ public class DashboardServiceImpl implements DashboardService {
         dto.setGoodsCount(spuCount);
         Integer days = 7;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
-        String startDay = sdf.format(new Date(System.currentTimeMillis() - 1000l * 60 * 60 * 24 * days));
+        String startDay = sdf.format(LocalDateTime.now().plusDays(days));
         List<KVModel<String, Long>> orderCountKVList = orderMapper.selectOrderCountStatistics(startDay);
         List<KVModel<String, Long>> orderSumKVList = orderMapper.selectOrderSumStatistics(startDay);
         SimpleDateFormat sdfDay = new SimpleDateFormat("yyyy-MM-dd");
@@ -60,7 +60,7 @@ public class DashboardServiceImpl implements DashboardService {
         dto.setDaysSum(orderSum);
         //这里是在补全 group by 为 0 的情况
         for (int i = 0; i < days; i++) {
-            Date date = new Date(System.currentTimeMillis() - 1000l * 60 * 60 * 24 * i);
+            LocalDateTime date = LocalDateTime.now().plusDays(-i);
             String key = sdfDay.format(date);
             int i1 = orderCountKVList.indexOf(new KVModel<>(key, null));
             if (i1 >= 0) {

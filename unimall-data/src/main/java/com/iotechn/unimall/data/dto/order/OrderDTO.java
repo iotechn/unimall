@@ -8,7 +8,7 @@ import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.enums.SpuActivityType;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -81,7 +81,7 @@ public class OrderDTO extends SuperDTO {
     private String payChannel;
 
     @ApiField(description = "支付时间")
-    private Date gmtPay;
+    private LocalDateTime gmtPay;
 
     @ApiField(description = "运单号")
     private String shipNo;
@@ -120,10 +120,10 @@ public class OrderDTO extends SuperDTO {
     private String refundReason;
 
     @ApiField(description = "发货时间")
-    private Date gmtShip;
+    private LocalDateTime gmtShip;
 
     @ApiField(description = "确实收货时间")
-    private Date gmtConfirm;
+    private LocalDateTime gmtConfirm;
 
     @ApiField(description = "自动取消订单还有多少秒")
     private Integer cancelSec;

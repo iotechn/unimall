@@ -1,8 +1,8 @@
 package com.iotechn.unimall.admin.api.product;
 
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.model.Page;
@@ -27,8 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,36 +62,36 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
     @Transactional(rollbackFor = Exception.class)
     public String create(Long spuId, Long gmtStart, Long gmtEnd, Integer minNum, Integer automaticRefund, String groupShopSkuListStr, Long adminId) throws ServiceException {
         // 1.转化为对应的GroupShopSkuDTO类的链表
-        List<GroupShopSkuDTO> groupShopSkuDTOList = JSONObject.parseArray(groupShopSkuListStr, GroupShopSkuDTO.class)
+        List<GroupShopSkuDTO> groupShopSkuDTOList = JacksonUtil.parseArray(groupShopSkuListStr, GroupShopSkuDTO.class)
                 .stream().sorted(Comparator.comparingInt(GroupShopSkuDTO::getSkuGroupShopPrice)).collect(Collectors.toList());
 
         if (gmtStart.compareTo(gmtEnd) >= 0) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_START_MUST_LESS_THAN_END);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_START_MUST_LESS_THAN_END);
         }
 
         // 2.1 检验数据库中是否存在spuId对应的sku
         SpuDO spuDO = spuMapper.selectById(spuId);
         List<SkuDO> skuDOList = skuMapper.selectList((new QueryWrapper<SkuDO>().eq("spu_id", spuId)));
         if (spuDO == null || CollectionUtils.isEmpty(skuDOList)) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST_OR_ONLY_SPU);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST_OR_ONLY_SPU);
         }
         // 2.2 检验groupShop表中是否存在此商品
-        Integer count = groupShopMapper.selectCount((new QueryWrapper<GroupShopDO>().eq("spu_id", spuId)));
+        Long count = groupShopMapper.selectCount((new QueryWrapper<GroupShopDO>().eq("spu_id", spuId)));
         if (count > 0) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_ALREADY_EXIT);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_ALREADY_EXIT);
         }
         // 2.3 校验商品是否还有未存在的活动
         if (spuDO.getActivityId() != null && spuDO.getActivityType() != null
                 && spuDO.getActivityType() != SpuActivityType.NONE.getCode()
                 && spuDO.getGmtActivityEnd() != null && spuDO.getGmtActivityEnd().getTime() > System.currentTimeMillis()) {
-            throw new AdminServiceException(ExceptionDefinition.PRODUCT_SPU_EXIST_ACTIVITY);
+            throw new ServiceException(ExceptionDefinition.PRODUCT_SPU_EXIST_ACTIVITY);
         }
 
         // 3.创建团购活动信息
         // 3.1.插入主表
         Date timeStart = new Date(gmtStart);
         Date timeEnd = new Date(gmtEnd);
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         GroupShopDO groupShopDO = new GroupShopDO();
 
         groupShopDO.setBuyerNum(0);
@@ -106,11 +107,11 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         // 由活动开始定时任务更改其状态
         groupShopDO.setStatus(StatusType.LOCK.getCode());
         if (groupShopMapper.insert(groupShopDO) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_ADD_SQL_QUERY_ERROR);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SPU_ADD_SQL_QUERY_ERROR);
         }
 
         if (skuDOList.size() != groupShopSkuDTOList.size()) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SKU_NUMBER_ERROR);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SKU_NUMBER_ERROR);
         }
         // 3.2 插入groupShopSkuList（插入从表）
         this.insertGroupShopSkuList(groupShopSkuDTOList, skuDOList, groupShopDO.getId(), now);
@@ -134,22 +135,22 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         // 1. 参数校验
         GroupShopDO groupShopDO = groupShopMapper.selectById(id);
         if (groupShopDO == null) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST_OR_ONLY_SPU);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST_OR_ONLY_SPU);
         }
 
         if (groupShopDO.getStatus() > 0) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_ALREADY_ACTIVE);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_ALREADY_ACTIVE);
         }
 
         // 2. 删除团购
         if (groupShopMapper.deleteById(id) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_DELETE_SQL_QUERY_ERROR);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SPU_DELETE_SQL_QUERY_ERROR);
         }
         if (skuActivityPriceMapper.delete((
                 new QueryWrapper<SkuActivityPriceDO>()
                         .eq("activity_id", id)
                         .eq("activity_type", SpuActivityType.GROUP_SHOP.getCode()))) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SKU_DELETE_SQL_QUERY_ERROR);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SKU_DELETE_SQL_QUERY_ERROR);
         }
 
         // 3. 更新SPU状态
@@ -160,7 +161,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
             SpuDO updateSpuDO = new SpuDO();
             updateSpuDO.setId(groupShopDO.getSpuId());
             updateSpuDO.setActivityType(SpuActivityType.NONE.getCode());
-            updateSpuDO.setGmtUpdate(new Date());
+            updateSpuDO.setGmtUpdate(LocalDateTime.now());
             spuMapper.updateById(updateSpuDO);
         }
         // 4. 清理缓存
@@ -172,40 +173,40 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
     @Transactional(rollbackFor = Exception.class)
     public GroupShopDTO edit(Long id, Long spuId, Long gmtStart, Long gmtEnd, Integer minimumNumber, Integer automaticRefund, String groupShopSkuListStr, Long adminId) throws ServiceException {
         // 1.转化为对应的GroupShopSkuDO类的链表
-        List<GroupShopSkuDTO> groupShopSkuDOList = JSONObject.parseArray(groupShopSkuListStr, GroupShopSkuDTO.class)
+        List<GroupShopSkuDTO> groupShopSkuDOList = JacksonUtil.parseArray(groupShopSkuListStr, GroupShopSkuDTO.class)
                 .stream().sorted(Comparator.comparingInt(GroupShopSkuDTO::getSkuGroupShopPrice)).collect(Collectors.toList());
         // 2校验参数
         // 2.1.校验过期
         if (gmtStart.compareTo(gmtEnd) >= 0) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_START_MUST_LESS_THAN_END);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_START_MUST_LESS_THAN_END);
         }
 
         // 2.2.校验团购
         GroupShopDO groupShopDO = groupShopMapper.selectById(id);
         if (groupShopDO == null) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST);
         }
 
         if (groupShopDO.getStatus() > 0) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_ALREADY_ACTIVE);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_ALREADY_ACTIVE);
         }
 
         // 2.2. 校验SPU
         SpuDO spuDO = spuMapper.selectById(spuId);
         List<SkuDO> skuDOList = skuMapper.selectList((new QueryWrapper<SkuDO>().eq("spu_id", spuId)));
         if (spuDO == null || CollectionUtils.isEmpty(skuDOList)) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST_OR_ONLY_SPU);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXIST_OR_ONLY_SPU);
         }
 
         if (skuDOList.size() != groupShopSkuDOList.size()) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SKU_NUMBER_ERROR);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SKU_NUMBER_ERROR);
         }
 
         // 3. 修改团购信息
         // 3.1. 修改主表
         Date timeStart = new Date(gmtStart);
         Date timeEnd = new Date(gmtEnd);
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         groupShopDO.setMinNum(minimumNumber);
         groupShopDO.setGmtStart(timeStart);
         groupShopDO.setGmtEnd(timeEnd);
@@ -216,7 +217,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
         groupShopDO.setGmtUpdate(now);
         groupShopDO.setStatus(StatusType.LOCK.getCode());
         if (groupShopMapper.updateById(groupShopDO) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_UPDATE_SQL_QUERY_ERROR);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SPU_UPDATE_SQL_QUERY_ERROR);
         }
         // 3.2.插入groupShopSkuList(即修改活动商品价格表)
         // 3.2.1. 删除旧有活动商品价格
@@ -224,7 +225,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
                 new QueryWrapper<SkuActivityPriceDO>()
                         .eq("activity_id", id)
                         .eq("activity_type", SpuActivityType.GROUP_SHOP.getCode()))) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SKU_DELETE_SQL_QUERY_ERROR);
+            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SKU_DELETE_SQL_QUERY_ERROR);
         }
         // 3.3.2. 插入新的活动商品价格
         this.insertGroupShopSkuList(groupShopSkuDOList, skuDOList, groupShopDO.getId(), now);
@@ -305,11 +306,11 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
             }
 
             if (!judge) {
-                throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SKU_ID_ERROR);
+                throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SKU_ID_ERROR);
             }
 
             if (groupShopSkuDTO.getSkuGroupShopPrice() == null || groupShopSkuDTO.getSkuGroupShopPrice().equals(0)) {
-                throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SKU_PRICE_ERROR);
+                throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SKU_PRICE_ERROR);
             }
             // 插入到商品活动价表
             SkuActivityPriceDO skuActivityPriceDO = new SkuActivityPriceDO();
@@ -320,7 +321,7 @@ public class AdminGroupShopServiceImpl implements AdminGroupShopService {
             skuActivityPriceDO.setGmtCreate(now);
             skuActivityPriceDO.setSkuId(groupShopSkuDTO.getSkuId());
             if (skuActivityPriceMapper.insert(skuActivityPriceDO) <= 0) {
-                throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SKU_ADD_SQL_QUERY_ERROR);
+                throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SKU_ADD_SQL_QUERY_ERROR);
             }
         }
     }

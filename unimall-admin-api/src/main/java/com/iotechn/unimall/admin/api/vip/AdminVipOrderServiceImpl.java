@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.vip;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.model.request.MatrixPayRefundRequest;
 import com.dobbinsoft.fw.pay.model.result.MatrixPayRefundResult;
@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Service
 public class AdminVipOrderServiceImpl implements AdminVipOrderService {
@@ -44,10 +44,10 @@ public class AdminVipOrderServiceImpl implements AdminVipOrderService {
     public String refund(Long id, Long adminId) throws ServiceException {
         VipOrderDO vipOrderDO = vipOrderMapper.selectById(id);
         if (vipOrderDO.getStatus().intValue() != VipOrderStatusType.WAIT_REFUND.getCode()) {
-            throw new AdminServiceException(ExceptionDefinition.VIP_ORDER_STATUS_ERROR);
+            throw new ServiceException(ExceptionDefinition.VIP_ORDER_STATUS_ERROR);
         }
-        if (vipOrderDO.getGmtPay().getTime() + 1000l * 60 * 60 * 24 * 7 <= new Date().getTime()) {
-            throw new AdminServiceException(ExceptionDefinition.VIP_ORDER_REFUND_TIME_EXPIRED);
+        if (vipOrderDO.getGmtPay().plusDays(7).isBefore(LocalDateTime.now())) {
+            throw new ServiceException(ExceptionDefinition.VIP_ORDER_REFUND_TIME_EXPIRED);
         }
         vipOrderBizService.changeOrderParentStatus(id, VipOrderStatusType.WAIT_REFUND.getCode(), VipOrderStatusType.REFUND_OVER.getCode());
         String lockKey = LockConst.VIP_ORDER_REFUND_LOCK + id;
@@ -63,12 +63,12 @@ public class AdminVipOrderServiceImpl implements AdminVipOrderService {
                 MatrixPayRefundResult matrixPayRefundResult = matrixPayService.refund(matrixPayRefundRequest);
                 if (!matrixPayRefundResult.getReturnCode().equals("SUCCESS")) {
                     logger.warn("[退款] 失败 : " + matrixPayRefundResult.getReturnMsg());
-                    throw new AdminServiceException(matrixPayRefundResult.getReturnMsg(),
+                    throw new ServiceException(matrixPayRefundResult.getReturnMsg(),
                             ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
                 }
                 if (!matrixPayRefundResult.getResultCode().equals("SUCCESS")) {
                     logger.warn("[退款] 失败 : " + matrixPayRefundResult.getReturnMsg());
-                    throw new AdminServiceException(matrixPayRefundResult.getReturnMsg(),
+                    throw new ServiceException(matrixPayRefundResult.getReturnMsg(),
                             ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
                 }
                 return "ok";
@@ -77,12 +77,12 @@ public class AdminVipOrderServiceImpl implements AdminVipOrderService {
                 throw e;
             } catch (Exception e) {
                 logger.error("[退款] 异常", e);
-                throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+                throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
             } finally {
                 lockComponent.release(lockKey);
             }
         } else {
-            throw new AdminServiceException(ExceptionDefinition.SYSTEM_BUSY);
+            throw new ServiceException(ExceptionDefinition.SYSTEM_BUSY);
         }
     }
 

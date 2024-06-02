@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.coupon;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.CouponDO;
@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -37,8 +37,8 @@ public class AdminCouponServiceImpl implements AdminCouponService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CouponDO create(String title, Integer type, Integer isVip, String description, Integer total, Integer limit, Integer discount, Integer min, Integer status, Long categoryId, Integer days, Long gmtStart, Long gmtEnd, Long adminId) throws ServiceException {
-        Date start = null;
-        Date end = null;
+        LocalDateTime start = null;
+        LocalDateTime end = null;
         if (gmtEnd != null && gmtStart != null) {
             start = new Date(gmtStart);
             end = new Date(gmtEnd);
@@ -59,13 +59,13 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         couponDO.setDays(days);
         couponDO.setGmtStart(start);
         couponDO.setGmtEnd(end);
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         couponDO.setGmtCreate(now);
         couponDO.setGmtUpdate(now);
         if (couponMapper.insert(couponDO) > 0) {
             return couponDO;
         }
-        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         QueryWrapper wrapperC = new QueryWrapper();
         wrapperC.eq("id", id);
         if (couponMapper.delete(wrapperC) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+            throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
         }
         QueryWrapper wrapperUC = new QueryWrapper();
         wrapperUC.eq("coupon_id", id);
@@ -103,9 +103,9 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         couponDO.setGmtEnd(gmtEnd);
         List<CouponDO> couponDOList = couponMapper.selectList(new QueryWrapper<CouponDO>().eq("id", id));
         if (CollectionUtils.isEmpty(couponDOList)) {
-            throw new AdminServiceException(ExceptionDefinition.COUPON_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.COUPON_NOT_EXIST);
         }
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         couponDO.setGmtCreate(couponDOList.get(0).getGmtCreate());
         couponDO.setGmtUpdate(now);
         return couponMapper.updateById(couponDO) > 0;
@@ -117,7 +117,7 @@ public class AdminCouponServiceImpl implements AdminCouponService {
         CouponDO couponDO = new CouponDO();
         couponDO.setId(id);
         couponDO.setStatus(status);
-        couponDO.setGmtUpdate(new Date());
+        couponDO.setGmtUpdate(LocalDateTime.now());
         return couponMapper.updateById(couponDO) > 0;
     }
 

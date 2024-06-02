@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.coupon;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.KVModel;
@@ -24,10 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,27 +56,27 @@ public class CouponServiceImpl extends BaseService<UserDTO, AdminDTO> implements
             try {
                 CouponDO couponDO = couponMapper.selectById(couponId);
                 if (couponDO.getStatus() == StatusType.LOCK.getCode()) {
-                    throw new AppServiceException(ExceptionDefinition.COUPON_HAS_LOCKED);
+                    throw new ServiceException(ExceptionDefinition.COUPON_HAS_LOCKED);
                 }
                 if (couponDO.getIsVip().intValue() == 1) {
                     if (sessionUtil.getUser().getLevel() != UserLevelType.VIP.getCode()) {
-                        throw new AppServiceException(ExceptionDefinition.COUPON_IS_VIP_ONLY);
+                        throw new ServiceException(ExceptionDefinition.COUPON_IS_VIP_ONLY);
                     }
                 }
-                Date now = new Date();
-                if (couponDO.getGmtEnd() != null && couponDO.getGmtEnd().getTime() < now.getTime()) {
-                    throw new AppServiceException(ExceptionDefinition.COUPON_ACTIVITY_HAS_END);
+                LocalDateTime now = LocalDateTime.now();
+                if (couponDO.getGmtEnd() != null && couponDO.getGmtEnd().isBefore(now)) {
+                    throw new ServiceException(ExceptionDefinition.COUPON_ACTIVITY_HAS_END);
                 }
-                if (couponDO.getGmtStart() != null && couponDO.getGmtStart().getTime() > now.getTime()) {
-                    throw new AppServiceException(ExceptionDefinition.COUPON_ACTIVITY_NOT_START);
+                if (couponDO.getGmtStart() != null && couponDO.getGmtStart().isAfter(now)) {
+                    throw new ServiceException(ExceptionDefinition.COUPON_ACTIVITY_NOT_START);
                 }
                 if (couponDO.getTotal() != -1 && couponDO.getSurplus() <= 0) {
-                    throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
+                    throw new ServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
                 } else {
                     if (couponDO.getTotal() >= 0) {
                         if (couponDO.getSurplus() == 1) {
                             if (!lockComponent.tryLock(LockConst.COUPON_LOCK + couponId, 10)) {
-                                throw new AppServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
+                                throw new ServiceException(ExceptionDefinition.COUPON_ISSUE_OVER);
                             }
                         }
                         couponMapper.decCoupon(couponId);
@@ -86,13 +86,13 @@ public class CouponServiceImpl extends BaseService<UserDTO, AdminDTO> implements
 
                 if (couponDO.getLimit() != -1) {
                     //校验用户是否已经领了
-                    Integer count = couponUserMapper.selectCount(
+                    Long count = couponUserMapper.selectCount(
                             new QueryWrapper<CouponUserDO>()
                                     .eq("user_id", userId)
                                     .eq("coupon_id", couponId));
 
                     if (count >= couponDO.getLimit()) {
-                        throw new AppServiceException(ExceptionDefinition.COUPON_YOU_HAVE_OBTAINED);
+                        throw new ServiceException(ExceptionDefinition.COUPON_YOU_HAVE_OBTAINED);
                     }
                 }
 
@@ -107,9 +107,9 @@ public class CouponServiceImpl extends BaseService<UserDTO, AdminDTO> implements
                 } else if (couponDO.getDays() != null) {
                     //如果是任意领取的，则从当前时间 加上 可用天数
                     userCouponDO.setGmtStart(now);
-                    userCouponDO.setGmtEnd(new Date(now.getTime() + 1000l * 60 * 60 * 24 * couponDO.getDays()));
+                    userCouponDO.setGmtEnd(LocalDateTime.now().plusDays(couponDO.getDays()));
                 } else {
-                    throw new AppServiceException(ExceptionDefinition.COUPON_STRATEGY_INCORRECT);
+                    throw new ServiceException(ExceptionDefinition.COUPON_STRATEGY_INCORRECT);
                 }
 
                 userCouponDO.setGmtUpdate(now);
@@ -121,12 +121,12 @@ public class CouponServiceImpl extends BaseService<UserDTO, AdminDTO> implements
                 throw e;
             } catch (Exception e) {
                 logger.error("[领取优惠券] 异常", e);
-                throw new AppServiceException(ExceptionDefinition.APP_UNKNOWN_EXCEPTION);
+                throw new ServiceException(ExceptionDefinition.APP_UNKNOWN_EXCEPTION);
             } finally {
                 lockComponent.release(LockConst.COUPON_USER_LOCK + userId + "_" + couponId);
             }
         } else {
-            throw new AppServiceException(ExceptionDefinition.SYSTEM_BUSY);
+            throw new ServiceException(ExceptionDefinition.SYSTEM_BUSY);
         }
 
     }

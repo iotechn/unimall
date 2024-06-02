@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * ClassName: OpenPlatformNotifyDO
@@ -32,7 +32,7 @@ public class OpenPlatformNotifyDO extends SuperDO {
     /**
      * 下一次通知时间
      */
-    private Date nextNotify;
+    private LocalDateTime nextNotify;
 
     /**
      * 参数string json List<String>

@@ -4,7 +4,7 @@ import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created by rize on 2019/7/5.
@@ -37,12 +37,12 @@ public class CouponUserDTO extends SuperDTO {
     private Long orderId;
 
     @ApiField(description = "使用的时间 未使用未空")
-    private Date gmtUsed;
+    private LocalDateTime gmtUsed;
 
     @ApiField(description = "可使用开始时间")
-    private Date gmtStart;
+    private LocalDateTime gmtStart;
 
     @ApiField(description = "可使用结束时间")
-    private Date gmtEnd;
+    private LocalDateTime gmtEnd;
 
 }

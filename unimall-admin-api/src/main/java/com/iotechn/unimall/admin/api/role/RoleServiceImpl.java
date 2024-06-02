@@ -1,7 +1,11 @@
 package com.iotechn.unimall.admin.api.role;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.model.PermissionPoint;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
 import com.iotechn.unimall.data.domain.RolePermissionDO;
@@ -11,17 +15,13 @@ import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.AdminMapper;
 import com.iotechn.unimall.data.mapper.RoleMapper;
 import com.iotechn.unimall.data.mapper.RolePermissionMapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
-import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.support.model.Page;
-import com.dobbinsoft.fw.support.model.PermissionPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -71,32 +71,32 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDO create(RoleDO roleDO, Long adminId) throws ServiceException {
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         roleDO.setStatus(RoleStatusType.ACTIVE.getCode());
         roleDO.setGmtUpdate(now);
         roleDO.setGmtCreate(now);
         if (roleMapper.insert(roleDO) > 0) {
             return roleDO;
         }
-        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String delete(Long roleId, Long adminId) throws ServiceException {
         // 列举出所有管理员，并校验是否存在关联此角色的管理员
-        List<List<Long>> roleIds = adminMapper.selectList(new QueryWrapper<AdminDO>().select("role_ids")).stream().map(item -> JSONObject.parseArray(item.getRoleIds(), Long.class)).collect(Collectors.toList());
+        List<List<Long>> roleIds = adminMapper.selectList(new QueryWrapper<AdminDO>().select("role_ids")).stream().map(item -> JacksonUtil.parseArray(item.getRoleIds(), Long.class)).collect(Collectors.toList());
         for (List<Long> list : roleIds) {
             for (Long id : list) {
                 if (roleId.longValue() == id.longValue()) {
-                    throw new AdminServiceException(ExceptionDefinition.ADMIN_ROLE_UNION_ADMIN);
+                    throw new ServiceException(ExceptionDefinition.ADMIN_ROLE_UNION_ADMIN);
                 }
             }
         }
         if (roleMapper.deleteById(roleId) > 0) {
             return "ok";
         }
-        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class RoleServiceImpl implements RoleService {
         if (roleMapper.updateById(roleDO) > 0) {
             return roleDO;
         }
-        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override
@@ -112,13 +112,13 @@ public class RoleServiceImpl implements RoleService {
     public String permissionSet(RoleSetPermissionDTO roleSetPermissionDTO, Long adminId) throws ServiceException {
         Long roleId = roleSetPermissionDTO.getRoleId();
         if (roleId == null) {
-            throw new AdminServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
+            throw new ServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
         }
         rolePermissionMapper.delete(new QueryWrapper<RolePermissionDO>().eq("role_id", roleId));
         //构建插入
         List<String> permissions = roleSetPermissionDTO.getPermissions();
         if (!CollectionUtils.isEmpty(permissions)) {
-            Date now = new Date();
+            LocalDateTime now = LocalDateTime.now();
             for (String permission : permissions) {
                 RolePermissionDO rolePermissionDO = new RolePermissionDO();
                 rolePermissionDO.setRoleId(roleId);

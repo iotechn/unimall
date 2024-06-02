@@ -1,8 +1,8 @@
 package com.iotechn.unimall.biz.service.order;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AppServiceException;
-import com.dobbinsoft.fw.core.exception.BizServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.model.request.MatrixPayRefundRequest;
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -70,7 +70,7 @@ public class OrderBizService {
         }
         List<OrderDO> orderDOS = orderMapper.selectList(wrapper);
         if (CollectionUtils.isEmpty(orderDOS)) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.ORDER_NOT_EXIST);
         }
         return orderDOS;
     }
@@ -82,7 +82,7 @@ public class OrderBizService {
         }
         List<OrderDO> orderDOS = orderMapper.selectList(wrapper);
         if (CollectionUtils.isEmpty(orderDOS)) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.ORDER_NOT_EXIST);
         }
         return orderDOS;
     }
@@ -92,7 +92,7 @@ public class OrderBizService {
         try {
             // 防止传入值为空,导致其余订单被改变
             if(orderNo == null || orderDO == null){
-                throw new BizServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+                throw new ServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
             }
             // 同时拿到父单锁和子单锁，才能对子单进行操作
             if (lockComponent.tryLock(LockConst.ORDER_SUB_STATUS_LOCK + orderNo, 30)
@@ -103,15 +103,15 @@ public class OrderBizService {
                                 .eq("status", nowStatus)) > 0) {
                     return true;
                 }
-                throw new BizServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+                throw new ServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
             } else {
-                throw new BizServiceException(ExceptionDefinition.ORDER_SYSTEM_BUSY);
+                throw new ServiceException(ExceptionDefinition.ORDER_SYSTEM_BUSY);
             }
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             logger.error("[订单状态扭转] 异常", e);
-            throw new BizServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+            throw new ServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
         } finally {
             lockComponent.release(LockConst.ORDER_SUB_STATUS_LOCK + orderNo);
             lockComponent.release(LockConst.ORDER_PARENT_STATUS_LOCK + parentOrderNo);
@@ -122,7 +122,7 @@ public class OrderBizService {
         try {
             // 防止传入值为空,导致其余订单被改变
             if (parentOrderNo == null || orderDO == null) {
-                throw new BizServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+                throw new ServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
             }
             if (lockComponent.tryLock(LockConst.ORDER_PARENT_STATUS_LOCK + parentOrderNo, 30)) {
                 int updateRes = orderMapper.update(orderDO,
@@ -132,15 +132,15 @@ public class OrderBizService {
                 if (updateRes == length) {
                     return true;
                 }
-                throw new BizServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+                throw new ServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
             } else {
-                throw new BizServiceException(ExceptionDefinition.ORDER_SYSTEM_BUSY);
+                throw new ServiceException(ExceptionDefinition.ORDER_SYSTEM_BUSY);
             }
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             logger.error("[订单状态扭转] 异常", parentOrderNo, e);
-            throw new BizServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+            throw new ServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
         } finally {
             lockComponent.release(LockConst.ORDER_PARENT_STATUS_LOCK + parentOrderNo);
         }
@@ -154,7 +154,7 @@ public class OrderBizService {
         }
         List<OrderDO> orderDOS = orderMapper.selectList(wrapper);
         if (CollectionUtils.isEmpty(orderDOS)) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.ORDER_NOT_EXIST);
         }
         OrderDTO orderDTO = new OrderDTO();
         BeanUtils.copyProperties(orderDOS.get(0), orderDTO);
@@ -183,13 +183,13 @@ public class OrderBizService {
                 //1.校验订单状态是否处于团购状态中
                 OrderDO orderDO = checkOrderExistByNo(orderNo, null).get(0);
                 if (orderDO.getStatus() != OrderStatusType.GROUP_SHOP_WAIT.getCode()) {
-                    throw new BizServiceException(ExceptionDefinition.ORDER_IS_NOT_GROUP_SHOP_STATUS);
+                    throw new ServiceException(ExceptionDefinition.ORDER_IS_NOT_GROUP_SHOP_STATUS);
                 }
                 //2.退款处理
                 //2.1.1 先流转状态
                 OrderDO updateOrderDO = new OrderDO();
                 updateOrderDO.setStatus(OrderStatusType.REFUNDED.getCode());
-                updateOrderDO.setGmtUpdate(new Date());
+                updateOrderDO.setGmtUpdate(LocalDateTime.now());
                 changeOrderSubStatus(orderNo, OrderStatusType.GROUP_SHOP_WAIT.getCode(), updateOrderDO);
                 Long userId = orderDO.getUserId();
                 UserDO userDO = userMapper.selectById(userId);
@@ -209,12 +209,12 @@ public class OrderBizService {
                     MatrixPayRefundResult payRefundResult = payService.refund(payRefundRequest);
                     if (!payRefundResult.getReturnCode().equals("SUCCESS")) {
                         logger.warn("[微信退款] 失败 : " + payRefundResult.getReturnMsg());
-                        throw new BizServiceException(payRefundResult.getReturnMsg(),
+                        throw new ServiceException(payRefundResult.getReturnMsg(),
                                 ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
                     }
                     if (!payRefundResult.getResultCode().equals("SUCCESS")) {
                         logger.warn("[微信退款] 失败 : " + payRefundResult.getReturnMsg());
-                        throw new BizServiceException(payRefundResult.getReturnMsg(),
+                        throw new ServiceException(payRefundResult.getReturnMsg(),
                                 ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
                     }
                     return "ok";
@@ -222,19 +222,19 @@ public class OrderBizService {
                     // 不需要退款
                     return "ok";
                 } else {
-                    throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
+                    throw new ServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
                 }
 
             } catch (ServiceException e) {
                 throw e;
             } catch (Exception e) {
                 logger.error("[微信退款] 异常", e);
-                throw new AppServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+                throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
             } finally {
                 lockComponent.release(LockConst.ORDER_REFUND_LOCK + orderNo);
             }
         } else {
-            throw new AppServiceException(ExceptionDefinition.SYSTEM_BUSY);
+            throw new ServiceException(ExceptionDefinition.SYSTEM_BUSY);
         }
     }
 

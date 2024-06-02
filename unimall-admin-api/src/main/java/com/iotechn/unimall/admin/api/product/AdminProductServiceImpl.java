@@ -1,8 +1,8 @@
 package com.iotechn.unimall.admin.api.product;
 
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.CoreExceptionDefinition;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
@@ -256,7 +256,7 @@ public class AdminProductServiceImpl implements AdminProductService {
         // 校验是否有不可下架的活动
         this.checkProductActivity(spuDOBefore);
         if (spuMapper.deleteById(spuId) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
         }
         // 将需要删除的图片路径取出来
         List<String> deleteImgList = imgMapper.getImgs(BizType.GOODS.getCode(), spuId);
@@ -269,7 +269,6 @@ public class AdminProductServiceImpl implements AdminProductService {
             @Override
             public void afterCommit() {
                 productBizService.deleteSpuCache(spuDOBefore);
-                productBizService.deleteSearchEngine(spuDOBefore.getId());
                 GlobalExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -289,14 +288,14 @@ public class AdminProductServiceImpl implements AdminProductService {
                         .eq("union_type", AdvertUnionType.PRODUCT.getCode())
                         .in("union_value", ids).last("LIMIT 1"));
         if (!CollectionUtils.isEmpty(list1)) {
-            throw new AdminServiceException(CoreExceptionDefinition.buildVariableException(ExceptionDefinition.PRODUCT_EXIST_ADVERT, list1.get(0).getTitle()));
+            throw new ServiceException(CoreExceptionDefinition.buildVariableException(ExceptionDefinition.PRODUCT_EXIST_ADVERT, list1.get(0).getTitle()));
         }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String batchDelete(String idsJson, Long adminId) throws ServiceException {
-        List<Long> ids = JSONObject.parseArray(idsJson, Long.class);
+        List<Long> ids = JacksonUtil.parseArray(idsJson, Long.class);
         // 校验是否有广告关联
         List<String> idStrList = ids.stream().map(item -> item.toString()).collect(Collectors.toList());
         this.checkUnionAdvert(idStrList);
@@ -306,10 +305,10 @@ public class AdminProductServiceImpl implements AdminProductService {
             this.checkProductActivity(spuDO);
         }
         if (CollectionUtils.isEmpty(ids)) {
-            throw new AdminServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
         }
         if (spuMapper.delete(new QueryWrapper<SpuDO>().in("id", ids)) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
         }
         List<Long> skuIds = skuMapper.selectSkuIdsBySpuIds(ids);
         cartMapper.delete(new QueryWrapper<CartDO>().in("sku_id", skuIds));
@@ -321,7 +320,6 @@ public class AdminProductServiceImpl implements AdminProductService {
             public void afterCommit() {
                 for (SpuDO spuDOBefore : beforeSpuList) {
                     productBizService.deleteSpuCache(spuDOBefore);
-                    productBizService.deleteSearchEngine(spuDOBefore.getId());
                 }
             }
         });
@@ -356,7 +354,7 @@ public class AdminProductServiceImpl implements AdminProductService {
     public AdminSpuDTO freezeOrActivation(Long spuId, Integer status, Long adminId) throws ServiceException {
         SpuDO spuDO = spuMapper.selectById(spuId);
         if (spuDO == null) {
-            throw new AdminServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
         }
         status = status <= SpuStatusType.STOCK.getCode() ? SpuStatusType.STOCK.getCode() : SpuStatusType.SELLING.getCode();
         // 不可下架活动校验
@@ -364,12 +362,12 @@ public class AdminProductServiceImpl implements AdminProductService {
             this.checkProductActivity(spuDO);
         }
         if (spuDO.getStatus().intValue() == status.intValue()) {
-            throw new AdminServiceException(ExceptionDefinition.SYSTEM_BUSY);
+            throw new ServiceException(ExceptionDefinition.SYSTEM_BUSY);
         }
         spuDO.setStatus(status);
-        spuDO.setGmtUpdate(new Date());
+        spuDO.setGmtUpdate(LocalDateTime.now());
         if (spuMapper.updateById(spuDO) <= 0) {
-            throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+            throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
         }
         AdminSpuDTO spuDTO = new AdminSpuDTO();
         BeanUtils.copyProperties(spuDO, spuDTO);
@@ -385,13 +383,9 @@ public class AdminProductServiceImpl implements AdminProductService {
                     for (SkuDO skuDO : spuDTO.getSkuList()) {
                         cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
                     }
-                    //3. 更新搜索引擎缓存
-                    productBizService.transmissionSearchEngine(spuId);
                 } else {
                     // 删除商品列表缓存
                     productBizService.deleteSpuCache(spuDO);
-                    // 更新搜索引擎
-                    productBizService.deleteSearchEngine(spuId);
                 }
             }
         });
@@ -406,7 +400,7 @@ public class AdminProductServiceImpl implements AdminProductService {
      */
     private void checkProductActivity(SpuDO spuDO) throws ServiceException {
         if (spuDO.getActivityType() != null && spuDO.getActivityType() == SpuActivityType.GROUP_SHOP.getCode()) {
-            throw new AdminServiceException(ExceptionDefinition.PRODUCT_UNION_ACTIVITY_CAN_NOT_BE_OFF_SHELF);
+            throw new ServiceException(ExceptionDefinition.PRODUCT_UNION_ACTIVITY_CAN_NOT_BE_OFF_SHELF);
         }
     }
 

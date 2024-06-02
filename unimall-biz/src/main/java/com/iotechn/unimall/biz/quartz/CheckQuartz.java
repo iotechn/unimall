@@ -1,13 +1,12 @@
 package com.iotechn.unimall.biz.quartz;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.Const;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.component.MachineComponent;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.iotechn.unimall.biz.client.erp.ErpClient;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.data.constant.LockConst;
@@ -30,7 +29,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,16 +77,15 @@ public class CheckQuartz {
     @Scheduled(cron = "0 * * * * ?")
     public void checkOrderStatus() {
         if (lockComponent.tryLock(LockConst.SCHEDULED_ORDER_STATUS_CHECK_LOCK, 30)) {
-            Date now = new Date();
             // 1.检查是否存在需要自动取消的订单（即redis过期回调失败），将检查出的订单延时一秒放入延时队列
             QueryWrapper<OrderDO> cancelWrapper = new QueryWrapper<OrderDO>();
             cancelWrapper.select("id", "order_no");
             cancelWrapper.eq("status", OrderStatusType.UNPAY.getCode());
-            Date cancelTime = new Date(now.getTime() - unimallOrderProperties.getAutoCancelTime() * 1000);
+            LocalDateTime cancelTime = LocalDateTime.now().plusSeconds(-unimallOrderProperties.getAutoCancelTime());
             cancelWrapper.lt("gmt_update", cancelTime);
             List<OrderDO> cancelList = orderMapper.selectList(cancelWrapper);
             if (!CollectionUtils.isEmpty(cancelList)) {
-                cancelList.stream().forEach(item -> {
+                cancelList.forEach(item -> {
                     delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CANCEL.getCode(), item.getOrderNo(), 1);
                 });
             }
@@ -95,11 +93,11 @@ public class CheckQuartz {
             QueryWrapper<OrderDO> confirmWrapper = new QueryWrapper<OrderDO>();
             confirmWrapper.select("id", "order_no");
             confirmWrapper.eq("status", OrderStatusType.WAIT_CONFIRM.getCode());
-            Date confirmTime = new Date(now.getTime() - unimallOrderProperties.getAutoConfirmTime() * 1000);
+            LocalDateTime confirmTime = LocalDateTime.now().plusSeconds(-unimallOrderProperties.getAutoConfirmTime());
             confirmWrapper.lt("gmt_update", confirmTime);
             List<OrderDO> confirmList = orderMapper.selectList(confirmWrapper);
             if (!CollectionUtils.isEmpty(confirmList)) {
-                confirmList.stream().forEach(item -> {
+                confirmList.forEach(item -> {
                     delayedMessageQueue.publishTask(DMQHandlerType.ORDER_AUTO_CONFIRM.getCode(), item.getOrderNo(), 1);
                 });
             }
@@ -113,7 +111,7 @@ public class CheckQuartz {
     @Transactional(rollbackFor = Exception.class)
     public void groupShopStart() throws Exception {
         if (lockComponent.tryLock(LockConst.GROUP_SHOP_START_LOCK, 30)) {
-            Date now = new Date();
+            LocalDateTime now = LocalDateTime.now();
             /**
              * 1. 激活 团购时间开始的活动商品
              */
@@ -128,13 +126,13 @@ public class CheckQuartz {
                     groupShopDO.setStatus(StatusType.ACTIVE.getCode());
                     SpuDO spuDO = spuMapper.selectById(groupShopDO.getSpuId());
                     if (spuDO == null) {
-                        throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXITS);
+                        throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SPU_NO_EXITS);
                     }
 
                     // 1.2 检查商品是不是已经下架
                     if (spuDO.getStatus().equals(StatusType.ACTIVE.getCode())) {
                         if (groupShopMapper.updateById(groupShopDO) <= 0) {
-                            throw new AdminServiceException(ExceptionDefinition.GROUP_SHOP_SPU_UPDATE_SQL_QUERY_ERROR);
+                            throw new ServiceException(ExceptionDefinition.GROUP_SHOP_SPU_UPDATE_SQL_QUERY_ERROR);
                         }
                     }
                 }
@@ -147,7 +145,7 @@ public class CheckQuartz {
     @Scheduled(cron = "10 * * * * ?")
     public void groupShopEnd() throws Exception {
         if (lockComponent.tryLock(LockConst.GROUP_SHOP_END_LOCK, 30)) {
-            Date now = new Date();
+            LocalDateTime now = LocalDateTime.now();
             /**
              * 2. 冻结 团购时间结束的活动商品,并根据对应情况处理订单
              */
@@ -244,7 +242,7 @@ public class CheckQuartz {
     @Scheduled(cron = "0 0 0 * * ?")
     public void downLevel() throws Exception {
         if (lockComponent.tryLock(LockConst.VIP_EXPIRE_LOCK, 30)) {
-            Date now = new Date();
+            LocalDateTime now = LocalDateTime.now();
             transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                 @Override
                 protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -271,9 +269,9 @@ public class CheckQuartz {
                             if (!CollectionUtils.isEmpty(keys)) {
                                 for (String key : keys) {
                                     String userJson = userRedisTemplate.opsForValue().get(key);
-                                    UserDTO userDTO = JSONObject.parseObject(userJson, UserDTO.class);
+                                    UserDTO userDTO = JacksonUtil.parseObject(userJson, UserDTO.class);
                                     userDTO.setLevel(UserLevelType.COMMON.getCode());
-                                    userRedisTemplate.opsForValue().set(key, JSONObject.toJSONString(userDTO));
+                                    userRedisTemplate.opsForValue().set(key, JacksonUtil.toJSONString(userDTO));
                                 }
 
                             }
@@ -295,7 +293,7 @@ public class CheckQuartz {
             try {
                 QueryWrapper<VipOrderDO> wrapper = new QueryWrapper<>();
                 wrapper.eq("status", VipOrderStatusType.WAIT_REFUND.getCode());
-                wrapper.le("gmt_pay", new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000l));
+                wrapper.le("gmt_pay", LocalDateTime.now().plusDays(-7));
                 List<VipOrderDO> vipOrderDOS = vipOrderMapper.selectList(wrapper);
                 if (!CollectionUtils.isEmpty(vipOrderDOS)) {
                     for (VipOrderDO vipOrderDO : vipOrderDOS) {

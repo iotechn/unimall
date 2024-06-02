@@ -7,7 +7,7 @@ import com.dobbinsoft.fw.support.domain.SuperDO;
 import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created by rize on 2019/4/8.
@@ -48,6 +48,6 @@ public class AdminDO extends SuperDO {
     private String lastLoginIp;
 
     @ApiField(description = "最后登录时间")
-    private Date gmtLastLogin;
+    private LocalDateTime gmtLastLogin;
 
 }

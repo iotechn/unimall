@@ -1,8 +1,8 @@
 package com.iotechn.unimall.biz.pay;
 
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.exception.PayServiceException;
@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -76,7 +76,7 @@ public class OrderPayCallbackHandler implements MatrixPayCallbackHandler {
     public Object handle(MatrixPayOrderNotifyResult result, HttpServletRequest request) {
         try {
             logger.info("处理{}支付平台的订单支付", result.getPayChannel().getMsg());
-            logger.info(JSONObject.toJSONString(result));
+            logger.info(JacksonUtil.toJSONString(result));
             /* 之前传过去的我们系统的订单ID */
             // 现在是不知道是父订单还是普通订单
             String orderAbstractNo = result.getOutTradeNo();
@@ -122,7 +122,7 @@ public class OrderPayCallbackHandler implements MatrixPayCallbackHandler {
             /**************** 在此之前都没有 数据库修改 操作 所以前面是直接返回错误的 **********************/
 
             //1. 更新订单状态
-            Date now = new Date();
+            LocalDateTime now = LocalDateTime.now();
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setPayId(payId);
             updateOrderDO.setPayChannel(result.getPayChannel().getCode());

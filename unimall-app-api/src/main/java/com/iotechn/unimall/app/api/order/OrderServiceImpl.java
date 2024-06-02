@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.order;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.GeneratorUtil;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
@@ -58,8 +58,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -144,20 +145,20 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 //用户会员等级
                 Integer userLevel = user.getLevel();
                 if (user.getStatus().intValue() != UserStatusType.ACTIVE.getCode()) {
-                    throw new AppServiceException(ExceptionDefinition.ORDER_USER_IS_NOT_ACTIVE);
+                    throw new ServiceException(ExceptionDefinition.ORDER_USER_IS_NOT_ACTIVE);
                 }
                 // 对Sku排序，防止相互拿锁，两边都无法结算的情况。
                 orderRequest.getSkuList().sort((o1, o2) -> (int) (o1.getSkuId() - o2.getSkuId()));
                 //参数强校验 START
                 if (CollectionUtils.isEmpty(skuList) || orderRequest.getTotalPrice() == null) {
-                    throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
+                    throw new ServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
                 }
                 if (orderRequest.getTotalPrice() <= 0) {
-                    throw new AppServiceException(ExceptionDefinition.ORDER_PRICE_MUST_GT_ZERO);
+                    throw new ServiceException(ExceptionDefinition.ORDER_PRICE_MUST_GT_ZERO);
                 }
                 // 若是卖虚拟物品，不需要收货地址，可以将此行注释掉
                 if (orderRequest.getAddressId() == null) {
-                    throw new AppServiceException(ExceptionDefinition.ORDER_ADDRESS_CANNOT_BE_NULL);
+                    throw new ServiceException(ExceptionDefinition.ORDER_ADDRESS_CANNOT_BE_NULL);
                 }
                 // 收货地址对象
                 AddressDO addressDO = addressBizService.getAddressById(orderRequest.getAddressId());
@@ -207,15 +208,15 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
 
                 // 商品库存不足列表，用于前端提示 使用异常的Attach方法
                 if (!CollectionUtils.isEmpty(stockErrorSkuList)) {
-                    throw new AppServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH).attach(stockErrorSkuList);
+                    throw new ServiceException(ExceptionDefinition.ORDER_SKU_STOCK_NOT_ENOUGH).attach(stockErrorSkuList);
                 }
 
                 // 状态错误列表，用于前端提示
                 if (!CollectionUtils.isEmpty(statusErrorSkuList)) {
-                    throw new AppServiceException(ExceptionDefinition.ORDER_SKU_NOT_EXIST).attach(statusErrorSkuList);
+                    throw new ServiceException(ExceptionDefinition.ORDER_SKU_NOT_EXIST).attach(statusErrorSkuList);
                 }
 
-                Date now = new Date();
+                LocalDateTime now = LocalDateTime.now();
                 // 若库存充足，也没下架，则获取所有sku实体对象
                 List<SkuDTO> skuDTOListOfAll = productBizService.getSkuListByIds(skuIds);
                 // 优惠券实例
@@ -223,7 +224,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 if (orderRequest.getCouponId() != null) {
                     couponUserDTO = couponBizService.getCouponUserById(orderRequest.getCouponId(), userId);
                     if (couponUserDTO == null || couponUserDTO.getGmtUsed() != null) {
-                        throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_NOT_EXIST);
+                        throw new ServiceException(ExceptionDefinition.ORDER_COUPON_NOT_EXIST);
                     }
                 }
 
@@ -248,12 +249,12 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                     // FIXME 对于活动价格，需要在skuDTO中覆盖掉之前价格
                     // FIXME 对于参加活动的商品，商品的非活动价格已经无参考价值
                     if ((skuDTO.getActivityType() != null
-                            && skuDTO.getActivityType() == SpuActivityType.GROUP_SHOP.getCode() && skuDTO.getGmtActivityStart() != null
-                            && skuDTO.getGmtActivityEnd() != null && skuDTO.getGmtActivityStart().getTime() < now.getTime() && skuDTO.getGmtActivityEnd().getTime() > now.getTime())) {
+                            && skuDTO.getActivityType().intValue() == SpuActivityType.GROUP_SHOP.getCode() && skuDTO.getGmtActivityStart() != null
+                            && skuDTO.getGmtActivityEnd() != null && skuDTO.getGmtActivityStart().isBefore(LocalDateTime.now()) && skuDTO.getGmtActivityEnd().isAfter(now))) {
                         // 这个判断，表示该商品与正在进行的团购活动
                         GroupShopDTO groupShopActivity = groupShopBizService.getGroupShopById(skuDTO.getActivityId());
                         if (groupShopActivity == null) {
-                            throw new AppServiceException(ExceptionDefinition.ORDER_GROUP_SHOP_ACTIVITY_HAS_OVER);
+                            throw new ServiceException(ExceptionDefinition.ORDER_GROUP_SHOP_ACTIVITY_HAS_OVER);
                         }
                         // 有可能两个SKU是同一个团购活动，所以需要将这两个活动价格合并
                         Integer oldPrice = groupShopPriceMap.get(groupShopActivity.getId());
@@ -274,7 +275,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                         } else {
                             groupShopOriginalPriceMap.put(groupShopActivity.getId(), skuDTO.getOriginalPrice() * orderCalcSkuDTO.getNum());
                         }
-                    } else if (userLevel == UserLevelType.VIP.getCode()) {
+                    } else if (userLevel == UserLevelType.VIP.getCode().intValue()) {
                         skuOriginalPrice += originalPrice * orderCalcSkuDTO.getNum();
                         skuPrice += skuDTO.getVipPrice() * orderCalcSkuDTO.getNum();
                         totalSkuPrice += skuDTO.getVipPrice() * orderCalcSkuDTO.getNum();
@@ -328,8 +329,8 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                     for (int i = 0; i < skuDTOList.size(); i++) {
                         SkuDTO item = skuDTOList.get(i);
                         if (!(item.getActivityType() != null
-                                && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode() && item.getGmtActivityStart() != null
-                                && item.getGmtActivityEnd() != null && item.getGmtActivityStart().getTime() < now.getTime() && item.getGmtActivityEnd().getTime() > now.getTime())) {
+                                && item.getActivityType().intValue() == SpuActivityType.GROUP_SHOP.getCode() && item.getGmtActivityStart() != null
+                                && item.getGmtActivityEnd() != null && item.getGmtActivityStart().isBefore(now) && item.getGmtActivityEnd().isAfter(now))) {
                             commonSkuList.add(item);
                             commonOrderCalcSkuList.add(orderCalcSkuList.get(i));
                         }
@@ -342,7 +343,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                     // 标记已经计算过运费和优惠券了
                     singleFee = true;
                 }
-                if (groupShopPriceMap.size() > 0) {
+                if (!groupShopPriceMap.isEmpty()) {
                     // 存在团购商品，分别分单处理团购商品
                     Set<Long> groupShopIds = groupShopPriceMap.keySet();
                     for (Long groupShopId : groupShopIds) {
@@ -354,8 +355,8 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                         for (int i = 0; i < skuDTOList.size(); i++) {
                             SkuDTO item = skuDTOList.get(i);
                             if (item.getActivityType() != null
-                                    && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode() && item.getGmtActivityStart() != null && item.getActivityId().longValue() == groupShopId.longValue()
-                                    && item.getGmtActivityEnd() != null && item.getGmtActivityStart().getTime() < now.getTime() && item.getGmtActivityEnd().getTime() > now.getTime()) {
+                                    && item.getActivityType().intValue() == SpuActivityType.GROUP_SHOP.getCode() && item.getGmtActivityStart() != null && item.getActivityId().longValue() == groupShopId.longValue()
+                                    && item.getGmtActivityEnd() != null && item.getGmtActivityStart().isBefore(now) && item.getGmtActivityEnd().isAfter(now)) {
                                 groupShopSkuList.add(item);
                                 groupShopOrderCalcSkuList.add(calcSkuList.get(i));
                             }
@@ -392,7 +393,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 if (orderRequest.getExceptPrice() != null) {
                     int exceptPrice = this.checkPrepay(parentOrderNo, null, userId);
                     if (exceptPrice != orderRequest.getExceptPrice().intValue()) {
-                        throw new AppServiceException(ExceptionDefinition.ORDER_PRODUCT_PRICE_HAS_BEEN_CHANGED);
+                        throw new ServiceException(ExceptionDefinition.ORDER_PRODUCT_PRICE_HAS_BEEN_CHANGED);
                     }
                 }
                 // 日志 & 发送一个订单自动取消定时任务
@@ -420,7 +421,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 lockComponent.release(LockConst.TAKE_ORDER_LOCK + userId);
             }
         }
-        throw new AppServiceException(ExceptionDefinition.ORDER_SYSTEM_BUSY);
+        throw new ServiceException(ExceptionDefinition.ORDER_SYSTEM_BUSY);
     }
 
     @Override
@@ -450,7 +451,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     private int checkPrepay(String parentOrderNo, String orderNo, Long userId) throws ServiceException {
         // 两个都为空 和 两个都不为空是不合法的
         if ((ObjectUtils.isEmpty(parentOrderNo) && ObjectUtils.isEmpty(orderNo)) || (!ObjectUtils.isEmpty(parentOrderNo) && !ObjectUtils.isEmpty(orderNo))) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_PARAM_CHECK_FAILED);
+            throw new ServiceException(ExceptionDefinition.ORDER_PARAM_CHECK_FAILED);
         }
         List<OrderDO> orderList;
         if (!ObjectUtils.isEmpty(parentOrderNo))
@@ -462,7 +463,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
         for (OrderDO orderDO : orderList) {
             Integer status = orderDO.getStatus();
             if (status != OrderStatusType.UNPAY.getCode()) {
-                throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+                throw new ServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
             }
             actualPrice += orderDO.getActualPrice();
         }
@@ -474,7 +475,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     public Object offlinePrepay(String parentOrderNo, String orderNo, Long userId) throws ServiceException {
         // 两个都为空 和 两个都不为空是不合法的
         if ((ObjectUtils.isEmpty(parentOrderNo) && ObjectUtils.isEmpty(orderNo)) || (!ObjectUtils.isEmpty(parentOrderNo) && !ObjectUtils.isEmpty(orderNo))) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_PARAM_CHECK_FAILED);
+            throw new ServiceException(ExceptionDefinition.ORDER_PARAM_CHECK_FAILED);
         }
         List<OrderDO> orderList;
         if (!ObjectUtils.isEmpty(parentOrderNo))
@@ -485,10 +486,10 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
         for (OrderDO orderDO : orderList) {
             Integer status = orderDO.getStatus();
             if (status != OrderStatusType.UNPAY.getCode()) {
-                throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
+                throw new ServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
             }
         }
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         for (OrderDO orderDO : orderList) {
             List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
             List<OrderSkuDO> groupShopSkuList = orderSkuDOList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).collect(Collectors.toList());
@@ -513,10 +514,10 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 OrderDO updateOrderDO = new OrderDO();
                 updateOrderDO.setPayChannel(PayChannelType.OFFLINE.getCode());
                 updateOrderDO.setStatus(OrderStatusType.WAIT_STOCK.getCode());
-                updateOrderDO.setGmtUpdate(new Date());
+                updateOrderDO.setGmtUpdate(LocalDateTime.now());
                 boolean succ = orderBizService.changeOrderSubStatus(orderDO.getOrderNo(), OrderStatusType.UNPAY.getCode(), updateOrderDO);
                 if (!succ) {
-                    throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
+                    throw new ServiceException(ExceptionDefinition.ORDER_STATUS_CHANGE_FAILED);
                 }
             }
             // 增加商品销量
@@ -533,7 +534,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     public String refund(String orderNo, String reason, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (PayChannelType.OFFLINE.getCode().equals(orderDO.getPayChannel())) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
+            throw new ServiceException(ExceptionDefinition.ORDER_PAY_CHANNEL_NOT_SUPPORT_REFUND);
         }
         if (OrderStatusType.refundable(orderDO.getStatus())) {
             OrderDO updateOrderDO = new OrderDO();
@@ -549,7 +550,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
             });
             return "ok";
         }
-        throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_REFUND);
+        throw new ServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_REFUND);
     }
 
     @Override
@@ -557,11 +558,11 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     public String cancel(String orderNo, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() != OrderStatusType.UNPAY.getCode()) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CANCEL);
+            throw new ServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CANCEL);
         }
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.CANCELED.getCode());
-        updateOrderDO.setGmtUpdate(new Date());
+        updateOrderDO.setGmtUpdate(LocalDateTime.now());
         List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
         orderSkuList.forEach(item -> {
             skuMapper.returnSkuStock(item.getSkuId(), item.getNum());
@@ -576,11 +577,11 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     public String confirm(String orderNo, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() != OrderStatusType.WAIT_CONFIRM.getCode()) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CONFIRM);
+            throw new ServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CONFIRM);
         }
         OrderDO updateOrderDO = new OrderDO();
         updateOrderDO.setStatus(OrderStatusType.WAIT_APPRAISE.getCode());
-        updateOrderDO.setGmtUpdate(new Date());
+        updateOrderDO.setGmtUpdate(LocalDateTime.now());
         orderBizService.changeOrderSubStatus(orderNo, OrderStatusType.WAIT_CONFIRM.getCode(), updateOrderDO);
         delayedMessageQueue.deleteTask(DMQHandlerType.ORDER_AUTO_CONFIRM.getCode(), orderNo);
         return "ok";
@@ -590,14 +591,14 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     public ShipTraceDTO queryShip(String orderNo, Long userId) throws ServiceException {
         OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
         if (orderDO.getStatus() < OrderStatusType.WAIT_CONFIRM.getCode()) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_HAS_NOT_SHIP);
+            throw new ServiceException(ExceptionDefinition.ORDER_HAS_NOT_SHIP);
         }
         if (StringUtils.isEmpty(orderDO.getShipCode()) || StringUtils.isEmpty(orderDO.getShipNo())) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_DID_NOT_SET_SHIP);
+            throw new ServiceException(ExceptionDefinition.ORDER_DID_NOT_SET_SHIP);
         }
         ShipTraceDTO shipTraceList = freightTemplateBizService.getShipTraceList(orderDO.getShipNo(), orderDO.getShipCode());
         if (CollectionUtils.isEmpty(shipTraceList.getTraces())) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_DO_NOT_EXIST_SHIP_TRACE);
+            throw new ServiceException(ExceptionDefinition.ORDER_DO_NOT_EXIST_SHIP_TRACE);
         }
         return shipTraceList;
     }
@@ -628,7 +629,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
             int price = 0;
             for (OrderRequestSkuDTO skuDTO : v) {
                 weight += skuDTO.getWeight() * skuDTO.getNum();
-                price += (user.getLevel() == UserLevelType.VIP.getCode() ? skuDTO.getVipPrice() : skuDTO.getPrice()) * skuDTO.getNum();
+                price += (user.getLevel().intValue() == UserLevelType.VIP.getCode() ? skuDTO.getVipPrice() : skuDTO.getPrice()) * skuDTO.getNum();
             }
             faw.setWeight(weight);
             faw.setPrice(price);
@@ -665,7 +666,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     private OrderDO save(int skuOriginalPrice, int skuPrice, String channel,
                          int freightPrice, CouponUserDTO couponUserDTO,
                          OrderRequestDTO orderRequest, String parentOrderNo, int childIndex,
-                         Long userId, Date now, AddressDO addressDO, List<SkuDTO> skuDTOList,
+                         Long userId, LocalDateTime now, AddressDO addressDO, List<SkuDTO> skuDTOList,
                          List<OrderCalcSkuModel> orderCalcSkuList, Integer userLevel,
                          Integer activityType, Long activityId) throws ServiceException {
         OrderDO orderDO = new OrderDO();
@@ -682,7 +683,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
             couponPrice = couponUserDTO.getDiscount();
             // 这里根据实际情况决定是否需要将邮费加入到优惠券计算中
             if (couponUserDTO.getMin() > skuPrice) {
-                throw new AppServiceException(ExceptionDefinition.ORDER_COUPON_PRICE_NOT_ENOUGH);
+                throw new ServiceException(ExceptionDefinition.ORDER_COUPON_PRICE_NOT_ENOUGH);
             }
         }
         orderDO.setCouponPrice(couponPrice);
@@ -695,7 +696,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
         orderDO.setGmtUpdate(now);
         orderDO.setGmtCreate(now);
         if (!userId.equals(addressDO.getUserId())) {
-            throw new AppServiceException(ExceptionDefinition.ORDER_ADDRESS_NOT_BELONGS_TO_YOU);
+            throw new ServiceException(ExceptionDefinition.ORDER_ADDRESS_NOT_BELONGS_TO_YOU);
         }
         orderDO.setConsignee(addressDO.getConsignee());
         orderDO.setPhone(addressDO.getPhone());
@@ -722,7 +723,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
             orderSkuDO.setNum(orderCalcSpuDTO.getNum());
             orderSkuDO.setOriginalPrice(skuDTO.getOriginalPrice());
             orderSkuDO.setPrice(skuDTO.getPrice());
-            if (userLevel == UserLevelType.VIP.getCode()) {
+            if (userLevel.intValue() == UserLevelType.VIP.getCode()) {
                 orderSkuDO.setPrice(skuDTO.getVipPrice());
             } else {
                 orderSkuDO.setPrice(skuDTO.getPrice());

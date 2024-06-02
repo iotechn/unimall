@@ -1,7 +1,7 @@
 package com.iotechn.unimall.biz.service.vip;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.BizServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.iotechn.unimall.data.constant.LockConst;
@@ -11,7 +11,7 @@ import com.iotechn.unimall.data.mapper.VipOrderMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Service
 public class VipOrderBizService {
@@ -29,7 +29,7 @@ public class VipOrderBizService {
                 VipOrderDO update = new VipOrderDO();
                 update.setId(id);
                 update.setStatus(nowStatus);
-                update.setGmtUpdate(new Date());
+                update.setGmtUpdate(LocalDateTime.now());
                 int updateRes = vipOrderMapper.update(update,
                         new QueryWrapper<VipOrderDO>()
                                 .eq("id", id)
@@ -37,14 +37,14 @@ public class VipOrderBizService {
                 if (updateRes > 0) {
                     return true;
                 }
-                throw new BizServiceException(ExceptionDefinition.VIP_ORDER_STATUS_CHANGE_FAILED);
+                throw new ServiceException(ExceptionDefinition.VIP_ORDER_STATUS_CHANGE_FAILED);
             } else {
-                throw new BizServiceException(ExceptionDefinition.VIP_ORDER_SYSTEM_BUSY);
+                throw new ServiceException(ExceptionDefinition.VIP_ORDER_SYSTEM_BUSY);
             }
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            throw new BizServiceException(ExceptionDefinition.VIP_ORDER_UNKNOWN_EXCEPTION);
+            throw new ServiceException(ExceptionDefinition.VIP_ORDER_UNKNOWN_EXCEPTION);
         } finally {
             lockComponent.release(lockKey);
         }

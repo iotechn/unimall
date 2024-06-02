@@ -9,7 +9,7 @@ import com.iotechn.unimall.data.dto.CouponAdminDTO;
 import com.iotechn.unimall.data.dto.CouponDTO;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**

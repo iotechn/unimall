@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.address;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.iotechn.unimall.data.domain.AddressDO;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /*
@@ -27,7 +27,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String create(String province, String city, String county, String address, Integer defaultAddress, Long userId, String phone, String consignee) throws ServiceException {
-        Integer addressCount = addressMapper.selectCount(new QueryWrapper<AddressDO>().eq("user_id", userId));
+        Long addressCount = addressMapper.selectCount(new QueryWrapper<AddressDO>().eq("user_id", userId));
         AddressDO addressDO = new AddressDO();
         addressDO.setProvince(province);
         addressDO.setCity(city);
@@ -53,13 +53,13 @@ public class AddressServiceImpl implements AddressService {
                 addressDO.setDefaultAddress(0);
             }
         }
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         addressDO.setGmtCreate(now);
         addressDO.setGmtUpdate(now);
         if (addressMapper.insert(addressDO) > 0) {
             return "ok";
         }
-        throw new AppServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
+        throw new ServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
     }
 
     @Override
@@ -76,13 +76,13 @@ public class AddressServiceImpl implements AddressService {
                     .eq("user_id", userId)) > 0) {
                 return "ok";
             }
-            throw new AppServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
+            throw new ServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
         } else {
             // 若是默认地址，需要将其他1个设置为默认地址
             if (addressMapper.delete(new QueryWrapper<AddressDO>()
                     .eq("id", addressId)
                     .eq("user_id", userId)) <= 0) {
-                throw new AppServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
+                throw new ServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
             } else {
                 List<AddressDO> addressDOS = addressMapper.selectList(new QueryWrapper<AddressDO>().eq("user_id", userId));
                 if (!CollectionUtils.isEmpty(addressDOS)) {
@@ -92,7 +92,7 @@ public class AddressServiceImpl implements AddressService {
                         return "ok";
                     }
                 }
-                throw new AppServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
+                throw new ServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
             }
         }
     }
@@ -109,7 +109,7 @@ public class AddressServiceImpl implements AddressService {
         addressDO.setPhone(phone);
         addressDO.setConsignee(consignee);
         addressDO.setDefaultAddress(defaultAddress);
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         if (defaultAddress != 0) {
             defaultAddress = 1;
             // 将所有地址更新为非默认
@@ -125,7 +125,7 @@ public class AddressServiceImpl implements AddressService {
                         .eq("user_id", userId)) > 0) {
             return "ok";
         }
-        throw new AppServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
+        throw new ServiceException(ExceptionDefinition.ADDRESS_DATABASE_QUERY_FAILED);
     }
 
     @Override

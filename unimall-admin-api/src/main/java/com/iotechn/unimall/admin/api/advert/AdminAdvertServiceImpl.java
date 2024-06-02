@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.advert;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.model.Page;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,7 +36,7 @@ public class AdminAdvertServiceImpl implements AdminAdvertService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String create(Integer type, Integer unionType, String title, String unionValue, String imgUrl, Integer status, String color, Long adminId) throws ServiceException {
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         AdvertDO advertDO = new AdvertDO();
         advertDO.setType(type);
         advertDO.setTitle(title);
@@ -51,7 +51,7 @@ public class AdminAdvertServiceImpl implements AdminAdvertService {
             this.clearCache(type);
             return "ok";
         }
-        throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_ADD_FAILED);
+        throw new ServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_ADD_FAILED);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class AdminAdvertServiceImpl implements AdminAdvertService {
             this.clearCache(adType);
             return "ok";
         }
-        throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_DELETE_FAILED);
+        throw new ServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_DELETE_FAILED);
     }
 
     @Override
@@ -78,12 +78,12 @@ public class AdminAdvertServiceImpl implements AdminAdvertService {
         advertDO.setImgUrl(imgUrl);
         advertDO.setStatus(status);
         advertDO.setColor(color);
-        advertDO.setGmtUpdate(new Date());
+        advertDO.setGmtUpdate(LocalDateTime.now());
         if (advertMapper.updateById(advertDO) > 0) {
             this.clearCache(type);
             return "ok";
         }
-        throw new AdminServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_UPDATE_FAILED);
+        throw new ServiceException(ExceptionDefinition.ADVERTISEMENT_SQL_UPDATE_FAILED);
     }
 
     @Override

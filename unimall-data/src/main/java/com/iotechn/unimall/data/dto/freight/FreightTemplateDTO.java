@@ -21,10 +21,7 @@ import java.util.List;
 @Data
 @ApiEntity(description = "运费模板传输实体")
 public class FreightTemplateDTO extends SuperDTO {
-
-    /**
-     * TODO 去掉DO
-     */
+    
     @ApiField(description = "特殊地区列表")
     private List<FreightTemplateCarriageDO> carriageDOList;
 

@@ -19,9 +19,6 @@ public class AppraiseRequestDTO extends SuperDTO {
     @ApiField(description = "订单ID")
     private Long orderId;
 
-    /**
-     * TODO 取调DTO名字
-     */
     private List<AppraiseRequestItemDTO> appraiseDTOList;
 
 }

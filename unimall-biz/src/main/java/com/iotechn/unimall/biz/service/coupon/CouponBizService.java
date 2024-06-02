@@ -6,7 +6,7 @@ import com.iotechn.unimall.data.mapper.CouponUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Description:
@@ -27,7 +27,7 @@ public class CouponBizService {
     public Integer useCoupon(Long couponUserId, Long orderId) {
         CouponUserDO couponUserDO = new CouponUserDO();
         couponUserDO.setId(couponUserId);
-        couponUserDO.setGmtUsed(new Date());
+        couponUserDO.setGmtUsed(LocalDateTime.now());
         couponUserDO.setOrderId(orderId);
         return couponUserMapper.updateById(couponUserDO);
     }

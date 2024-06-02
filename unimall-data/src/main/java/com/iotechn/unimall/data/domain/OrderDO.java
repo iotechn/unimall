@@ -7,7 +7,7 @@ import com.dobbinsoft.fw.support.domain.SuperDO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created by rize on 2019/7/5.
@@ -90,7 +90,7 @@ public class OrderDO extends SuperDO {
     private String appId;
 
     @ApiField(description = "支付时间")
-    private Date gmtPay;
+    private LocalDateTime gmtPay;
 
     @ApiField(description = "运单号")
     private String shipNo;
@@ -129,9 +129,9 @@ public class OrderDO extends SuperDO {
     private String refundReason;
 
     @ApiField(description = "发货时间")
-    private Date gmtShip;
+    private LocalDateTime gmtShip;
 
     @ApiField(description = "确实收货时间")
-    private Date gmtConfirm;
+    private LocalDateTime gmtConfirm;
 
 }

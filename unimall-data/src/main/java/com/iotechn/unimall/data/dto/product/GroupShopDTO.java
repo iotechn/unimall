@@ -7,7 +7,7 @@ import com.iotechn.unimall.data.enums.GroupShopAutomaticRefundType;
 import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -32,10 +32,10 @@ public class GroupShopDTO extends SuperDTO {
     private Integer maxPrice;
 
     @ApiField(description = "活动开始时间")
-    private Date gmtStart;
+    private LocalDateTime gmtStart;
 
     @ApiField(description = "活动结束时间")
-    private Date gmtEnd;
+    private LocalDateTime gmtEnd;
 
     @ApiField(description = "团购最小人数")
     private Integer minNum;

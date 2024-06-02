@@ -1,10 +1,10 @@
 package com.iotechn.unimall.biz.client.erp.dobbin;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.BizServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.CoreExceptionDefinition;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ThirdPartServiceException;
@@ -211,7 +211,7 @@ public class DobbinErpClient implements ErpClient {
                                     SpuDO spuFromDB = null;
                                     if (skuFromDB != null) {
                                         Long spuId = skuFromDB.getSpuId();
-                                        Integer count = skuMapper.selectCount(new QueryWrapper<SkuDO>().eq("spu_id", spuId));
+                                        Long count = skuMapper.selectCount(new QueryWrapper<SkuDO>().eq("spu_id", spuId));
                                         spuFromDB = spuMapper.selectById(spuId);
                                         if (count > 1) {
                                             resInfo.add("放弃添加“" + detailSku.getTitle() + "”,该商品存在多个规格");
@@ -346,7 +346,7 @@ public class DobbinErpClient implements ErpClient {
         Map<String, String> listParams = new HashMap<>();
         listParams.put("_gp", "admin.openplace");
         listParams.put("_mt", "create");
-        listParams.put("header", JSONObject.toJSONString(erpSalesHeader));
+        listParams.put("header", JacksonUtil.toJSONString(erpSalesHeader));
         RequestBody listRequestBody = OpenPlatformUtil.buildBody(this.qs(listParams),
                 unimallErpOpenPlatformProperties.getDobbinClientCode(),
                 unimallErpOpenPlatformProperties.getDobbinClientPrivateKey());
@@ -385,7 +385,7 @@ public class DobbinErpClient implements ErpClient {
         Map<String, String> listParams = new HashMap<>();
         listParams.put("_gp", "admin.openplace");
         listParams.put("_mt", "refund");
-        listParams.put("refund", JSONObject.toJSONString(erpPlaceRefund));
+        listParams.put("refund", JacksonUtil.toJSONString(erpPlaceRefund));
         RequestBody listRequestBody = OpenPlatformUtil.buildBody(this.qs(listParams),
                 unimallErpOpenPlatformProperties.getDobbinClientCode(),
                 unimallErpOpenPlatformProperties.getDobbinClientPrivateKey());
@@ -409,44 +409,44 @@ public class DobbinErpClient implements ErpClient {
     }
 
 
-    private JSONObject getObjectFromJson(String json) throws ServiceException {
-        JSONObject jsonObject = JSONObject.parseObject(json);
+    private JacksonUtil getObjectFromJson(String json) throws ServiceException {
+        JacksonUtil jsonObject = JacksonUtil.parseObject(json);
         Integer errno = jsonObject.getInteger("errno");
         if (errno.intValue() != 200) {
             // 抛出异常
-            throw new BizServiceException(jsonObject.getString("errmsg"), jsonObject.getInteger("errno"));
+            throw new ServiceException(jsonObject.getString("errmsg"), jsonObject.getInteger("errno"));
         }
-        return jsonObject.getJSONObject("data");
+        return jsonObject.getJacksonUtil("data");
     }
 
     private <T> T getObjectFromJson(String json, Class<T> clazz) throws ServiceException {
-        JSONObject jsonObject = JSONObject.parseObject(json);
+        JacksonUtil jsonObject = JacksonUtil.parseObject(json);
         Integer errno = jsonObject.getInteger("errno");
         if (errno.intValue() != 200) {
             // 抛出异常
-            throw new BizServiceException(jsonObject.getString("errmsg"), jsonObject.getInteger("errno"));
+            throw new ServiceException(jsonObject.getString("errmsg"), jsonObject.getInteger("errno"));
         }
-        JSONObject data = jsonObject.getJSONObject("data");
+        JacksonUtil data = jsonObject.getJacksonUtil("data");
         return data.toJavaObject(clazz);
     }
 
     private <T> T getObjectFromJson(String json, TypeReference<T> typeReference) throws ServiceException {
-        JSONObject jsonObject = JSONObject.parseObject(json);
+        JacksonUtil jsonObject = JacksonUtil.parseObject(json);
         Integer errno = jsonObject.getInteger("errno");
         if (errno.intValue() != 200) {
             // 抛出异常
-            throw new BizServiceException(jsonObject.getString("errmsg"), jsonObject.getInteger("errno"));
+            throw new ServiceException(jsonObject.getString("errmsg"), jsonObject.getInteger("errno"));
         }
-        JSONObject data = jsonObject.getJSONObject("data");
+        JacksonUtil data = jsonObject.getJacksonUtil("data");
         return data.toJavaObject(typeReference);
     }
 
     private <T> List<T> getListFromJson(String json, Class<T> clazz) throws ServiceException {
-        JSONObject jsonObject = JSONObject.parseObject(json);
+        JacksonUtil jsonObject = JacksonUtil.parseObject(json);
         Integer errno = jsonObject.getInteger("errno");
         if (errno.intValue() != 200) {
             // 抛出异常
-            throw new BizServiceException(jsonObject.getString("errmsg"), jsonObject.getInteger("errno"));
+            throw new ServiceException(jsonObject.getString("errmsg"), jsonObject.getInteger("errno"));
         }
         JSONArray data = jsonObject.getJSONArray("data");
         return data.toJavaList(clazz);

@@ -8,13 +8,6 @@ package com.iotechn.unimall.data.constant;
  */
 public class DynamicConst {
 
-    public static final String WX_APP_CONFIG_PREFIX = "WX_APP_CONFIG:";
-
-    public static final String WX_PAY_CONFIG_PREFIX = "WX_PAY_CONFIG:";
-
-    public static final String ALI_PAY_CONFIG_PREFIX = "ALI_PAY_CONFIG:";
-
-    public static final String OPEN_SEARCH_CONFIG_PREFIX = "OPEN_SEARCH_CONFIG:";
 
     public static final String ORDER_CONFIG_PREFIX = "ORDER_CONFIG:";
 

@@ -7,7 +7,7 @@ import com.iotechn.unimall.data.enums.CouponType;
 import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created with IntelliJ IDEA.
@@ -60,8 +60,8 @@ public class CouponAdminDTO extends SuperDTO {
     private Integer days;
 
     @ApiField(description = "领取开始时间")
-    private Date gmtStart;
+    private LocalDateTime gmtStart;
 
     @ApiField(description = "领域结束时间")
-    private Date gmtEnd;
+    private LocalDateTime gmtEnd;
 }

@@ -9,7 +9,7 @@ import com.iotechn.unimall.data.enums.CouponType;
 import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created by rize on 2019/7/4.
@@ -66,9 +66,9 @@ public class CouponDO extends SuperDO {
     private Integer days;
 
     @ApiField(description = "可领取开始时间")
-    private Date gmtStart;
+    private LocalDateTime gmtStart;
 
     @ApiField(description = "可领取结束时间")
-    private Date gmtEnd;
+    private LocalDateTime gmtEnd;
 
 }

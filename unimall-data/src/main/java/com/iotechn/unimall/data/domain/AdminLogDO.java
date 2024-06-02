@@ -6,7 +6,7 @@ import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Description: 管理员操作日志

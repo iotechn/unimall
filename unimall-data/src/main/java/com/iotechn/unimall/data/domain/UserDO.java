@@ -9,7 +9,7 @@ import com.iotechn.unimall.data.enums.UserGenderType;
 import com.iotechn.unimall.data.enums.UserLevelType;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created by rize on 2019/6/30.
@@ -62,16 +62,16 @@ public class UserDO extends SuperDO {
     private Integer level;
 
     @ApiField(description = "VIP过期时间")
-    private Date gmtVipExpire;
+    private LocalDateTime gmtVipExpire;
 
     @ApiField(description = "出生日期")
-    private Date birthday;
+    private LocalDateTime birthday;
 
     @ApiField(description = "性别", enums = UserGenderType.class)
     private Integer gender;
 
     @ApiField(description = "最后登录时间")
-    private Date gmtLastLogin;
+    private LocalDateTime gmtLastLogin;
 
     @ApiField(description = "最后登录ID")
     private String lastLoginIp;

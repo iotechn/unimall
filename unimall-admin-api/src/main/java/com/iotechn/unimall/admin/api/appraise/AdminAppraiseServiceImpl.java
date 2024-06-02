@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.appraise;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.model.Page;
@@ -69,7 +69,7 @@ public class AdminAppraiseServiceImpl implements AdminAppraiseService {
             });
             return "ok";
         }
-        throw new AdminServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
+        throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
     }
 
     @Override

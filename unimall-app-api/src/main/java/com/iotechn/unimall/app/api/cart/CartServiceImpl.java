@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.cart;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.data.domain.CartDO;
@@ -11,10 +11,10 @@ import com.iotechn.unimall.data.mapper.CartMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -37,7 +37,7 @@ public class CartServiceImpl implements CartService {
                         .eq("sku_id", skuId)
                         .eq("user_id", userId));
         CartDO cartDO = new CartDO();
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         if (cartFromDB != null) {
             //若非空
             cartDO.setId(cartFromDB.getId());
@@ -64,7 +64,7 @@ public class CartServiceImpl implements CartService {
                         .eq("user_id", userId));
 
         CartDO cartDO = new CartDO();
-        if (cartDO != null) {
+        if (cartFromDB != null) {
             cartDO.setId(cartFromDB.getId());
             cartDO.setNum(cartFromDB.getNum() - num);
             if (cartDO.getNum() <= 0) {
@@ -90,11 +90,11 @@ public class CartServiceImpl implements CartService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean removeCartItemBatch(String cartIdList, Long userId) throws ServiceException {
         if (StringUtils.isEmpty(cartIdList)) {
-            throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
+            throw new ServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
         }
         String[] split = cartIdList.split(",");
         if (split.length == 0) {
-            throw new AppServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
+            throw new ServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
         }
         List<Long> array = new ArrayList<>(split.length);
         for (String idRaw : split) {
@@ -125,7 +125,7 @@ public class CartServiceImpl implements CartService {
         if (update > 0) {
             return num;
         }
-        throw new AppServiceException(ExceptionDefinition.CART_UPDATE_FAILED);
+        throw new ServiceException(ExceptionDefinition.CART_UPDATE_FAILED);
     }
 
     @Override

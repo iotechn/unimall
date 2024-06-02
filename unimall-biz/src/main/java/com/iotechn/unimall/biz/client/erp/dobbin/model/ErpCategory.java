@@ -4,7 +4,7 @@ import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -33,8 +33,8 @@ public class ErpCategory implements Serializable {
     @ApiField(description = "子类目集合")
     private List<ErpCategory> children;
 
-    private Date gmtUpdate;
+    private LocalDateTime gmtUpdate;
 
-    private Date gmtCreate;
+    private LocalDateTime gmtCreate;
 
 }

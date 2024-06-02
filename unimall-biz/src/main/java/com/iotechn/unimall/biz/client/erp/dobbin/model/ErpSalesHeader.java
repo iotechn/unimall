@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -23,7 +23,7 @@ public class ErpSalesHeader extends SuperDTO implements Serializable {
     private String placeCode;
 
     @ApiField(description = "销售时间")
-    private Date gmtSales;
+    private LocalDateTime gmtSales;
 
     @ApiField(description = "税率")
     private Integer taxRate;

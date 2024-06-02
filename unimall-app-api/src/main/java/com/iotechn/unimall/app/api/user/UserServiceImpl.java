@@ -1,13 +1,13 @@
 package com.iotechn.unimall.app.api.user;
 
 import cn.hutool.crypto.SecureUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.alipay.easysdk.base.oauth.models.AlipaySystemOauthTokenResponse;
 import com.alipay.easysdk.factory.Factory;
 import com.alipay.easysdk.kernel.Config;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.Const;
-import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.GeneratorUtil;
 import com.dobbinsoft.fw.pay.enums.PayPlatformType;
@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,11 +97,11 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
     public String sendVerifyCode(String phone) throws ServiceException {
         String verifyCode = GeneratorUtil.genSixVerifyCode();
         SMSResult res = smsClient.sendRegisterVerify(phone, verifyCode);
-        if (res.isSucc()) {
+        if (res.isSuccess()) {
             cacheComponent.putRaw(CacheConst.USER_VERIFY_CODE_PREFIX + phone, verifyCode, 300);
             return "ok";
         } else {
-            throw new AppServiceException(res.getMsg(), ExceptionDefinition.USER_SEND_VERIFY_FAILED.getCode());
+            throw new ServiceException(res.getMsg(), ExceptionDefinition.USER_SEND_VERIFY_FAILED.getCode());
         }
 
     }
@@ -112,14 +112,14 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         //1.校验验证码
         checkVerifyCode(phone, verifyCode);
         //2.校验用户是否存在
-        Integer count = userMapper.selectCount(
+        Long count = userMapper.selectCount(
                 new QueryWrapper<UserDO>()
                         .eq("phone", phone));
         if (count > 0) {
-            throw new AppServiceException(ExceptionDefinition.USER_PHONE_HAS_EXISTED);
+            throw new ServiceException(ExceptionDefinition.USER_PHONE_HAS_EXISTED);
         }
         //3.校验成功，注册用户
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         UserDO userDO = new UserDO();
         userDO.setPhone(phone);
         String salt = GeneratorUtil.genSalt();
@@ -153,7 +153,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
             //3. 更换绑定手机逻辑
             //3.1. 校验用户是否存在
             if (existUserDO != null) {
-                throw new AppServiceException(ExceptionDefinition.USER_PHONE_HAS_EXISTED);
+                throw new ServiceException(ExceptionDefinition.USER_PHONE_HAS_EXISTED);
             }
             //3.2. 校验成功，绑定手机
             UserDO updateUserDO = new UserDO();
@@ -164,11 +164,11 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 UserDTO user = sessionUtil.getUser();
                 user.setPhone(phone);
                 user.setStatus(UserStatusType.ACTIVE.getCode());
-                userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(user));
+                userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(user));
                 return "ok";
             }
         }
-        throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
+        throw new ServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
     }
 
     /**
@@ -205,7 +205,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                     new QueryWrapper<UserDO>().eq("phone", phone));
             UserDTO userDTO = new UserDTO();
             BeanUtils.copyProperties(existUserDO, userDTO);
-            userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
+            userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(userDTO));
             return true;
         } else {
             // 2.2. 绑定逻辑
@@ -215,7 +215,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
             if (userMapper.updateById(updateUserDO) > 0) {
                 UserDTO user = sessionUtil.getUser();
                 user.setPhone(phone);
-                userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(user));
+                userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(user));
                 return true;
             }
         }
@@ -232,7 +232,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 new QueryWrapper<UserDO>()
                         .eq("phone", phone));
         if (CollectionUtils.isEmpty(targetUserList)) {
-            throw new AppServiceException(ExceptionDefinition.USER_PHONE_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.USER_PHONE_NOT_EXIST);
         }
         Long id = targetUserList.get(0).getId();
         //3.校验成功，重置密码
@@ -241,12 +241,12 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         String salt = GeneratorUtil.genSalt();
         updateUserDO.setSalt(salt);
         updateUserDO.setPassword(Md5Crypt.md5Crypt(password.getBytes(), "$1$" + salt));
-        updateUserDO.setGmtUpdate(new Date());
+        updateUserDO.setGmtUpdate(LocalDateTime.now());
         if (userMapper.updateById(updateUserDO) > 0) {
             cacheComponent.del(CacheConst.USER_VERIFY_CODE_PREFIX + phone);
             return "ok";
         }
-        throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
+        throw new ServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
     }
 
     /**
@@ -259,10 +259,10 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
     private void checkVerifyCode(String phone, String verifyCode) throws ServiceException {
         String raw = cacheComponent.getRaw(CacheConst.USER_VERIFY_CODE_PREFIX + phone);
         if (ObjectUtils.isEmpty(raw)) {
-            throw new AppServiceException(ExceptionDefinition.USER_VERIFY_CODE_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.USER_VERIFY_CODE_NOT_EXIST);
         }
         if (!raw.equals(verifyCode)) {
-            throw new AppServiceException(ExceptionDefinition.USER_VERIFY_CODE_NOT_CORRECT);
+            throw new ServiceException(ExceptionDefinition.USER_VERIFY_CODE_NOT_CORRECT);
         }
     }
 
@@ -271,22 +271,22 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
     public UserDTO login(String phone, String password, Integer platform, String ip) throws ServiceException {
         UserDO userDO = userMapper.selectOne(new QueryWrapper<UserDO>().eq("phone", phone));
         if (userDO == null) {
-            throw new AppServiceException(ExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);
+            throw new ServiceException(ExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);
         }
         String cryptPassword = Md5Crypt.md5Crypt(password.getBytes(), "$1$" + userDO.getSalt());
         if (!cryptPassword.equals(userDO.getPassword())) {
-            throw new AppServiceException(ExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);
+            throw new ServiceException(ExceptionDefinition.USER_PHONE_OR_PASSWORD_NOT_CORRECT);
         }
         //检查帐号是否已经冻结
         if (userDO.getStatus() == 0) {
-            throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
+            throw new ServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
         }
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(userDO, userDTO);
         userDTO.setPlatform(platform);
         String accessToken = GeneratorUtil.genSessionId();
         //放入SESSION专用Redis数据源中
-        userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
+        userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(userDTO));
         userDTO.setAccessToken(accessToken);
         UserDO userUpdateDO = new UserDO();
         userUpdateDO.setId(userDTO.getId());
@@ -315,13 +315,13 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
             } else if (UserLoginType.MP_ALI.getCode().intValue() == loginType) {
                 return alipayMpLogin(ip, platform, raw);
             } else {
-                throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_NOT_SUPPORT);
+                throw new ServiceException(ExceptionDefinition.USER_THIRD_PART_NOT_SUPPORT);
             }
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             logger.error("[用户第三方登录] 异常", e);
-            throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
+            throw new ServiceException(ExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
         }
     }
 
@@ -329,24 +329,24 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
     @Transactional(rollbackFor = Exception.class)
     public String getWxPhone(String raw, String encryptedData, String iv, String accessToken, Long userId) throws ServiceException {
         try {
-            JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
+            JacksonUtil thirdPartJsonObject = JacksonUtil.parseObject(raw);
             String code = thirdPartJsonObject.getString("code");
             String body = okHttpClient.newCall(new Request.Builder()
                     .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + this.fwWxAppProperties.getMiniAppId()
                             + "&secret=" + this.fwWxAppProperties.getMiniAppSecret()
                             + "&grant_type=authorization_code&js_code=" + code).get().build()).execute().body().string();
-            JSONObject jsonObject = JSONObject.parseObject(body);
+            JacksonUtil jsonObject = JacksonUtil.parseObject(body);
             Integer errcode = jsonObject.getInteger("errcode");
             if (errcode == null || errcode == 0) {
                 String session_key = jsonObject.getString("session_key");
                 String decrypt = PKCS7Encoder.decrypt(encryptedData, iv, session_key);
                 if (decrypt == null) {
-                    throw new AppServiceException(ExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
+                    throw new ServiceException(ExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
                 }
-                JSONObject parseObject = JSONObject.parseObject(decrypt);
+                JacksonUtil parseObject = JacksonUtil.parseObject(decrypt);
                 String purePhoneNumber = parseObject.getString("purePhoneNumber");
                 if (purePhoneNumber == null || purePhoneNumber.length() != 11) {
-                    throw new AppServiceException(ExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
+                    throw new ServiceException(ExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
                 }
                 //绑定手机
                 UserDO existUserDO = userMapper.selectOne(new QueryWrapper<UserDO>().eq("phone", purePhoneNumber));
@@ -358,17 +358,17 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                     user.setPhone(purePhoneNumber);
                     user.setStatus(UserStatusType.ACTIVE.getCode());
                     user.setPlatform(PayPlatformType.MP.getCode());
-                    userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(user));
+                    userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(user));
                 }
                 return purePhoneNumber;
             }
             logger.info("[获取微信手机号] 回复失败 回复报文：" + body);
-            throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_NOT_SUPPORT);
+            throw new ServiceException(ExceptionDefinition.USER_THIRD_PART_NOT_SUPPORT);
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             logger.error("[获取微信手机号]: 异常", e);
-            throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
+            throw new ServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
         }
     }
 
@@ -382,7 +382,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         updateUserDO.setCity(city);
         updateUserDO.setCounty(county);
         updateUserDO.setGender(gender);
-        updateUserDO.setGmtUpdate(new Date());
+        updateUserDO.setGmtUpdate(LocalDateTime.now());
         if (birthday != null)
             updateUserDO.setBirthday(new Date(birthday));
         if (userMapper.updateById(updateUserDO) > 0) {
@@ -400,10 +400,10 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
             if (gender != null) {
                 user.setGender(gender);
             }
-            userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(user));
+            userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(user));
             return "ok";
         }
-        throw new AppServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
+        throw new ServiceException(ExceptionDefinition.USER_UNKNOWN_EXCEPTION);
     }
 
     @Override
@@ -433,7 +433,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
             return obj;
         } catch (Exception e) {
             logger.info("[获取H5签名] 异常", e);
-            throw new AppServiceException(ExceptionDefinition.APP_UNKNOWN_EXCEPTION);
+            throw new ServiceException(ExceptionDefinition.APP_UNKNOWN_EXCEPTION);
         }
     }
 
@@ -463,13 +463,13 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
      */
     private UserDTO wechatSafeLogin(Integer loginType, Integer platform, String ip, String raw) throws Exception {
         //微信第三方登录
-        JSONObject thirdPartJsonObject = JSONObject.parseObject(raw);
+        JacksonUtil thirdPartJsonObject = JacksonUtil.parseObject(raw);
         String code = thirdPartJsonObject.getString("code");
         String body = okHttpClient.newCall(new Request.Builder()
                 .url("https://api.weixin.qq.com/sns/jscode2session?appid=" + (UserLoginType.MP_WEIXIN.getCode().intValue() == loginType ? this.fwWxAppProperties.getMiniAppId() : this.fwWxAppProperties.getAppId()) +
                         "&secret=" + (UserLoginType.MP_WEIXIN.getCode().intValue() == loginType ? this.fwWxAppProperties.getMiniAppSecret() : this.fwWxAppProperties.getAppSecret()) +
                         "&grant_type=authorization_code&js_code=" + code).get().build()).execute().body().string();
-        JSONObject jsonObject = JSONObject.parseObject(body);
+        JacksonUtil jsonObject = JacksonUtil.parseObject(body);
         Integer errcode = jsonObject.getInteger("errcode");
         if (errcode == null || errcode == 0) {
             String miniOpenId = jsonObject.getString("openid");
@@ -481,7 +481,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
             }
             if (userDO == null) {
                 //若用户为空，则注册此用户
-                Date now = new Date();
+                LocalDateTime now = LocalDateTime.now();
                 UserDO newUserDO = new UserDO();
                 newUserDO.setWxMpOpenId(miniOpenId);
                 newUserDO.setLastLoginIp(ip);
@@ -500,18 +500,18 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
             }
             //检查帐号是否已经冻结
             if (userDO.getStatus().intValue() == UserStatusType.LOCK.getCode()) {
-                throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
+                throw new ServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
             }
             String accessToken = GeneratorUtil.genSessionId();
             UserDTO userDTO = new UserDTO();
             BeanUtils.copyProperties(userDO, userDTO);
             userDTO.setPlatform(platform);
-            userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
+            userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(userDTO));
             userDTO.setAccessToken(accessToken);
             return userDTO;
         } else {
             logger.info("[微信登录] 回复失败 回复报文：" + body);
-            throw new AppServiceException(ExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
+            throw new ServiceException(ExceptionDefinition.USER_THIRD_UNEXPECT_RESPONSE);
         }
 
     }
@@ -529,7 +529,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         String json = okHttpClient.newCall(
                 new Request.Builder().url("https://api.weixin.qq.com/sns/oauth2/access_token?appid="
                         + this.fwWxAppProperties.getH5AppId() + "&secret=" + this.fwWxAppProperties.getH5AppSecret() + "&code=" + raw + "&grant_type=authorization_code").build()).execute().body().string();
-        JSONObject jsonObject = JSONObject.parseObject(json);
+        JacksonUtil jsonObject = JacksonUtil.parseObject(json);
         Integer errcode = jsonObject.getInteger("errcode");
         if (errcode == null || errcode == 0) {
             String openid = jsonObject.getString("openid");
@@ -540,7 +540,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 UserDTO userDTO = new UserDTO();
                 BeanUtils.copyProperties(userDO, userDTO);
                 userDTO.setPlatform(platform);
-                userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
+                userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(userDTO));
                 userDTO.setAccessToken(accessToken);
                 return userDTO;
             } else {
@@ -549,8 +549,8 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 String userInfoJson = okHttpClient.newCall(
                         new Request.Builder().url("https://api.weixin.qq.com/sns/userinfo?access_token="
                                 + userAccessToken + "&openid=" + openid + "&lang=zh_CN").build()).execute().body().string();
-                JSONObject userInfoJsonObject = JSONObject.parseObject(userInfoJson);
-                Date now = new Date();
+                JacksonUtil userInfoJsonObject = JacksonUtil.parseObject(userInfoJson);
+                LocalDateTime now = LocalDateTime.now();
                 UserDO newUserDO = new UserDO();
                 newUserDO.setNickname(userInfoJsonObject.getString("nickname"));
                 newUserDO.setAvatarUrl(userInfoJsonObject.getString("headimgurl"));
@@ -567,12 +567,12 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 UserDTO userDTO = new UserDTO();
                 BeanUtils.copyProperties(userDO, userDTO);
                 userDTO.setPlatform(platform);
-                userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
+                userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(userDTO));
                 userDTO.setAccessToken(accessToken);
                 return userDTO;
             }
         } else {
-            throw new AppServiceException(ExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
+            throw new ServiceException(ExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
         }
     }
 
@@ -586,13 +586,13 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
      */
     private UserDTO wechatAppLogin(String ip, Integer platform, String raw) throws Exception {
         //UNI-APP 的 微信APP登录 APPSecret是保存在前端的。这点非常不安全。但是用了他的框架，也没有办法
-        JSONObject jsonObject = JSONObject.parseObject(raw);
-        JSONObject authResult = jsonObject.getJSONObject("authResult");
+        JacksonUtil jsonObject = JacksonUtil.parseObject(raw);
+        JacksonUtil authResult = jsonObject.getJacksonUtil("authResult");
         String openid = authResult.getString("openid");
         UserDO userDO = userMapper.selectOne(new QueryWrapper<UserDO>().eq("wx_app_open_id", openid));
         if (userDO == null) {
             //创建新用户
-            Date now = new Date();
+            LocalDateTime now = LocalDateTime.now();
             UserDO newUserDO = new UserDO();
             newUserDO.setWxAppOpenId(openid);
             newUserDO.setLastLoginIp(ip);
@@ -611,13 +611,13 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         }
         //检查帐号是否已经冻结
         if (userDO.getStatus() == UserStatusType.LOCK.getCode()) {
-            throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
+            throw new ServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
         }
         String accessToken = GeneratorUtil.genSessionId();
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(userDO, userDTO);
         userDTO.setPlatform(platform);
-        userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
+        userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(userDTO));
         userDTO.setAccessToken(accessToken);
         return userDTO;
     }
@@ -630,13 +630,13 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
      */
     private UserDTO alipayMpLogin(String ip, Integer platform, String raw) throws Exception {
         Factory.setOptions(this.aliMiniCode);
-        JSONObject jsonObject = JSONObject.parseObject(raw);
+        JacksonUtil jsonObject = JacksonUtil.parseObject(raw);
         AlipaySystemOauthTokenResponse response = Factory.Base.OAuth().getToken(jsonObject.getString("code"));
         String userId = response.getUserId();
         UserDO userDO = userMapper.selectOne(new QueryWrapper<UserDO>().eq("ali_mp_open_id", userId));
         if (userDO == null) {
             //创建新用户
-            Date now = new Date();
+            LocalDateTime now = LocalDateTime.now();
             UserDO newUserDO = new UserDO();
             newUserDO.setAliMpOpenId(userId);
             newUserDO.setLastLoginIp(ip);
@@ -653,13 +653,13 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         }
         //检查帐号是否已经冻结
         if (userDO.getStatus() == UserStatusType.LOCK.getCode()) {
-            throw new AppServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
+            throw new ServiceException(ExceptionDefinition.USER_CAN_NOT_ACTIVE);
         }
         String accessToken = GeneratorUtil.genSessionId();
         UserDTO userDTO = new UserDTO();
         BeanUtils.copyProperties(userDO, userDTO);
         userDTO.setPlatform(platform);
-        userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JSONObject.toJSONString(userDTO));
+        userRedisTemplate.opsForValue().set(Const.USER_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(userDTO));
         userDTO.setAccessToken(accessToken);
         return userDTO;
     }

@@ -1,7 +1,7 @@
 package com.iotechn.unimall.biz.service.freight;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.BizServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
@@ -48,11 +48,9 @@ public class FreightTemplateBizService {
     public int computePostage(FreightCalcModel freightCalcModel) throws ServiceException {
         List<FreightCalcModel.FreightAndWeight> freightAndWeights = freightCalcModel.getFreightAndWeights();
         if(CollectionUtils.isEmpty(freightAndWeights)){
-            throw new BizServiceException(ExceptionDefinition.FREIGHT_PARAM_CHECK_FAILED);
+            throw new ServiceException(ExceptionDefinition.FREIGHT_PARAM_CHECK_FAILED);
         }
-        HashSet<Long> templateIds = freightAndWeights.stream().map(item ->{
-            return item.getId();
-        }).collect(Collectors.toCollection(HashSet::new));
+        HashSet<Long> templateIds = freightAndWeights.stream().map(FreightCalcModel.FreightAndWeight::getId).collect(Collectors.toCollection(HashSet::new));
 
          // 统计每个模板下的商品重量和，key为模板ID
         Map<Long, Integer> weightMap = templateIds.stream().collect(Collectors.toMap(key -> key, value -> 0));
@@ -102,7 +100,7 @@ public class FreightTemplateBizService {
 
         FreightTemplateDO freightTemplateDO = templateMapper.selectById(id);
         if(freightTemplateDO == null){
-            throw new BizServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_NOT_EXIST);
+            throw new ServiceException(ExceptionDefinition.FREIGHT_TEMPLATE_NOT_EXIST);
         }
         List<FreightTemplateCarriageDO> template_id = carriageMapper.selectList(
                 new QueryWrapper<FreightTemplateCarriageDO>()

@@ -1,7 +1,9 @@
 package com.iotechn.unimall.data.enums;
 
 import com.dobbinsoft.fw.core.enums.BaseEnums;
+import lombok.Getter;
 
+@Getter
 public enum DMQHandlerType implements BaseEnums<Integer> {
     ORDER_AUTO_CANCEL(1, "订单自动取消"),
     ORDER_AUTO_CONFIRM(2,"订单自动收货"),
@@ -13,16 +15,8 @@ public enum DMQHandlerType implements BaseEnums<Integer> {
         this.msg = msg;
     }
 
-    private int code;
+    private Integer code;
 
     private String msg;
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
 
 }

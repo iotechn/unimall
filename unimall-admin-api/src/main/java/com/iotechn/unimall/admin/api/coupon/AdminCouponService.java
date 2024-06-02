@@ -10,7 +10,7 @@ import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.dto.CouponAdminDTO;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created with IntelliJ IDEA.

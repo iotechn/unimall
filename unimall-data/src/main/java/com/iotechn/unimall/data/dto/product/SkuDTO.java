@@ -6,7 +6,7 @@ import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created by rize on 2019/7/6.
@@ -71,9 +71,9 @@ public class SkuDTO extends SuperDTO {
     private Long activityId;
 
     @ApiField(description = "活动开始时间")
-    private Date gmtActivityStart;
+    private LocalDateTime gmtActivityStart;
 
     @ApiField(description = "活动结束时间")
-    private Date gmtActivityEnd;
+    private LocalDateTime gmtActivityEnd;
 
 }

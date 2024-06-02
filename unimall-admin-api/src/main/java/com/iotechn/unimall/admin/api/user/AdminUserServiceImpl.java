@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AdminServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.GeneratorUtil;
 import com.dobbinsoft.fw.support.model.Page;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,15 +33,15 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean create(UserDO user, Long adminId) throws ServiceException {
         if (user == null){
-            throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
+            throw new ServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
         if(user.getPhone() == null){
-            throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
+            throw new ServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
         if(userMapper.selectCount(new QueryWrapper<UserDO>().eq("phone",user.getPhone())) > 0){
-            throw new AdminServiceException(ExceptionDefinition.USER_PHONE_ALREADY_EXIST);
+            throw new ServiceException(ExceptionDefinition.USER_PHONE_ALREADY_EXIST);
         }
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         user.setId(null);
         String salt = GeneratorUtil.genSalt();
         user.setPassword(Md5Crypt.md5Crypt(user.getPassword().getBytes(), "$1$" + salt));
@@ -62,15 +62,15 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean edit(UserDO user, Long adminId) throws ServiceException {
         if (user == null || user.getId() == null){
-            throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
+            throw new ServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
         if(user.getPhone() == null){
-            throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
+            throw new ServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
         if(userMapper.selectCount(new QueryWrapper<UserDO>().eq("phone",user.getPhone()).notIn("id",user.getId())) > 0){
-            throw new AdminServiceException(ExceptionDefinition.USER_PHONE_ALREADY_EXIST);
+            throw new ServiceException(ExceptionDefinition.USER_PHONE_ALREADY_EXIST);
         }
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         user.setGmtUpdate(now);
 
         String salt = GeneratorUtil.genSalt();
@@ -84,12 +84,12 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public Boolean editStatus(Long userId, Integer status, Long adminId) throws ServiceException {
         if(userId == null || status == null || (status != 0 && status != 1)){
-            throw new AdminServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
+            throw new ServiceException(ExceptionDefinition.USER_INFORMATION_MISSING);
         }
         UserDO userDO = new UserDO();
         userDO.setId(userId);
         userDO.setStatus(status);
-        userDO.setGmtUpdate(new Date());
+        userDO.setGmtUpdate(LocalDateTime.now());
         if(userMapper.updateById(userDO) > 0){
             return true;
         }

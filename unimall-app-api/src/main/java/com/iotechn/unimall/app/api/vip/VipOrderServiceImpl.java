@@ -1,7 +1,7 @@
 package com.iotechn.unimall.app.api.vip;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.GeneratorUtil;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
@@ -60,7 +60,7 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
     public Object prepay(Integer payPlatform, String payChannel, Long templateId, String ip, Long userId) throws ServiceException {
         VipTemplateDO vipTemplateDO = templateMapper.selectById(templateId);
         if (vipTemplateDO == null || 1 != vipTemplateDO.getDisplay().intValue()) {
-            throw new AppServiceException(ExceptionDefinition.VIP_TEMPLATE_NULL_OR_NOT_DISPLAY);
+            throw new ServiceException(ExceptionDefinition.VIP_TEMPLATE_NULL_OR_NOT_DISPLAY);
         }
         String orderNo = GeneratorUtil.genOrderId(this.machineComponent.getMachineNo() + "", this.ENV);
         VipOrderDO vipOrderDO = new VipOrderDO();
@@ -90,10 +90,10 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
             return object;
         } catch (MatrixPayException e) {
             logger.error("[Matrix支付] 异常", e);
-            throw new AppServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+            throw new ServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
         } catch (Exception e) {
             logger.error("[预付款异常]", e);
-            throw new AppServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
+            throw new ServiceException(ExceptionDefinition.ORDER_UNKNOWN_EXCEPTION);
         }
     }
 

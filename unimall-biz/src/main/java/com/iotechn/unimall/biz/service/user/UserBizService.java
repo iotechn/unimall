@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.service.user;
 
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.domain.VipOrderDO;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created by rize on 2019/9/12.
@@ -48,7 +48,7 @@ public class UserBizService {
                                     + fwWxAppProperties.getH5AppId() + "&secret=" + fwWxAppProperties.getH5AppSecret())
                             .get()
                             .build()).execute().body().string();
-            JSONObject jsonObject = JSONObject.parseObject(accessJson);
+            JacksonUtil jsonObject = JacksonUtil.parseObject(accessJson);
             wxAccessToken = jsonObject.getString("access_token");
             if (!ObjectUtils.isEmpty(wxAccessToken)) {
                 Integer expires_in = jsonObject.getInteger("expires_in");
@@ -71,7 +71,7 @@ public class UserBizService {
                             .url("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + accessToken + "&type=jsapi")
                             .get()
                             .build()).execute().body().string();
-            JSONObject jsonObject = JSONObject.parseObject(ticketJson);
+            JacksonUtil jsonObject = JacksonUtil.parseObject(ticketJson);
             wxTicket = jsonObject.getString("ticket");
             if (!ObjectUtils.isEmpty(wxTicket)) {
                 Integer expires_in = jsonObject.getInteger("expires_in");
@@ -94,7 +94,7 @@ public class UserBizService {
                                     + fwWxAppProperties.getMiniAppId() + "&secret=" + fwWxAppProperties.getMiniAppSecret())
                             .get()
                             .build()).execute().body().string();
-            JSONObject jsonObject = JSONObject.parseObject(accessJson);
+            JacksonUtil jsonObject = JacksonUtil.parseObject(accessJson);
             access_token = jsonObject.getString("access_token");
             if (!ObjectUtils.isEmpty(access_token)) {
                 Integer expires_in = jsonObject.getInteger("expires_in");
@@ -118,7 +118,7 @@ public class UserBizService {
      */
     public UserDO upUserLevel(VipOrderDO vipOrder){
         UserDO userDO = userMapper.selectById(vipOrder.getUserId());
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         Calendar calendar = Calendar.getInstance();
         if(UserLevelType.VIP.getCode() == userDO.getLevel().intValue()){
             calendar.setTime(userDO.getGmtVipExpire());

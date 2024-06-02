@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.util;
 
-import com.dobbinsoft.fw.core.exception.BizServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.SessionUtil;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
@@ -58,7 +58,7 @@ public class PaySelector {
                 orderRequest.setPayChannel(PayChannelType.ALI);
             }
         } else {
-            throw new BizServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
+            throw new ServiceException(ExceptionDefinition.ORDER_LOGIN_TYPE_NOT_SUPPORT_WXPAY);
         }
     }
 

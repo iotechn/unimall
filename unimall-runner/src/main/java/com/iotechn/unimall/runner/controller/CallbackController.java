@@ -1,6 +1,6 @@
 package com.iotechn.unimall.runner.controller;
 
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.dobbinsoft.fw.support.component.open.OpenPlatformUtil;
 import com.iotechn.unimall.biz.client.erp.ErpClient;
 import com.iotechn.unimall.data.dto.ErpStockNotifyDTO;
@@ -31,14 +31,14 @@ public class CallbackController {
     @RequestMapping("/erp/stock")
     @Transactional(rollbackFor = Exception.class)
     public Object stock(@RequestBody String body) throws Exception {
-        JSONObject jsonObject = JSONObject.parseObject(body);
+        JacksonUtil jsonObject = JacksonUtil.parseObject(body);
         String ciphertext = jsonObject.getString("ciphertext");
         // 验签
         String publicKey = unimallErpOpenPlatformProperties.getDobbinServerPublicKey();
         Map<String, String> map = OpenPlatformUtil.parseAndCheckSign(ciphertext, publicKey);
         String notify = map.get("notify");
         // 编辑库存
-        ErpStockNotifyDTO erpStockNotifyDTO = JSONObject.parseObject(notify, ErpStockNotifyDTO.class);
+        ErpStockNotifyDTO erpStockNotifyDTO = JacksonUtil.parseObject(notify, ErpStockNotifyDTO.class);
         List<ErpStockNotifyItemDTO> items = erpStockNotifyDTO.getItems();
         for (ErpStockNotifyItemDTO item : items) {
             erpClient.invokeStockChange(item.getBarCode(), item.getQuantity());

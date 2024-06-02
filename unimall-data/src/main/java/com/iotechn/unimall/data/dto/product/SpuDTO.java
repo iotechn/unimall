@@ -15,7 +15,7 @@ import com.iotechn.unimall.data.enums.SpuActivityType;
 import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -141,7 +141,7 @@ public class SpuDTO extends SuperDTO {
      * 若活动没有结束时间，应该将其设为巨大的值eg.Long.MAX_VALUE，否则商品系统会误判活动已经结束
      */
     @ApiField(description = "活动开始时间")
-    private Date gmtActivityStart;
+    private LocalDateTime gmtActivityStart;
 
     /**
      * 商品活动结束时间
@@ -149,7 +149,7 @@ public class SpuDTO extends SuperDTO {
      * 若活动没有结束时间，应该将其设为巨大的值eg.Long.MAX_VALUE，否则商品系统会误判活动已经结束
      */
     @ApiField(description = "活动结束时间")
-    private Date gmtActivityEnd;
+    private LocalDateTime gmtActivityEnd;
 
     /**
      * Spu活动

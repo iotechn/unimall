@@ -1,7 +1,7 @@
 package com.iotechn.unimall.data.open;
 
 import cn.hutool.crypto.asymmetric.RSA;
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.iotechn.unimall.data.domain.OpenPlatformClientDO;
 import com.iotechn.unimall.data.domain.OpenPlatformNotifyDO;
@@ -14,10 +14,10 @@ import com.dobbinsoft.fw.support.component.open.model.OPNotify;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,7 +96,7 @@ public class OpenPlatformStorageDatabaseImpl implements OpenPlatformStorageStrat
         if (StringUtils.isEmpty(openPlatformClientDO.getPermissionList())) {
             opClient.setPermissionList(new ArrayList<>());
         } else {
-            List<OPClientPermission> permissionList = JSONObject.parseArray(openPlatformClientDO.getPermissionList(), OPClientPermission.class);
+            List<OPClientPermission> permissionList = JacksonUtil.parseArray(openPlatformClientDO.getPermissionList(), OPClientPermission.class);
             opClient.setPermissionList(permissionList);
         }
         return opClient;
@@ -105,14 +105,14 @@ public class OpenPlatformStorageDatabaseImpl implements OpenPlatformStorageStrat
     @Override
     public boolean setClientPermissionList(String clientCode, List<OPClientPermission> permissionList) {
         OpenPlatformClientDO openPlatformClientDO = new OpenPlatformClientDO();
-        openPlatformClientDO.setPermissionList(JSONObject.toJSONString(permissionList));
+        openPlatformClientDO.setPermissionList(JacksonUtil.toJSONString(permissionList));
         return openPlatformClientMapper.update(openPlatformClientDO, new QueryWrapper<OpenPlatformClientDO>().eq("code", clientCode)) > 0;
     }
 
     @Override
     public boolean checkApiPermission(String clientCode, String group, String method) {
         OpenPlatformClientDO openPlatformClientDO = openPlatformClientMapper.selectOne(new QueryWrapper<OpenPlatformClientDO>().eq("code", clientCode));
-        List<OPClientPermission> permissionList = JSONObject.parseArray(openPlatformClientDO.getPermissionList(), OPClientPermission.class);
+        List<OPClientPermission> permissionList = JacksonUtil.parseArray(openPlatformClientDO.getPermissionList(), OPClientPermission.class);
         OPClientPermission permission = new OPClientPermission();
         permission.setGroup(group);
         permission.setMethod(method);
@@ -130,7 +130,7 @@ public class OpenPlatformStorageDatabaseImpl implements OpenPlatformStorageStrat
         if (StringUtils.isEmpty(openPlatformClientDO.getPermissionList())) {
             opClient.setPermissionList(new ArrayList<>());
         } else {
-            List<OPClientPermission> permissionList = JSONObject.parseArray(openPlatformClientDO.getPermissionList(), OPClientPermission.class);
+            List<OPClientPermission> permissionList = JacksonUtil.parseArray(openPlatformClientDO.getPermissionList(), OPClientPermission.class);
             opClient.setPermissionList(permissionList);
         }
         return opClient;
@@ -141,7 +141,7 @@ public class OpenPlatformStorageDatabaseImpl implements OpenPlatformStorageStrat
         OpenPlatformNotifyDO openPlatformNotifyDO = new OpenPlatformNotifyDO();
         openPlatformNotifyDO.setClientCode(opNotify.getClientCode());
         openPlatformNotifyDO.setNextNotify(opNotify.getNextNotify());
-        openPlatformNotifyDO.setParams(JSONObject.toJSONString(opNotify.getParams()));
+        openPlatformNotifyDO.setParams(JacksonUtil.toJSONString(opNotify.getParams()));
         openPlatformNotifyDO.setStatus(opNotify.getStatus());
         openPlatformNotifyDO.setTimes(opNotify.getTimes());
 
@@ -154,7 +154,7 @@ public class OpenPlatformStorageDatabaseImpl implements OpenPlatformStorageStrat
     @Override
     public List<OPNotify> getNeedNotify() {
         QueryWrapper<OpenPlatformNotifyDO> queryWrapper = new QueryWrapper<OpenPlatformNotifyDO>().eq("status", 0).gt("next_notify", new Date());
-        Integer count = openPlatformNotifyMapper.selectCount(queryWrapper);
+        Long count = openPlatformNotifyMapper.selectCount(queryWrapper);
         if (count == 0) {
             return new ArrayList<>();
         }
@@ -166,7 +166,7 @@ public class OpenPlatformStorageDatabaseImpl implements OpenPlatformStorageStrat
             opNotify.setTimes(item.getTimes());
             opNotify.setNextNotify(item.getNextNotify());
             opNotify.setClientCode(item.getClientCode());
-            opNotify.setParams(JSONObject.parseArray(item.getParams(), String.class));
+            opNotify.setParams(JacksonUtil.parseArray(item.getParams(), String.class));
             return opNotify;
         }).collect(Collectors.toList());
     }
@@ -176,7 +176,7 @@ public class OpenPlatformStorageDatabaseImpl implements OpenPlatformStorageStrat
         OpenPlatformNotifyDO openPlatformNotifyDO = new OpenPlatformNotifyDO();
         openPlatformNotifyDO.setClientCode(opNotify.getClientCode());
         openPlatformNotifyDO.setNextNotify(opNotify.getNextNotify());
-        openPlatformNotifyDO.setParams(opNotify.getParams() == null ? null : JSONObject.toJSONString(opNotify.getParams()));
+        openPlatformNotifyDO.setParams(opNotify.getParams() == null ? null : JacksonUtil.toJSONString(opNotify.getParams()));
         openPlatformNotifyDO.setStatus(opNotify.getStatus());
         openPlatformNotifyDO.setTimes(opNotify.getTimes());
         openPlatformNotifyDO.setId(Long.parseLong(opNotify.getId()));

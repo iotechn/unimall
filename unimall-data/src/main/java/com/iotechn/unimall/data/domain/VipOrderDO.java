@@ -5,7 +5,7 @@ import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @TableName("unimall_vip_order")
@@ -23,7 +23,7 @@ public class VipOrderDO extends SuperDO {
 
     private Integer status;
 
-    private Date gmtPay;
+    private LocalDateTime gmtPay;
 
     @ApiField(description = "支付渠道")
     private String payChannel;

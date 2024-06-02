@@ -1,7 +1,7 @@
 package com.iotechn.unimall.biz.handler;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.AppServiceException;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.mq.DelayedMessageHandler;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -50,12 +50,11 @@ public class OrderAutoCancelHandler implements DelayedMessageHandler {
     public int handle(String orderNo) {
         try {
             OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, null).get(0);
-            if (orderDO.getStatus() != OrderStatusType.UNPAY.getCode()) {
-                throw new AppServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CANCEL);
+            if (orderDO.getStatus().intValue() != OrderStatusType.UNPAY.getCode()) {
+                throw new ServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_CANCEL);
             }
             OrderDO updateOrderDO = new OrderDO();
             updateOrderDO.setStatus(OrderStatusType.CANCELED_SYS.getCode());
-            updateOrderDO.setGmtUpdate(new Date());
             List<OrderSkuDO> orderSkuList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
             orderSkuList.forEach(item -> {
                 skuMapper.returnSkuStock(item.getSkuId(), item.getNum());

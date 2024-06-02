@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.pay;
 
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.exception.PayServiceException;
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class VipOrderPayCallbackHandler implements MatrixPayCallbackHandler {
@@ -59,14 +59,14 @@ public class VipOrderPayCallbackHandler implements MatrixPayCallbackHandler {
                 return MatrixPayNotifyResponse.fail("没有该订单");
             }
             VipOrderDO vipOrderDO = vipOrderDOS.get(0);
-            if (vipOrderDO.getStatus() != VipOrderStatusType.WAIT_BUY.getCode()) {
+            if (vipOrderDO.getStatus().intValue() != VipOrderStatusType.WAIT_BUY.getCode()) {
                 return MatrixPayNotifyResponse.success("订单已处理");
             }
 
             if (result.getTotalFee().intValue() != vipOrderDO.getPrice().intValue()) {
                 return MatrixPayNotifyResponse.fail("价格不一致");
             }
-            logger.info("[VIP 充值回调] result=" + JSONObject.toJSONString(result));
+            logger.info("[VIP 充值回调] result=" + JacksonUtil.toJSONString(result));
             vipOrderBizService.changeOrderParentStatus(vipOrderDO.getId(), VipOrderStatusType.WAIT_REFUND.getCode(), VipOrderStatusType.WAIT_BUY.getCode());
             userBizService.upUserLevel(vipOrderDO);
             delayedMessageQueue.publishTask(DMQHandlerType.VIP_ORDER_BUY_OVER.getCode(), String.valueOf(vipOrderDO.getId()), 60 * 60 * 24 * 7);

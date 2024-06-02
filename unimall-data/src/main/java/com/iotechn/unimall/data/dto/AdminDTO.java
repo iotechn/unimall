@@ -7,7 +7,7 @@ import com.dobbinsoft.fw.core.entiy.inter.PermissionOwner;
 import com.iotechn.unimall.data.enums.StatusType;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -47,7 +47,7 @@ public class AdminDTO extends SuperDTO implements PermissionOwner {
     private String lastLoginIp;
 
     @ApiField(description = "最后登录时间")
-    private Date gmtLastLogin;
+    private LocalDateTime gmtLastLogin;
 
     @ApiField(description = "角色名称")
     private List<String> roles;

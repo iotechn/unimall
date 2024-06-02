@@ -1,10 +1,12 @@
 package com.iotechn.unimall.data.enums;
 
 import com.dobbinsoft.fw.core.enums.BaseEnums;
+import lombok.Getter;
 
 /**
  * Created by rize on 2019/2/11.
  */
+@Getter
 public enum ShipCodeType implements BaseEnums<String> {
     SF("SF","顺丰速运"),
     HTKY("HTKY", "百世快递"),
@@ -34,13 +36,5 @@ public enum ShipCodeType implements BaseEnums<String> {
         this.msg = msg;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-
-    public String getMsg() {
-        return msg;
-    }
 
 }

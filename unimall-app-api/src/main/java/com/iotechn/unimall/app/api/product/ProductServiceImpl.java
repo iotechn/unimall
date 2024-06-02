@@ -25,6 +25,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -132,10 +133,10 @@ public class ProductServiceImpl implements ProductService {
             spuDTO.setFavorite(cacheComponent.getHashRaw(CacheConst.PRT_USER_FAVORITE_HASH_BUCKET + spuId, "U" + userId) != null);
         }
         // 5. 封装活动信息
-        if (spuDTO.getActivityType() != null && spuDTO.getActivityType() != SpuActivityType.NONE.getCode()
-                && spuDTO.getGmtActivityEnd() != null && spuDTO.getGmtActivityEnd().getTime() > System.currentTimeMillis()) {
+        if (spuDTO.getActivityType() != null && spuDTO.getActivityType().intValue() != SpuActivityType.NONE.getCode()
+                && spuDTO.getGmtActivityEnd() != null && spuDTO.getGmtActivityEnd().isAfter(LocalDateTime.now())) {
             // 若存在正在进行的活动，封装活动实例。这里活动的缓存应该由各个活动BizService内部决定是否使用缓存？如何设计缓存？
-            if (spuDTO.getActivityType() == SpuActivityType.GROUP_SHOP.getCode()) {
+            if (spuDTO.getActivityType().intValue() == SpuActivityType.GROUP_SHOP.getCode()) {
                 GroupShopDTO groupShopDTO = groupShopBizService.getGroupShopById(spuDTO.getActivityId());
                 spuDTO.setActivity(groupShopDTO);
             }

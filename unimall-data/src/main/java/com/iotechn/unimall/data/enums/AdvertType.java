@@ -1,6 +1,7 @@
 package com.iotechn.unimall.data.enums;
 
 import com.dobbinsoft.fw.core.enums.BaseEnums;
+import lombok.Getter;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,6 +10,7 @@ import com.dobbinsoft.fw.core.enums.BaseEnums;
  * Date: 2020-03-26
  * Time: 下午6:46
  */
+@Getter
 public enum AdvertType implements BaseEnums<Integer> {
 
     CAROUSEL(1, "轮播"),
@@ -23,17 +25,9 @@ public enum AdvertType implements BaseEnums<Integer> {
         this.msg = msg;
     }
 
-    private int code;
+    private Integer code;
 
     private String msg;
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
 
 }
 

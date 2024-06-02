@@ -1,6 +1,6 @@
 package com.iotechn.unimall.biz.service.notify;
 
-import com.alibaba.fastjson.JSONObject;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +18,11 @@ public class MockAdminNotifyBizServiceImpl implements AdminNotifyBizService {
 
     @Override
     public void newOrder(OrderDTO orderDTO) {
-        logger.info("[mock通知 有新订单] 请及时发货：" + JSONObject.toJSONString(orderDTO));
+        logger.info("[mock通知 有新订单] 请及时发货：" + JacksonUtil.toJSONString(orderDTO));
     }
 
     @Override
     public void refundOrder(OrderDTO orderDTO) {
-        logger.info("[mock通知 有新退款] 请及时处理：" + JSONObject.toJSONString(orderDTO));
+        logger.info("[mock通知 有新退款] 请及时处理：" + JacksonUtil.toJSONString(orderDTO));
     }
 }

@@ -1,10 +1,12 @@
 package com.iotechn.unimall.data.enums;
 
 import com.dobbinsoft.fw.core.enums.BaseEnums;
+import lombok.Getter;
 
 /**
  * Created by rize on 2019/2/13.
  */
+@Getter
 public enum OrderStatusType implements BaseEnums<Integer> {
     UNPAY(10, "未付款"),
     GROUP_SHOP_WAIT(12,"等待团购活动结束"),
@@ -22,17 +24,9 @@ public enum OrderStatusType implements BaseEnums<Integer> {
         this.msg = msg;
     }
 
-    private int code;
+    private Integer code;
 
     private String msg;
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
 
 
     /**
@@ -40,11 +34,7 @@ public enum OrderStatusType implements BaseEnums<Integer> {
      * @return
      */
     public static boolean refundable(int orderStatus) {
-        if (orderStatus == WAIT_STOCK.getCode() || orderStatus == WAIT_CONFIRM.getCode()) {
-            return true;
-        } else {
-            return false;
-        }
+        return orderStatus == WAIT_STOCK.getCode() || orderStatus == WAIT_CONFIRM.getCode();
     }
 
 }

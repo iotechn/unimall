@@ -1,6 +1,7 @@
 package com.iotechn.unimall.data.enums;
 
 import com.dobbinsoft.fw.core.enums.BaseEnums;
+import lombok.Getter;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,6 +10,7 @@ import com.dobbinsoft.fw.core.enums.BaseEnums;
  * Date: 2020/3/26
  * Time: 18:52
  */
+@Getter
 public enum AdvertUnionType implements BaseEnums<Integer> {
     PRODUCT(1, "产品"),
     CATEGORY(2, "类目"),
@@ -20,15 +22,8 @@ public enum AdvertUnionType implements BaseEnums<Integer> {
         this.msg = msg;
     }
 
-    private int code;
+    private Integer code;
 
     private String msg;
 
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
 }

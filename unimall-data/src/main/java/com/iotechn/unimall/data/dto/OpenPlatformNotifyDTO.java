@@ -3,7 +3,7 @@ package com.iotechn.unimall.data.dto;
 import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -31,7 +31,7 @@ public class OpenPlatformNotifyDTO extends SuperDTO {
     /**
      * 下一次通知时间
      */
-    private Date nextNotify;
+    private LocalDateTime nextNotify;
 
     /**
      * 参数string json List<String>

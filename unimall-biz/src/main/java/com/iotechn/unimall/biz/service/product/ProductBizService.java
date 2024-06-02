@@ -1,12 +1,11 @@
 package com.iotechn.unimall.biz.service.product;
 
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.BizServiceException;
 import com.dobbinsoft.fw.core.exception.CoreExceptionDefinition;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 import com.iotechn.unimall.biz.service.category.CategoryBizService;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.*;
@@ -33,9 +32,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -66,8 +65,8 @@ public class ProductBizService {
     @Autowired
     private CacheComponent cacheComponent;
 
-//    @Autowired(required = false)
-//    private SearchEngine searchEngine;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
 
     /**
@@ -82,7 +81,7 @@ public class ProductBizService {
         List<String> tempList = new ArrayList<>();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
-            String name = StrUtil.toUnderlineCase(field.getName());
+            String name = StringUtils.toUnderlineCase(field.getName());
             if (!name.equals("detail")) {
                 tempList.add(name);
             }
@@ -102,25 +101,25 @@ public class ProductBizService {
     public String create(AdminSpuDTO adminSpuDTO) throws ServiceException {
         // 1.参数校验
         if (adminSpuDTO.getId() != null) {
-            throw new BizServiceException(ExceptionDefinition.PRODUCT_CREATE_HAS_ID);
+            throw new ServiceException(ExceptionDefinition.PRODUCT_CREATE_HAS_ID);
         }
         if (CollectionUtils.isEmpty(adminSpuDTO.getSkuList())) {
-            throw new BizServiceException(ExceptionDefinition.PRODUCT_SKU_LIST_EMPTY);
+            throw new ServiceException(ExceptionDefinition.PRODUCT_SKU_LIST_EMPTY);
         }
         // 1.2.校验Sku是否重复
         Set<String> barCodes = adminSpuDTO.getSkuList().stream().map(item -> item.getBarCode()).collect(Collectors.toSet());
         if (barCodes.size() != adminSpuDTO.getSkuList().size()) {
-            throw new BizServiceException(ExceptionDefinition.PRODUCT_UPLOAD_SKU_BARCODE_REPEAT);
+            throw new ServiceException(ExceptionDefinition.PRODUCT_UPLOAD_SKU_BARCODE_REPEAT);
         }
         List<SkuDO> existSkuDO = skuMapper.selectList(new QueryWrapper<SkuDO>().in("bar_code", barCodes));
         if (!CollectionUtils.isEmpty(existSkuDO)) {
             String spuIds = existSkuDO.stream().map(item -> item.getSpuId().toString()).collect(Collectors.joining(","));
             String skuIds = existSkuDO.stream().map(item -> item.getBarCode()).collect(Collectors.joining(","));
-            throw new BizServiceException(CoreExceptionDefinition
+            throw new ServiceException(CoreExceptionDefinition
                     .buildVariableException(ExceptionDefinition.PRODUCT_CREATE_BARCODE_REPEAT, spuIds, skuIds));
         }
         // 2.1.插入主表
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         SpuDO spuDO = new SpuDO();
         BeanUtils.copyProperties(adminSpuDTO, spuDO);
         spuDO.setGmtUpdate(now);
@@ -173,13 +172,13 @@ public class ProductBizService {
      * 封装商品原价/VIP价等
      * @param adminSpuDTO
      * @param spuDO
-     * @throws BizServiceException
+     * @throws ServiceException
      */
-    private void packPrice(AdminSpuDTO adminSpuDTO, SpuDO spuDO) throws BizServiceException {
+    private void packPrice(AdminSpuDTO adminSpuDTO, SpuDO spuDO) throws ServiceException {
         SkuDO minPriceSku = null;
         for (SkuDO skuDO : adminSpuDTO.getSkuList()) {
             if (skuDO.getOriginalPrice() < skuDO.getPrice() || skuDO.getPrice() < skuDO.getVipPrice() || skuDO.getOriginalPrice() < skuDO.getVipPrice()) {
-                throw new BizServiceException(ExceptionDefinition.PRODUCT_PRICE_CHECKED_FAILED);
+                throw new ServiceException(ExceptionDefinition.PRODUCT_PRICE_CHECKED_FAILED);
             }
             if (minPriceSku == null) {
                 minPriceSku = skuDO;
@@ -202,15 +201,15 @@ public class ProductBizService {
     public String edit(AdminSpuDTO spuDTO) throws ServiceException {
         // 1. 参数校验
         if (spuDTO.getId() == null) {
-            throw new BizServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
+            throw new ServiceException(ExceptionDefinition.PARAM_CHECK_FAILED);
         }
         if (CollectionUtils.isEmpty(spuDTO.getSkuList())) {
-            throw new BizServiceException(ExceptionDefinition.PRODUCT_SKU_LIST_EMPTY);
+            throw new ServiceException(ExceptionDefinition.PRODUCT_SKU_LIST_EMPTY);
         }
         // 将旧值查询出来，若价格没有改变，则无需更新价格排序缓存
         SpuDO spuFromDB = spuMapper.selectById(spuDTO.getId());
         // 2.1. 更新主表
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         SpuDO spuDO = new SpuDO();
         BeanUtils.copyProperties(spuDTO, spuDO);
         packPrice(spuDTO, spuDO);
@@ -219,7 +218,7 @@ public class ProductBizService {
         Set<String> barCodes = new HashSet<>();
         for (SkuDO skuDO : spuDTO.getSkuList()) {
             if (skuDO.getOriginalPrice() < skuDO.getPrice() || skuDO.getPrice() < skuDO.getVipPrice() || skuDO.getOriginalPrice() < skuDO.getVipPrice()) {
-                throw new BizServiceException(ExceptionDefinition.PRODUCT_PRICE_CHECKED_FAILED);
+                throw new ServiceException(ExceptionDefinition.PRODUCT_PRICE_CHECKED_FAILED);
             }
             skuDO.setId(null);
             skuDO.setSpuId(spuDO.getId());
@@ -232,7 +231,7 @@ public class ProductBizService {
             }
             boolean succ = barCodes.add(skuDO.getBarCode());
             if (!succ) {
-                throw new BizServiceException(ExceptionDefinition.PRODUCT_UPLOAD_SKU_BARCODE_REPEAT);
+                throw new ServiceException(ExceptionDefinition.PRODUCT_UPLOAD_SKU_BARCODE_REPEAT);
             }
         }
         // 2.2.2. 删除多余barCode
@@ -289,14 +288,12 @@ public class ProductBizService {
                 for (SkuDO skuDO : spuDTO.getSkuList()) {
                     cacheComponent.putHashRaw(CacheConst.PRT_SKU_STOCK_BUCKET, "K" + skuDO.getId(), skuDO.getStock() + "");
                 }
-                // 4 更新搜索引擎
-                ProductBizService.this.transmissionSearchEngine(spuDO.getId());
             }
         });
         return "ok";
     }
 
-    private void insertSpuAttribute(AdminSpuDTO spuDTO, Date now) {
+    private void insertSpuAttribute(AdminSpuDTO spuDTO, LocalDateTime now) {
         if (!CollectionUtils.isEmpty(spuDTO.getAttributeList())) {
             for (SpuAttributeDO spuAttributeDO : spuDTO.getAttributeList()) {
                 spuAttributeDO.setSpuId(spuDTO.getId());
@@ -307,7 +304,7 @@ public class ProductBizService {
         }
     }
 
-    private void insertSpuImg(AdminSpuDTO spuDTO, Long bizId, Date now) {
+    private void insertSpuImg(AdminSpuDTO spuDTO, Long bizId, LocalDateTime now) {
         List<String> imgList = spuDTO.getImgList();
         List<ImgDO> imgDOList = imgList.stream().map(item -> {
             ImgDO imgDO = new ImgDO();
@@ -321,26 +318,6 @@ public class ProductBizService {
         imgMapper.insertBatchSomeColumn(imgDOList);
     }
 
-    public void transmissionSearchEngine(Long id) {
-        // TODO
-//        if (searchEngine != null) {
-//            GlobalExecutor.execute(() -> {
-//                SpuDO spuFromDB = AdminProductServiceImpl.this.productBizService.getProductByIdFromDB(id);
-//                searchEngine.dataTransmission(spuFromDB);
-//            });
-//        }
-    }
-
-    public void deleteSearchEngine(Long id) {
-        // TODO
-//        if (searchEngine != null) {
-//            GlobalExecutor.execute(() -> {
-//                SpuDO spuDO = new SpuDO();
-//                spuDO.setId(id);
-//                searchEngine.deleteData(spuDO);
-//            });
-//        }
-    }
 
     /**
      * 若搜索关键字为空，则从缓存中获取商品列表，此列表不包含detail(商品详情)字段
@@ -356,29 +333,6 @@ public class ProductBizService {
      */
     public Page<SpuDO> getProductPage(Integer pageNo, Integer pageSize, Long categoryId, String orderBy, Boolean isAsc, String title) throws ServiceException {
         if (!StringUtils.isEmpty(title)) {
-            // TODO 搜索引擎
-//            try {
-//                if (this.searchEngine != null) {
-//                    SearchWrapperModel searchWrapper =
-//                            new SearchWrapperModel()
-//                                    .div(pageNo, pageSize)
-//                                    .like("title", title);
-//                    if (categoryId != null && categoryId > 0) {
-//                        searchWrapper.eq("category_id", categoryId);
-//                    }
-//                    if (orderBy != null && isAsc != null) {
-//                        if (isAsc)
-//                            searchWrapper.orderByAsc(orderBy);
-//                        else
-//                            searchWrapper.orderByDesc(orderBy);
-//                    }
-//                    Page<SpuDO> searchRes = searchEngine.search(searchWrapper, SpuDO.class);
-//                    return searchRes;
-//                }
-//            } catch (SearchEngineException e) {
-//                logger.error("[获取商品列表] 搜素引擎 异常", e);
-//                throw new AppServiceException(ExceptionDefinition.buildVariableException(ExceptionDefinition.SEARCH_ENGINE_INNER_EXCEPTION, e.getMessage()));
-//            }
             // 使用DB逻辑
             return this.getProductPageFromDB(pageNo, pageSize, categoryId, orderBy, isAsc, title);
         }
@@ -391,7 +345,7 @@ public class ProductBizService {
         } else if ("sales".equals(orderBy)) {
             zsetBucketKey = CacheConst.PRT_CATEGORY_ORDER_SALES_ZSET + categoryId;
         } else {
-            throw new BizServiceException(ExceptionDefinition.GOODS_ORDER_BY_WAY_ILLEGAL);
+            throw new ServiceException(ExceptionDefinition.GOODS_ORDER_BY_WAY_ILLEGAL);
         }
         Page<String> page = cacheComponent.getZSetPage(zsetBucketKey, pageNo, pageSize, isAsc);
         if (page.getTotal() == 0) {
@@ -508,13 +462,11 @@ public class ProductBizService {
     }
 
     /**
-     * TODO 从缓存中查出SPU，不带detail字段
-     *
      * @param spuId
      * @return
      */
     public SpuDTO getProductByIdFromCache(Long spuId) throws ServiceException {
-        SpuDTO spuDTO = null; // cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, SpuDTO.class);
+        SpuDTO spuDTO = cacheComponent.getHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, SpuDTO.class);
         if (spuDTO == null) {
             SpuDO spuDO = spuMapper.selectOne(new QueryWrapper<SpuDO>().select(ProductBizService.SPU_EXCLUDE_DETAIL_FIELDS).eq("id", spuId));
             if (spuDO != null) {
@@ -522,9 +474,9 @@ public class ProductBizService {
                 BeanUtils.copyProperties(spuDO, spuDTO);
                 List<Long> categoryFamily = categoryBizService.getCategoryFamily(spuDO.getCategoryId());
                 spuDTO.setCategoryIds(categoryFamily);
-//                cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, spuDTO);
+                cacheComponent.putHashObj(CacheConst.PRT_SPU_HASH_BUCKET, "P" + spuId, spuDTO);
             } else {
-                throw new BizServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
+                throw new ServiceException(ExceptionDefinition.PRODUCT_NOT_EXIST);
             }
         }
         return spuDTO;
@@ -539,8 +491,7 @@ public class ProductBizService {
         skuStockMap.forEach((k, v) -> skuMapper.decSkuStock(k, v));
     }
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+
 
     /**
      * 增加商品销量

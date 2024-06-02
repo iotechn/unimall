@@ -1,10 +1,12 @@
 package com.iotechn.unimall.data.enums;
 
 import com.dobbinsoft.fw.core.enums.BaseEnums;
+import lombok.Getter;
 
 /**
  * Created by rize on 2019/2/13.
  */
+@Getter
 public enum CouponType implements BaseEnums<Integer> {
     COMMON(1, "普通券"),
     CDKEY(2, "兑换券"),
@@ -15,17 +17,9 @@ public enum CouponType implements BaseEnums<Integer> {
         this.msg = msg;
     }
 
-    private int code;
+    private Integer code;
 
     private String msg;
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
 
 
 }
