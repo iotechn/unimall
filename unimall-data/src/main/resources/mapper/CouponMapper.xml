@@ -6,7 +6,7 @@
         update unimall_coupon set surplus = surplus - 1 where id = #{couponId}
     </update>
 
-    <select id="getUserCouponsCount" resultType="com.dobbinsoft.fw.support.model.KVModel">
+    <select id="getUserCouponsCount" resultType="com.iotechn.unimall.data.dto.coupon.CouponCountDTO">
         SELECT
             coupon_id AS `key`,
             count( coupon_id ) AS `value`
@@ -23,7 +23,7 @@
     </select>
 
 
-    <select id="getAdminCouponList" resultType="com.iotechn.unimall.data.dto.CouponAdminDTO">
+    <select id="getAdminCouponList" resultType="com.iotechn.unimall.data.dto.coupon.CouponAdminDTO">
         SELECT
           c.id AS id,
           c.title AS title,
@@ -63,7 +63,7 @@
         ORDER BY c.id DESC
     </select>
 
-    <select id="getActiveCoupons" resultType="com.iotechn.unimall.data.dto.CouponDTO">
+    <select id="getActiveCoupons" resultType="com.iotechn.unimall.data.dto.coupon.CouponDTO">
         SELECT
             c.id,
             c.title,

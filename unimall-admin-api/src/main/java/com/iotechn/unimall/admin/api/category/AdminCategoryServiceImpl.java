@@ -61,9 +61,9 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CategoryDO create(String title, Long parentId, String picUrl, Long adminId) throws ServiceException {
-        CategoryDO parent = null;
+        CategoryDO parent;
         CategoryDO categoryDO = new CategoryDO();
-        if (!parentId.equals(0l)) {
+        if (!parentId.equals(0L)) {
             parent = categoryMapper.selectById(parentId);
             if (parent == null || parent.getLevel().intValue() > CategoryLevelType.TWO.getCode()) {
                 throw new ServiceException(ExceptionDefinition.CATEGORY_PARENT_NODE_INFORMATION_ERROR);
@@ -179,7 +179,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
     @Override
     public Page<CategoryDTO> list(Long id, String title, Integer level, Long parentId, Integer page, Integer limit, Long adminId) throws ServiceException {
-        QueryWrapper<CategoryDO> wrapper = new QueryWrapper();
+        QueryWrapper<CategoryDO> wrapper = new QueryWrapper<>();
         if (id != null) {
             wrapper.eq("id", id);
         }

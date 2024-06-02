@@ -5,7 +5,7 @@ import com.dobbinsoft.fw.pay.model.request.MatrixPayUnifiedOrderRequest;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.service.BaseService;
 import com.iotechn.unimall.biz.util.PaySelector;
-import com.iotechn.unimall.data.dto.AdminDTO;
+import com.iotechn.unimall.data.dto.admin.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

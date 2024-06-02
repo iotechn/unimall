@@ -1,4 +1,4 @@
-package com.iotechn.unimall.data.dto;
+package com.iotechn.unimall.data.dto.coupon;
 
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.core.entiy.SuperDTO;

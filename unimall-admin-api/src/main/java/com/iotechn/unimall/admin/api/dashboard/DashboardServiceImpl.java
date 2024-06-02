@@ -2,13 +2,13 @@ package com.iotechn.unimall.admin.api.dashboard;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.support.model.KVModel;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.SpuDO;
 import com.iotechn.unimall.data.dto.DashboardIntegralDTO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.SpuMapper;
+import com.iotechn.unimall.data.model.KVModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,9 +38,9 @@ public class DashboardServiceImpl implements DashboardService {
         List<KVModel<String, Long>> channel = orderMapper.selectChannelStatistics();
         dto.setArea(area);
         dto.setChannel(channel);
-        dto.setWaitStockCount(orderWaitStock);
-        dto.setGoodsCount(spuCount);
-        Integer days = 7;
+        dto.setWaitStockCount(orderWaitStock.intValue());
+        dto.setGoodsCount(spuCount.intValue());
+        int days = 7;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
         String startDay = sdf.format(LocalDateTime.now().plusDays(days));
         List<KVModel<String, Long>> orderCountKVList = orderMapper.selectOrderCountStatistics(startDay);

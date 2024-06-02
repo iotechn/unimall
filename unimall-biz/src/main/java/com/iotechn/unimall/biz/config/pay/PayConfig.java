@@ -8,13 +8,11 @@ import com.dobbinsoft.fw.pay.enums.PayPlatformType;
 import com.dobbinsoft.fw.pay.handler.MatrixPayCallbackHandler;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayServiceImpl;
-import com.dobbinsoft.fw.support.properties.FwAliAppProperties;
-import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
-import com.dobbinsoft.fw.support.properties.FwWxPayProperties;
 import com.iotechn.unimall.biz.pay.OrderPayCallbackHandler;
 import com.iotechn.unimall.biz.pay.VipOrderPayCallbackHandler;
-import com.iotechn.unimall.data.dto.AdminDTO;
+import com.iotechn.unimall.data.dto.admin.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
+import com.iotechn.unimall.data.properties.UnimallWxPayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +21,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Configuration
 public class PayConfig {
 
     @Autowired
-    private FwWxPayProperties fwWxPayProperties;
+    private UnimallWxPayProperties unimallWxPayProperties;
 
     @Autowired
     private FwAliAppProperties fwAliAppProperties;
@@ -191,24 +186,24 @@ public class PayConfig {
 
         @Override
         public String getWxMchId() {
-            return fwWxPayProperties.getMchId();
+            return unimallWxPayProperties.getMchId();
         }
 
         @Override
         public String getWxMchKey() {
-            return fwWxPayProperties.getMchKey();
+            return unimallWxPayProperties.getMchKey();
         }
 
         @Override
         public String getWxNotifyUrl() {
-            return fwWxPayProperties.getNotifyUrl();
+            return unimallWxPayProperties.getNotifyUrl();
         }
 
         @Override
         public byte[] getWxCert() {
-            String keyContent = fwWxPayProperties.getKeyContent();
+            String keyContent = unimallWxPayProperties.getKeyContent();
             if (!ObjectUtils.isEmpty(keyContent)) {
-                return Base64.decode(fwWxPayProperties.getKeyContent());
+                return Base64.getDecoder().decode(unimallWxPayProperties.getKeyContent());
             }
             return new byte[0];
         }

@@ -23,6 +23,9 @@ public class AdminDO extends SuperDO {
     @ApiField(description = "登录密码")
     private String password;
 
+    @ApiField(description = "密码盐值")
+    private String salt;
+
     @ApiField(description = "手机号 会用于登录验证")
     private String phone;
 

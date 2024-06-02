@@ -28,6 +28,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -90,19 +91,18 @@ public class AdminProductServiceImpl implements AdminProductService {
         List<SpuDO> spuDOS = spuMapper.getSpuTitleAll();
 
         HashMap<Long, List<SpuTreeNodeDTO>> productMap = new HashMap<>();
-        for (int i = 0; i < spuDOS.size(); i++) {
-            SpuDO spuDO = spuDOS.get(i);
+        for (SpuDO spuDO : spuDOS) {
             List<SpuTreeNodeDTO> orDefault = productMap.getOrDefault(spuDO.getCategoryId(), new ArrayList<>());
             SpuTreeNodeDTO dtoOnK = new SpuTreeNodeDTO();
             dtoOnK.setLabel(spuDO.getTitle());
             dtoOnK.setValue("G_" + spuDO.getId());
             dtoOnK.setId(spuDO.getId());
             orDefault.add(dtoOnK);
-            productMap.put(spuDO.getCategoryId(),orDefault);
+            productMap.put(spuDO.getCategoryId(), orDefault);
         }
 
         List<SpuTreeNodeDTO> list = new ArrayList<>();
-        Integer recordLevelOne = 0;
+        int recordLevelOne = 0;
         for (int i = 0; i < categoryDOS.size(); i++) {
             if (i != 0 && categoryDOS.get(i - 1).getLevel().equals(CategoryLevelType.ONE.getCode()) && categoryDOS.get(i).getLevel().equals(CategoryLevelType.TWO.getCode())) {
                 recordLevelOne = i;

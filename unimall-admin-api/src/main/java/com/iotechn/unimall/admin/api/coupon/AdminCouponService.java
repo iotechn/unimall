@@ -8,7 +8,7 @@ import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.CouponDO;
-import com.iotechn.unimall.data.dto.CouponAdminDTO;
+import com.iotechn.unimall.data.dto.coupon.CouponAdminDTO;
 
 import java.time.LocalDateTime;
 
@@ -36,8 +36,8 @@ public interface AdminCouponService {
             @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "优惠卷状态") Integer status,
             @HttpParam(name = "categoryId", type = HttpParamType.COMMON, description = "优惠类别") Long categoryId,
             @HttpParam(name = "days", type = HttpParamType.COMMON, description = "优惠时长") Integer days,
-            @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "优惠开始时间") Long gmtStart,
-            @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "优惠结束时间") Long gmtEnd,
+            @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "优惠开始时间") LocalDateTime gmtStart,
+            @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "优惠结束时间") LocalDateTime gmtEnd,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "删除", permission = "promotion:coupon:delete", permissionParentName = "推广管理", permissionName = "优惠管理")
@@ -60,8 +60,8 @@ public interface AdminCouponService {
             @NotNull @HttpParam(name = "status", type = HttpParamType.COMMON, description = "优惠卷状态") Integer status,
             @HttpParam(name = "categoryId", type = HttpParamType.COMMON, description = "优惠类别") Long categoryId,
             @HttpParam(name = "days", type = HttpParamType.COMMON, description = "优惠时长") Integer days,
-            @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "优惠开始时间") Date gmtStart,
-            @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "优惠结束时间") Date gmtEnd,
+            @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "优惠开始时间") LocalDateTime gmtStart,
+            @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "优惠结束时间") LocalDateTime gmtEnd,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "修改", permission = "promotion:coupon:edit", permissionParentName = "推广管理", permissionName = "优惠管理")

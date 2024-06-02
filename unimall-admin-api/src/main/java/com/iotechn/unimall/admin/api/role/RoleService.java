@@ -3,7 +3,7 @@ package com.iotechn.unimall.admin.api.role;
 
 
 import com.iotechn.unimall.data.domain.RoleDO;
-import com.iotechn.unimall.data.dto.RoleSetPermissionDTO;
+import com.iotechn.unimall.data.dto.admin.RoleSetPermissionDTO;
 import com.dobbinsoft.fw.core.annotation.HttpMethod;
 import com.dobbinsoft.fw.core.annotation.HttpOpenApi;
 import com.dobbinsoft.fw.core.annotation.HttpParam;

@@ -57,7 +57,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String delete(Long spuId, Long userId) throws ServiceException {
-        Integer num = favoriteMapper.delete(
+        int num = favoriteMapper.delete(
                 new QueryWrapper<FavoriteDO>()
                         .eq("spu_id", spuId)
                         .eq("user_id", userId));
@@ -81,6 +81,6 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Override
     public Boolean getFavoriteBySpuId(Long spuId, Long userId) throws ServiceException {
         String hashRaw = cacheComponent.getHashRaw(CacheConst.PRT_USER_FAVORITE_HASH_BUCKET + spuId, "U" + userId);
-        return hashRaw != null && "1".equals(hashRaw);
+        return "1".equals(hashRaw);
     }
 }

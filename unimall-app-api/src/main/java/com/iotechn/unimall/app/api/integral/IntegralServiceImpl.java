@@ -74,7 +74,7 @@ public class IntegralServiceImpl implements IntegralService {
         if (!CollectionUtils.isEmpty(recommendAd)) {
             recommendAd = recommendAd.stream().filter(item -> {
                 try {
-                    if (item.getUnionType() == AdvertUnionType.PRODUCT.getCode()) {
+                    if (item.getUnionType().intValue() == AdvertUnionType.PRODUCT.getCode()) {
                         SpuDTO spuDTO = productBizService.getProductByIdFromCache(Long.parseLong(item.getUnionValue()));
                         item.setData(spuDTO);
                         return true;

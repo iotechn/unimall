@@ -2,7 +2,6 @@ package com.iotechn.unimall.admin.api.order;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.model.request.MatrixPayRefundRequest;
 import com.dobbinsoft.fw.pay.model.result.MatrixPayRefundResult;
@@ -10,7 +9,7 @@ import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.Page;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
-import com.dobbinsoft.fw.support.properties.FwWxPayProperties;
+import com.dobbinsoft.fw.support.utils.StringUtils;
 import com.iotechn.unimall.biz.service.order.OrderBizService;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.OrderDO;
@@ -23,21 +22,17 @@ import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.SkuMapper;
+import com.iotechn.unimall.data.properties.UnimallWxPayProperties;
 import com.iotechn.unimall.data.properties.UnimallOrderProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import com.dobbinsoft.fw.support.utils.StringUtils;
 
-import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by rize on 2019/7/10.
@@ -72,7 +67,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private UnimallOrderProperties unimallOrderProperties;
 
     @Autowired
-    private FwWxPayProperties fwWxPayProperties;
+    private UnimallWxPayProperties unimallWxPayProperties;
 
     @Override
     public Page<OrderDO> list(Integer page, Integer limit, Integer status, String orderNo, Long adminId) throws ServiceException {
@@ -94,7 +89,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             try {
                 //1.校验订单状态是否处于退款中
                 OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, null).get(0);
-                if (orderDO.getStatus() != OrderStatusType.REFUNDING.getCode()) {
+                if (orderDO.getStatus().intValue() != OrderStatusType.REFUNDING.getCode()) {
                     throw new ServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_REFUND);
                 }
                 //2.退款处理
@@ -113,7 +108,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     return "ok";
                 } else if (type == 1) {
                     if (orderDO.getPayChannel().equalsIgnoreCase(PayChannelType.WX.getCode())) {
-                        String keyContentBase64 = fwWxPayProperties.getKeyContent();
+                        String keyContentBase64 = unimallWxPayProperties.getKeyContent();
                         if (ObjectUtils.isEmpty(keyContentBase64)) {
                             throw new ServiceException(ExceptionDefinition.ORDER_REFUND_KEY_PATH_ERROR);
                         }
@@ -209,32 +204,34 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     @Override
+    @Deprecated
     public List<OrderDTO> queryToExcel(Long gmtStart, Long gmtEnd, Integer status, Long adminId) throws ServiceException {
-        QueryWrapper wrapper = new QueryWrapper();
-        if (gmtStart != null && gmtEnd != null) {
-            if (gmtStart > gmtStart) {
-                throw new ServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
-            }
-            wrapper.between("gmt_create", new Date(gmtStart), new Date(gmtEnd));
-        }
-        if (status != null) {
-            wrapper.eq("status", status);
-        }
-        List<OrderDO> orderDOS = orderMapper.selectList(wrapper);
-        if (orderDOS == null || orderDOS.size() == 0) {
-            return null;
-        }
-        List<OrderDTO> orderDTOList = new ArrayList<>();
-        for (OrderDO temp : orderDOS) {
-            OrderDTO orderDTO = new OrderDTO();
-            BeanUtils.copyProperties(temp, orderDTO);
-            orderDTOList.add(orderDTO);
-        }
-        for (OrderDTO orderDTO : orderDTOList) {
-            List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_no", orderDTO.getOrderNo()));
-            orderDTO.setSkuList(orderSkuDOList);
-        }
-        return orderDTOList;
+//        QueryWrapper wrapper = new QueryWrapper();
+//        if (gmtStart != null && gmtEnd != null) {
+//            if (gmtStart > gmtStart) {
+//                throw new ServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
+//            }
+//            wrapper.between("gmt_create", new Date(gmtStart), new Date(gmtEnd));
+//        }
+//        if (status != null) {
+//            wrapper.eq("status", status);
+//        }
+//        List<OrderDO> orderDOS = orderMapper.selectList(wrapper);
+//        if (orderDOS == null || orderDOS.size() == 0) {
+//            return null;
+//        }
+//        List<OrderDTO> orderDTOList = new ArrayList<>();
+//        for (OrderDO temp : orderDOS) {
+//            OrderDTO orderDTO = new OrderDTO();
+//            BeanUtils.copyProperties(temp, orderDTO);
+//            orderDTOList.add(orderDTO);
+//        }
+//        for (OrderDTO orderDTO : orderDTOList) {
+//            List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_no", orderDTO.getOrderNo()));
+//            orderDTO.setSkuList(orderSkuDOList);
+//        }
+//        return orderDTOList;
+        return null;
     }
 
     @Override
@@ -251,27 +248,29 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     @Override
+    @Deprecated
     public List<OrderStatisticsDTO> statistics(Long gmtStart, Long gmtEnd, Long adminId) throws ServiceException {
-        if (gmtStart == null) {
-            gmtStart = System.currentTimeMillis() - 1000l * 60 * 60 * 24;
-        }
-        if (gmtEnd == null) {
-            gmtEnd = System.currentTimeMillis();
-        }
-        if (gmtStart > gmtStart) {
-            throw new ServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
-        }
-        List<OrderDO> orderDOS = orderMapper.selectList(
-                new QueryWrapper<OrderDO>()
-                        .between("gmt_create", new Date(gmtStart), new Date(gmtEnd))
-                        .select("id"));
-        List<Long> ids = orderDOS.stream().map(item -> item.getId()).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(ids)) {
-            return null;
-        }
-
-        List<OrderStatisticsDTO> statistics = orderSkuMapper.statistics(ids);
-        return statistics;
+//        if (gmtStart == null) {
+//            gmtStart = System.currentTimeMillis() - 1000l * 60 * 60 * 24;
+//        }
+//        if (gmtEnd == null) {
+//            gmtEnd = System.currentTimeMillis();
+//        }
+//        if (gmtStart > gmtStart) {
+//            throw new ServiceException(ExceptionDefinition.ORDER_EXCEL_PARAM_ERROR);
+//        }
+//        List<OrderDO> orderDOS = orderMapper.selectList(
+//                new QueryWrapper<OrderDO>()
+//                        .between("gmt_create", new Date(gmtStart), new Date(gmtEnd))
+//                        .select("id"));
+//        List<Long> ids = orderDOS.stream().map(item -> item.getId()).collect(Collectors.toList());
+//        if (CollectionUtils.isEmpty(ids)) {
+//            return null;
+//        }
+//
+//        List<OrderStatisticsDTO> statistics = orderSkuMapper.statistics(ids);
+//        return statistics;
+        return null;
     }
 
 }

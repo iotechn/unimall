@@ -34,7 +34,7 @@
         </if>
     </select>
 
-    <select id="selectAreaStatistics" resultType="com.dobbinsoft.fw.support.model.KVModel">
+    <select id="selectAreaStatistics" resultType="com.iotechn.unimall.data.model.KVModel">
         SELECT
             `province` AS `key`,
             count( 1 ) AS `value`
@@ -46,7 +46,7 @@
             `province`
     </select>
 
-    <select id="selectChannelStatistics" resultType="com.dobbinsoft.fw.support.model.KVModel">
+    <select id="selectChannelStatistics" resultType="com.iotechn.unimall.data.model.KVModel">
         SELECT
             `channel` AS `key`,
             count( 1 ) AS `value`
@@ -56,7 +56,7 @@
             `channel`
     </select>
 
-    <select id="selectOrderCountStatistics" resultType="com.dobbinsoft.fw.support.model.KVModel">
+    <select id="selectOrderCountStatistics" resultType="com.iotechn.unimall.data.model.KVModel">
         SELECT
             DATE_FORMAT( gmt_create, '%Y-%m-%d' ) AS `key`,
             count( 1 ) AS `value`
@@ -68,7 +68,7 @@
             `key`;
     </select>
 
-    <select id="selectOrderSumStatistics" resultType="com.dobbinsoft.fw.support.model.KVModel">
+    <select id="selectOrderSumStatistics" resultType="com.iotechn.unimall.data.model.KVModel">
         SELECT
             DATE_FORMAT( gmt_create, '%Y-%m-%d' ) AS `key`,
             sum( pay_price ) AS `value`

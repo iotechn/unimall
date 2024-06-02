@@ -1,17 +1,18 @@
 package com.iotechn.unimall.app.api.coupon;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.entiy.SuperDTO;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.LockComponent;
-import com.dobbinsoft.fw.support.model.KVModel;
+import com.iotechn.unimall.data.model.KVModel;
 import com.dobbinsoft.fw.support.service.BaseService;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.CouponDO;
 import com.iotechn.unimall.data.domain.CouponUserDO;
-import com.iotechn.unimall.data.dto.AdminDTO;
-import com.iotechn.unimall.data.dto.CouponDTO;
-import com.iotechn.unimall.data.dto.CouponUserDTO;
+import com.iotechn.unimall.data.dto.admin.AdminDTO;
+import com.iotechn.unimall.data.dto.coupon.CouponCountDTO;
+import com.iotechn.unimall.data.dto.coupon.CouponDTO;
+import com.iotechn.unimall.data.dto.coupon.CouponUserDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.enums.StatusType;
 import com.iotechn.unimall.data.enums.UserLevelType;
@@ -55,11 +56,11 @@ public class CouponServiceImpl extends BaseService<UserDTO, AdminDTO> implements
         if (lockComponent.tryLock(LockConst.COUPON_USER_LOCK + userId + "_" + couponId, 10)) {
             try {
                 CouponDO couponDO = couponMapper.selectById(couponId);
-                if (couponDO.getStatus() == StatusType.LOCK.getCode()) {
+                if (couponDO.getStatus().intValue() == StatusType.LOCK.getCode()) {
                     throw new ServiceException(ExceptionDefinition.COUPON_HAS_LOCKED);
                 }
                 if (couponDO.getIsVip().intValue() == 1) {
-                    if (sessionUtil.getUser().getLevel() != UserLevelType.VIP.getCode()) {
+                    if (sessionUtil.getUser().getLevel().intValue() != UserLevelType.VIP.getCode()) {
                         throw new ServiceException(ExceptionDefinition.COUPON_IS_VIP_ONLY);
                     }
                 }
@@ -135,25 +136,22 @@ public class CouponServiceImpl extends BaseService<UserDTO, AdminDTO> implements
     public List<CouponDTO> getObtainableCoupon(Long userId) throws ServiceException {
         List<CouponDTO> couponDOS = couponMapper.getActiveCoupons();
         //活动中的优惠券Id
-        List<Long> activeCouponIds = couponDOS.stream().map(couponDO -> couponDO.getId()).collect(Collectors.toList());
+        List<Long> activeCouponIds = couponDOS.stream().map(SuperDTO::getId).collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(activeCouponIds)) {
             return new ArrayList<>();
         }
 
-        List<KVModel<Long, Long>> userCouponsCount = couponMapper.getUserCouponsCount(userId, activeCouponIds);
+        List<CouponCountDTO> userCouponsCount = couponMapper.getUserCouponsCount(userId, activeCouponIds);
 
-        List<CouponDTO> couponDTOList = couponDOS.stream().map(item -> {
+        return couponDOS.stream().peek(item -> {
             item.setNowCount(0);
-            for (int i = 0; i < userCouponsCount.size(); i++) {
-                KVModel<Long, Long> kv = userCouponsCount.get(i);
-                if (kv != null && kv.getKey().equals(item.getId())) {
-                    item.setNowCount(kv.getValue().intValue());
+            for (CouponCountDTO kv : userCouponsCount) {
+                if (kv != null && kv.getCouponId().equals(item.getId())) {
+                    item.setNowCount(kv.getCouponCount());
                 }
             }
-            return item;
-        }).filter(item -> (item.getCategoryId() == null || (item.getCategoryId() != null && !StringUtils.isEmpty(item.getCategoryTitle())))).collect(Collectors.toList());
-        return couponDTOList;
+        }).filter(item -> item.getCategoryId() == null || !StringUtils.isEmpty(item.getCategoryTitle())).collect(Collectors.toList());
     }
 
     @Override

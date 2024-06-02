@@ -1,7 +1,7 @@
 package com.iotechn.unimall.admin.api.admin;
 
 
-import com.iotechn.unimall.data.dto.AdminDTO;
+import com.iotechn.unimall.data.dto.admin.AdminDTO;
 import com.dobbinsoft.fw.core.Const;
 import com.dobbinsoft.fw.core.annotation.HttpMethod;
 import com.dobbinsoft.fw.core.annotation.HttpOpenApi;

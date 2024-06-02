@@ -1,9 +1,6 @@
 package com.iotechn.unimall.admin.api.freight;
 
-import com.alibaba.fastjson.JSON;
-import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
@@ -23,8 +20,8 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,7 +49,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String create(String title, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstWeight, Integer defaultFirstPrice, Integer defaultContinueWeight, Integer defaultContinuePrice, List carriageDOList, Long adminId) throws ServiceException {
+    public String create(String title, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstWeight, Integer defaultFirstPrice, Integer defaultContinueWeight, Integer defaultContinuePrice, List<FreightTemplateCarriageDO> carriageDOList, Long adminId) throws ServiceException {
         FreightTemplateDO freightTemplateDO = newFreightTemplateDO(null,title,spuLocation,deliveryDeadline,defaultFreePrice,defaultFirstWeight,defaultFirstPrice,defaultContinueWeight,defaultContinuePrice);
 
         if (templateMapper.insert(freightTemplateDO) <= 0) {
@@ -83,7 +80,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String edit(Long id, String title, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstWeight, Integer defaultFirstPrice, Integer defaultContinueWeight, Integer defaultContinuePrice, List carriageDOList, Long adminId) throws ServiceException {
+    public String edit(Long id, String title, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstWeight, Integer defaultFirstPrice, Integer defaultContinueWeight, Integer defaultContinuePrice, List<FreightTemplateCarriageDO> carriageDOList, Long adminId) throws ServiceException {
 
         FreightTemplateDO freightTemplateDO = newFreightTemplateDO(id,title,spuLocation,deliveryDeadline,defaultFreePrice,defaultFirstWeight,defaultFirstPrice,defaultContinueWeight,defaultContinuePrice);
         if (templateMapper.updateById(freightTemplateDO) <= 0) {    //如果主表修改失败
@@ -102,7 +99,7 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
             return new ArrayList<>();
         }
 
-        List<FreightTemplateDTO> template_id = freightTemplateDOList.stream().map(item -> {
+        return freightTemplateDOList.stream().map(item -> {
             FreightTemplateDTO freightTemplateDTO = new FreightTemplateDTO();
             List<FreightTemplateCarriageDO> freightTemplateCarriageDOList = carriageMapper.selectList(new QueryWrapper<FreightTemplateCarriageDO>()
                     .eq("template_id", item.getId()));
@@ -110,27 +107,22 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
             freightTemplateDTO.setCarriageDOList(freightTemplateCarriageDOList);
             return freightTemplateDTO;
         }).collect(Collectors.toList());
-        return template_id;
     }
 
     /**
      * 将传入的特殊地区邮费计算插入表中
+     *
      * @param freightTemplateDO
      * @param carriageDOList
-     * @return
      * @throws ServiceException
      */
-    private boolean insertCarriage(FreightTemplateDO freightTemplateDO, List carriageDOList) throws ServiceException {
+    private void insertCarriage(FreightTemplateDO freightTemplateDO, List<FreightTemplateCarriageDO> carriageDOList) throws ServiceException {
         LocalDateTime now = LocalDateTime.now();
         if (CollectionUtils.isEmpty(carriageDOList)) {
-            return true;
+            return;
         }
-        List<FreightTemplateCarriageDO> collect = (List<FreightTemplateCarriageDO>) carriageDOList.stream().map(item -> {
-            FreightTemplateCarriageDO t = JacksonUtil.toJavaObject((JSON) item, FreightTemplateCarriageDO.class);
-            return t;
-        }).collect(Collectors.toList());
         //表中设定可默认值，所以就不检查是否为空
-        for (FreightTemplateCarriageDO carriageDO : collect) {
+        for (FreightTemplateCarriageDO carriageDO : carriageDOList) {
             carriageDO.setTemplateId(freightTemplateDO.getId());
             carriageDO.setGmtCreate(now);
             carriageDO.setGmtUpdate(now);
@@ -138,7 +130,6 @@ public class AdminFreightTemplateServiceImpl implements AdminFreightTemplateServ
                 throw new ServiceException(ExceptionDefinition.FREIGHT_CARRIAGE_INSERT_FAILED);
             }
         }
-        return true;
     }
 
     private FreightTemplateDO newFreightTemplateDO(Long id, String title, String spuLocation, Integer deliveryDeadline, Integer defaultFreePrice, Integer defaultFirstWeight, Integer defaultFirstPrice, Integer defaultContinueWeight, Integer defaultContinuePrice){

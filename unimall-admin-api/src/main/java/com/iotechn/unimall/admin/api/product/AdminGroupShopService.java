@@ -10,14 +10,16 @@ import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.dto.product.GroupShopDTO;
 
+import java.time.LocalDateTime;
+
 @HttpOpenApi(group = "admin.groupshop", description = "管理团购商品服务")
 public interface AdminGroupShopService {
 
     @HttpMethod(description = "增加", permission = "product:groupshop:create", permissionParentName = "商品管理", permissionName = "团购商品管理")
     public String create(
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "spuId") Long spuId,
-            @NotNull @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "团购开始时间戳") Long gmtStart,
-            @NotNull @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "团购结束时间戳") Long gmtEnd,
+            @NotNull @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "团购开始时间戳") LocalDateTime gmtStart,
+            @NotNull @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "团购结束时间戳") LocalDateTime gmtEnd,
             @NotNull @Range(min = 1) @HttpParam(name = "minNum", type = HttpParamType.COMMON, description = "团购最低人数") Integer minNum,
             @NotNull @HttpParam(name = "automaticRefund", type = HttpParamType.COMMON, description = "团购人数未满是否自动退款") Integer automaticRefund,
             @NotNull @HttpParam(name = "groupShopSkuList", type = HttpParamType.COMMON, description = "团购sku链表") String groupShopSkuListStr,
@@ -29,11 +31,11 @@ public interface AdminGroupShopService {
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员Id") Long adminId) throws  ServiceException;
 
     @HttpMethod(description = "修改", permission = "product:groupshop:edit", permissionParentName = "商品管理", permissionName = "团购商品管理")
-    public GroupShopDTO edit(
+    public String edit(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "团购商品spuID") Long id,
             @NotNull @HttpParam(name = "spuId", type = HttpParamType.COMMON, description = "spuId") Long spuId,
-            @NotNull @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "团购开始时间戳") Long gmtStart,
-            @NotNull @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "团购结束时间戳") Long gmtEnd,
+            @NotNull @HttpParam(name = "gmtStart", type = HttpParamType.COMMON, description = "团购开始时间戳") LocalDateTime gmtStart,
+            @NotNull @HttpParam(name = "gmtEnd", type = HttpParamType.COMMON, description = "团购结束时间戳") LocalDateTime gmtEnd,
             @NotNull @Range(min = 1) @HttpParam(name = "minNum", type = HttpParamType.COMMON, description = "团购最低人数") Integer minNum,
             @NotNull @HttpParam(name = "automaticRefund", type = HttpParamType.COMMON, description = "团购人数未满是否自动退款") Integer automaticRefund,
             @NotNull @HttpParam(name = "groupShopSkuList", type = HttpParamType.COMMON, description = "团购sku链表") String groupShopSkuDOListStr,

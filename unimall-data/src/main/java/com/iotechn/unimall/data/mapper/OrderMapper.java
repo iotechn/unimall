@@ -1,9 +1,9 @@
 package com.iotechn.unimall.data.mapper;
 
 import com.dobbinsoft.fw.support.mapper.IMapper;
-import com.dobbinsoft.fw.support.model.KVModel;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.dto.order.OrderDTO;
+import com.iotechn.unimall.data.model.KVModel;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDateTime;
@@ -30,6 +30,6 @@ public interface OrderMapper extends IMapper<OrderDO> {
 
     public List<KVModel<String, Long>> selectOrderSumStatistics(String gmtStart);
 
-    public List<OrderDO> selectExpireOrderNos(@Param("status") Integer status, @Param("time") Date time);
+    public List<OrderDO> selectExpireOrderNos(@Param("status") Integer status, @Param("time") LocalDateTime time);
 
 }

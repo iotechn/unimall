@@ -9,7 +9,7 @@ import com.dobbinsoft.fw.support.utils.StringUtils;
 import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
 import com.iotechn.unimall.data.domain.RolePermissionDO;
-import com.iotechn.unimall.data.dto.RoleSetPermissionDTO;
+import com.iotechn.unimall.data.dto.admin.RoleSetPermissionDTO;
 import com.iotechn.unimall.data.enums.RoleStatusType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.AdminMapper;

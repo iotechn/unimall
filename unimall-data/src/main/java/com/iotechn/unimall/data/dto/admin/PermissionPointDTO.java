@@ -1,4 +1,4 @@
-package com.iotechn.unimall.data.dto;
+package com.iotechn.unimall.data.dto.admin;
 
 import java.util.List;
 

@@ -2,19 +2,18 @@ package com.iotechn.unimall.admin.api.vip;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.model.request.MatrixPayRefundRequest;
 import com.dobbinsoft.fw.pay.model.result.MatrixPayRefundResult;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.model.Page;
-import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
 import com.iotechn.unimall.biz.service.vip.VipOrderBizService;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.VipOrderDO;
 import com.iotechn.unimall.data.enums.VipOrderStatusType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.VipOrderMapper;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,7 @@ public class AdminVipOrderServiceImpl implements AdminVipOrderService {
     @Autowired
     private LockComponent lockComponent;
     @Autowired
-    private FwWxAppProperties fwWxAppProperties;
+    private UnimallWxAppProperties unimallWxAppProperties;
     @Autowired
     private MatrixPayService matrixPayService;
 
@@ -55,7 +54,7 @@ public class AdminVipOrderServiceImpl implements AdminVipOrderService {
             try {
                 //2.2.2 向支付平台发送退款请求
                 MatrixPayRefundRequest matrixPayRefundRequest = new MatrixPayRefundRequest();
-                matrixPayRefundRequest.setAppid(fwWxAppProperties.getMiniAppId());
+                matrixPayRefundRequest.setAppid(unimallWxAppProperties.getMiniAppId());
                 matrixPayRefundRequest.setOutTradeNo(vipOrderDO.getOrderNo());
                 matrixPayRefundRequest.setOutRefundNo("refund_VIP_" + vipOrderDO.getOrderNo());
                 matrixPayRefundRequest.setTotalFee(vipOrderDO.getPrice());

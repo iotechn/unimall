@@ -21,11 +21,6 @@ import com.dobbinsoft.fw.support.model.Page;
 @HttpOpenApi(group = "admin.user", description = "用户管理")
 public interface AdminUserService {
 
-    @HttpMethod(description = "创建", permission = "user:user:create", permissionParentName = "用户管理", permissionName = "用户管理")
-    public Boolean create(
-            @NotNull @HttpParam(name = "user", type = HttpParamType.COMMON, description = "用户信息") UserDO user,
-            @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
-
     @HttpMethod(description = "删除", permission = "user:user:delete", permissionParentName = "用户管理", permissionName = "用户管理")
     public Boolean delete(
             @NotNull @HttpParam(name = "id", type = HttpParamType.COMMON, description = "用户Id") Long id,

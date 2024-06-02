@@ -2,7 +2,6 @@ package com.iotechn.unimall.app.api.vip;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.util.GeneratorUtil;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.enums.PayPlatformType;
@@ -16,7 +15,7 @@ import com.dobbinsoft.fw.support.service.BaseService;
 import com.iotechn.unimall.biz.util.PaySelector;
 import com.iotechn.unimall.data.domain.VipOrderDO;
 import com.iotechn.unimall.data.domain.VipTemplateDO;
-import com.iotechn.unimall.data.dto.AdminDTO;
+import com.iotechn.unimall.data.dto.admin.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.enums.VipOrderStatusType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;

@@ -2,7 +2,7 @@ package com.iotechn.unimall.data.dto;
 
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
-import com.dobbinsoft.fw.support.model.KVModel;
+import com.iotechn.unimall.data.model.KVModel;
 import lombok.Data;
 
 import java.util.List;

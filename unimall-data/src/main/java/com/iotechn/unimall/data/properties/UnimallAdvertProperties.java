@@ -1,8 +1,8 @@
 package com.iotechn.unimall.data.properties;
 
-import com.dobbinsoft.fw.support.annotation.DynamicConfigProperties;
-import com.iotechn.unimall.data.constant.DynamicConst;
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Description:
@@ -11,7 +11,8 @@ import lombok.Data;
  * Time: 10:35
  */
 @Data
-@DynamicConfigProperties(prefix = DynamicConst.ADVERT_CONFIG_PREFIX)
+@Component
+@ConfigurationProperties(prefix = "com.dobbinsoft.advert")
 public class UnimallAdvertProperties {
 
     /**

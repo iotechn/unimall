@@ -7,6 +7,7 @@ import com.dobbinsoft.fw.core.annotation.HttpParamType;
 import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.core.annotation.param.Range;
 import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public interface AdminFreightTemplateService {
             @NotNull @Range(min = 0) @HttpParam(name = "defaultFirstPrice", type = HttpParamType.COMMON, description = "首费，单位分") Integer defaultFirstPrice,
             @NotNull @Range(min = 1) @HttpParam(name = "defaultContinueWeight", type = HttpParamType.COMMON, description = "续重") Integer defaultContinueWeight,
             @NotNull @Range(min = 0) @HttpParam(name = "defaultContinuePrice", type = HttpParamType.COMMON, description = "续费") Integer defaultContinuePrice,
-            @HttpParam(name = "carriageDOList", type = HttpParamType.COMMON, description = "特殊运费区") List carriageDOList,
+            @HttpParam(name = "carriageDOList", type = HttpParamType.COMMON, description = "特殊运费区", arrayClass = FreightTemplateCarriageDO.class) List<FreightTemplateCarriageDO> carriageDOList,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "删除", permission = "operation:freight:delete", permissionParentName = "运营管理", permissionName = "运费模板管理")
@@ -50,7 +51,7 @@ public interface AdminFreightTemplateService {
             @NotNull @Range(min = 0) @HttpParam(name = "defaultFirstPrice", type = HttpParamType.COMMON, description = "首费，单位分") Integer defaultFirstPrice,
             @NotNull @Range(min = 1) @HttpParam(name = "defaultContinueWeight", type = HttpParamType.COMMON, description = "续重") Integer defaultContinueWeight,
             @NotNull @Range(min = 0) @HttpParam(name = "defaultContinuePrice", type = HttpParamType.COMMON, description = "续费") Integer defaultContinuePrice,
-            @HttpParam(name = "carriageDOList", type = HttpParamType.COMMON, description = "特殊运费区") List carriageDOList,
+            @HttpParam(name = "carriageDOList", type = HttpParamType.COMMON, description = "特殊运费区", arrayClass = FreightTemplateCarriageDO.class) List<FreightTemplateCarriageDO> carriageDOList,
             @NotNull @HttpParam(name = "adminId", type = HttpParamType.ADMIN_ID, description = "管理员ID") Long adminId) throws ServiceException;
 
     @HttpMethod(description = "查询", permission = "operation:freight:list", permissionParentName = "运营管理", permissionName = "运费模板管理")

@@ -1,11 +1,12 @@
 package com.iotechn.unimall.data.properties;
 
-import com.dobbinsoft.fw.support.annotation.DynamicConfigProperties;
-import com.iotechn.unimall.data.constant.DynamicConst;
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 @Data
-@DynamicConfigProperties(prefix = DynamicConst.ORDER_CONFIG_PREFIX)
+@Component
+@ConfigurationProperties("com.dobbinsoft.order")
 public class UnimallOrderProperties {
 
     /**

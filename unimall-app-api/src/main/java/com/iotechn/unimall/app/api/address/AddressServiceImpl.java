@@ -65,7 +65,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String delete(Long addressId, Long userId) throws ServiceException {
-        Integer defaultNum = addressMapper.selectCount(new QueryWrapper<AddressDO>()
+        Long defaultNum = addressMapper.selectCount(new QueryWrapper<AddressDO>()
                 .eq("user_id", userId)
                 .eq("id", addressId)
                 .eq("default_address", 1));

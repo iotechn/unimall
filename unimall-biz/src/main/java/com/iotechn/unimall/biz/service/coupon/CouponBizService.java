@@ -1,7 +1,7 @@
 package com.iotechn.unimall.biz.service.coupon;
 
 import com.iotechn.unimall.data.domain.CouponUserDO;
-import com.iotechn.unimall.data.dto.CouponUserDTO;
+import com.iotechn.unimall.data.dto.coupon.CouponUserDTO;
 import com.iotechn.unimall.data.mapper.CouponUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

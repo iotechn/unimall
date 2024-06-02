@@ -6,8 +6,8 @@ import com.dobbinsoft.fw.core.annotation.HttpParam;
 import com.dobbinsoft.fw.core.annotation.HttpParamType;
 import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.iotechn.unimall.data.dto.CouponDTO;
-import com.iotechn.unimall.data.dto.CouponUserDTO;
+import com.iotechn.unimall.data.dto.coupon.CouponDTO;
+import com.iotechn.unimall.data.dto.coupon.CouponUserDTO;
 
 import java.util.List;
 

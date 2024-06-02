@@ -1,8 +1,8 @@
 package com.iotechn.unimall.data.properties;
 
-import com.dobbinsoft.fw.support.annotation.DynamicConfigProperties;
-import com.iotechn.unimall.data.constant.DynamicConst;
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Description: 管理员统一推送动态配置
@@ -11,7 +11,8 @@ import lombok.Data;
  * Time: 21:14
  */
 @Data
-@DynamicConfigProperties(prefix = DynamicConst.ADMIN_NOTIFY_CONFIG_PREFIX)
+@Component
+@ConfigurationProperties(prefix = "com.dobbinsoft.admin-notify")
 public class UnimallAdminNotifyProperties {
 
     private String enable;

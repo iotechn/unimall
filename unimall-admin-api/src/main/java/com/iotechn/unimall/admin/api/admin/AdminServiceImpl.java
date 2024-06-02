@@ -1,36 +1,33 @@
 package com.iotechn.unimall.admin.api.admin;
 
-import cn.hutool.crypto.SecureUtil;
-import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.dobbinsoft.fw.core.Const;
+import com.dobbinsoft.fw.core.exception.CoreExceptionDefinition;
+import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.core.model.GatewayResponse;
+import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.service.BaseService;
+import com.dobbinsoft.fw.support.sms.SMSClient;
+import com.dobbinsoft.fw.support.sms.SMSResult;
+import com.dobbinsoft.fw.support.utils.DigestUtils;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
+import com.dobbinsoft.fw.support.utils.RandomStringUtils;
+import com.dobbinsoft.fw.support.utils.StringUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.AdminDO;
 import com.iotechn.unimall.data.domain.RoleDO;
 import com.iotechn.unimall.data.domain.RolePermissionDO;
-import com.iotechn.unimall.data.dto.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
+import com.iotechn.unimall.data.dto.admin.AdminDTO;
 import com.iotechn.unimall.data.enums.AdminStatusType;
 import com.iotechn.unimall.data.enums.RoleStatusType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.AdminMapper;
 import com.iotechn.unimall.data.mapper.RoleMapper;
 import com.iotechn.unimall.data.mapper.RolePermissionMapper;
-import com.dobbinsoft.fw.core.Const;
-import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.core.exception.CoreExceptionDefinition;
-import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.core.exception.ThirdPartServiceException;
-import com.dobbinsoft.fw.core.util.GeneratorUtil;
-import com.dobbinsoft.fw.support.annotation.Query;
-import com.dobbinsoft.fw.support.annotation.QueryCondition;
-import com.dobbinsoft.fw.support.annotation.enums.Conditions;
-import com.dobbinsoft.fw.support.component.CacheComponent;
-import com.dobbinsoft.fw.support.model.Page;
-import com.dobbinsoft.fw.support.properties.FwAdminNotifyProperties;
-import com.dobbinsoft.fw.support.properties.FwSystemProperties;
-import com.dobbinsoft.fw.support.service.BaseService;
-import com.dobbinsoft.fw.support.sms.SMSClient;
-import com.dobbinsoft.fw.support.sms.SMSResult;
+import com.iotechn.unimall.data.properties.UnimallAdminNotifyProperties;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.slf4j.Logger;
@@ -41,14 +38,15 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import com.dobbinsoft.fw.support.utils.StringUtils;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Created by rize on 2019/4/8.
@@ -75,11 +73,7 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     private SMSClient smsClient;
 
     @Autowired
-    private FwAdminNotifyProperties unimallAdminNotifyProperties;
-
-    @Autowired
-    private FwSystemProperties unimallSystemProperties;
-
+    private UnimallAdminNotifyProperties unimallAdminNotifyProperties;
 
     private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
@@ -87,20 +81,19 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     public String login(String username, String password, String verifyCode) throws ServiceException {
         String accessToken = generateAccessToken();
         //数据库查管理员
-        List<AdminDO> adminDOS = adminMapper.selectList(
+        AdminDO adminDO = adminMapper.selectOne(
                 new QueryWrapper<AdminDO>()
                         .eq("username", username));
-        if (CollectionUtils.isEmpty(adminDOS)) {
+        if (adminDO == null) {
             throw new ServiceException(ExceptionDefinition.ADMIN_NOT_EXIST);
         }
-        AdminDO adminDO = adminDOS.get(0);
         //短信验证码
         String code = cacheComponent.getRaw(CacheConst.ADMIN_MSG_CODE + adminDO.getPhone());
-        boolean isGuest = "guest".equals(username) && "true".equals(unimallSystemProperties.getGuest());
+        boolean isGuest = "guest".equals(username);
         if (!isGuest && (code == null || !code.equals(verifyCode))) {
             throw new ServiceException(ExceptionDefinition.ADMIN_VERIFYCODE_ERROR);
         }
-        if (!SecureUtil.md5(password + username).equalsIgnoreCase(adminDO.getPassword())) {
+        if (!DigestUtils.md5Hex(password + adminDO.getSalt()).equalsIgnoreCase(adminDO.getPassword())) {
             throw new ServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
         }
         List<Long> ids = JacksonUtil.parseArray(adminDO.getRoleIds(), Long.class);
@@ -172,7 +165,8 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
             throw new ServiceException(ExceptionDefinition.ADMIN_USER_NAME_REPEAT);
         }
         BeanUtils.copyProperties(adminDTO, adminDO);
-        adminDO.setPassword(SecureUtil.md5(adminDO.getPassword() + adminDO.getUsername()));
+        adminDO.setSalt(RandomStringUtils.randomNumeric(8));
+        adminDO.setPassword(DigestUtils.md5Hex(adminDO.getPassword() + adminDO.getSalt()));
         adminDO.setRoleIds(JacksonUtil.toJSONString(adminDTO.getRoleIds()));
         adminDO.setGmtUpdate(LocalDateTime.now());
         adminDO.setGmtCreate(adminDO.getGmtUpdate());
@@ -197,8 +191,8 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
         BeanUtils.copyProperties(adminDTO, adminDO);
         adminDO.setGmtUpdate(LocalDateTime.now());
         AdminDO adminDOExist = adminMapper.selectById(id);
-        if (!StringUtils.isEmpty(adminDO.getPassword()) && !StringUtils.isEmpty(adminDOExist.getUsername())) {
-            adminDO.setPassword(SecureUtil.md5(adminDO.getPassword() + adminDOExist.getUsername()));
+        if (StringUtils.isNotBlank(adminDTO.getPassword())) {
+            adminDO.setPassword(DigestUtils.md5Hex(adminDO.getPassword() + adminDOExist.getSalt()));
         }
         adminDO.setUsername(null);
         if (!CollectionUtils.isEmpty(adminDTO.getRoleIds())) {
@@ -223,12 +217,12 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     @Transactional(rollbackFor = Exception.class)
     public String newPassword(String accessToken, String oldPassword, String newPassword, Long adminId) throws ServiceException {
         AdminDO adminDOExist = adminMapper.selectById(adminId);
-        if (!SecureUtil.md5(oldPassword + adminDOExist.getUsername()).equals(adminDOExist.getPassword())) {
+        if (!DigestUtils.md5Hex(adminDOExist.getPassword() + adminDOExist.getSalt()).equals(adminDOExist.getPassword())) {
             throw new ServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
         }
         AdminDO adminDO = new AdminDO();
         adminDO.setId(adminId);
-        adminDO.setPassword(SecureUtil.md5(newPassword + adminDOExist.getUsername()));
+        adminDO.setPassword(DigestUtils.md5Hex(adminDOExist.getPassword() + adminDOExist.getSalt()));
         if (adminMapper.updateById(adminDO) > 0) {
             return "ok";
         }
@@ -242,16 +236,18 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
         }
         AdminDO admin = adminMapper.selectOne(
                 new QueryWrapper<AdminDO>()
-                        .eq("username", username)
-                        .eq("password", SecureUtil.md5(password + username)));
+                        .eq("username", username));
         if (admin == null) {
             throw new ServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXIST);
         }
-        String code = GeneratorUtil.genSixVerifyCode();
+        if (!DigestUtils.md5Hex(admin.getPassword() + admin.getSalt()).equals(admin.getPassword())) {
+            throw new ServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
+        }
+        String code = RandomStringUtils.randomNumeric(6);
         cacheComponent.putRaw(CacheConst.ADMIN_MSG_CODE + admin.getPhone(), code, 300);
         SMSResult smsResult = smsClient.sendAdminLoginVerify(admin.getPhone(), code);
-        if (!smsResult.isSucc()) {
-            throw new ThirdPartServiceException(smsResult.getMsg(), ExceptionDefinition.ADMIN_VERIFY_CODE_SEND_FAIL.getCode());
+        if (!smsResult.isSuccess()) {
+            throw new ServiceException(smsResult.getMessage(), ExceptionDefinition.ADMIN_VERIFY_CODE_SEND_FAIL.getCode());
         }
         return true;
     }
@@ -272,18 +268,19 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                     .newCall(new Request.Builder()
                             .get()
                             .url(this.unimallAdminNotifyProperties.getUniNotifyUrl() + "?_gp=developer&_mt=getRegisterUrl&userId=" + this.sessionUtil.getAdmin().getUsername()
-                                    + "&appId=" + this.unimallAdminNotifyProperties.getUniNotifyAppId() + "&timestamp=" + timestamp + "&sign=" + SecureUtil.sha256(URLEncoder.encode(set.stream().collect(Collectors.joining()), "utf-8")))
+                                    + "&appId=" + this.unimallAdminNotifyProperties.getUniNotifyAppId() + "&timestamp=" + timestamp + "&sign=" + DigestUtils.sha256Hex(URLEncoder.encode(String.join("", set), "utf-8")))
                             .build()).execute().body().string();
-            JacksonUtil jsonObject = JacksonUtil.parseObject(json);
-            Integer errcode = jsonObject.getInteger("errno");
-            if (errcode == 200) {
-                return jsonObject.getString("data");
+
+            GatewayResponse<String> response = JacksonUtil.parseObject(json, new TypeReference<GatewayResponse<String>>() {
+            });
+            if (response.getErrno() == 200) {
+                return response.getData();
             }
-            throw new ThirdPartServiceException(jsonObject.getString("errmsg"), CoreExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
+            throw new ServiceException(response.getErrmsg(), CoreExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());
         } catch (ServiceException e) {
             throw e;
         } catch (IOException e) {
-            throw new ThirdPartServiceException(CoreExceptionDefinition.THIRD_PART_IO_EXCEPTION);
+            throw new ServiceException(CoreExceptionDefinition.THIRD_PART_IO_EXCEPTION);
         } catch (Exception e) {
             logger.error("[绑定通知] 异常", e);
             throw new ServiceException(ExceptionDefinition.ADMIN_UNKNOWN_EXCEPTION);
