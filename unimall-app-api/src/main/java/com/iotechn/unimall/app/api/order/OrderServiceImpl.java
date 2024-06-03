@@ -492,7 +492,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
         for (OrderDO orderDO : orderList) {
             List<OrderSkuDO> orderSkuDOList = orderSkuMapper.selectList(new QueryWrapper<OrderSkuDO>().eq("order_id", orderDO.getId()));
             List<OrderSkuDO> groupShopSkuList = orderSkuDOList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).collect(Collectors.toList());
-            if (groupShopSkuList.size() > 0) {
+            if (!groupShopSkuList.isEmpty()) {
                 // 订单中是否是团购商品
                 OrderDO groupShopUpdateDO = new OrderDO();
                 groupShopUpdateDO.setPayId("OFFLINE");

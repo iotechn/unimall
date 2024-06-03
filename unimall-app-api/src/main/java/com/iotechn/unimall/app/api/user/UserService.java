@@ -7,7 +7,10 @@ import com.dobbinsoft.fw.core.annotation.*;
 import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.core.annotation.param.TextFormat;
 import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.iotechn.unimall.data.dto.user.WxLoginRequestDTO;
 import com.iotechn.unimall.data.enums.UserLoginType;
+
+import java.time.LocalDateTime;
 
 /**
  * Created by rize on 2019/6/30.
@@ -74,7 +77,7 @@ public interface UserService {
 
     @HttpMethod(description = "获取手机号")
     public String getWxPhone(
-            @NotNull @HttpParam(name = "raw", type = HttpParamType.COMMON, description = "小程序登录，wx.login()返回的数据串") String raw,
+            @NotNull @HttpParam(name = "raw", type = HttpParamType.COMMON, description = "小程序登录，wx.login()返回的数据串") WxLoginRequestDTO raw,
             @NotNull @HttpParam(name = "encryptedData", type = HttpParamType.COMMON, description = "包括敏感数据在内的完整用户信息的加密数据") String encryptedData,
             @NotNull @HttpParam(name = "iv", type = HttpParamType.COMMON, description = "加密算法的初始向量") String iv,
             @NotNull @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "用户访问") String accessToken,
@@ -88,7 +91,7 @@ public interface UserService {
             @HttpParam(name = "city", type = HttpParamType.COMMON, description = "市") String city,
             @HttpParam(name = "county", type = HttpParamType.COMMON, description = "区") String county,
             @HttpParam(name = "gender", type = HttpParamType.COMMON, description = "性别0未知1男2女") Integer gender,
-            @HttpParam(name = "birthday", type = HttpParamType.COMMON, description = "用户生日") Long birthday,
+            @HttpParam(name = "birthday", type = HttpParamType.COMMON, description = "用户生日") LocalDateTime birthday,
             @HttpParam(name = Const.USER_ACCESS_TOKEN, type = HttpParamType.HEADER, description = "访问令牌") String accessToken,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户ID") Long userId) throws ServiceException;
 

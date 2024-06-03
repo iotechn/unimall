@@ -4,28 +4,25 @@
     <parent>
         <groupId>com.iotechn</groupId>
         <artifactId>unimall</artifactId>
-        <version>v3</version>
+        <version>v4</version>
     </parent>
     <groupId>com.iotechn</groupId>
     <artifactId>unimall-app-api</artifactId>
-    <version>v3</version>
+    <version>v4</version>
     <name>unimall-app-api</name>
     <description>骨架DEMO API</description>
-    <properties>
-        <java.version>1.8</java.version>
-    </properties>
     <dependencies>
 
         <dependency>
             <groupId>com.iotechn</groupId>
             <artifactId>unimall-data</artifactId>
-            <version>v3</version>
+            <version>v4</version>
         </dependency>
 
         <dependency>
             <groupId>com.iotechn</groupId>
             <artifactId>unimall-biz</artifactId>
-            <version>v3</version>
+            <version>v4</version>
         </dependency>
 
         <dependency>

@@ -2,7 +2,6 @@ package com.iotechn.unimall.app.api.vip;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.core.util.GeneratorUtil;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.enums.PayPlatformType;
 import com.dobbinsoft.fw.pay.exception.MatrixPayException;
@@ -10,8 +9,8 @@ import com.dobbinsoft.fw.pay.model.request.MatrixPayUnifiedOrderRequest;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.MachineComponent;
 import com.dobbinsoft.fw.support.model.Page;
-import com.dobbinsoft.fw.support.properties.FwWxPayProperties;
 import com.dobbinsoft.fw.support.service.BaseService;
+import com.iotechn.unimall.biz.util.GeneratorUtil;
 import com.iotechn.unimall.biz.util.PaySelector;
 import com.iotechn.unimall.data.domain.VipOrderDO;
 import com.iotechn.unimall.data.domain.VipTemplateDO;
@@ -21,6 +20,7 @@ import com.iotechn.unimall.data.enums.VipOrderStatusType;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.VipOrderMapper;
 import com.iotechn.unimall.data.mapper.VipTemplateMapper;
+import com.iotechn.unimall.data.properties.UnimallWxPayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
     private MatrixPayService matrixPayService;
 
     @Autowired
-    private FwWxPayProperties fwWxPayProperties;
+    private UnimallWxPayProperties unimallWxPayProperties;
 
     @Autowired
     private MachineComponent machineComponent;
@@ -76,7 +76,7 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
             // 前端来决定支付方式
             MatrixPayUnifiedOrderRequest orderRequest = new MatrixPayUnifiedOrderRequest();
             paySelector.packPayChannel(orderRequest, payPlatform, payChannel);
-            orderRequest.setNotifyUrl(fwWxPayProperties.getNotifyUrl() + "/vip");
+            orderRequest.setNotifyUrl(unimallWxPayProperties.getNotifyUrl() + "/vip");
             // 区分回调 直接通过 S 来判断
             orderRequest.setOutTradeNo(orderNo);
             orderRequest.setOpenid(sessionUtil.getUser().getWxMpOpenId());
@@ -85,8 +85,7 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
             orderRequest.setSpbillCreateIp(ip);
             orderRequest.setPayPlatform(PayPlatformType.getByCode(payPlatform));
             orderRequest.setPayChannel(PayChannelType.getByCode(payChannel));
-            Object object = matrixPayService.createOrder(orderRequest);
-            return object;
+            return matrixPayService.createOrder(orderRequest);
         } catch (MatrixPayException e) {
             logger.error("[Matrix支付] 异常", e);
             throw new ServiceException(e.getErrCodeDes(), ExceptionDefinition.THIRD_PART_SERVICE_EXCEPTION.getCode());

@@ -4,11 +4,11 @@
     <parent>
         <groupId>com.iotechn</groupId>
         <artifactId>unimall</artifactId>
-        <version>v3</version>
+        <version>v4</version>
     </parent>
     <groupId>com.iotechn</groupId>
     <artifactId>unimall-runner</artifactId>
-    <version>v3</version>
+    <version>v4</version>
     <name>unimall-runner</name>
     <description>骨架DEMO Runner</description>
     <properties>
@@ -19,25 +19,19 @@
         <dependency>
             <groupId>com.iotechn</groupId>
             <artifactId>unimall-data</artifactId>
-            <version>v3</version>
+            <version>v4</version>
         </dependency>
 
         <dependency>
             <groupId>com.iotechn</groupId>
             <artifactId>unimall-admin-api</artifactId>
-            <version>v3</version>
+            <version>v4</version>
         </dependency>
 
         <dependency>
             <groupId>com.iotechn</groupId>
             <artifactId>unimall-app-api</artifactId>
-            <version>v3</version>
-        </dependency>
-
-        <!-- 模板引擎 freemarker -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-freemarker</artifactId>
+            <version>v4</version>
         </dependency>
 
         <dependency>

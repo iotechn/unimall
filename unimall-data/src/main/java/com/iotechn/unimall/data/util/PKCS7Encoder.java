@@ -78,7 +78,6 @@ public class PKCS7Encoder {
         Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
         cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(Base64.decodeBase64(sessionKey), "AES"), algorithmParameters);
         byte[] decode = PKCS7Encoder.decode(cipher.doFinal(Base64.decodeBase64(encryptData)));
-        String decryptStr = new String(decode, StandardCharsets.UTF_8);
-        return decryptStr;
+        return new String(decode, StandardCharsets.UTF_8);
     }
 }

@@ -5,11 +5,11 @@ import com.dobbinsoft.fw.core.util.SessionUtil;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.enums.PayPlatformType;
 import com.dobbinsoft.fw.pay.model.request.MatrixPayUnifiedOrderRequest;
-import com.dobbinsoft.fw.support.properties.FwAliAppProperties;
-import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
 import com.iotechn.unimall.data.dto.admin.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
+import com.iotechn.unimall.data.properties.UnimallAliAppProperties;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +17,10 @@ import org.springframework.stereotype.Component;
 public class PaySelector {
 
     @Autowired
-    private FwWxAppProperties fwWxAppProperties;
+    private UnimallWxAppProperties unimallWxAppProperties;
 
     @Autowired
-    private FwAliAppProperties fwAliAppProperties;
+    private UnimallAliAppProperties unimallAliAppProperties;
 
     @Autowired
     private SessionUtil<UserDTO, AdminDTO> sessionUtil;
@@ -31,29 +31,29 @@ public class PaySelector {
         if (PayPlatformType.MP.getCode() == payPlatform) {
             if (PayChannelType.WX.getCode().equals(payChannel)) {
                 orderRequest.setPayChannel(PayChannelType.WX);
-                orderRequest.setAppid(fwWxAppProperties.getMiniAppId());
+                orderRequest.setAppid(unimallWxAppProperties.getMiniAppId());
                 orderRequest.setOpenid(sessionUtil.getUser().getWxMpOpenId());
             } else if (PayChannelType.ALI.getCode().equals(payChannel)) {
                 orderRequest.setPayChannel(PayChannelType.ALI);
-                orderRequest.setAppid(fwAliAppProperties.getMiniAppId());
+                orderRequest.setAppid(unimallAliAppProperties.getMiniAppId());
                 orderRequest.setOpenid(sessionUtil.getUser().getAliMpOpenId());
             }
         } else if (PayPlatformType.APP.getCode() == payPlatform) {
             if (PayChannelType.WX.getCode().equals(payChannel)) {
                 orderRequest.setPayChannel(PayChannelType.WX);
-                orderRequest.setAppid(fwWxAppProperties.getAppId());
+                orderRequest.setAppid(unimallWxAppProperties.getAppId());
                 orderRequest.setOpenid(sessionUtil.getUser().getWxAppOpenId());
             } else if (PayChannelType.ALI.getCode().equals(payChannel)) {
                 orderRequest.setPayChannel(PayChannelType.ALI);
-                orderRequest.setAppid(fwAliAppProperties.getAppId());
+                orderRequest.setAppid(unimallAliAppProperties.getAppId());
             }
         } else if (PayPlatformType.WAP.getCode() == payPlatform) {
             if (PayChannelType.WX.getCode().equals(payChannel)) {
-                orderRequest.setAppid(fwWxAppProperties.getH5AppId());
+                orderRequest.setAppid(unimallWxAppProperties.getH5AppId());
                 orderRequest.setPayChannel(PayChannelType.WX);
                 orderRequest.setOpenid(sessionUtil.getUser().getWxH5OpenId());
             } else if (PayChannelType.ALI.getCode().equals(payChannel)) {
-                orderRequest.setAppid(fwAliAppProperties.getWapAppId());
+                orderRequest.setAppid(unimallAliAppProperties.getWapAppId());
                 orderRequest.setPayChannel(PayChannelType.ALI);
             }
         } else {

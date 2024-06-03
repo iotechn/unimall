@@ -3,7 +3,6 @@ package com.iotechn.unimall.data.dto.product;
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.dobbinsoft.fw.core.entiy.SuperDTO;
-import com.dobbinsoft.fw.support.annotation.LeafTable;
 import com.dobbinsoft.fw.support.model.Page;
 import com.iotechn.unimall.data.domain.SkuDO;
 import com.iotechn.unimall.data.domain.SpuAttributeDO;

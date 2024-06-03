@@ -4,7 +4,6 @@ import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
 import com.iotechn.unimall.data.domain.SpuDO;
 import lombok.Data;
-import org.apache.pulsar.shade.io.swagger.annotations.Api;
 
 import java.util.List;
 import java.util.Map;

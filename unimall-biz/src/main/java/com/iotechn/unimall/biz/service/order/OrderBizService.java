@@ -2,15 +2,12 @@ package com.iotechn.unimall.biz.service.order;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.pay.enums.PayChannelType;
 import com.dobbinsoft.fw.pay.model.request.MatrixPayRefundRequest;
 import com.dobbinsoft.fw.pay.model.result.MatrixPayRefundResult;
 import com.dobbinsoft.fw.pay.service.pay.MatrixPayService;
 import com.dobbinsoft.fw.support.component.LockComponent;
 import com.dobbinsoft.fw.support.mq.DelayedMessageQueue;
-import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
 import com.iotechn.unimall.data.constant.LockConst;
 import com.iotechn.unimall.data.domain.OrderDO;
 import com.iotechn.unimall.data.domain.OrderSkuDO;
@@ -23,6 +20,7 @@ import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.OrderMapper;
 import com.iotechn.unimall.data.mapper.OrderSkuMapper;
 import com.iotechn.unimall.data.mapper.UserMapper;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -60,7 +58,7 @@ public class OrderBizService {
     private DelayedMessageQueue delayedMessageQueue;
 
     @Autowired
-    private FwWxAppProperties fwWxAppProperties;
+    private UnimallWxAppProperties unimallWxAppProperties;
 
 
     public List<OrderDO> checkOrderExistByParentNo(String parentOrderNo, Long userId) throws ServiceException {
@@ -200,7 +198,7 @@ public class OrderBizService {
                     //2.1.2 向微信支付平台发送退款请求
                     // TODO 设置平台
                     MatrixPayRefundRequest payRefundRequest = new MatrixPayRefundRequest();
-                    payRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? fwWxAppProperties.getMiniAppId() : fwWxAppProperties.getAppId());
+                    payRefundRequest.setAppid(loginType == UserLoginType.MP_WEIXIN.getCode() ? unimallWxAppProperties.getMiniAppId() : unimallWxAppProperties.getAppId());
                     payRefundRequest.setOutTradeNo(orderNo);
                     payRefundRequest.setOutRefundNo("refund_" + orderNo);
                     payRefundRequest.setRefundDesc("团购失败退款");

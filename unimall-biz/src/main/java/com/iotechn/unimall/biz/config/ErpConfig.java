@@ -1,7 +1,7 @@
 package com.iotechn.unimall.biz.config;
 
 import com.iotechn.unimall.biz.client.erp.ErpClient;
-import com.iotechn.unimall.biz.client.erp.dobbin.DobbinErpClient;
+import com.iotechn.unimall.biz.client.erp.dobbin.MockErpClient;
 import com.iotechn.unimall.biz.client.erp.mock.ErpMockClient;
 import com.iotechn.unimall.data.properties.UnimallErpOpenPlatformProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class ErpConfig {
         if ("mock".equals(unimallErpOpenPlatformProperties.getEnable())) {
             return new ErpMockClient();
         } else if ("dobbin".equals(unimallErpOpenPlatformProperties.getEnable())) {
-            return new DobbinErpClient();
+            return new MockErpClient();
         } else {
             return new ErpMockClient();
         }

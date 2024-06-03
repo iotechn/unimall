@@ -1,6 +1,5 @@
 package com.iotechn.unimall.biz.config.pay;
 
-import cn.hutool.core.codec.Base64;
 import com.dobbinsoft.fw.core.util.SessionUtil;
 import com.dobbinsoft.fw.pay.callback.PayHttpCallbackServlet;
 import com.dobbinsoft.fw.pay.config.PayProperties;
@@ -12,6 +11,8 @@ import com.iotechn.unimall.biz.pay.OrderPayCallbackHandler;
 import com.iotechn.unimall.biz.pay.VipOrderPayCallbackHandler;
 import com.iotechn.unimall.data.dto.admin.AdminDTO;
 import com.iotechn.unimall.data.dto.UserDTO;
+import com.iotechn.unimall.data.properties.UnimallAliAppProperties;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import com.iotechn.unimall.data.properties.UnimallWxPayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,10 @@ public class PayConfig {
     private UnimallWxPayProperties unimallWxPayProperties;
 
     @Autowired
-    private FwAliAppProperties fwAliAppProperties;
+    private UnimallAliAppProperties unimallAliAppProperties;
 
     @Autowired
-    private FwWxAppProperties fwWxAppProperties;
+    private UnimallWxAppProperties unimallWxAppProperties;
 
     @Autowired
     private SessionUtil<UserDTO, AdminDTO> sessionUtil;
@@ -68,12 +69,12 @@ public class PayConfig {
 
         @Override
         public String getAliGateway() {
-            return fwAliAppProperties.getAliGateway();
+            return unimallAliAppProperties.getAliGateway();
         }
 
         @Override
         public String getAliNotifyUrl() {
-            return fwAliAppProperties.getAppNotifyUrl();
+            return unimallAliAppProperties.getAppNotifyUrl();
         }
     }
 
@@ -81,57 +82,57 @@ public class PayConfig {
     public MatrixPayService matrixPayService() {
         MatrixPayServiceImpl matrixPayService = new MatrixPayServiceImpl(new PayDynamicPropertiesImpl());
         List<PayProperties> payProperties = new ArrayList<>();
-        if (!ObjectUtils.isEmpty(fwAliAppProperties.getMiniAppId())) {
+        if (!ObjectUtils.isEmpty(unimallAliAppProperties.getMiniAppId())) {
             payProperties.add(new AbstractPayProperties() {
                 @Override
                 public String getAliAppId() {
-                    return fwAliAppProperties.getMiniAppId();
+                    return unimallAliAppProperties.getMiniAppId();
                 }
 
                 @Override
                 public String getAliMchPrivateKey() {
-                    return fwAliAppProperties.getMiniAppPrivateKey2();
+                    return unimallAliAppProperties.getMiniAppPrivateKey2();
                 }
 
                 @Override
                 public String getAliAliPublicKey() {
-                    return fwAliAppProperties.getMiniAppPublicKey1();
+                    return unimallAliAppProperties.getMiniAppPublicKey1();
                 }
             });
         }
-        if (!ObjectUtils.isEmpty(fwAliAppProperties.getAppId())) {
+        if (!ObjectUtils.isEmpty(unimallAliAppProperties.getAppId())) {
             payProperties.add(new AbstractPayProperties() {
                 @Override
                 public String getAliAppId() {
-                    return fwAliAppProperties.getAppId();
+                    return unimallAliAppProperties.getAppId();
                 }
 
                 @Override
                 public String getAliMchPrivateKey() {
-                    return fwAliAppProperties.getAppPrivateKey2();
+                    return unimallAliAppProperties.getAppPrivateKey2();
                 }
 
                 @Override
                 public String getAliAliPublicKey() {
-                    return fwAliAppProperties.getAppPublicKey1();
+                    return unimallAliAppProperties.getAppPublicKey1();
                 }
             });
         }
-        if (!ObjectUtils.isEmpty(fwAliAppProperties.getWapAppId())) {
+        if (!ObjectUtils.isEmpty(unimallAliAppProperties.getWapAppId())) {
             payProperties.add(new AbstractPayProperties() {
                 @Override
                 public String getAliAppId() {
-                    return fwAliAppProperties.getWapAppId();
+                    return unimallAliAppProperties.getWapAppId();
                 }
 
                 @Override
                 public String getAliMchPrivateKey() {
-                    return fwAliAppProperties.getWapAppPrivateKey2();
+                    return unimallAliAppProperties.getWapAppPrivateKey2();
                 }
 
                 @Override
                 public String getAliAliPublicKey() {
-                    return fwAliAppProperties.getWapAppPublicKey1();
+                    return unimallAliAppProperties.getWapAppPublicKey1();
                 }
             });
         }
@@ -175,11 +176,11 @@ public class PayConfig {
             }
             Integer platform = user.getPlatform();
             if (PayPlatformType.MP.getCode() == platform) {
-                return fwWxAppProperties.getMiniAppId();
+                return unimallWxAppProperties.getMiniAppId();
             } else if (PayPlatformType.APP.getCode() == platform) {
-                return fwWxAppProperties.getAppId();
+                return unimallWxAppProperties.getAppId();
             } else if (PayPlatformType.WAP.getCode() == platform) {
-                return fwWxAppProperties.getH5AppId();
+                return unimallWxAppProperties.getH5AppId();
             }
             return null;
         }
@@ -210,7 +211,7 @@ public class PayConfig {
 
         @Override
         public String getAliGateway() {
-            return fwAliAppProperties.getAliGateway();
+            return unimallAliAppProperties.getAliGateway();
         }
 
         @Override
@@ -222,11 +223,11 @@ public class PayConfig {
             }
             Integer platform = user.getPlatform();
             if (PayPlatformType.MP.getCode() == platform) {
-                return fwAliAppProperties.getMiniAppId();
+                return unimallAliAppProperties.getMiniAppId();
             } else if (PayPlatformType.APP.getCode() == platform) {
-                return fwAliAppProperties.getAppId();
+                return unimallAliAppProperties.getAppId();
             } else if (PayPlatformType.WAP.getCode() == platform) {
-                return fwAliAppProperties.getWapAppId();
+                return unimallAliAppProperties.getWapAppId();
             }
             return null;
         }
@@ -239,11 +240,11 @@ public class PayConfig {
             }
             Integer platform = user.getPlatform();
             if (PayPlatformType.MP.getCode() == platform) {
-                return fwAliAppProperties.getMiniAppPrivateKey2();
+                return unimallAliAppProperties.getMiniAppPrivateKey2();
             } else if (PayPlatformType.APP.getCode() == platform) {
-                return fwAliAppProperties.getAppPrivateKey2();
+                return unimallAliAppProperties.getAppPrivateKey2();
             } else if (PayPlatformType.WAP.getCode() == platform) {
-                return fwAliAppProperties.getWapAppPrivateKey2();
+                return unimallAliAppProperties.getWapAppPrivateKey2();
             }
             return null;
         }
@@ -256,18 +257,18 @@ public class PayConfig {
             }
             Integer platform = user.getPlatform();
             if (PayPlatformType.MP.getCode() == platform) {
-                return fwAliAppProperties.getMiniAppPublicKey1();
+                return unimallAliAppProperties.getMiniAppPublicKey1();
             } else if (PayPlatformType.APP.getCode() == platform) {
-                return fwAliAppProperties.getAppPublicKey1();
+                return unimallAliAppProperties.getAppPublicKey1();
             } else if (PayPlatformType.WAP.getCode() == platform) {
-                return fwAliAppProperties.getWapAppPublicKey1();
+                return unimallAliAppProperties.getWapAppPublicKey1();
             }
             return null;
         }
 
         @Override
         public String getAliNotifyUrl() {
-            return fwAliAppProperties.getAppNotifyUrl();
+            return unimallAliAppProperties.getAppNotifyUrl();
         }
 
 

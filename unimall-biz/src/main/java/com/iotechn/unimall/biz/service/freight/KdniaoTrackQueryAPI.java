@@ -1,10 +1,10 @@
 package com.iotechn.unimall.biz.service.freight;
 
 import com.alibaba.fastjson.JSONArray;
-import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.dobbinsoft.fw.core.enums.BaseEnums;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.exception.ThirdPartServiceException;
+import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.dto.freight.ShipTraceItemDTO;
 import com.iotechn.unimall.data.enums.ShipCodeType;
@@ -17,12 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.CollectionUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -105,8 +105,8 @@ public class KdniaoTrackQueryAPI implements ShipTraceQuery {
         md.update(str.getBytes(charset));
         byte[] result = md.digest();
         StringBuffer sb = new StringBuffer(32);
-        for (int i = 0; i < result.length; i++) {
-            int val = result[i] & 0xff;
+        for (byte b : result) {
+            int val = b & 0xff;
             if (val <= 0xf) {
                 sb.append("0");
             }
@@ -123,7 +123,7 @@ public class KdniaoTrackQueryAPI implements ShipTraceQuery {
      * @throws UnsupportedEncodingException
      */
     private String base64(String str, String charset) throws UnsupportedEncodingException {
-        return Base64Utils.encodeToString(str.getBytes(charset));
+        return Base64.getEncoder().encodeToString(str.getBytes(charset));
     }
 
     /**

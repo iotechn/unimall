@@ -22,6 +22,12 @@ public class UserDO extends SuperDO {
     @ApiField(description = "用户手机号")
     private String phone;
 
+    @ApiField(description = "用户登录密码 可空")
+    private String password;
+
+    @ApiField(description = "密码盐值")
+    private String salt;
+
     @ApiField(description = "支付宝小程序OPENID")
     private String aliMpOpenId;
 

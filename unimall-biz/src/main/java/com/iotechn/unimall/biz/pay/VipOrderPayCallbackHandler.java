@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -72,7 +71,7 @@ public class VipOrderPayCallbackHandler implements MatrixPayCallbackHandler {
             delayedMessageQueue.publishTask(DMQHandlerType.VIP_ORDER_BUY_OVER.getCode(), String.valueOf(vipOrderDO.getId()), 60 * 60 * 24 * 7);
             VipOrderDO update = new VipOrderDO();
             update.setId(vipOrderDO.getId());
-            update.setGmtPay(new Date());
+            update.setGmtPay(LocalDateTime.now());
             update.setPayChannel(result.getPayChannel().getCode());
             update.setAppId(result.getAppid());
             vipOrderMapper.updateById(update);

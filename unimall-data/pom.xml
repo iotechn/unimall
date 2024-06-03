@@ -4,16 +4,13 @@
     <parent>
         <groupId>com.iotechn</groupId>
         <artifactId>unimall</artifactId>
-        <version>v3</version>
+        <version>v4</version>
     </parent>
     <groupId>com.iotechn</groupId>
     <artifactId>unimall-data</artifactId>
-    <version>v3</version>
+    <version>v4</version>
     <name>unimall-data</name>
     <description>骨架DEMO 数据</description>
-    <properties>
-        <java.version>1.8</java.version>
-    </properties>
     <dependencies>
 
         <!-- 統一支付包Api -->

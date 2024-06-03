@@ -8,6 +8,7 @@ import com.iotechn.unimall.data.enums.UserLevelType;
 import com.iotechn.unimall.data.mapper.UserMapper;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
+import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class UserBizService {
     private OkHttpClient okHttpClient = new OkHttpClient();
 
     @Autowired
-    private FwWxAppProperties fwWxAppProperties;
+    private UnimallWxAppProperties fwWxAppProperties;
 
     @Autowired
     private CacheComponent cacheComponent;
