@@ -1,10 +1,7 @@
 package com.iotechn.unimall.runner;
 
-import com.anji.captcha.config.AjCaptchaAutoConfiguration;
 import com.dobbinsoft.fw.launcher.manager.IApiManager;
 import com.dobbinsoft.fw.support.annotation.EnableDelayedMQ;
-import com.dobbinsoft.fw.support.annotation.EnableDynamicConfig;
-import com.dobbinsoft.fw.support.annotation.EnableOpenPlatform;
 import com.dobbinsoft.fw.support.component.MachineComponent;
 import com.iotechn.unimall.admin.api.role.RoleServiceImpl;
 import org.mybatis.spring.annotation.MapperScan;
@@ -22,15 +19,12 @@ import org.springframework.context.ConfigurableApplicationContext;
                 "com.dobbinsoft.fw"
         },
         exclude = {
-                AjCaptchaAutoConfiguration.class,
                 RedisAutoConfiguration.class,
                 RedisReactiveAutoConfiguration.class
         })
 @MapperScan({
         "com.iotechn.unimall.data.mapper"
 })
-@EnableOpenPlatform
-@EnableDynamicConfig
 @EnableDelayedMQ
 public class UnimallRunnerApplication {
 

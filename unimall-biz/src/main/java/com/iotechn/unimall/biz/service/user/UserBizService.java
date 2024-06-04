@@ -1,13 +1,14 @@
 package com.iotechn.unimall.biz.service.user;
 
+import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.UserDO;
 import com.iotechn.unimall.data.domain.VipOrderDO;
+import com.iotechn.unimall.data.dto.user.WxAccessTokenResultDTO;
+import com.iotechn.unimall.data.dto.user.WxH5TicketResultDTO;
 import com.iotechn.unimall.data.enums.UserLevelType;
 import com.iotechn.unimall.data.mapper.UserMapper;
-import com.dobbinsoft.fw.support.component.CacheComponent;
-import com.dobbinsoft.fw.support.properties.FwWxAppProperties;
 import com.iotechn.unimall.data.properties.UnimallWxAppProperties;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Calendar;
 import java.time.LocalDateTime;
 
 /**
@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 @Service
 public class UserBizService {
 
-    private OkHttpClient okHttpClient = new OkHttpClient();
+    private final OkHttpClient okHttpClient = new OkHttpClient();
 
     @Autowired
     private UnimallWxAppProperties fwWxAppProperties;
@@ -43,21 +43,22 @@ public class UserBizService {
         String wxAccessToken = cacheComponent.getRaw(CacheConst.USER_OFFICIAL_WECHAT_ACCESS);
         if (ObjectUtils.isEmpty(wxAccessToken)) {
             //尝试获取微信公众号Token
-            String accessJson = okHttpClient.newCall(
+            String responseJson = okHttpClient.newCall(
                     new Request.Builder()
                             .url("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="
                                     + fwWxAppProperties.getH5AppId() + "&secret=" + fwWxAppProperties.getH5AppSecret())
                             .get()
                             .build()).execute().body().string();
-            JacksonUtil jsonObject = JacksonUtil.parseObject(accessJson);
-            wxAccessToken = jsonObject.getString("access_token");
+
+            WxAccessTokenResultDTO wxAccessTokenResultDTO = JacksonUtil.parseObject(responseJson, WxAccessTokenResultDTO.class);
+
+            wxAccessToken = wxAccessTokenResultDTO.getAccessToken();
             if (!ObjectUtils.isEmpty(wxAccessToken)) {
-                Integer expires_in = jsonObject.getInteger("expires_in");
                 //在过期前重置
-                Integer cacheExpireSec = expires_in * 4 / 5;
+                Integer cacheExpireSec = wxAccessTokenResultDTO.getExpiresIn() * 4 / 5;
                 cacheComponent.putRaw(CacheConst.USER_OFFICIAL_WECHAT_ACCESS, wxAccessToken, cacheExpireSec);
             } else {
-                throw new RuntimeException("回复错误:" + accessJson);
+                throw new RuntimeException("回复错误:" + responseJson);
             }
         }
         return wxAccessToken;
@@ -72,12 +73,11 @@ public class UserBizService {
                             .url("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + accessToken + "&type=jsapi")
                             .get()
                             .build()).execute().body().string();
-            JacksonUtil jsonObject = JacksonUtil.parseObject(ticketJson);
-            wxTicket = jsonObject.getString("ticket");
+            WxH5TicketResultDTO wxH5TicketResultDTO = JacksonUtil.parseObject(ticketJson, WxH5TicketResultDTO.class);
+            wxTicket = wxH5TicketResultDTO.getTicket();
             if (!ObjectUtils.isEmpty(wxTicket)) {
-                Integer expires_in = jsonObject.getInteger("expires_in");
                 //在过期前重置
-                Integer cacheExpireSec = expires_in * 4 / 5;
+                Integer cacheExpireSec = wxH5TicketResultDTO.getExpiresIn() * 4 / 5;
                 cacheComponent.putRaw(CacheConst.USER_OFFICIAL_WECHAT_TICKET, wxTicket, cacheExpireSec);
             } else {
                 throw new RuntimeException("回复错误:" + ticketJson);
@@ -87,25 +87,26 @@ public class UserBizService {
     }
 
     public String getWxMiniAccessToken() throws Exception {
-        String access_token = cacheComponent.getRaw(CacheConst.USER_MINI_WECHAT_ACCESS);
-        if (ObjectUtils.isEmpty(access_token)) {
+        String accessToken = cacheComponent.getRaw(CacheConst.USER_MINI_WECHAT_ACCESS);
+        if (ObjectUtils.isEmpty(accessToken)) {
             String accessJson = okHttpClient.newCall(
                     new Request.Builder()
                             .url("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid="
                                     + fwWxAppProperties.getMiniAppId() + "&secret=" + fwWxAppProperties.getMiniAppSecret())
                             .get()
                             .build()).execute().body().string();
-            JacksonUtil jsonObject = JacksonUtil.parseObject(accessJson);
-            access_token = jsonObject.getString("access_token");
-            if (!ObjectUtils.isEmpty(access_token)) {
-                Integer expires_in = jsonObject.getInteger("expires_in");
-                Integer cacheExpireSec = expires_in * 4 / 5;
-                cacheComponent.putRaw(CacheConst.USER_MINI_WECHAT_ACCESS, access_token, cacheExpireSec);
+
+
+            WxAccessTokenResultDTO wxAccessTokenResultDTO = JacksonUtil.parseObject(accessJson, WxAccessTokenResultDTO.class);
+            accessToken = wxAccessTokenResultDTO.getAccessToken();
+            if (!ObjectUtils.isEmpty(accessToken)) {
+                Integer cacheExpireSec = wxAccessTokenResultDTO.getExpiresIn() * 4 / 5;
+                cacheComponent.putRaw(CacheConst.USER_MINI_WECHAT_ACCESS, accessToken, cacheExpireSec);
             } else {
                 throw new RuntimeException("回复错误:" + accessJson);
             }
         }
-        return access_token;
+        return accessToken;
     }
 
 
@@ -120,15 +121,9 @@ public class UserBizService {
     public UserDO upUserLevel(VipOrderDO vipOrder){
         UserDO userDO = userMapper.selectById(vipOrder.getUserId());
         LocalDateTime now = LocalDateTime.now();
-        Calendar calendar = Calendar.getInstance();
-        if(UserLevelType.VIP.getCode() == userDO.getLevel().intValue()){
-            calendar.setTime(userDO.getGmtVipExpire());
-        }else {
-            calendar.setTime(now);
-        }
-        calendar.add(Calendar.DATE,vipOrder.getDayNum());
-        Date time = calendar.getTime();
-        userDO.setGmtVipExpire(time);
+        // 若已过期或首次充值，则以现在的时间为续费基点。否则在过期的时间基础上加时长。
+        LocalDateTime baseTime = (UserLevelType.COMMON.getCode() == userDO.getLevel().intValue() || now.isAfter(userDO.getGmtVipExpire())) ? now : userDO.getGmtVipExpire();
+        userDO.setGmtVipExpire(baseTime.plusDays(vipOrder.getDayNum()));
         userDO.setLevel(UserLevelType.VIP.getCode());
         userDO.setId(userDO.getId());
         userMapper.updateById(userDO);

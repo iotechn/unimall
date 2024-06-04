@@ -588,18 +588,20 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
 
     @Override
     public ShipTraceDTO queryShip(String orderNo, Long userId) throws ServiceException {
-        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
-        if (orderDO.getStatus() < OrderStatusType.WAIT_CONFIRM.getCode()) {
-            throw new ServiceException(ExceptionDefinition.ORDER_HAS_NOT_SHIP);
-        }
-        if (StringUtils.isEmpty(orderDO.getShipCode()) || StringUtils.isEmpty(orderDO.getShipNo())) {
-            throw new ServiceException(ExceptionDefinition.ORDER_DID_NOT_SET_SHIP);
-        }
-        ShipTraceDTO shipTraceList = freightTemplateBizService.getShipTraceList(orderDO.getShipNo(), orderDO.getShipCode());
-        if (CollectionUtils.isEmpty(shipTraceList.getTraces())) {
-            throw new ServiceException(ExceptionDefinition.ORDER_DO_NOT_EXIST_SHIP_TRACE);
-        }
-        return shipTraceList;
+        // TODO KD100订阅
+        return null;
+//        OrderDO orderDO = orderBizService.checkOrderExistByNo(orderNo, userId).get(0);
+//        if (orderDO.getStatus() < OrderStatusType.WAIT_CONFIRM.getCode()) {
+//            throw new ServiceException(ExceptionDefinition.ORDER_HAS_NOT_SHIP);
+//        }
+//        if (StringUtils.isEmpty(orderDO.getShipCode()) || StringUtils.isEmpty(orderDO.getShipNo())) {
+//            throw new ServiceException(ExceptionDefinition.ORDER_DID_NOT_SET_SHIP);
+//        }
+//        ShipTraceDTO shipTraceList = freightTemplateBizService.getShipTraceList(orderDO.getShipNo(), orderDO.getShipCode());
+//        if (CollectionUtils.isEmpty(shipTraceList.getTraces())) {
+//            throw new ServiceException(ExceptionDefinition.ORDER_DO_NOT_EXIST_SHIP_TRACE);
+//        }
+//        return shipTraceList;
     }
 
     @Override

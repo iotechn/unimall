@@ -2,13 +2,11 @@ package com.iotechn.unimall.biz.service.freight;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
-import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.iotechn.unimall.data.constant.CacheConst;
 import com.iotechn.unimall.data.domain.FreightTemplateCarriageDO;
 import com.iotechn.unimall.data.domain.FreightTemplateDO;
 import com.iotechn.unimall.data.dto.freight.FreightTemplateDTO;
-import com.iotechn.unimall.data.dto.freight.ShipTraceDTO;
 import com.iotechn.unimall.data.exception.ExceptionDefinition;
 import com.iotechn.unimall.data.mapper.FreightTemplateCarriageMapper;
 import com.iotechn.unimall.data.mapper.FreightTemplateMapper;
@@ -41,9 +39,6 @@ public class FreightTemplateBizService {
 
     @Autowired
     private CacheComponent cacheComponent;
-
-    @Autowired
-    private ShipTraceQuery shipTraceQuery;
 
     public int computePostage(FreightCalcModel freightCalcModel) throws ServiceException {
         List<FreightCalcModel.FreightAndWeight> freightAndWeights = freightCalcModel.getFreightAndWeights();
@@ -85,10 +80,6 @@ public class FreightTemplateBizService {
             }
         }
         return postage;
-    }
-
-    public ShipTraceDTO getShipTraceList(String shipNo, String shipCode) throws ServiceException {
-        return shipTraceQuery.query(shipNo, shipCode);
     }
 
     // 内部有调用，不用切面
