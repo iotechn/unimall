@@ -1,9 +1,9 @@
-package com.iotechn.unimall.runner;
+package com.dobbinsoft.unimall.runner;
 
 import com.dobbinsoft.fw.launcher.manager.IApiManager;
 import com.dobbinsoft.fw.support.annotation.EnableDelayedMQ;
 import com.dobbinsoft.fw.support.component.MachineComponent;
-import com.iotechn.unimall.admin.api.role.RoleServiceImpl;
+import com.dobbinsoft.unimall.admin.api.role.RoleServiceImpl;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication(
         scanBasePackages = {
-                "com.iotechn.unimall",
+                "com.dobbinsoft.unimall",
                 "com.dobbinsoft.fw"
         },
         exclude = {
@@ -23,7 +23,7 @@ import org.springframework.context.ConfigurableApplicationContext;
                 RedisReactiveAutoConfiguration.class
         })
 @MapperScan({
-        "com.iotechn.unimall.data.mapper"
+        "com.dobbinsoft.unimall.data.mapper"
 })
 @EnableDelayedMQ
 public class UnimallRunnerApplication {

@@ -1,4 +1,4 @@
-package com.iotechn.dobbinarchetype.unimall.runner;
+package com.dobbinsoft.dobbinarchetype.unimall.runner;
 
 import org.springframework.boot.test.context.SpringBootTest;
 

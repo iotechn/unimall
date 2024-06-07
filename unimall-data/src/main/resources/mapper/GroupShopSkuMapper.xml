@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.iotechn.unimall.data.mapper.GroupShopSkuMapper">
+<mapper namespace="com.dobbinsoft.unimall.data.mapper.GroupShopSkuMapper">
 
-    <select id="getSkuList" resultType="com.iotechn.unimall.data.dto.product.GroupShopSkuDTO">
+    <select id="getSkuList" resultType="com.dobbinsoft.unimall.data.dto.product.GroupShopSkuDTO">
         SELECT
             g.id,
             g.sku_id AS skuId,

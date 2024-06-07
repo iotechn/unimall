@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.iotechn.unimall.data.mapper.SkuMapper">
+<mapper namespace="com.dobbinsoft.unimall.data.mapper.SkuMapper">
 
     <update id="decSkuStock">
         UPDATE unimall_sku SET stock = stock - #{stock} WHERE id = #{skuId} AND stock >= #{stock}
@@ -10,7 +10,7 @@
         UPDATE unimall_sku SET stock = stock + #{stock} WHERE id = #{skuId}
     </update>
 
-    <select id="getSkuDTOById" resultType="com.iotechn.unimall.data.dto.product.SkuDTO">
+    <select id="getSkuDTOById" resultType="com.dobbinsoft.unimall.data.dto.product.SkuDTO">
         SELECT
             k.id,
             k.spu_id AS spuId,
@@ -52,7 +52,7 @@
         SELECT stock FROM unimall_sku WHERE id = #{skuId} FOR UPDATE
     </select>
 
-    <select id="getSkuDTOListByIds" resultType="com.iotechn.unimall.data.dto.product.SkuDTO">
+    <select id="getSkuDTOListByIds" resultType="com.dobbinsoft.unimall.data.dto.product.SkuDTO">
         SELECT
             k.id,
             k.spu_id AS spuId,

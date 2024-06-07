@@ -6,7 +6,7 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.5</version> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.iotechn</groupId>
+    <groupId>com.dobbinsoft</groupId>
     <artifactId>unimall</artifactId>
     <version>v4</version>
     <name>unimall</name>

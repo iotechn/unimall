@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.iotechn.unimall.data.mapper.OrderMapper">
+<mapper namespace="com.dobbinsoft.unimall.data.mapper.OrderMapper">
 
 
-    <select id="selectOrderPage" resultType="com.iotechn.unimall.data.dto.order.OrderDTO">
+    <select id="selectOrderPage" resultType="com.dobbinsoft.unimall.data.dto.order.OrderDTO">
         SELECT
             id,
             order_no AS orderNo,
@@ -34,7 +34,7 @@
         </if>
     </select>
 
-    <select id="selectAreaStatistics" resultType="com.iotechn.unimall.data.model.KVModel">
+    <select id="selectAreaStatistics" resultType="com.dobbinsoft.unimall.data.model.KVModel">
         SELECT
             `province` AS `key`,
             count( 1 ) AS `value`
@@ -46,7 +46,7 @@
             `province`
     </select>
 
-    <select id="selectChannelStatistics" resultType="com.iotechn.unimall.data.model.KVModel">
+    <select id="selectChannelStatistics" resultType="com.dobbinsoft.unimall.data.model.KVModel">
         SELECT
             `channel` AS `key`,
             count( 1 ) AS `value`
@@ -56,7 +56,7 @@
             `channel`
     </select>
 
-    <select id="selectOrderCountStatistics" resultType="com.iotechn.unimall.data.model.KVModel">
+    <select id="selectOrderCountStatistics" resultType="com.dobbinsoft.unimall.data.model.KVModel">
         SELECT
             DATE_FORMAT( gmt_create, '%Y-%m-%d' ) AS `key`,
             count( 1 ) AS `value`
@@ -68,7 +68,7 @@
             `key`;
     </select>
 
-    <select id="selectOrderSumStatistics" resultType="com.iotechn.unimall.data.model.KVModel">
+    <select id="selectOrderSumStatistics" resultType="com.dobbinsoft.unimall.data.model.KVModel">
         SELECT
             DATE_FORMAT( gmt_create, '%Y-%m-%d' ) AS `key`,
             sum( pay_price ) AS `value`
@@ -81,7 +81,7 @@
             `key`;
     </select>
 
-    <select id="selectExpireOrderNos" resultType="com.iotechn.unimall.data.domain.OrderDO">
+    <select id="selectExpireOrderNos" resultType="com.dobbinsoft.unimall.data.domain.OrderDO">
         SELECT
            id,
            order_no as orderNo

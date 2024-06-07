@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.iotechn</groupId>
+        <groupId>com.dobbinsoft</groupId>
         <artifactId>unimall</artifactId>
         <version>v4</version>
     </parent>
-    <groupId>com.iotechn</groupId>
+    <groupId>com.dobbinsoft</groupId>
     <artifactId>unimall-admin-api</artifactId>
     <version>v4</version>
     <name>unimall-admin-api</name>
@@ -14,13 +14,13 @@
     <dependencies>
 
         <dependency>
-            <groupId>com.iotechn</groupId>
+            <groupId>com.dobbinsoft</groupId>
             <artifactId>unimall-data</artifactId>
             <version>v4</version>
         </dependency>
 
         <dependency>
-            <groupId>com.iotechn</groupId>
+            <groupId>com.dobbinsoft</groupId>
             <artifactId>unimall-biz</artifactId>
             <version>v4</version>
         </dependency>

@@ -1,4 +1,4 @@
-package com.iotechn.unimall.app.api;
+package com.dobbinsoft.unimall.app.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

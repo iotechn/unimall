@@ -1,4 +1,4 @@
-package com.iotechn.dobbinarchetype.unimall.app.api;
+package com.dobbinsoft.dobbinarchetype.unimall.app.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

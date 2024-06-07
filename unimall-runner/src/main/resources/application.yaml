@@ -43,7 +43,8 @@ mybatis-plus:
 com:
   dobbinsoft:
     db:
-      auto-build-table: true
+      # 类自动生成表结构
+      auto-build-table: false
     system:
       admin-session-period: 43200
       user-session-period: 43200
@@ -73,7 +74,17 @@ com:
     order:
       auto-confirm-time: 259200
       auto-cancel-time: 900
-
+    wx-app:
+      app-id: xxxx
+      app-secret: xxxx
+      mini-app-id: xxxx
+      mini-app-secret: xxxx
+      h5-app-id: xxxx
+      h5-app-secret: xxxx
+    wx-pay:
+      mch-id: xxx
+      mch-key: xxx
+      key-path: /xxx/xxx
 
 aj:
   captcha:

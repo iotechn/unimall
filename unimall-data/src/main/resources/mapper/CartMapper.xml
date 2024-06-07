@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.iotechn.unimall.data.mapper.CartMapper">
+<mapper namespace="com.dobbinsoft.unimall.data.mapper.CartMapper">
 
     <select id="countCart" resultType="java.lang.Integer">
         SELECT
@@ -11,7 +11,7 @@
             c.user_id = #{userId}
     </select>
 
-    <select id="getCartList" resultType="com.iotechn.unimall.data.dto.CartDTO">
+    <select id="getCartList" resultType="com.dobbinsoft.unimall.data.dto.CartDTO">
         SELECT
             c.id,
             c.sku_id AS skuId,
