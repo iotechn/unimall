@@ -46,9 +46,6 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
     @Autowired
     private MachineComponent machineComponent;
 
-    @Value("${com.dobbinsoft.fw.env}")
-    private String ENV;
-
     @Autowired
     private PaySelector paySelector;
 
@@ -61,7 +58,7 @@ public class VipOrderServiceImpl extends BaseService<UserDTO, AdminDTO> implemen
         if (vipTemplateDO == null || 1 != vipTemplateDO.getDisplay().intValue()) {
             throw new ServiceException(ExceptionDefinition.VIP_TEMPLATE_NULL_OR_NOT_DISPLAY);
         }
-        String orderNo = GeneratorUtil.genOrderId(this.machineComponent.getMachineNo() + "", this.ENV);
+        String orderNo = GeneratorUtil.genOrderId(this.machineComponent.getMachineNo() + "");
         VipOrderDO vipOrderDO = new VipOrderDO();
         vipOrderDO.setDayNum(vipTemplateDO.getDayNum());
         vipOrderDO.setPrice(vipTemplateDO.getPrice());

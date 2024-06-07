@@ -3,6 +3,7 @@ package com.iotechn.unimall.data.domain;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
@@ -16,9 +17,11 @@ import java.time.LocalDateTime;
 @TableName("unimall_coupon_user")
 public class CouponUserDO extends SuperDO {
 
+    @NotNull
     @ApiField(description = "用户ID")
     private Long userId;
 
+    @NotNull
     @ApiField(description = "优惠券ID")
     private Long couponId;
 

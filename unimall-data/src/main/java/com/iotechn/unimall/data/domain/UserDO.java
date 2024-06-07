@@ -3,6 +3,7 @@ package com.iotechn.unimall.data.domain;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import com.iotechn.unimall.data.enums.StatusType;
 import com.iotechn.unimall.data.enums.UserGenderType;
@@ -58,6 +59,7 @@ public class UserDO extends SuperDO {
     @ApiField(description = "区")
     private String county;
 
+    @NotNull
     @ApiField(description = "等级", enums = UserLevelType.class)
     private Integer level;
 
@@ -76,6 +78,7 @@ public class UserDO extends SuperDO {
     @ApiField(description = "最后登录ID")
     private String lastLoginIp;
 
+    @NotNull
     @ApiField(description = "状态", enums = StatusType.class)
     private Integer status;
 

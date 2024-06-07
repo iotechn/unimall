@@ -139,7 +139,7 @@ public class PayConfig {
         /**
          * 先将支付宝client加载到内存
          */
-        matrixPayService.configWarmUp(payProperties);
+//        matrixPayService.configWarmUp(payProperties);
         return matrixPayService;
     }
 

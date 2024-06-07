@@ -122,9 +122,6 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     @Autowired
     private MachineComponent machineComponent;
 
-    @Value("${com.dobbinsoft.fw.env}")
-    private String ENV;
-
     @Autowired
     private UnimallOrderProperties unimallOrderProperties;
 
@@ -319,7 +316,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
                 // 使用优惠券的订单
                 Long useCouponOrderId = null;
                 // 生成一个父单号
-                String parentOrderNo = GeneratorUtil.genOrderId(this.machineComponent.getMachineNo() + "", this.ENV);
+                String parentOrderNo = GeneratorUtil.genOrderId(this.machineComponent.getMachineNo() + "");
                 if (skuPrice > 0) {
                     // 这是普通商品
                     // 将普通商品(非团购等需要单独拆单的商品)的SkuList过滤出来

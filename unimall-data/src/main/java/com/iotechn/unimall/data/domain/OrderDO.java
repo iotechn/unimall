@@ -3,6 +3,7 @@ package com.iotechn.unimall.data.domain;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import com.iotechn.unimall.data.enums.OrderStatusType;
 import lombok.Data;
@@ -20,12 +21,15 @@ public class OrderDO extends SuperDO {
     /**
      * 用户下单渠道
      */
+    @NotNull
     @ApiField(description = "下单渠道")
     private String channel;
 
+    @NotNull
     @ApiField(description = "订单父单串号")
     private String parentOrderNo;
 
+    @NotNull
     @ApiField(description = "订单串号")
     private String orderNo;
 
@@ -35,21 +39,26 @@ public class OrderDO extends SuperDO {
     @ApiField(description = "若是子单支付的，则此字段为1，若是父单合单支付的，此字段为0。若未支付，此字段为NULL")
     private Integer subPay;
 
+    @NotNull
     @ApiField(description = "所属用户ID")
     private Long userId;
 
+    @NotNull
     @ApiField(description = "状态", enums = OrderStatusType.class)
     private Integer status;
 
+    @NotNull
     @ApiField(description = "商品原始价格总价(仅显示作用)")
     private Integer skuOriginalTotalPrice;
 
     /**
      * 商品总价
      */
+    @NotNull
     @ApiField(description = "商品总价")
     private Integer skuTotalPrice;
 
+    @NotNull
     @ApiField(description = "商品配送费")
     private Integer freightPrice;
 
@@ -65,6 +74,7 @@ public class OrderDO extends SuperDO {
     /**
      * 计算优惠后，实际需要支付的价格
      */
+    @NotNull
     @ApiField(description = "计算优惠后，实际需要支付的价格")
     private Integer actualPrice;
 

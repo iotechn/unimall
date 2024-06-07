@@ -11,9 +11,9 @@ public class GeneratorUtil {
     private static final SimpleDateFormat ORDER_ID_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
 
 
-    public static String genOrderId(String machineNo, String env) {
+    public static String genOrderId(String machineNo) {
         int i = orderIdCount.incrementAndGet() % 1000;
         i += 1000;
-        return env + machineNo + ORDER_ID_FORMAT.format(new Date()) + i;
+        return machineNo + ORDER_ID_FORMAT.format(new Date()) + i;
     }
 }

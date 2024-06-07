@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import com.iotechn.unimall.data.enums.CouponType;
 import com.iotechn.unimall.data.enums.StatusType;
@@ -19,9 +20,11 @@ import java.time.LocalDateTime;
 @TableName("unimall_coupon")
 public class CouponDO extends SuperDO {
 
+    @NotNull
     @ApiField(description = "优惠券标题")
     private String title;
 
+    @NotNull
     @ApiField(description = "类型", enums = CouponType.class)
     private Integer type;
 
@@ -29,33 +32,37 @@ public class CouponDO extends SuperDO {
      * 是否是vip专享
      * 0:不是，1:是
      */
+    @NotNull
     @ApiField(description = "是否是vip专享")
     private Integer isVip;
 
+    @NotNull
     @ApiField(description = "优惠券描述")
     private String description;
 
+    @NotNull
     @ApiField(description = "总共发的数量")
     private Integer total;
 
+    @NotNull
     @ApiField(description = "剩余的数量")
     private Integer surplus;
 
+    @NotNull
     @ApiField(description = "每个用户限制领取数量")
     @TableField("`limit`")
     private Integer limit;
 
+    @NotNull
     @ApiField(description = "折扣")
     private Integer discount;
 
+    @NotNull
     @ApiField(description = "最低使用价格，单位分")
     @TableField("`min`")
     private Integer min;
 
-    /**
-     * 0:下架
-     * 1: 正常
-     */
+    @NotNull
     @ApiField(description = "状态", enums = StatusType.class)
     private Integer status;
 

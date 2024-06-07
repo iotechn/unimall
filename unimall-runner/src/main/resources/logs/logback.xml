@@ -5,7 +5,8 @@
 
     <springProperty scop="context" name="PROJECT_NAME" source="spring.application.name" defaultValue="default"/>
     <springProperty scop="context" name="rootLevel" source="logging.level" defaultValue="INFO"/>
-    <property name="PATTERN" value="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %-5level %logger{50}:%line - %msg%n" />
+    <property name="PATTERN" value="[%d{yy-MM-dd HH:mm:ss.SSS}] [%X{account}] [%X{trace}] %-5level %logger{24}:%line - %msg%n" />
+    <property name="PATTERN_ERROR" value="[%d{yy-MM-dd HH:mm:ss.SSS}] [%X{account}] [%X{trace}] [%X{token}] %-5level %logger{24}:%line - %msg%n" />
     <property name="LOG_PATH" value="./logs/${PROJECT_NAME}" />
 
     <!--myibatis log configure-->
@@ -56,7 +57,7 @@
             <level>ERROR</level>
         </filter>
         <encoder>
-            <pattern>${PATTERN}</pattern>
+            <pattern>${PATTERN_ERROR}</pattern>
             <charset>UTF-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">

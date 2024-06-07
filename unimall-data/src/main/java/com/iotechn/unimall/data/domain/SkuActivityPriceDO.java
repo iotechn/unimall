@@ -3,6 +3,7 @@ package com.iotechn.unimall.data.domain;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
@@ -17,15 +18,19 @@ import lombok.Data;
 @TableName("unimall_sku_activity_price")
 public class SkuActivityPriceDO extends SuperDO {
 
+    @NotNull
     @ApiField(description = "活动类型")
     private Integer activityType;
 
+    @NotNull
     @ApiField(description = "活动ID")
     private Long activityId;
 
+    @NotNull
     @ApiField(description = "商品规格ID")
     private Long skuId;
 
+    @NotNull
     @ApiField(description = "活动价")
     private Integer activityPrice;
 

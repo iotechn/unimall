@@ -3,6 +3,7 @@ package com.iotechn.unimall.data.domain;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.dobbinsoft.fw.core.annotation.doc.ApiEntity;
 import com.dobbinsoft.fw.core.annotation.doc.ApiField;
+import com.dobbinsoft.fw.core.annotation.param.NotNull;
 import com.dobbinsoft.fw.support.domain.SuperDO;
 import lombok.Data;
 
@@ -14,9 +15,11 @@ import lombok.Data;
 @TableName("unimall_role_permission")
 public class RolePermissionDO extends SuperDO {
 
+    @NotNull
     @ApiField(description = "角色ID")
     private Long roleId;
 
+    @NotNull
     @ApiField(description = "权限点")
     private String permission;
 

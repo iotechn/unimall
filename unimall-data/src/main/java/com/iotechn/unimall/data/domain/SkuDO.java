@@ -15,6 +15,7 @@ import lombok.Data;
 @TableName("unimall_sku")
 public class SkuDO extends SuperDO {
 
+    @NotNull
     @ApiField(description = "商品ID")
     private Long spuId;
 
@@ -29,6 +30,7 @@ public class SkuDO extends SuperDO {
     @NotNull(message = "SKU显示名不能为空")
     private String title;
 
+    @NotNull
     @ApiField(description = "每个规格的具体值 格式: 尺码_S,颜色_经典款短袖黑色A")
     private String specification;
 
