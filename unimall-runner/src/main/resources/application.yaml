@@ -1,0 +1,98 @@
+server:
+  port: 8000
+  servlet:
+    context-path: /unimall
+
+
+spring:
+  application:
+    name: unimall
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      auto-commit: true
+      connection-test-query: SELECT 1
+      connection-timeout: 30000
+      idle-timeout: 30000
+      maximum-pool-size: 15
+      minimum-idle: 5
+    password: 123456
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://192.168.123.180:31230/unimall?autoReconnect=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+    username: root
+
+  redis:
+    master-name: mymaster
+    mode: single
+    database: 6
+    host: 192.168.123.180:31235
+  user-redis:
+    database: 7
+    host: 192.168.123.180:31235
+  lock-redis:
+    database: 8
+    host: 192.168.123.180:31235
+
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: auto
+      table-prefix: unimall_
+  mapper-locations: classpath:/mapper/**/*.xml
+
+com:
+  dobbinsoft:
+    db:
+      auto-build-table: true
+    system:
+      admin-session-period: 43200
+      user-session-period: 43200
+      mutex-login: false
+    captcha:
+      enable: aj
+    oss:
+      enable: aliyun
+      ali-access-key-id: Lxxxxxxxxxxxxxxxxx3
+      ali-access-key-secret: pxxxxxxxxxxxxxxxxxxxxxA
+      ali-endpoint: oss-cn-hangzhou.aliyuncs.com
+      ali-bucket: xxxxx
+      ali-base-url: https://xxxxx.oss-cn-hangzhou.aliyuncs.com
+    sms:
+      enable: aliyun
+      aliyun-access-key-id: Lxxxxxxxxxxxxxxxxxb
+      aliyun-access-key-secret: yxxxxxxxxxxxxxxxxxu
+      aliyun-signature: xxxx
+      aliyun-register-template-id: SMS_xxxx
+      aliyun-bind-phone-template-id: SMS_xxxx
+      aliyun-reset-password-template-id: SMS_xxxx
+      aliyun-admin-login-template-id: SMS_xxxx
+    admin-notify:
+      enable: mock
+    advert:
+      top-sales-num: 10
+    order:
+      auto-confirm-time: 259200
+      auto-cancel-time: 900
+
+
+aj:
+  captcha:
+    aes-status: true
+    cache-type: redis
+    font-size: 25
+    font-style: 1
+    font-type: dejavu
+    history-data-clear-enable: false
+    interference-options: 2
+    jigsaw: classpath:images/jigsaw
+    pic-click: classpath:images/pic-click
+    req-check-minute-limit: 60
+    req-frequency-limit-enable: false
+    req-get-lock-limit: 5
+    req-get-lock-seconds: 360
+    req-get-minute-limit: 30
+    req-verify-minute-limit: 60
+    slip-offset: 5
+    type: default
+    water-font: dejavu
+    water-mark: dobbinsoft
