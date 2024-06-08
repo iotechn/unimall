@@ -26,7 +26,7 @@ public class PaySelector {
     private SessionUtil<UserDTO, AdminDTO> sessionUtil;
 
     public void packPayChannel(MatrixPayUnifiedOrderRequest orderRequest, int payPlatform, String payChannel) throws ServiceException {
-// 设置支付请求基本信息
+        // 设置支付请求基本信息
         orderRequest.setPayPlatform(PayPlatformType.getByCode(payPlatform));
         if (PayPlatformType.MP.getCode() == payPlatform) {
             if (PayChannelType.WX.getCode().equals(payChannel)) {

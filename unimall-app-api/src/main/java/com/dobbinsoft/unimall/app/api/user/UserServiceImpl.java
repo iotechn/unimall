@@ -20,6 +20,7 @@ import com.dobbinsoft.unimall.data.domain.UserDO;
 import com.dobbinsoft.unimall.data.dto.UserDTO;
 import com.dobbinsoft.unimall.data.dto.admin.AdminDTO;
 import com.dobbinsoft.unimall.data.dto.user.*;
+import com.dobbinsoft.unimall.data.enums.UserLevelType;
 import com.dobbinsoft.unimall.data.enums.UserLoginType;
 import com.dobbinsoft.unimall.data.enums.UserStatusType;
 import com.dobbinsoft.unimall.data.exception.ExceptionDefinition;
@@ -114,6 +115,8 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
         userDO.setGmtUpdate(now);
         userDO.setGmtCreate(now);
         userDO.setSalt(salt);
+        userDO.setStatus(UserStatusType.ACTIVE.getCode());
+        userDO.setLevel(UserLevelType.COMMON.getCode());
         userMapper.insert(userDO);
         //返回用户DTO
         cacheComponent.del(CacheConst.USER_VERIFY_CODE_PREFIX + phone);
@@ -465,6 +468,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 newUserDO.setLastLoginIp(ip);
                 newUserDO.setGmtLastLogin(now);
                 newUserDO.setStatus(UserStatusType.WAIT_PHONE.getCode());
+                newUserDO.setLevel(UserLevelType.COMMON.getCode());
                 newUserDO.setSalt(RandomStringUtils.randomNumeric(6));
                 userMapper.insert(newUserDO);
                 //这一步是为了封装上数据库上配置的默认值
@@ -535,6 +539,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 newUserDO.setGender(wxH5UserInfoResultDTO.getSex());
                 newUserDO.setWxH5OpenId(openid);
                 newUserDO.setLastLoginIp(ip);
+                newUserDO.setStatus(UserStatusType.ACTIVE.getCode());
                 newUserDO.setStatus(UserStatusType.WAIT_PHONE.getCode());
                 newUserDO.setGmtLastLogin(now);
                 newUserDO.setSalt(RandomStringUtils.randomNumeric(6));
@@ -575,6 +580,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
             newUserDO.setWxAppOpenId(openid);
             newUserDO.setLastLoginIp(ip);
             newUserDO.setGmtLastLogin(now);
+            newUserDO.setStatus(UserStatusType.ACTIVE.getCode());
             newUserDO.setStatus(UserStatusType.WAIT_PHONE.getCode());
             newUserDO.setSalt(RandomStringUtils.randomNumeric(6));
             userMapper.insert(newUserDO);
@@ -618,6 +624,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
 //            newUserDO.setLastLoginIp(ip);
 //            newUserDO.setGmtLastLogin(LocalDateTime.now());
 //            newUserDO.setStatus(UserStatusType.WAIT_PHONE.getCode());
+//            newUserDO.setLevel(UserLevelType.COMMON.getCode());
 //            newUserDO.setSalt(RandomStringUtils.randomNumeric(6));
 //            userMapper.insert(newUserDO);
 //            userDO = userMapper.selectById(newUserDO.getId());

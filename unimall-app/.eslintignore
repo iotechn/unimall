@@ -1,0 +1,6 @@
+build/*.js
+src/assets
+src/components
+src/uni_modules
+src/*.json
+src/libs/im
