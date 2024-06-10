@@ -17,6 +17,7 @@ import com.dobbinsoft.unimall.data.properties.UnimallWxPayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,9 @@ import java.util.*;
 
 @Configuration
 public class PayConfig {
+
+    @Autowired
+    private ServerProperties serverProperties;
 
     @Autowired
     private UnimallWxPayProperties unimallWxPayProperties;
@@ -156,9 +160,10 @@ public class PayConfig {
     @Bean
     public ServletRegistrationBean servletRegistrationBean() {
         Map<String, MatrixPayCallbackHandler> urlHandlerMap = new HashMap<>();
+        String servletContext = "/".equalsIgnoreCase(serverProperties.getServlet().getContextPath()) ? "" : serverProperties.getServlet().getContextPath();
         urlHandlerMap.put("/cb/pay", orderPayCallbackHandler());
         urlHandlerMap.put("/cb/pay/vip", vipOrderPayCallbackHandler());
-        return new ServletRegistrationBean(new PayHttpCallbackServlet(matrixPayService(), urlHandlerMap), urlHandlerMap.keySet().toArray(new String[]{}));
+        return new ServletRegistrationBean(new PayHttpCallbackServlet(matrixPayService(), urlHandlerMap, servletContext), urlHandlerMap.keySet().toArray(new String[]{}));
     }
 
 

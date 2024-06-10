@@ -458,7 +458,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
         int actualPrice = 0;
         for (OrderDO orderDO : orderList) {
             Integer status = orderDO.getStatus();
-            if (status != OrderStatusType.UNPAY.getCode()) {
+            if (!Objects.equals(status, OrderStatusType.UNPAY.getCode())) {
                 throw new ServiceException(ExceptionDefinition.ORDER_STATUS_NOT_SUPPORT_PAY);
             }
             actualPrice += orderDO.getActualPrice();
@@ -726,6 +726,7 @@ public class OrderServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
             } else {
                 orderSkuDO.setPrice(skuDTO.getPrice());
             }
+            orderSkuDO.setWeight(skuDTO.getWeight());
             orderSkuDO.setSkuId(skuDTO.getId());
             orderSkuDO.setSpuId(skuDTO.getSpuId());
             orderSkuDO.setOrderNo(orderDO.getOrderNo());
