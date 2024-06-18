@@ -35,7 +35,7 @@ public interface OrderService {
             @NotNull @HttpParam(name = "orderId", type = HttpParamType.COMMON, description = "订单号") Long orderId,
             @NotNull @HttpParam(name = "userId", type = HttpParamType.USER_ID, description = "用户Id") Long userId) throws ServiceException;
 
-    @HttpMethod(description = "微信小程序预先支付")
+    @HttpMethod(description = "统一预先支付")
     public Object prepay(
             @HttpParam(name = "parentOrderNo", type = HttpParamType.COMMON, description = "父单串号") String parentOrderNo,
             @HttpParam(name = "orderNo", type = HttpParamType.COMMON, description = "订单串号") String orderNo,

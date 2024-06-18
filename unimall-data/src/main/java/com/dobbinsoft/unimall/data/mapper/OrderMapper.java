@@ -6,6 +6,7 @@ import com.dobbinsoft.unimall.data.dto.order.OrderDTO;
 import com.dobbinsoft.unimall.data.model.KVModel;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,9 +27,9 @@ public interface OrderMapper extends IMapper<OrderDO> {
 
     public List<KVModel<String, Long>> selectChannelStatistics();
 
-    public List<KVModel<String, Long>> selectOrderCountStatistics(String gmtStart);
+    public List<KVModel<String, Long>> selectOrderCountStatistics(LocalDate gmtStart);
 
-    public List<KVModel<String, Long>> selectOrderSumStatistics(String gmtStart);
+    public List<KVModel<String, Long>> selectOrderSumStatistics(LocalDate gmtStart);
 
     public List<OrderDO> selectExpireOrderNos(@Param("status") Integer status, @Param("time") LocalDateTime time);
 

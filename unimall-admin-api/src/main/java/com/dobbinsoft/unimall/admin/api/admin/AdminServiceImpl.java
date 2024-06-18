@@ -7,7 +7,9 @@ import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.core.model.GatewayResponse;
 import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.fw.support.model.Page;
+import com.dobbinsoft.fw.support.properties.FwSystemProperties;
 import com.dobbinsoft.fw.support.service.BaseService;
+import com.dobbinsoft.fw.support.session.SessionStorage;
 import com.dobbinsoft.fw.support.sms.SMSClient;
 import com.dobbinsoft.fw.support.sms.SMSResult;
 import com.dobbinsoft.fw.support.utils.DigestUtils;
@@ -55,9 +57,6 @@ import java.util.concurrent.TimeUnit;
 public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements AdminService {
 
     @Autowired
-    private StringRedisTemplate userRedisTemplate;
-
-    @Autowired
     private AdminMapper adminMapper;
 
     @Autowired
@@ -73,7 +72,13 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
     private SMSClient smsClient;
 
     @Autowired
+    private SessionStorage sessionStorage;
+
+    @Autowired
     private UnimallAdminNotifyProperties unimallAdminNotifyProperties;
+
+    @Autowired
+    private FwSystemProperties fwSystemProperties;
 
     private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
@@ -115,20 +120,19 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
         adminDTO.setPassword(null);
         List<RolePermissionDO> rolePermissionDOList = rolePermissionMapper.selectList(
                 new QueryWrapper<RolePermissionDO>()
-                        .in("role_id", ids)
-                        .eq("deleted", 0));
+                        .in("role_id", ids));
         List<String> permissionNames = new LinkedList<>();
         rolePermissionDOList.forEach(item -> {
             permissionNames.add(item.getPermission());
         });
         adminDTO.setPerms(permissionNames);
-        userRedisTemplate.opsForValue().set(Const.ADMIN_REDIS_PREFIX + accessToken, JacksonUtil.toJSONString(adminDTO), 30, TimeUnit.MINUTES);
+        sessionStorage.save(Const.ADMIN_REDIS_PREFIX, accessToken, adminDTO, fwSystemProperties.getAdminSessionPeriod());
         return accessToken;
     }
 
     @Override
     public String logout(String accessToken, Long adminId) throws ServiceException {
-        userRedisTemplate.delete(Const.ADMIN_REDIS_PREFIX + accessToken);
+        sessionStorage.logout(Const.ADMIN_REDIS_PREFIX, accessToken);
         return "ok";
     }
 
@@ -240,7 +244,7 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
         if (admin == null) {
             throw new ServiceException(ExceptionDefinition.ADMIN_USER_NOT_EXIST);
         }
-        if (!DigestUtils.md5Hex(admin.getPassword() + admin.getSalt()).equals(admin.getPassword())) {
+        if (!DigestUtils.md5Hex(password + admin.getSalt()).equals(admin.getPassword())) {
             throw new ServiceException(ExceptionDefinition.ADMIN_PASSWORD_ERROR);
         }
         String code = RandomStringUtils.randomNumeric(6);

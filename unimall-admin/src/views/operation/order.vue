@@ -121,7 +121,7 @@
       <!--<el-table-column align="center" label="支付金额" prop="actualPrice"/>-->
 
       <el-table-column align="center" width="140" label="创建时间" prop="gmtCreate">
-        <template slot-scope="scope">{{ scope.row.gmtCreate | formatTime }}</template>
+        <template slot-scope="scope">{{ scope.row.gmtCreate }}</template>
       </el-table-column>
 
       <el-table-column align="center" width="140" label="物流渠道" prop="shipCode">

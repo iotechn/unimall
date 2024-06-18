@@ -2,6 +2,7 @@ package com.dobbinsoft.unimall.admin.api.dashboard;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dobbinsoft.fw.core.exception.ServiceException;
+import com.dobbinsoft.fw.support.utils.TimeUtils;
 import com.dobbinsoft.unimall.data.domain.OrderDO;
 import com.dobbinsoft.unimall.data.domain.SpuDO;
 import com.dobbinsoft.unimall.data.dto.DashboardIntegralDTO;
@@ -12,8 +13,7 @@ import com.dobbinsoft.unimall.data.model.KVModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,11 +41,9 @@ public class DashboardServiceImpl implements DashboardService {
         dto.setWaitStockCount(orderWaitStock.intValue());
         dto.setGoodsCount(spuCount.intValue());
         int days = 7;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
-        String startDay = sdf.format(LocalDateTime.now().plusDays(days));
+        LocalDate startDay = LocalDate.now().plusDays(-days);
         List<KVModel<String, Long>> orderCountKVList = orderMapper.selectOrderCountStatistics(startDay);
         List<KVModel<String, Long>> orderSumKVList = orderMapper.selectOrderSumStatistics(startDay);
-        SimpleDateFormat sdfDay = new SimpleDateFormat("yyyy-MM-dd");
         List<Object[]> orderCount = new LinkedList<>();
         Object[] orderCountNameArray = new Object[days];
         Object[] orderCountValueArray = new Object[days];
@@ -60,8 +58,8 @@ public class DashboardServiceImpl implements DashboardService {
         dto.setDaysSum(orderSum);
         //这里是在补全 group by 为 0 的情况
         for (int i = 0; i < days; i++) {
-            LocalDateTime date = LocalDateTime.now().plusDays(-i);
-            String key = sdfDay.format(date);
+            LocalDate date = LocalDate.now().plusDays(-i);
+            String key = TimeUtils.localDateToString(date, "yyyy-MM-dd");
             int i1 = orderCountKVList.indexOf(new KVModel<>(key, null));
             if (i1 >= 0) {
                 orderCountNameArray[days - i - 1] = key;

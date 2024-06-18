@@ -70,4 +70,4 @@ unimall.log.*.tmp
 /unimall-app/pages/plugins/
 /unimall-admin/src/views/plugins/
 
-Dockerfile_demo
+Dockerfile

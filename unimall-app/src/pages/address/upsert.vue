@@ -18,8 +18,8 @@
       <text class="tit">
         城市
       </text>
-      <view placeholder="请选择城市" style="width: 100%; height: 60rpx" @click="lotusAddressData.visible = true">
-        <text>{{ addressData.province + ' ' + addressData.city + ' ' + addressData.county }}</text>
+      <view placeholder="请选择城市" style="width: 100%; height: 60rpx; display: flex; align-items: center;" @click="lotusAddressData.visible = true">
+        <text style="font-size: 30rpx; color: #303133;">{{ addressData.province + ' ' + addressData.city + ' ' + addressData.county }}</text>
         <lotus-address
           v-show="lotusAddressData.visible"
           :lotus-address-data="lotusAddressData"

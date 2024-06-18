@@ -84,14 +84,14 @@
 
           <div class="login-menu">
             <a
-              href="#"
-              @click.stop="activeName='user'">驽驹官网</a>
+              href="https://www.dobbinsoft.com"
+              @click.stop="activeName='user'">道宾云官网</a>
             <a
-              href="#"
-              @click.stop="activeName='code'">客服</a>
+              href="https://console.dobbinsoft.com"
+              @click.stop="activeName='code'">SaaS服务</a>
             <a
-              href="#"
-              @click.stop="activeName='third'">Test</a>
+              href="https://www.dobbinsoft.com"
+              @click.stop="activeName='third'">多商户平台</a>
           </div>
         </div>
 

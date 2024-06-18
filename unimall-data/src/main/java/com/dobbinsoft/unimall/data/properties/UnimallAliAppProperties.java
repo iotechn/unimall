@@ -27,6 +27,9 @@ public class UnimallAliAppProperties {
 
     private String appPublicKey2;
 
+    /**
+     * 应用私钥匙
+     */
     private String appPrivateKey2;
 
     private String appNotifyUrl;

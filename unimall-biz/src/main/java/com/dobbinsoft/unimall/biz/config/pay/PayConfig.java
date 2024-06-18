@@ -84,67 +84,7 @@ public class PayConfig {
 
     @Bean
     public MatrixPayService matrixPayService() {
-        MatrixPayServiceImpl matrixPayService = new MatrixPayServiceImpl(new PayDynamicPropertiesImpl());
-        List<PayProperties> payProperties = new ArrayList<>();
-        if (!ObjectUtils.isEmpty(unimallAliAppProperties.getMiniAppId())) {
-            payProperties.add(new AbstractPayProperties() {
-                @Override
-                public String getAliAppId() {
-                    return unimallAliAppProperties.getMiniAppId();
-                }
-
-                @Override
-                public String getAliMchPrivateKey() {
-                    return unimallAliAppProperties.getMiniAppPrivateKey2();
-                }
-
-                @Override
-                public String getAliAliPublicKey() {
-                    return unimallAliAppProperties.getMiniAppPublicKey1();
-                }
-            });
-        }
-        if (!ObjectUtils.isEmpty(unimallAliAppProperties.getAppId())) {
-            payProperties.add(new AbstractPayProperties() {
-                @Override
-                public String getAliAppId() {
-                    return unimallAliAppProperties.getAppId();
-                }
-
-                @Override
-                public String getAliMchPrivateKey() {
-                    return unimallAliAppProperties.getAppPrivateKey2();
-                }
-
-                @Override
-                public String getAliAliPublicKey() {
-                    return unimallAliAppProperties.getAppPublicKey1();
-                }
-            });
-        }
-        if (!ObjectUtils.isEmpty(unimallAliAppProperties.getWapAppId())) {
-            payProperties.add(new AbstractPayProperties() {
-                @Override
-                public String getAliAppId() {
-                    return unimallAliAppProperties.getWapAppId();
-                }
-
-                @Override
-                public String getAliMchPrivateKey() {
-                    return unimallAliAppProperties.getWapAppPrivateKey2();
-                }
-
-                @Override
-                public String getAliAliPublicKey() {
-                    return unimallAliAppProperties.getWapAppPublicKey1();
-                }
-            });
-        }
-        /**
-         * 先将支付宝client加载到内存
-         */
-//        matrixPayService.configWarmUp(payProperties);
-        return matrixPayService;
+        return new MatrixPayServiceImpl(new PayDynamicPropertiesImpl());
     }
 
     @Bean

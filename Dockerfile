@@ -1,28 +1,13 @@
-FROM centos:7
-WORKDIR /home/dobbin
-ENV RUN_ENV="prd"
-RUN chmod 755 /home/dobbin/ -R
+FROM registry.cn-beijing.aliyuncs.com/dobbinsoft/dobbinjdk:21
+COPY ./unimall-runner/target/unimall-runner-v3.jar main.jar
 
-# nginx
-RUN yum install epel-release -y && yum install nginx -y
-COPY ./env/nginx.conf /etc/nginx/nginx.conf
-COPY ./env/unimall.key /etc/nginx/ssl/unimall.key
-COPY ./env/unimall.pem /etc/nginx/ssl/unimall.pem
-COPY ./unimall-admin/dist /usr/share/nginx/html
-RUN echo nginx >> /home/dobbin/start.sh
-
-
-EXPOSE 443
-EXPOSE 80
-
-# jvm
-RUN yum -y install java-1.8.0-openjdk.x86_64
-COPY ./unimall-runner/target/unimall-runner-v3.jar unimall.jar
+ENV RUN_ENV="prod"
+EXPOSE 8000
 
 ENV JAVA_OPTS="\
 -server \
--Xmx1024m \
--Xms1024m \
+-Xmx768m \
+-Xms768m \
 -Xmn512m \
 -Xloggc:/home/dobbin/gc.log \
 -XX:+IgnoreUnrecognizedVMOptions \
@@ -44,6 +29,5 @@ ENV JAVA_OPTS="\
 -XX:CMSInitiatingOccupancyFraction=75 \
 -XX:+UseCMSInitiatingOccupancyOnly \
 -XX:+ExitOnOutOfMemoryError"
-RUN echo "java \$JAVA_OPTS -Dspring.profiles.active=\${RUN_ENV} -jar unimall.jar" >> /home/dobbin/start.sh
-RUN chmod +x /home/dobbin/start.sh
-CMD ["sh", "-c", "/home/dobbin/start.sh" ]
+
+CMD ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=${RUN_ENV} -jar main.jar" ]
