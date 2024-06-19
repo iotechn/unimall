@@ -543,6 +543,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 newUserDO.setStatus(UserStatusType.WAIT_PHONE.getCode());
                 newUserDO.setGmtLastLogin(now);
                 newUserDO.setSalt(RandomStringUtils.randomNumeric(6));
+                newUserDO.setLevel(UserLevelType.COMMON.getCode());
                 userMapper.insert(newUserDO);
                 //这一步是为了封装上数据库上配置的默认值
                 userDO = userMapper.selectById(newUserDO.getId());
@@ -555,6 +556,7 @@ public class UserServiceImpl extends BaseService<UserDTO, AdminDTO> implements U
                 return userDTO;
             }
         } else {
+            logger.error("[微信H5登录] 回复与预期不一致:{}", json);
             throw new ServiceException(ExceptionDefinition.USER_THIRD_PART_LOGIN_FAILED);
         }
     }

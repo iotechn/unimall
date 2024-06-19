@@ -42,6 +42,7 @@ mvnw.cmd
 ###properties###
 
 /unimall-runner/src/main/resources/application-local.yaml
+/unimall-runner/src/main/resources/application-prod.yaml
 
 ### target ###
 /target/

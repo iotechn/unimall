@@ -76,10 +76,10 @@ spec:
           name: unimall
           resources:
             limits:
-              cpu: 1000m
+              cpu: 150m
               memory: 1124Mi
             requests:
-              cpu: 1000m
+              cpu: 150m
               memory: 1124Mi
           securityContext:
             privileged: false

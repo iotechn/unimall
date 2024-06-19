@@ -1,5 +1,5 @@
 server:
-  port: 8000
+  port: ${UNIMALL_PORT:8000}
   servlet:
     context-path: /unimall
 
@@ -16,22 +16,22 @@ spring:
       idle-timeout: 30000
       maximum-pool-size: 15
       minimum-idle: 5
-    password: 123456
+    password: ${UNIMALL_DB_PASSWORD:8000}
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://192.168.123.180:31230/unimall?autoReconnect=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+    url: jdbc:mysql://${UNIMALL_DB_HOST:localhost}/${UNIMALL_DB_PORT:3306}?autoReconnect=true&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
     username: root
 
   redis:
     master-name: mymaster
     mode: single
-    database: 6
-    host: 192.168.123.180:31235
+    database: ${UNIMALL_REDIS_DATABASE:0}
+    host: ${UNIMALL_REDIS_HOST:localhost}:${UNIMALL_REDIS_PORT:6379}
   user-redis:
-    database: 7
-    host: 192.168.123.180:31235
+    database: ${UNIMALL_REDIS_DATABASE:0}
+    host: ${UNIMALL_REDIS_HOST:localhost}:${UNIMALL_REDIS_PORT:6379}
   lock-redis:
-    database: 8
-    host: 192.168.123.180:31235
+    database: ${UNIMALL_REDIS_DATABASE:0}
+    host: ${UNIMALL_REDIS_HOST:localhost}:${UNIMALL_REDIS_PORT:6379}
 
 mybatis-plus:
   global-config:
@@ -48,16 +48,14 @@ com:
     system:
       admin-session-period: 43200
       user-session-period: 43200
-      mutex-login: false
-    captcha:
-      enable: aj
+      mutex-login: true # 是否允许同一个账户多地登录
     oss:
       enable: aliyun
-      ali-access-key-id: Lxxxxxxxxxxxxxxxxx3
-      ali-access-key-secret: pxxxxxxxxxxxxxxxxxxxxxA
-      ali-endpoint: oss-cn-hangzhou.aliyuncs.com
-      ali-bucket: xxxxx
-      ali-base-url: https://xxxxx.oss-cn-hangzhou.aliyuncs.com
+      ali-access-key-id: ${UNIMALL_OSS_ALI_ACCESS_KEY_ID:xxx}
+      ali-access-key-secret: ${UNIMALL_OSS_ALI_ACCESS_KEY_SECRET:xxx}
+      ali-endpoint: ${UNIMALL_OSS_ALI_ENDPOINT:xxx}
+      ali-bucket: ${UNIMALL_OSS_ALI_BUCKET:xxx}
+      ali-base-url: ${UNIMALL_OSS_ALI_BASE_URL:xxx}
     sms:
       enable: aliyun
       aliyun-access-key-id: Lxxxxxxxxxxxxxxxxxb
@@ -75,41 +73,18 @@ com:
       auto-confirm-time: 259200
       auto-cancel-time: 900
     wx-app:
-      app-id: xxxx
-      app-secret: xxxx
-      mini-app-id: wxa5c9e824dae2c62c
-      mini-app-secret: 8daeaadee2a1d0aba474bfeefd5d8a29
-      h5-app-id: xxxx
-      h5-app-secret: xxxx
+      app-id: ${UNIMALL_APP_ID:xxx}
+      app-secret: ${UNIMALL_APP_SECRET:xxx}
+      mini-app-id: ${UNIMALL_MINI_APP_ID:xxx}
+      mini-app-secret: ${UNIMALL_MINI_APP_SECRET:xxx}
+      h5-app-id: ${UNIMALL_H5_APP_ID:xxx}
+      h5-app-secret: ${UNIMALL_H5_APP_SECRET:xxx}
     wx-pay:
-      mch-id: 1538757851
-      mch-key: DYmJ5wc65cRUS4nLHmHmpn6MMhw79D6y
-      key-path: /xxx/xxx
-      notify-url: https://unimall.v3.dobbinsoft.com/unimall/cb/pay
+      mch-id: ${UNIMALL_WX_PAY_MCH_ID:xxx}
+      mch-key: ${UNIMALL_WX_PAY_MCH_KEY:xxx}
+      key-path: ${UNIMALL_WX_PAY_KEY_PATH:/home/dobbin/cert/application.p12}
+      notify-url: ${UNIMALL_WX_NOTIFY_URL:https://unimallv4.dobbinsoft.com/unimall/cb/pay}
     ali-app:
       ali-gateway: https://openapi.alipay.com/gateway.do
       app-id: 2021004150664371
       app-private-key2: MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC+Hcw44KismUFBY5Vt0oiAny8A/9TRsdwRBwvWz+C8QpCQlMKiLcFFzvNO5To/IZCMq88lFFUbCB/6FQ1ngmVhHT32XSZVY2jt5QKfdLyc6+320ZfmzhIcbmHr5gxx63gHDQ4Bn6nCz81c/Qd/m2DD523U7CgVshlbjcpl6uUG+IgdApaleczM5ITPzQscidRIScoD1O5mA+KqaCC1tjX0qoiUeIarbVyoUn+arznbVkgcPrAqtPW2ipjoFr35T4BArGlIA9auo0A8tkGTJX3Os44qRH+JCiwvzbawfhgm5Ss6cWZ1o6Y772TymmPQv3ZBhw4x1+cG1sQHGA7IwtGJAgMBAAECggEARDBH2XaqyQ1G3H8tT3CdyRRPNZqM6JFUjz7pvihdQOjXFSRmEuk6UyGBHyEUnSQaxnmxGGmMhN+LKJV4c1HPrt9gJAcRArtfHURwhmTGabotZcOTKhNrZ4sn0AZ5HDsKl+zUwzxTFS6XR+zxTZGbSWiuehoh3nY8phvbJmbzsmW/lTiwm0llZj5EiPT6ayam7CE8GZszNJmJpDNSIb65kv9iaadu56C/iqVLoSt3lxutCfYCE2SJ7Bb+ZZxy/1dNPJNtPLzBy84DSxCvkPHgyncrzJ4m7oaHZ3stcwb/42XpsrKLi1NvlvtQ3jqm1iXmKoQHD/3NYycRy2ac08lJSQKBgQDgULQRyamA4Q64I1Mn3CxuTSvujMxHTxnhnbfWqHDBk69nvyGT3FlfukpXSm5nTgANAkbhZsruUrsGV/x/IVqwNCkHVdbPLb1vIHy0bP6QXd32qAit6VY/BhBMPQvoDniL6zXjnM2KbakJC87VAhKrKvjrtVs49Z6CD86KeHFKYwKBgQDY+HSHpZ7ujBCUa4zdyGbJFDqsA+zfSdTfjV1BADb6KjYelBrvEprkFWHZ9bHiAsUTgZ2WbDFT5u0wtom3qzanA3dywnleRov0mkaMU0osUhnPJDPlLSitTI/9q8pUDXhk7Y+QX/WNJy2B+xnUXojv8Cx9+Bau4nMUZMHm0/GiIwKBgQDWbG7lPgd4+inu3V2lEbOrMLvZCeBQHg4YfIJ6gINgl8MpgiwfwpfwiQx9StokiAxGYzHMT02W6aB8HOlxwTmGjCXYLDbtzsRxkPWEJ1hkOkZufQvm6tEV5772kbhq+EJFRe86h+528AKQcighuByOYMKX1sG/vhLqMx/1f9KUDwKBgQDQ46ONVS8Gi2MLAeDFRcNvpEI4ii7rarG/6OH3SrWjdDBWkFC+CzOEk/F5Xsq7xd7nQMrvn4p+NL33QEamxfgAI55EpmcjFNh5zm5Ne4LV2NVwUHKGGkwnTKb0mwhYk/9tbCnj3f8Svr1Zft8HT1yXZKvxO4DbLrmM0NS93x+r8QKBgQCxFElDHymRB9SJ1y/T/jnOPnhI6iG8vdX5PYbEFmKiOPfFSWYPBs+GrXeDOawOSF+8korXuFOcps7EZLoBmjpWMoUmV8Sdh+2ZLIX7M250FfKNuKXidJPQabp14jCxynjCsorMTV5h/78kDL/46sVlJbM9BtZ0ojRRw4Eg53WuOg==
-
-
-aj:
-  captcha:
-    aes-status: true
-    cache-type: redis
-    font-size: 25
-    font-style: 1
-    font-type: dejavu
-    history-data-clear-enable: false
-    interference-options: 2
-    jigsaw: classpath:images/jigsaw
-    pic-click: classpath:images/pic-click
-    req-check-minute-limit: 60
-    req-frequency-limit-enable: false
-    req-get-lock-limit: 5
-    req-get-lock-seconds: 360
-    req-get-minute-limit: 30
-    req-verify-minute-limit: 60
-    slip-offset: 5
-    type: default
-    water-font: dejavu
-    water-mark: dobbinsoft

@@ -1,7 +1,7 @@
 FROM registry.cn-beijing.aliyuncs.com/dobbinsoft/dobbinjdk:21
 COPY ./unimall-runner/target/unimall-runner-v4.jar main.jar
 
-ENV RUN_ENV="default"
+ENV RUN_ENV="prod"
 EXPOSE 8000
 
 ENV JAVA_OPTS="\
