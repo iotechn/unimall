@@ -1,6 +1,6 @@
 const config = {
   baseUrl: 'https://unimallv4.dobbinsoft.com/unimall',
-  h5Appid: 'wxb66b599f7f61b46f',
+  h5Appid: 'wx0a03a0d2b83178ab',
   debug: false,
   OSS_PROVIDER: 'aliyun'
 }
