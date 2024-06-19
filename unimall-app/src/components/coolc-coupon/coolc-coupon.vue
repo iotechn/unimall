@@ -3,7 +3,7 @@
     <view class="coupon-money">
       <view v-if="!types" class="nick">{{ item.title }}</view>
       <view :style="{color:theme}" class="layof">￥{{ item.discount / 100.0 }}</view>
-      <view v-if="item.couponId" class="end_time">有效期至{{ item.gmtEnd | dateFormat }}</view>
+      <view v-if="item.couponId" class="end_time">有效期至{{ item.gmtEnd }}</view>
       <view v-if="!item.couponId && item.gmtEnd" class="end_time">在{{ item.gmtEnd }}前有效。 可领{{ item.limit }}张，已领{{ item.nowCount }}张</view>
       <view v-if="!item.couponId && !item.gmtEnd" class="end_time">在领取后{{ item.days }}天内有效。可领{{ item.limit }}张，已领{{ item.nowCount }}张</view>
       <view v-if="!types">

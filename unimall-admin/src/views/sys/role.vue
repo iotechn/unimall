@@ -23,7 +23,7 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="角色名称" prop="name" sortable />
+      <el-table-column align="center" label="角色名称" prop="name" />
 
       <el-table-column align="center" label="说明" prop="desc" />
 

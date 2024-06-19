@@ -119,7 +119,7 @@
           创建时间
         </text>
         <text class="cell-tip">
-          {{ orderDetail.gmtCreate | dateFormat }}
+          {{ orderDetail.gmtCreate }}
         </text>
       </view>
       <view v-if="orderDetail.payChannel" class="yt-list-cell b-b">
@@ -135,7 +135,7 @@
           支付时间
         </text>
         <text class="cell-tip">
-          ￥{{ orderDetail.gmtPay | dateFormat }}
+          {{ orderDetail.gmtPay }}
         </text>
       </view>
       <view class="yt-list-cell desc-cell">

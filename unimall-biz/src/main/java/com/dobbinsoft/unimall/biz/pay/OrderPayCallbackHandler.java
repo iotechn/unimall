@@ -103,7 +103,7 @@ public class OrderPayCallbackHandler implements MatrixPayCallbackHandler {
 
             for (OrderDO orderDO : orderDOList) {
                 actualPrice += orderDO.getActualPrice();
-                if (orderDO.getStatus().intValue() != status) {
+                if (orderDO.getStatus() != status) {
                     return MatrixPayNotifyResponse.fail("订单子单状态不一致");
                 }
             }
@@ -149,7 +149,7 @@ public class OrderPayCallbackHandler implements MatrixPayCallbackHandler {
                     for (OrderDO subOrder : subOrderList) {
                         List<OrderSkuDO> subOrderSkuList = orderSkuMap.get(subOrder.getOrderNo());
                         List<OrderSkuDO> groupShopSkuList = subOrderSkuList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).collect(Collectors.toList());
-                        if (groupShopSkuList.size() > 0) {
+                        if (!groupShopSkuList.isEmpty()) {
                             // 若存在团购商品
                             OrderDO groupShopUpdateDO = new OrderDO();
                             groupShopUpdateDO.setPayId(payId);
@@ -181,7 +181,7 @@ public class OrderPayCallbackHandler implements MatrixPayCallbackHandler {
                         new QueryWrapper<OrderSkuDO>()
                                 .eq("order_no", orderAbstractNo));
                 List<OrderSkuDO> groupShopSkuList = orderSkuDOList.stream().filter(item -> (item.getActivityType() != null && item.getActivityType() == SpuActivityType.GROUP_SHOP.getCode())).collect(Collectors.toList());
-                if (groupShopSkuList.size() > 0) {
+                if (!groupShopSkuList.isEmpty()) {
                     // 若存在团购商品
                     OrderDO groupShopUpdateDO = new OrderDO();
                     groupShopUpdateDO.setPayId(payId);

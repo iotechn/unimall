@@ -143,7 +143,7 @@
                 {{ item.title }}
               </text>
               <text class="time">
-                有效期至{{ item.gmtEnd | dateFormat }}
+                有效期至{{ item.gmtEnd }}
               </text>
             </view>
             <view class="right">

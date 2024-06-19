@@ -6,7 +6,6 @@
   "versionCode" : "100",
   "transformPx" : false,
   "app-plus" : {
-      /* 5+App特有相关 */
       "usingComponents" : true,
       "splashscreen" : {
           "alwaysShowBeforeRender" : true,
@@ -18,11 +17,8 @@
           "Payment" : {},
           "OAuth" : {}
       },
-      /* 模块配置 */
       "distribute" : {
-          /* 应用发布信息 */
           "android" : {
-              /* android打包配置 */
               "permissions" : [
                   "<uses-feature android:name=\"android.hardware.camera\"/>",
                   "<uses-feature android:name=\"android.hardware.camera.autofocus\"/>",
@@ -49,11 +45,10 @@
               ]
           },
           "ios" : {},
-          /* ios打包配置 */
           "sdkConfigs" : {
               "payment" : {
                   "weixin" : {
-                      "appid" : "wx6e1355f89b03fd2e"
+                      "appid" : "wx5b5151f58ec8d538"
                   },
                   "alipay" : {
                       "__platform__" : [ "ios", "android" ]
@@ -61,7 +56,7 @@
               },
               "oauth" : {
                   "weixin" : {
-                      "appid" : "wx6e1355f89b03fd2e",
+                      "appid" : "wx5b5151f58ec8d538",
                       "appsecret" : "73b5a5c361a32518a88c45e4c5643153"
                   }
               },
@@ -103,13 +98,10 @@
           }
       }
   },
-  /* SDK配置 */
   "quickapp" : {},
-  /* 快应用特有相关 */
   "mp-weixin" : {
-      /* 小程序特有相关 */
       "usingComponents" : true,
-      "appid" : "wxa5c9e824dae2c62c",
+      "appid" : "wx5b5151f58ec8d538",
       "setting" : {
           "urlCheck" : true
       }
@@ -120,9 +112,6 @@
       "router" : {
           "mode" : "history",
           "base" : "/h5/"
-      },
-      "devServer" : {
-          "disableHostCheck" : true
       }
   },
   "mp-alipay" : {

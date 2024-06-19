@@ -23,7 +23,7 @@
             <navigator :url="'/pages/order/detail?orderid=' + item.id">
               <view class="i-top b-b">
                 <text class="time">
-                  {{ item.gmtCreate | dateFormat }}
+                  {{ item.gmtCreate }}
                 </text>
                 <text class="state">
                   {{ statusMap[item.status] }}
@@ -111,7 +111,7 @@
             <navigator :url="'/pages/order/detail?orderid=' + item.id">
               <view class="i-top b-b">
                 <text class="time">
-                  {{ item.gmtCreate | dateFormat }}
+                  {{ item.gmtCreate }}
                 </text>
                 <text class="state">
                   {{ statusMap[item.status] }}

@@ -58,7 +58,7 @@
 
     <!-- 橱窗推荐 -->
     <view v-if="windowSpuList && windowSpuList.length > 0" class="f-header m-t">
-      <image src="/static/temp/h1.png" />
+      <image src="/static/h1.png" />
       <view class="tit-box">
         <text class="tit">
           橱窗推荐
@@ -122,7 +122,7 @@
 
     <!-- 分类推荐楼层 -->
     <view class="f-header m-t">
-      <image src="/static/temp/h1.png" />
+      <image src="/static/h1.png" />
       <view class="tit-box">
         <text class="tit">
           分类精选
@@ -162,7 +162,7 @@
 
     <!-- 销量top -->
     <view class="f-header m-t">
-      <image src="/static/temp/h1.png" />
+      <image src="/static/h1.png" />
       <view class="tit-box">
         <text class="tit">
           热销宝贝

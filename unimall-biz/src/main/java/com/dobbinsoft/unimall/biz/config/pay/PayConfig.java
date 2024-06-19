@@ -178,6 +178,11 @@ public class PayConfig {
         }
 
         @Override
+        public String getAliMchPublicKey() {
+            return null;
+        }
+
+        @Override
         public String getAliMchPrivateKey() {
             UserDTO user = sessionUtil.getUser();
             if (user == null) {
@@ -208,6 +213,11 @@ public class PayConfig {
             } else if (PayPlatformType.WAP.getCode() == platform) {
                 return unimallAliAppProperties.getWapAppPublicKey1();
             }
+            return null;
+        }
+
+        @Override
+        public String getAliAliRootCertPath() {
             return null;
         }
 

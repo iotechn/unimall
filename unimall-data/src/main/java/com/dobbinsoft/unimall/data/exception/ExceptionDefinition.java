@@ -32,6 +32,9 @@ public class ExceptionDefinition {
     public static final ServiceExceptionDefinition SYSTEM_BUSY =
             new ServiceExceptionDefinition(10007, "系统繁忙～");
 
+    public static final ServiceExceptionDefinition MATRIX_PAY_EXCEPTION =
+            new ServiceExceptionDefinition(10008, "支付发生异常");
+
     public static final ServiceExceptionDefinition USER_UNKNOWN_EXCEPTION =
             new ServiceExceptionDefinition(11000, "用户系统未知异常");
 
