@@ -391,7 +391,7 @@ export default {
         prePath = page.__page__.path + '?' + str
       }
       window.location = 'https://open.weixin.qq.com/connect/oauth2/authorize?' +
-        'appid=' + that.$api.config.h5Appid + '&redirect_uri=' + escape(href) + '&response_type=code&scope=snsapi_userinfo&state=' + escape(prePath) + '#wechat_redirect'
+        'appid=' + that.$api.config.h5Appid + '&redirect_uri=' + encodeURI(href) + '&response_type=code&scope=snsapi_userinfo&state=' + encodeURI(prePath) + '#wechat_redirect'
     },
     wechatH5LoginCallback(options) {
       // #ifdef H5
@@ -423,11 +423,19 @@ export default {
             if (options.state === '/pages/cart/cart' || options.state === '/pages/user/user' ||
               options.state === '/pages/index/index' || options.state === '/pages/category/category') {
               uni.switchTab({
-                url: options.state
+                url: options.state,
+                fail: (f) => {
+                  console.log('Switch Tab 失败')
+                  console.log(f)
+                }
               })
             } else {
               uni.redirectTo({
-                url: options.state
+                url: options.state,
+                fail: (f) => {
+                  console.log('Redirect To 失败')
+                  console.log(f)
+                }
               })
             }
           }
