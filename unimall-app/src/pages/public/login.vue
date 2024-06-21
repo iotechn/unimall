@@ -419,6 +419,7 @@ export default {
             })
           } else {
             // 不能重定向到tabbar页面
+            console.log('登录成功即将跳转到：' + options.state)
             if (options.state === '/pages/cart/cart' || options.state === '/pages/user/user' ||
               options.state === '/pages/index/index' || options.state === '/pages/category/category') {
               uni.switchTab({
