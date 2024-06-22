@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 /*
@@ -144,7 +145,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressDO getDefAddress(Long userId) throws ServiceException {
-        List<AddressDO> addressDOS = addressMapper.selectList(
+        List<AddressDO> addressDOS = userId == null ? Collections.emptyList() : addressMapper.selectList(
                 new QueryWrapper<AddressDO>()
                         .eq("user_id", userId)
                         .eq("default_address", 1));

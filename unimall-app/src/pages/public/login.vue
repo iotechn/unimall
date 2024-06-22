@@ -420,8 +420,8 @@ export default {
           } else {
             // 不能重定向到tabbar页面
             console.log('登录成功即将跳转到：' + options.state)
-            if (options.state === '/pages/cart/cart' || options.state === '/pages/user/user' ||
-              options.state === '/pages/index/index' || options.state === '/pages/category/category') {
+            if (options.state.startsWith('/pages/cart/cart') || options.state.startsWith('/pages/user/user') ||
+              options.state.startsWith('/pages/index/index') || options.state.startsWith('/pages/category/category')) {
               uni.switchTab({
                 url: options.state,
                 fail: (f) => {
