@@ -22,16 +22,13 @@ metadata:
     kubesphere.io/creator: admin
 spec:
   ports:
-    - name: http-8080
+    - name: http-8000
       protocol: TCP
-      port: 8080
-      targetPort: 8080
+      port: 8000
+      targetPort: 8000
   selector:
     k8s-app: unimall
     qcloud-app: unimall
-  clusterIP: 10.43.41.71
-  clusterIPs:
-    - 10.43.41.71
   type: ClusterIP
   sessionAffinity: None
   ipFamilies:
