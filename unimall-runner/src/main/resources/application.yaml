@@ -50,21 +50,22 @@ com:
       user-session-period: 43200
       mutex-login: true # 是否允许同一个账户多地登录
     oss:
-      enable: aliyun
+      enable: ${UNIMALL_OSS_ENABLE:mock}
       ali-access-key-id: ${UNIMALL_OSS_ALI_ACCESS_KEY_ID:xxx}
       ali-access-key-secret: ${UNIMALL_OSS_ALI_ACCESS_KEY_SECRET:xxx}
       ali-endpoint: ${UNIMALL_OSS_ALI_ENDPOINT:xxx}
       ali-bucket: ${UNIMALL_OSS_ALI_BUCKET:xxx}
       ali-base-url: ${UNIMALL_OSS_ALI_BASE_URL:xxx}
     sms:
-      enable: aliyun
-      aliyun-access-key-id: Lxxxxxxxxxxxxxxxxxb
-      aliyun-access-key-secret: yxxxxxxxxxxxxxxxxxu
-      aliyun-signature: xxxx
-      aliyun-register-template-id: SMS_xxxx
-      aliyun-bind-phone-template-id: SMS_xxxx
-      aliyun-reset-password-template-id: SMS_xxxx
-      aliyun-admin-login-template-id: SMS_xxxx
+      enable: ${UNIMALL_SMS_ENABLE:mock}
+      aliyun-access-key-id: ${UNIMALL_SMS_ALI_ACCESS_KEY_ID:xxx}
+      aliyun-access-key-secret: ${UNIMALL_SMS_ALI_ACCESS_KEY_SECRET:xxx}
+      aliyun-signature: ${UNIMALL_SMS_ALI_SIGNATURE:xxx}
+      aliyun-register-template-id: ${UNIMALL_SMS_TEMPLATE_ID:xxx}
+      aliyun-bind-phone-template-id: ${UNIMALL_SMS_TEMPLATE_ID:xxx}
+      aliyun-reset-password-template-id: ${UNIMALL_SMS_TEMPLATE_ID:xxx}
+      aliyun-admin-login-template-id: ${UNIMALL_SMS_TEMPLATE_ID:xxx}
+
     admin-notify:
       enable: mock
     advert:
