@@ -3,6 +3,11 @@ server:
   servlet:
     context-path: /unimall
 
+# 本地调试可以关闭，其他环境建议开启日志打印
+#logging:
+#  config: classpath:logs/logback.xml
+#  file:
+#    path: ~/logs/${spring.application.name}
 
 spring:
   application:

@@ -28,8 +28,8 @@
 
     <properties>
         <java.version>21</java.version>
-        <dobbinfw-support.version>2.0.1.4</dobbinfw-support.version>
-        <dobbinfw-launcher.version>2.0.0.1</dobbinfw-launcher.version>
+        <dobbinfw-support.version>2.0.2.1</dobbinfw-support.version>
+        <dobbinfw-launcher.version>2.0.2</dobbinfw-launcher.version>
     </properties>
 
 

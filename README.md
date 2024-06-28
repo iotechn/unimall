@@ -1,7 +1,7 @@
 ![](https://img.dobbinsoft.com/static/banner.jpg)
 ---  
 
-[![Release Version](https://img.shields.io/badge/release-3.0.0-brightgreen.svg)](https://gitee.com/iotechn/unimall) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://gitee.com/iotechn/unimall/pulls)
+[![Release Version](https://img.shields.io/badge/release-4.0.0-brightgreen.svg)](https://gitee.com/iotechn/unimall) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://gitee.com/iotechn/unimall/pulls)
 
 
 [(English Documents Available)](readme_en.md)
