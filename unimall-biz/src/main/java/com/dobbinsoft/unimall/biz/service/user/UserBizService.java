@@ -1,10 +1,15 @@
 package com.dobbinsoft.unimall.biz.service.user;
 
+import com.dobbinsoft.fw.core.Const;
+import com.dobbinsoft.fw.core.util.SessionUtil;
 import com.dobbinsoft.fw.support.component.CacheComponent;
+import com.dobbinsoft.fw.support.session.SessionStorage;
 import com.dobbinsoft.fw.support.utils.JacksonUtil;
 import com.dobbinsoft.unimall.data.constant.CacheConst;
 import com.dobbinsoft.unimall.data.domain.UserDO;
 import com.dobbinsoft.unimall.data.domain.VipOrderDO;
+import com.dobbinsoft.unimall.data.dto.UserDTO;
+import com.dobbinsoft.unimall.data.dto.admin.AdminDTO;
 import com.dobbinsoft.unimall.data.dto.user.WxAccessTokenResultDTO;
 import com.dobbinsoft.unimall.data.dto.user.WxH5TicketResultDTO;
 import com.dobbinsoft.unimall.data.enums.UserLevelType;
@@ -36,6 +41,12 @@ public class UserBizService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private SessionStorage sessionStorage;
+
+    @Autowired
+    private SessionUtil<UserDTO, AdminDTO> sessionUtil;
 
     private static final Logger logger = LoggerFactory.getLogger(UserBizService.class);
 
@@ -127,6 +138,11 @@ public class UserBizService {
         userDO.setLevel(UserLevelType.VIP.getCode());
         userDO.setId(userDO.getId());
         userMapper.updateById(userDO);
+
+        UserDTO user = sessionUtil.getUser();
+        user.setGmtVipExpire(userDO.getGmtVipExpire());
+        user.setLevel(userDO.getLevel());
+        sessionStorage.refresh(Const.USER_REDIS_PREFIX, user);
         return userDO;
     }
 

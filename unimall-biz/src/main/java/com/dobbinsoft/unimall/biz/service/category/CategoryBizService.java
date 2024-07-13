@@ -1,10 +1,8 @@
 package com.dobbinsoft.unimall.biz.service.category;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dobbinsoft.fw.core.Const;
 import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.support.annotation.AspectCommonCache;
-import com.dobbinsoft.fw.support.component.CacheComponent;
 import com.dobbinsoft.unimall.data.constant.CacheConst;
 import com.dobbinsoft.unimall.data.domain.CategoryDO;
 import com.dobbinsoft.unimall.data.dto.CategoryDTO;
@@ -26,9 +24,6 @@ public class CategoryBizService {
 
     @Autowired
     private CategoryMapper categoryMapper;
-
-    @Autowired
-    private CacheComponent cacheComponent;
 
     /**
      * 获取一棵两级类目树
@@ -82,27 +77,17 @@ public class CategoryBizService {
     }
 
     /**
-     * 获得所有类目list,类中有调用，不能使用切面
-     * TODO 切面缓存
+     * 获得所有类目list
      */
-
+    @AspectCommonCache(value = CacheConst.CATEGORY_ALL_LIST, arrayClass = CategoryDTO.class)
     public List<CategoryDTO> getCategoryList() throws ServiceException{
-        List<CategoryDTO> categoryDTOListFormCache = cacheComponent.getObjList(CacheConst.CATEGORY_ALL_LIST, CategoryDTO.class);
-        if (categoryDTOListFormCache != null) {
-            return categoryDTOListFormCache;
-        }
-
         List<CategoryDTO> categoryDTOS = categorySecondLevelTree();
         List<CategoryDTO> resultList = new LinkedList<>();
         categoryDTOS.forEach(first -> {
             resultList.add(first);
             if (!CollectionUtils.isEmpty(first.getChildrenList()))
-                first.getChildrenList().forEach(second -> {
-                    resultList.add(second);
-                });
+                resultList.addAll(first.getChildrenList());
         });
-
-        cacheComponent.putObj(CacheConst.CATEGORY_ALL_LIST, resultList, Const.CACHE_ONE_DAY);
         return resultList;
     }
 
