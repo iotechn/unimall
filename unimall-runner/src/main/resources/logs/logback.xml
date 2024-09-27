@@ -32,11 +32,9 @@
             <!--日志文件输出的文件名-->
             <FileNamePattern>${LOG_PATH}/${PROJECT_NAME}.log.%d{yyyy-MM-dd}.%i</FileNamePattern>
             <!--日志文件保留天数-->
-            <MaxHistory>7</MaxHistory>
+            <MaxHistory>90</MaxHistory>
             <!--日志文件大小 -->
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>50MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxFileSize>50MB</maxFileSize>
         </rollingPolicy>
 
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
