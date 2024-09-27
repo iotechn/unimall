@@ -269,18 +269,6 @@
             "page":"/sys/admin"
          },
          {
-            "path":"log",
-            "meta":{
-               "noCache":true,
-               "perms":[
-                  "sys:log:list"
-               ],
-               "title":"操作日志"
-            },
-            "name":"log",
-            "page":"/sys/log"
-         },
-         {
             "path":"role",
             "meta":{
                "noCache":true,
