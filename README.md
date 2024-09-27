@@ -51,7 +51,7 @@ QQ讨论群：656676341(1群已满) 940197916(2群已满) **936569693(3群)** (�
 ![front](https://unimall-asset.oss-cn-beijing.aliyuncs.com/readme/front.jpg)
 
 - Admin
-  - 后台演示地址: [https://unimall.v3.dobbinsoft.com](https://unimall.v3.dobbinsoft.com)
+  - 后台演示地址: [https://unimallv4.dobbinsoft.com](https://unimallv4.dobbinsoft.com)
   - 登录名:guest 密码:123456 验证码:666666 (guest仅有只读权限，无读配置权限)
 - Pages
 
