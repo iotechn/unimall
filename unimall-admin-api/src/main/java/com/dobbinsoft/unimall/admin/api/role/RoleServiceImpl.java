@@ -72,7 +72,6 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleDO create(RoleDO roleDO, Long adminId) throws ServiceException {
         LocalDateTime now = LocalDateTime.now();
-        roleDO.setStatus(RoleStatusType.ACTIVE.getCode());
         roleDO.setGmtUpdate(now);
         roleDO.setGmtCreate(now);
         if (roleMapper.insert(roleDO) > 0) {

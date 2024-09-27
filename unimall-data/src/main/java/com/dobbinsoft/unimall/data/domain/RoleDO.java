@@ -26,8 +26,4 @@ public class RoleDO extends SuperDO {
     @TableField("`desc`")
     private String desc;
 
-    @NotNull
-    @ApiField(description = "状态", enums = StatusType.class)
-    private Integer status;
-
 }
