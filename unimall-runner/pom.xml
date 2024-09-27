@@ -6,7 +6,6 @@
         <artifactId>unimall</artifactId>
         <version>v4</version>
     </parent>
-    <groupId>com.dobbinsoft</groupId>
     <artifactId>unimall-runner</artifactId>
     <version>v4</version>
     <name>unimall-runner</name>

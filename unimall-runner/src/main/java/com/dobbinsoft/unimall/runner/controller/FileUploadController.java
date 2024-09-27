@@ -4,6 +4,7 @@ package com.dobbinsoft.unimall.runner.controller;
 import com.dobbinsoft.fw.core.Const;
 import com.dobbinsoft.fw.core.entiy.inter.IdentityOwner;
 import com.dobbinsoft.fw.core.entiy.inter.PermissionOwner;
+import com.dobbinsoft.fw.core.exception.ServiceException;
 import com.dobbinsoft.fw.launcher.inter.AfterFileUpload;
 import com.dobbinsoft.fw.launcher.inter.BeforeFileUpload;
 import com.dobbinsoft.fw.launcher.inter.BeforeFileUploadPath;
@@ -186,7 +187,7 @@ public class FileUploadController {
      */
     @PostMapping("/local")
     @ResponseBody
-    public Object local(@RequestParam("file") MultipartFile file, String fsf, HttpServletRequest request) throws IOException {
+    public Object local(@RequestParam("file") MultipartFile file, String fsf, HttpServletRequest request) throws IOException, ServiceException {
         String accessToken = request.getHeader(Const.ADMIN_ACCESS_TOKEN);
         IdentityOwner user = userAuthenticator.getUser(accessToken);
         if (user != null) {
