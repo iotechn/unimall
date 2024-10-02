@@ -107,8 +107,7 @@ public class AdminServiceImpl extends BaseService<UserDTO, AdminDTO> implements 
         }
         List<RoleDO> roleDOList = roleMapper.selectList(
                 new QueryWrapper<RoleDO>()
-                        .in("id", ids)
-                        .eq("status", RoleStatusType.ACTIVE.getCode()));
+                        .in("id", ids));
         List<String> roleNames = new LinkedList<>();
         roleDOList.forEach(item -> {
             roleNames.add(item.getName());
