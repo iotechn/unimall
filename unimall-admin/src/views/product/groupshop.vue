@@ -147,7 +147,8 @@
                 v-model="dataForm.gmtStart"
                 type="datetime"
                 placeholder="选择日期"
-                style="width: 100%;" />
+                style="width: 100%;"
+                value-format="yyyy-MM-dd HH:mm:ss"/>
             </el-col>
             <el-col :span="2" class="line">&nbsp;&nbsp;&nbsp;&nbsp; 至</el-col>
             <el-col :span="11">
@@ -155,7 +156,8 @@
                 v-model="dataForm.gmtEnd"
                 type="datetime"
                 placeholder="选择日期"
-                style="width: 100%;" />
+                style="width: 100%;"
+                value-format="yyyy-MM-dd HH:mm:ss"/>
             </el-col>
           </el-form-item>
 

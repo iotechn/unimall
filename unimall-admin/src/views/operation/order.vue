@@ -35,6 +35,7 @@
         class="filter-item"
         default-time="00:00:00"
         placeholder="选择开始日期"
+        value-format="yyyy-MM-dd HH:mm:ss"
       />
       至
       <el-date-picker
@@ -44,6 +45,7 @@
         class="filter-item"
         default-time="00:00:00"
         placeholder="选择结束日期"
+        value-format="yyyy-MM-dd HH:mm:ss"
       />
       <el-select
         v-model="downData.status"
