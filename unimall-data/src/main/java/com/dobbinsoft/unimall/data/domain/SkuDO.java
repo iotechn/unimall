@@ -15,7 +15,6 @@ import lombok.Data;
 @TableName("unimall_sku")
 public class SkuDO extends SuperDO {
 
-    @NotNull
     @ApiField(description = "商品ID")
     private Long spuId;
 

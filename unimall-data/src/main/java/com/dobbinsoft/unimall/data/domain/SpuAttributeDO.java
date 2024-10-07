@@ -15,7 +15,6 @@ import lombok.Data;
 @ApiEntity(description = "商品属性 eg 材质: 纯金")
 public class SpuAttributeDO extends SuperDO {
 
-    @NotNull
     @ApiField(description = "商品ID")
     private Long spuId;
 

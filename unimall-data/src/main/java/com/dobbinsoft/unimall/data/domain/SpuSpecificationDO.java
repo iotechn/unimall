@@ -18,7 +18,6 @@ import lombok.Data;
 @ApiEntity(description = "商品规格维度表")
 public class SpuSpecificationDO extends SuperDO {
 
-    @NotNull
     @ApiField(description = "商品ID")
     private Long spuId;
 
