@@ -5,44 +5,49 @@
       class="drawer-bg"
       @click="handleClickOutside"
     />
-    <Sidebar class="sidebar-container" />
+    <sidebar class="sidebar-container" />
     <div class="main-container">
-      <Navbar />
-      <TagsView />
-      <AppMain />
+      <navbar />
+      <tags-view />
+      <app-main />
     </div>
   </div>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-import { useStore } from 'vuex'
+<script>
 import { Navbar, Sidebar, AppMain, TagsView } from './components'
 import ResizeMixin from './mixin/ResizeHandler'
 
-// 获取 Vuex 存储实例
-const store = useStore()
-
-// 计算属性获取 Vuex 状态
-const sidebar = computed(() => store.state.app.sidebar)
-const device = computed(() => store.state.app.device)
-
-// 计算 classObj
-const classObj = computed(() => ({
-  hideSidebar: !sidebar.value.opened,
-  openSidebar: sidebar.value.opened,
-  withoutAnimation: sidebar.value.withoutAnimation,
-  mobile: device.value === 'mobile',
-}))
-
-// 处理点击外部关闭侧边栏的方法
-const handleClickOutside = () => {
-  store.dispatch('closeSideBar', { withoutAnimation: false })
-}
-
-// 混入 ResizeMixin
-if (ResizeMixin.setup) {
-  ResizeMixin.setup()
+export default {
+  name: 'Layout',
+  components: {
+    Navbar,
+    Sidebar,
+    AppMain,
+    TagsView,
+  },
+  mixins: [ResizeMixin],
+  computed: {
+    sidebar() {
+      return this.$store.state.app.sidebar
+    },
+    device() {
+      return this.$store.state.app.device
+    },
+    classObj() {
+      return {
+        hideSidebar: !this.sidebar.opened,
+        openSidebar: this.sidebar.opened,
+        withoutAnimation: this.sidebar.withoutAnimation,
+        mobile: this.device === 'mobile',
+      }
+    },
+  },
+  methods: {
+    handleClickOutside() {
+      this.$store.dispatch('closeSideBar', { withoutAnimation: false })
+    },
+  },
 }
 </script>
 
