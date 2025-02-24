@@ -1,11 +1,11 @@
 import axios from 'axios'
-import { Message, MessageBox } from 'element-ui'
+import { ElMessage, ElMessageBox  } from 'element-plus'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
 // create an axios instance
 const service = axios.create({
-  baseURL: process.env.HOST + '/m.api', // api 的 base_url
+  baseURL: 'https://unimallv4.dobbinsoft.com/unimall' + '/m.api', // api 的 base_url
   timeout: 15000 // request timeout
 })
 
@@ -31,7 +31,7 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     if (res.errno === 10006) {
-      MessageBox.alert('系统未登录，请重新登录', '错误', {
+      ElMessageBox .alert('系统未登录，请重新登录', '错误', {
         confirmButtonText: '确定',
         type: 'error'
       }).then(() => {
@@ -41,7 +41,7 @@ service.interceptors.response.use(
       })
       return Promise.reject('error')
     } if (res.errno !== 200) {
-      Message({
+      ElMessage({
         message: res.errmsg + ' 异常代码：' + res.errno,
         type: 'error',
         duration: 5 * 1000
@@ -51,7 +51,7 @@ service.interceptors.response.use(
       return response
     }
   }, error => {
-    Message({
+    ElMessage({
       message: error + '（请联系系统管理员）',
       type: 'error',
       duration: 5 * 1000

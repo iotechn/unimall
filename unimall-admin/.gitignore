@@ -1,21 +1,29 @@
-.DS_Store
-node_modules/
-dist/
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-**/*.log
+pnpm-debug.log*
+lerna-debug.log*
 
-test/unit/coverage
-test/e2e/reports
-selenium-debug.log
+node_modules
+.DS_Store
+dist
+dist-ssr
+coverage
+*.local
+
+/cypress/videos/
+/cypress/screenshots/
 
 # Editor directories and files
+.vscode/*
+!.vscode/extensions.json
 .idea
-.vscode
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-
-package-lock.json
+*.sw?
+.vercel

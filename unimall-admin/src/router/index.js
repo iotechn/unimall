@@ -1,11 +1,8 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import routeJson from './route.json'
-
-Vue.use(Router)
+import { createRouter, createWebHistory } from 'vue-router';
+// import routeJson from './route.json';
 
 /* Layout */
-import Layout from '@/views/layout/Layout'
+import Layout from '@/layout'
 
 /** note: Submenu only appear when children.length>=1
  *  detail see  https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -70,26 +67,102 @@ export const constantRouterMap = [
       }
     ]
   }
-]
+];
 
-export default new Router({
+
+export const asyncRouterMap = 
+[
+  {
+     "redirect":"noredirect",
+    "path": "/operation",
+     component: Layout,
+     "children":[
+        {
+           "path":"order",
+           "meta":{
+              "noCache":true,
+              "perms":[
+                 "operation:order:list",
+                 "operation:order:detail",
+                 "operation:order:ship",
+                 "operation:order:refund",
+                 "operation:order:querytoexcel",
+                 "operation:order:editadminmono",
+                 "operation:order:statistics"
+              ],
+              "title":"订单管理"
+           },
+           "name":"order",
+           "component": () => import("@/views//operation/order.vue"),
+           "page":"/operation/order"
+        },
+        {
+           "path":"appraise",
+           "meta":{
+              "noCache":true,
+              "perms":[
+                 "operation:appraise:delete",
+                 "operation:appraise:list"
+              ],
+              "title":"评论管理"
+           },
+           "name":"appraise",
+           "page":"/operation/appraise"
+        },
+        {
+           "path":"freight",
+           "meta":{
+              "noCache":true,
+              "perms":[
+                 "operation:freight:list",
+                 "operation:freight:edit",
+                 "operation:freight:create",
+                 "operation:freight:delete"
+              ],
+              "title":"运费管理"
+           },
+           "name":"freight",
+           "page":"/operation/freight"
+        }
+     ],
+     "meta":{
+        "icon":"chart",
+        "title":"运营管理"
+     },
+     "name":"operationManage",
+     "alwaysShow":true
+  },
+
+  {
+     "redirect":"/404",
+     "path":"*",
+     "hidden":true
+  }
+];
+
+
+
+// const parseJson = () => {
+//   const mapArray = routeJson;
+//   for (let i = 0; i < mapArray.length; i++) {
+//     const item = mapArray[i];
+//     item.component = Layout;
+//     if (item.children && item.children.length > 0) {
+//       for (let j = 0; j < item.children.length; j++) {
+//         const childrenItem = item.children[j];
+//         childrenItem.component = () => import(`@/views${childrenItem.page}`);
+//       }
+//     }
+//   }
+//   return mapArray;
+// };
+
+// export const asyncRouterMap = parseJson();
+
+const router = createRouter({
+  history: createWebHistory(),
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRouterMap
-})
+});
 
-const parseJson = () => {
-  const mapArray = routeJson
-  for (let i = 0; i < mapArray.length; i++) {
-    const item = mapArray[i]
-    item.component = Layout
-    if (item.children && item.children.length > 0) {
-      for (let j = 0; j < item.children.length; j++) {
-        const childrenItem = item.children[j]
-        childrenItem.component = () => import(`@/views${childrenItem.page}`)
-      }
-    }
-  }
-  return mapArray
-}
-
-export const asyncRouterMap = parseJson()
+export default router;

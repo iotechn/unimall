@@ -1,4 +1,13 @@
-// set function parseTime,formatTime to filter
+import dayjs from "dayjs";
+
+// val：毫秒级时间戳
+const dateFilter = (val, format = "YYYY-MM-DD") => {
+	if (!isNaN(val)) {
+		val = parseInt(val);
+	}
+
+	return dayjs(val).format(format);
+};
 export { parseTime, formatTime, formatGmt } from '@/utils'
 
 function pluralize(time, label) {
@@ -66,3 +75,10 @@ export function formatDateAndTime(time) {
     return ''
   }
 }
+
+
+export default app => {
+	app.config.globalProperties.$filters = {
+		dateFilter
+	};
+};

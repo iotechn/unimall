@@ -3,10 +3,12 @@
     <div>
       <svg-icon class-name="international-icon" icon-class="language" />
     </div>
-    <el-dropdown-menu slot="dropdown">
+    <template v-slot:dropdown>
+<el-dropdown-menu >
       <el-dropdown-item :disabled="language==='zh'" command="zh">中文</el-dropdown-item>
       <el-dropdown-item :disabled="language==='en'" command="en">English</el-dropdown-item>
     </el-dropdown-menu>
+</template>
   </el-dropdown>
 </template>
 

@@ -4,13 +4,16 @@
       <el-col :span="5">
         <el-row class="panel-group">
           <el-col class="card-panel-col">
-            <div class="card-panel" @click="handleSetLineChartData('newVisitis')">
+            <div
+              class="card-panel"
+              @click="handleSetLineChartData('newVisitis')"
+            >
               <div class="card-panel-icon-wrapper icon-people">
                 <svg-icon icon-class="peoples" class-name="card-panel-icon" />
               </div>
               <div class="card-panel-description">
                 <div class="card-panel-text">商品数量</div>
-                <count-to :start-val="0" :end-val="productCount" :duration="2600" class="card-panel-num" />
+                <div>{{ productCount }}</div>
               </div>
             </div>
           </el-col>
@@ -23,32 +26,39 @@
               </div>
               <div class="card-panel-description">
                 <div class="card-panel-text">未发货单</div>
-                <count-to
-                  :start-val="0"
-                  :end-val="waitStockCount"
-                  :duration="3000"
-                  class="card-panel-num"
-                />
+                <div>{{ waitStockCount }}</div>
               </div>
             </div>
           </el-col>
         </el-row>
       </el-col>
       <el-col :span="16">
-        <div id="orderChart" class="chart" style="height: 350px; padding: 20px; padding-left: 80px"/>
+        <div
+          id="orderChart"
+          class="chart"
+          style="height: 350px; padding: 20px; padding-left: 80px"
+        />
       </el-col>
     </el-row>
     <el-row>
       <el-col :span="10">
-        <div id="sumChart" class="chart" style="height: 400px; padding: 30px"/>
+        <div id="sumChart" class="chart" style="height: 400px; padding: 30px" />
       </el-col>
       <el-col :span="11">
         <el-row>
           <el-col :span="12">
-            <div id="areaChart" class="chart" style="height: 400px; padding: 30px"/>
+            <div
+              id="areaChart"
+              class="chart"
+              style="height: 400px; padding: 30px"
+            />
           </el-col>
           <el-col :span="12">
-            <div id="channelChart" class="chart" style="height: 400px; padding: 30px"/>
+            <div
+              id="channelChart"
+              class="chart"
+              style="height: 400px; padding: 30px"
+            />
           </el-col>
         </el-row>
       </el-col>
@@ -56,157 +66,160 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import { info } from '@/api/dashboard'
-import CountTo from 'vue-count-to'
-var echarts = require('echarts')
-export default {
-  components: {
-    CountTo
-  },
-  data() {
-    return {
-      productCount: 0,
-      waitStockCount: 0
-    }
-  },
-  created() {
-    info().then(response => {
-      const orderChart = echarts.init(document.getElementById('orderChart'))
-      const sumChart = echarts.init(document.getElementById('sumChart'))
-      const areaChart = echarts.init(document.getElementById('areaChart'))
-      const channelChart = echarts.init(document.getElementById('channelChart'))
-      this.waitStockCount = response.data.data.waitStockCount
-      this.productCount = response.data.data.goodsCount
-      // 每日订单走势
-      orderChart.setOption({
-        title: { text: '7日订单' },
-        legend: {
-          data: ['订单数'],
-          right: 1
-        },
-        yAxis: [
-          {
-            name: '订单数',
-            type: 'value',
-            axisLine: {
-              show: false
-            },
-            axisTick: {
-              show: false
-            },
-            axisLabel: {
-              color: '#666',
-              fontSize: 12
-            }
-          }
-        ],
-        xAxis: {
-          axisTick: {
-            show: false
-          },
-          axisLabel: {
-            color: '#666',
-            fontSize: 12,
-            margin: 12
-          },
-          data: response.data.data.daysOrder[0]
-        },
-        series: [
-          {
-            name: '订单数',
-            yAxisIndex: 0,
-            data: response.data.data.daysOrder[1],
-            type: 'bar',
-            color: '#00B5FF',
-            barWidth: 30
-          }
-        ]
-      })
-      // 订单金额走势
-      sumChart.setOption({
-        title: { text: '7日成交金额' },
-        legend: {
-          data: ['订单数'],
-          right: 1
-        },
-        yAxis: [
-          {
-            name: '订单数',
-            type: 'value',
-            axisLine: {
-              show: false
-            },
-            axisTick: {
-              show: false
-            },
-            axisLabel: {
-              color: '#666',
-              fontSize: 12
-            }
-          }
-        ],
-        xAxis: {
-          axisTick: {
-            show: false
-          },
-          axisLabel: {
-            color: '#666',
-            fontSize: 12,
-            margin: 12
-          },
-          data: response.data.data.daysSum[0]
-        },
-        series: [
-          {
-            name: '订单数',
-            yAxisIndex: 0,
-            data: response.data.data.daysSum[1],
-            type: 'line',
-            color: '#20B2AA'
-          }
-        ]
-      })
-      // 地区饼图
-      areaChart.setOption({
-        title: { text: '订单地区分布' },
-        legend: {
-          data: ['地区分布'],
-          right: 1,
-          color: '#20B2AA'
-        },
-        series: [
-          {
-            type: 'pie',
-            name: '地区分布',
-            data: response.data.data.area
-          }
-        ]
-      })
-      // 渠道饼图
-      channelChart.setOption({
-        title: { text: '订单渠道分布' },
-        legend: {
-          data: ['渠道分布'],
-          right: 1,
-          color: '#20B2AA'
-        },
-        series: [
-          {
-            type: 'pie',
-            name: '地区分布',
+import * as echarts from 'echarts'
+// 响应式数据
+const productCount = ref(0)
+const waitStockCount = ref(0)
+// 初始化图表的函数
+const initCharts = (response) => {
+  const orderChart = echarts.init(document.getElementById('orderChart'))
+  const sumChart = echarts.init(document.getElementById('sumChart'))
+  const areaChart = echarts.init(document.getElementById('areaChart'))
+  const channelChart = echarts.init(document.getElementById('channelChart'))
 
-            data: response.data.data.channel
-          }
-        ]
-      })
-    })
-  },
-  methods: {
-    handleSetLineChartData(type) {
-      this.$emit('handleSetLineChartData', type)
-    }
-  }
+  waitStockCount.value = response.data.data.waitStockCount
+  productCount.value = response.data.data.goodsCount
+
+  // 每日订单走势
+  orderChart.setOption({
+    title: { text: '7日订单' },
+    legend: {
+      data: ['订单数'],
+      right: 1,
+    },
+    yAxis: [
+      {
+        name: '订单数',
+        type: 'value',
+        axisLine: {
+          show: false,
+        },
+        axisTick: {
+          show: false,
+        },
+        axisLabel: {
+          color: '#666',
+          fontSize: 12,
+        },
+      },
+    ],
+    xAxis: {
+      axisTick: {
+        show: false,
+      },
+      axisLabel: {
+        color: '#666',
+        fontSize: 12,
+        margin: 12,
+      },
+      data: response.data.data.daysOrder[0],
+    },
+    series: [
+      {
+        name: '订单数',
+        yAxisIndex: 0,
+        data: response.data.data.daysOrder[1],
+        type: 'bar',
+        color: '#00B5FF',
+        barWidth: 30,
+      },
+    ],
+  })
+
+  // 订单金额走势
+  sumChart.setOption({
+    title: { text: '7日成交金额' },
+    legend: {
+      data: ['订单数'],
+      right: 1,
+    },
+    yAxis: [
+      {
+        name: '订单数',
+        type: 'value',
+        axisLine: {
+          show: false,
+        },
+        axisTick: {
+          show: false,
+        },
+        axisLabel: {
+          color: '#666',
+          fontSize: 12,
+        },
+      },
+    ],
+    xAxis: {
+      axisTick: {
+        show: false,
+      },
+      axisLabel: {
+        color: '#666',
+        fontSize: 12,
+        margin: 12,
+      },
+      data: response.data.data.daysSum[0],
+    },
+    series: [
+      {
+        name: '订单数',
+        yAxisIndex: 0,
+        data: response.data.data.daysSum[1],
+        type: 'line',
+        color: '#20B2AA',
+      },
+    ],
+  })
+
+  // 地区饼图
+  areaChart.setOption({
+    title: { text: '订单地区分布' },
+    legend: {
+      data: ['地区分布'],
+      right: 1,
+      color: '#20B2AA',
+    },
+    series: [
+      {
+        type: 'pie',
+        name: '地区分布',
+        data: response.data.data.area,
+      },
+    ],
+  })
+
+  // 渠道饼图
+  channelChart.setOption({
+    title: { text: '订单渠道分布' },
+    legend: {
+      data: ['渠道分布'],
+      right: 1,
+      color: '#20B2AA',
+    },
+    series: [
+      {
+        type: 'pie',
+        name: '地区分布',
+        data: response.data.data.channel,
+      },
+    ],
+  })
+}
+
+// 生命周期钩子
+onMounted(() => {
+  info().then((response) => {
+    initCharts(response)
+  })
+})
+
+// 方法
+const handleSetLineChartData = (type) => {
+  const emit = defineEmits(['handleSetLineChartData'])
+  emit('handleSetLineChartData', type)
 }
 </script>
 

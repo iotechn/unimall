@@ -1,44 +1,44 @@
-import Vue from 'vue'
+import { createApp } from "vue";
+import App from "./App.vue";
+import store from "./store";
+import router from "./router";
+
+// 导入权限控制模块
+import "./permission";
+import "@/styles/index.scss";
 
 import Cookies from 'js-cookie'
-
-import 'normalize.css/normalize.css' // A modern alternative to CSS resets
-
-import Element from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
-
-import '@/styles/index.scss' // global css
-
-import App from './App'
-import router from './router'
-import store from './store'
-
 import i18n from './lang' // Internationalization
-import './icons' // icon
-import './permission' // permission control
+import ElementPlus from 'element-plus' // 完整引入Element Plus
+// element
+import installElementPlus from "./plugins/element";
+// directives
+import installDirective from "@/directives";
+// filter
+import installFilter from "@/filters";
 
-import * as filters from './filters' // global filters
+// 自定义表格工具组件
+import RightToolbar from "@/components/RightToolbar";
+// 分页组件
+import Pagination from "@/components/Pagination";
+// svg组件
+import svgIcon from "@/components/SvgIcon/index.vue";
+const app = createApp(App);
+installElementPlus(app);
+installDirective(app);
+installFilter(app);
+// 全局组件挂载
+app.component("RightToolbar", RightToolbar);
+app.component("Pagination", Pagination);
+app.component("svg-icon", svgIcon);
 
-import permission from '@/directive/permission/index.js' // 权限判断指令
 
-Vue.use(Element, {
+app.use(ElementPlus, {
   size: Cookies.get('size') || 'medium', // set element-ui default size
   i18n: (key, value) => i18n.t(key, value)
 })
-
-Vue.directive('permission', permission)
-
-// register global utility filters.
-Object.keys(filters).forEach(key => {
-  Vue.filter(key, filters[key])
-})
-
-Vue.config.productionTip = false
-
-new Vue({
-  el: '#app',
-  router,
-  store,
-  i18n,
-  render: h => h(App)
-})
+app.use(i18n)
+app
+	.use(store)
+	.use(router)
+	.mount("#app");
