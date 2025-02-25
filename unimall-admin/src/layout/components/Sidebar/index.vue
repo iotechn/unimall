@@ -38,7 +38,5 @@ const sidebar = computed(() => store.getters['sidebar'])
 const isCollapse = computed(() => !sidebar.value.opened)
 
 // 模拟 mounted 钩子
-onMounted(() => {
-  console.log(permissionRouters.value, 'wwwwwwwww')
-})
+onMounted(() => {})
 </script>

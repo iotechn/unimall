@@ -1,107 +1,103 @@
 <template>
-	<div class="wscn-http404-container">
-		<div class="wscn-http404">
-			<div class="bullshit">
-				<div class="bullshit__oops">401</div>
-				<div class="bullshit__headline">{{message}}</div>
-				<div class="bullshit__info">
-					<p>1、请检查您输入的URL是否正确</p>
-					<p>2、单击下面按钮返回主页</p>
-				</div>
-				<a href="" class="bullshit__return-home">回到主页</a>
-			</div>
-		</div>
-	</div>
+  <div class="errPage-container">
+    <el-button icon="arrow-left" class="pan-back-btn" @click="back"
+      >返回</el-button
+    >
+    <el-row>
+      <el-col :span="12">
+        <h1 class="text-jumbo text-ginormous">Oops!</h1>
+        gif来源 <a href="https://zh.airbnb.com/" target="_blank">airbnb</a> 页面
+        <h2>你没有权限去该页面</h2>
+        <h6>如有不满请联系你领导</h6>
+        <ul class="list-unstyled">
+          <li>或者你可以去:</li>
+          <li class="link-type">
+            <router-link to="/dashboard">回首页</router-link>
+          </li>
+          <li class="link-type">
+            <a href="https://www.taobao.com/">随便看看</a>
+          </li>
+          <li>
+            <a href="#" @click.prevent="dialogVisible = true">点我看图</a>
+          </li>
+        </ul>
+      </el-col>
+      <el-col :span="12">
+        <img
+          :src="errGif"
+          width="313"
+          height="428"
+          alt="Girl has dropped her ice cream."
+        />
+      </el-col>
+    </el-row>
+    <el-dialog :visible.sync="dialogVisible" title="随便看">
+      <img :src="ewizardClap" class="pan-img" />
+    </el-dialog>
+  </div>
 </template>
 
-<style lang="scss" scoped>
-  .wscn-http404-container {
-    position: absolute;
-    left: 50%;
-    top: 40%;
-    transform: translate(-50%, -50%);
+<script>
+import errGif from '@/assets/401_images/401.gif'
+
+export default {
+  name: 'Page401',
+  data() {
+    return {
+      errGif: errGif + '?' + +new Date(),
+      ewizardClap:
+        'https://wpimg.wallstcn.com/007ef517-bafd-4066-aae4-6883632d9646',
+      dialogVisible: false,
+    }
+  },
+  methods: {
+    back() {
+      if (this.$route.query.noGoBack) {
+        this.$router.push({ path: '/dashboard' })
+      } else {
+        this.$router.go(-1)
+      }
+    },
+  },
+}
+</script>
+
+<style rel="stylesheet/scss" lang="scss" scoped>
+.errPage-container {
+  width: 800px;
+  max-width: 100%;
+  margin: 100px auto;
+  .pan-back-btn {
+    background: #008489;
+    color: #fff;
+    border: none !important;
   }
-  .wscn-http404 {
-    overflow: hidden;
-    position: relative;
-    margin-top: 200px;
-    padding: 0 50px;
-    width: 1200px;
-    .bullshit {
-      overflow: hidden;
-      position: relative;
-      margin:0 auto;
-      padding: 30px 0;
-      width: 300px;
-      &__oops {
-        margin-bottom: 20px;
-        opacity: 0;
-        line-height: 40px;
-        font-weight: bold;
-        font-size: 32px;
-        color: #1482f0;
-        animation-name: slideUp;
-        animation-duration: 0.5s;
-        animation-fill-mode: forwards;
-      }
-      &__headline {
-        margin-bottom: 10px;
-        opacity: 0;
-        line-height: 24px;
-        font-weight: bold;
-        font-size: 20px;
-        color: #222;
-        animation-name: slideUp;
-        animation-duration: 0.5s;
-        animation-delay: 0.1s;
-        animation-fill-mode: forwards;
-      }
-      &__info {
-        margin-bottom: 30px;
-        opacity: 0;
-        line-height: 21px;
-        font-size: 13px;
-        color: grey;
-        animation-name: slideUp;
-        animation-duration: 0.5s;
-        animation-delay: 0.2s;
-        animation-fill-mode: forwards;
-      }
-      &__return-home {
-        display: block;
-        float: left;
-        border-radius: 100px;
-        width: 110px;
-        height: 36px;
-        background: #1482f0;
-        opacity: 0;
-        cursor: pointer;
-        line-height: 36px;
-        text-align: center;
-        font-size: 14px;
-        color: #fff;
-        animation-name: slideUp;
-        animation-duration: 0.5s;
-        animation-delay: 0.3s;
-        animation-fill-mode: forwards;
-      }
-      @keyframes slideUp {
-        0% {
-          opacity: 0;
-          transform: translateY(60px);
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0);
-        }
+  .pan-gif {
+    margin: 0 auto;
+    display: block;
+  }
+  .pan-img {
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .text-jumbo {
+    font-size: 60px;
+    font-weight: 700;
+    color: #484848;
+  }
+  .list-unstyled {
+    font-size: 14px;
+    li {
+      padding-bottom: 5px;
+    }
+    a {
+      color: #008489;
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
       }
     }
   }
+}
 </style>
-
-<script setup>
-import { computed } from "vue";
-const message = computed(() => {
-	return "您暂无权限查看该页面！";
-});
-</script>

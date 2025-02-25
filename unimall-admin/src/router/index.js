@@ -1,27 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
-// import routeJson from './route.json';
+import routeJs from './route.js';
 
-/* Layout */
 import Layout from '@/layout'
 
-/** note: Submenu only appear when children.length>=1
- *  detail see  https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
- **/
 
-/**
-* hidden: true                   if `hidden:true` will not show in the sidebar(default is false)
-* alwaysShow: true               if set true, will always show the root menu, whatever its child routes length
-*                                if not set alwaysShow, only more than one route under the children
-*                                it will becomes nested mode, otherwise not show the root menu
-* redirect: noredirect           if `redirect:noredirect` will no redirect in the breadcrumb
-* name:'router-name'             the name is used by <keep-alive> (must set!!!)
-* meta : {
-    perms: ['GET /aaa','POST /bbb']     will control the page perms (you can set multiple perms)
-    title: 'title'               the name show in submenu and breadcrumb (recommend set)
-    icon: 'svg-name'             the icon show in the sidebar,
-    noCache: true                if true ,the page will no be cached(default is false)
-  }
-**/
 export const constantRouterMap = [
   {
     path: '/redirect',
@@ -70,75 +52,7 @@ export const constantRouterMap = [
 ];
 
 
-export const asyncRouterMap = 
-[
-  {
-     "redirect":"noredirect",
-    "path": "/operation",
-     component: Layout,
-     "children":[
-        {
-           "path":"order",
-           "meta":{
-              "noCache":true,
-              "perms":[
-                 "operation:order:list",
-                 "operation:order:detail",
-                 "operation:order:ship",
-                 "operation:order:refund",
-                 "operation:order:querytoexcel",
-                 "operation:order:editadminmono",
-                 "operation:order:statistics"
-              ],
-              "title":"订单管理"
-           },
-           "name":"order",
-           "component": () => import("@/views//operation/order.vue"),
-           "page":"/operation/order"
-        },
-        {
-           "path":"appraise",
-           "meta":{
-              "noCache":true,
-              "perms":[
-                 "operation:appraise:delete",
-                 "operation:appraise:list"
-              ],
-              "title":"评论管理"
-           },
-           "name":"appraise",
-           "page":"/operation/appraise"
-        },
-        {
-           "path":"freight",
-           "meta":{
-              "noCache":true,
-              "perms":[
-                 "operation:freight:list",
-                 "operation:freight:edit",
-                 "operation:freight:create",
-                 "operation:freight:delete"
-              ],
-              "title":"运费管理"
-           },
-           "name":"freight",
-           "page":"/operation/freight"
-        }
-     ],
-     "meta":{
-        "icon":"chart",
-        "title":"运营管理"
-     },
-     "name":"operationManage",
-     "alwaysShow":true
-  },
-
-  {
-     "redirect":"/404",
-     "path":"/:pathMatch(.*)*",
-     "hidden":true
-  }
-];
+export const asyncRouterMap = routeJs
 
 
 

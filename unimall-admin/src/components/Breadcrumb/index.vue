@@ -1,11 +1,7 @@
 <template>
   <el-breadcrumb class="app-breadcrumb" separator="/">
     <transition-group name="breadcrumb">
-      <el-breadcrumb-item
-        v-for="(item, index) in levelList"
-        v-if="item && item.meta.title"
-        :key="item.path"
-      >
+      <el-breadcrumb-item v-for="(item, index) in levelList" :key="item.path">
         <span
           v-if="
             item.redirect === 'noredirect' || index === levelList.length - 1
@@ -22,61 +18,61 @@
 </template>
 
 <script>
-import { ref, watch } from "vue";
-import { generateTitle } from "@/utils/i18n";
-import { compile } from "path-to-regexp";
-import { useRoute } from "vue-router";
+import { ref, watch } from 'vue'
+import { generateTitle } from '@/utils/i18n'
+import { compile } from 'path-to-regexp'
+import { useRoute } from 'vue-router'
 
 export default {
   setup() {
     // 使用 ref 来创建响应式数据
-    const levelList = ref(null);
+    const levelList = ref(null)
 
     // 引入路由
-    const route = useRoute();
+    const route = useRoute()
 
     // 监听路由变化
     watch(
       () => route,
       () => {
-        getBreadcrumb();
+        getBreadcrumb()
       }
-    );
+    )
 
     // 获取面包屑数据的方法
     const getBreadcrumb = () => {
-      const { params } = route;
+      const { params } = route
       let matched = route.matched.filter((item) => {
         if (item.name) {
           // To solve this problem https://github.com/PanJiaChen/vue-element-admin/issues/561
-          var toPath = compile(item.path);
-          item.path = toPath(params);
-          return true;
+          var toPath = compile(item.path)
+          item.path = toPath(params)
+          return true
         }
-      });
-      const first = matched[0];
+      })
+      const first = matched[0]
       if (
         first &&
         first.name.trim().toLocaleLowerCase() !==
-          "Dashboard".toLocaleLowerCase()
+          'Dashboard'.toLocaleLowerCase()
       ) {
-        matched = [{ path: "/dashboard", meta: { title: "dashboard" } }].concat(
+        matched = [{ path: '/dashboard', meta: { title: 'dashboard' } }].concat(
           matched
-        );
+        )
       }
-      levelList.value = matched;
-    };
+      levelList.value = matched
+    }
 
     // 组件创建时调用获取面包屑数据的方法
-    getBreadcrumb();
+    getBreadcrumb()
 
     return {
       levelList,
       generateTitle,
       getBreadcrumb,
-    };
+    }
   },
-};
+}
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>

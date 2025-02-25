@@ -2,7 +2,6 @@
 import i18n from "@/lang/index.js";
 export function generateTitle(title) {
   const hasKey = i18n.te('route.' + title)
-  console.log(hasKey,"hasKey")
 
   if (hasKey) {
     // $t :this method from vue-i18n, inject in @/lang/index.js

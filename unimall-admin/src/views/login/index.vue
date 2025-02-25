@@ -63,7 +63,7 @@
                     :class="[{ display: !show }]"
                     class="msg-text"
                     @click="sendShortMsg"
-                    >{{ show ? "验证码" : count }}</span
+                    >{{ show ? '验证码' : count }}</span
                   >
                 </template>
               </el-input>
@@ -103,179 +103,179 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from "vue";
-import { sendMsg } from "@/api/login";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-import { ElNotification } from "element-plus";
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { sendMsg } from '@/api/login'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
+import { ElNotification } from 'element-plus'
 
 // 验证用户名
 const validateUsername = (rule, value, callback) => {
   if (value == null) {
-    callback(new Error("请输入正确的管理员用户名"));
+    callback(new Error('请输入正确的管理员用户名'))
   } else {
-    callback();
+    callback()
   }
-};
+}
 
 // 验证密码
 const validatePassword = (rule, value, callback) => {
   if (value.length < 6) {
-    callback(new Error("管理员密码长度应大于6"));
+    callback(new Error('管理员密码长度应大于6'))
   } else {
-    callback();
+    callback()
   }
-};
+}
 
 // 登录表单数据
 const loginForm = ref({
-  username: "guest",
-  password: "123456",
-  verifyCode: "666666",
-});
+  username: 'guest',
+  password: '123456',
+  verifyCode: '666666',
+})
 
 // 登录表单验证规则
 const loginRules = ref({
-  username: [{ required: true, trigger: "blur", validator: validateUsername }],
-  password: [{ required: true, trigger: "blur", validator: validatePassword }],
-  verifyCode: [{ required: true, trigger: "blur", message: "验证码不能为空" }],
-});
+  username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+  password: [{ required: true, trigger: 'blur', validator: validatePassword }],
+  verifyCode: [{ required: true, trigger: 'blur', message: '验证码不能为空' }],
+})
 
 // 密码输入类型
-const passwordType = ref("password");
+const passwordType = ref('password')
 // 加载状态
-const loading = ref(false);
+const loading = ref(false)
 // 验证码加载状态
-const verifyLoading = ref(false);
+const verifyLoading = ref(false)
 // 显示验证码文本
-const show = ref(true);
+const show = ref(true)
 // 倒计时
-const count = ref("");
+const count = ref('')
 // 定时器
-const timer = ref(null);
+const timer = ref(null)
 // 重定向路径
-const redirect = ref("");
+const redirect = ref('')
 // 激活名称
-const activeName = ref("");
+const activeName = ref('')
 
 // 获取 Vuex store 实例
-const store = useStore();
+const store = useStore()
 // 获取 Vue Router 实例
-const router = useRouter();
+const router = useRouter()
 // 获取表单引用
-const loginFormRef = ref(null);
+const loginFormRef = ref(null)
 
 // 监听路由变化
 watch(
   () => router.currentRoute.value,
   (route) => {
-    redirect.value = route.query && route.query.redirect;
+    redirect.value = route.query && route.query.redirect
   },
   { immediate: true }
-);
+)
 
 // 组件挂载后执行
 onMounted(() => {
   // window.addEventListener('hashchange', afterQRScan)
-});
+})
 
 // 组件销毁前执行
 onUnmounted(() => {
   // window.removeEventListener('hashchange', afterQRScan)
-});
+})
 
 // 发送短信验证码
 const sendShortMsg = () => {
   if (!show.value) {
     // 提示等待 60 秒后重试
     ElNotification.error({
-      title: "失败",
-      message: "请等待60s后重试",
-    });
-    return;
+      title: '失败',
+      message: '请等待60s后重试',
+    })
+    return
   }
   if (
     loginForm.value.username == null ||
-    loginForm.value.username === "" ||
+    loginForm.value.username === '' ||
     loginForm.value.password == null ||
-    loginForm.value.password === ""
+    loginForm.value.password === ''
   ) {
     // 提示先填写用户名和密码
     ElNotification.error({
-      title: "失败",
-      message: "请先填写用户名和密码",
-    });
-    return false;
+      title: '失败',
+      message: '请先填写用户名和密码',
+    })
+    return false
   }
-  verifyLoading.value = true;
+  verifyLoading.value = true
   sendMsg(loginForm.value)
     .then((response) => {
-      verifyLoading.value = false;
+      verifyLoading.value = false
       // 提示信息发送成功
       ElNotification.success({
-        title: "成功",
-        message: "信息发送成功",
-      });
-      const TIME_COUNT = 60;
+        title: '成功',
+        message: '信息发送成功',
+      })
+      const TIME_COUNT = 60
       if (!timer.value) {
-        count.value = TIME_COUNT;
-        show.value = false;
+        count.value = TIME_COUNT
+        show.value = false
         timer.value = setInterval(() => {
           if (count.value > 0 && count.value <= TIME_COUNT) {
-            count.value--;
+            count.value--
           } else {
-            show.value = true;
-            clearInterval(timer.value);
-            timer.value = null;
+            show.value = true
+            clearInterval(timer.value)
+            timer.value = null
           }
-        }, 1000);
+        }, 1000)
       }
     })
     .catch((response) => {
-      verifyLoading.value = false;
+      verifyLoading.value = false
       // 提示发送失败
       ElNotification.error({
-        title: "失败",
+        title: '失败',
         message: response.data.errmsg,
-      });
-      verifyLoading.value = false;
-    });
-};
+      })
+      verifyLoading.value = false
+    })
+}
 
 // 显示/隐藏密码
 const showPwd = () => {
-  if (passwordType.value === "password") {
-    passwordType.value = "";
+  if (passwordType.value === 'password') {
+    passwordType.value = ''
   } else {
-    passwordType.value = "password";
+    passwordType.value = 'password'
   }
-};
+}
 
 // 处理登录
 const handleLogin = () => {
   loginFormRef.value.validate((valid) => {
     if (valid && !loading.value) {
-      loading.value = true;
+      loading.value = true
       store
-        .dispatch("LoginByUsername", loginForm.value)
+        .dispatch('LoginByUsername', loginForm.value)
         .then(() => {
-          loading.value = false;
-          console.log(redirect.value, "qqqqqqqqqqqqqqq");
-          router.push({ path: redirect.value || "/" });
+          loading.value = false
+          console.log(redirect.value, 'qqqqqqqqqqqqqqq')
+          router.push({ path: redirect.value || '/' })
         })
         .catch((response) => {
           // 提示登录失败
           ElNotification.error({
-            title: "失败",
+            title: '失败',
             message: response.data.errmsg,
-          });
-          loading.value = false;
-        });
+          })
+          loading.value = false
+        })
     } else {
-      return false;
+      return false
     }
-  });
-};
+  })
+}
 </script>
 
 <style>
@@ -292,5 +292,5 @@ const handleLogin = () => {
 </style>
 
 <style lang="scss">
-@import "@/styles/login.scss";
+@use '@/styles/login.scss';
 </style>

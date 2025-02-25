@@ -132,7 +132,6 @@ const resolvePath = (routePath) => {
   if (routePath.startsWith('/')) {
     routePath = routePath.slice(1)
   }
-  console.log(resolvedPath + routePath, 'aaaa')
   return resolvedPath + routePath
 }
 

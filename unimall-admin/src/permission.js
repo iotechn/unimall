@@ -19,7 +19,7 @@ const whiteList = ['/login', '/auth-redirect'];// no redirect whitelist
 router.beforeEach(async (to, from, next) => {
   NProgress.start(); // start progress bar
   const token = getToken();
-console.log(token,"1213233");
+  console.log(token,"111111112");
   if (token) {
     /* has token*/
     if (to.path === '/login') {
@@ -34,30 +34,37 @@ console.log(token,"1213233");
 
           // 使用 addRoute 动态添加路由
           const addRouters = store.getters.addRouters;
-					console.log(addRouters,"q111");
-
           addRouters.forEach(route => {
             router.addRoute(route);
           });
 
+          console.log("ccccccccccc");
 
           next({ ...to, replace: true }); // hack方法 确保addRoutes已完成 ,set the replace: true so the navigation will not leave a history record
         } catch (err) {
+          console.log("bbbbbbbbb");
+
           await store.dispatch('FedLogOut');
           ElMessage.error(err || 'Verification failed, please login again');
           next({ path: '/' });
+
         }
       } else {
         // 没有动态改变权限的需求可直接next() 删除下方权限判断 ↓
         if (hasPermission(store.getters.perms, to.meta.perms)) {
+          console.log("aaaaaaaaaaa");
           next();
         } else {
+          console.log("dddddddd");
+
           next({ path: '/401', replace: true, query: { noGoBack: true } });
         }
         // 可删 ↑
       }
     }
   } else {
+    console.log("eeeeeeeee");
+
     /* has no token*/
     if (whiteList.indexOf(to.path) !== -1) {
       next();

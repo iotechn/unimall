@@ -1,7 +1,10 @@
-[
+import Layout from "@/layout";
+
+const router = [
    {
       "redirect":"noredirect",
-      "path":"/operation",
+      "path": "/operation",
+      component: Layout,
       "children":[
          {
             "path":"order",
@@ -18,7 +21,8 @@
                ],
                "title":"订单管理"
             },
-            "name":"order",
+            "name": "order",
+            "component": () => import("@/views//operation/order.vue"),
             "page":"/operation/order"
          },
          {
@@ -31,7 +35,8 @@
                ],
                "title":"评论管理"
             },
-            "name":"appraise",
+            "name": "appraise",
+            "component": () => import("@/views//operation/appraise.vue"),
             "page":"/operation/appraise"
          },
          {
@@ -46,7 +51,9 @@
                ],
                "title":"运费管理"
             },
-            "name":"freight",
+            "name": "freight",
+            "component": () => import("@/views//operation/freight.vue"),
+            
             "page":"/operation/freight"
          }
       ],
@@ -60,6 +67,7 @@
    {
       "redirect":"noredirect",
       "path":"/product",
+      component: Layout,
       "children":[
          {
             "path":"list",
@@ -135,6 +143,7 @@
    {
       "redirect":"noredirect",
       "path":"/promotion",
+      component: Layout,
       "children":[
          {
             "path":"advert",
@@ -177,7 +186,8 @@
    
    {
       "redirect":"noredirect",
-      "path":"/user",
+      "path": "/user",
+      component: Layout,
       "children":[
          {
             "path":"user",
@@ -216,6 +226,7 @@
    {
       "redirect":"noredirect",
       "path":"/vip",
+      component: Layout,
       "children":[
          {
             "path":"template",
@@ -252,6 +263,7 @@
    {
       "redirect":"noredirect",
       "path":"/sys",
+      component: Layout,
       "children":[
          {
             "path":"admin",
@@ -296,7 +308,8 @@
    {
       "redirect":"noredirect",
       "path":"/profile",
-      "hidden":true,
+      "hidden": true,
+      component: Layout,
       "children":[
          {
             "path":"password",
@@ -321,7 +334,8 @@
    },
    {
       "redirect":"/404",
-      "path":"*",
+      "path":"/:pathMatch(.*)*",
       "hidden":true
    }
 ]
+export default router;
