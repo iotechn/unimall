@@ -55,6 +55,7 @@ const user = {
         loginByUsername(username, userInfo.password, userInfo.verifyCode).then(response => {
           const token = response.data.data
           commit('SET_TOKEN', token)
+          console.log(token,"11111111111111");
           setToken(token)
           resolve()
         }).catch(error => {

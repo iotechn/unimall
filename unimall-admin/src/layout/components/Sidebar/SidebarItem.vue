@@ -56,9 +56,7 @@
 </template>
 
 <script setup>
-//defineOptions({
-//   name: 'SidebarItem',
-// })
+
 import path from 'path-browserify'
 import { ref, defineProps } from 'vue'
 // import path from 'path'
@@ -121,7 +119,6 @@ const hasOneShowingChild = (children, parent) => {
 //   }
 //   return path.resolve(props.basePath, routePath)
 // }
-console.log(path, '333333333')
 const resolvePath = (routePath) => {
   if (isExternalLink(routePath)) {
     return routePath

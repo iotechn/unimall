@@ -29,7 +29,7 @@ export const constantRouterMap = [
     hidden: true,
     children: [
       {
-        path: '/redirect/:path*',
+        path: '/redirect/:pathMatch(.*)*',
         component: () => import('@/views/redirect/index')
       }
     ]
@@ -135,7 +135,7 @@ export const asyncRouterMap =
 
   {
      "redirect":"/404",
-     "path":"*",
+     "path":"/:pathMatch(.*)*",
      "hidden":true
   }
 ];
