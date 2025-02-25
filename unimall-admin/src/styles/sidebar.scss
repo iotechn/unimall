@@ -1,3 +1,5 @@
+@use './variables.scss';
+
 #app {
 	// 主体区域
 	.main-container {
@@ -91,9 +93,9 @@
 	.sidebar-container .nest-menu .el-submenu>.el-submenu__title,
 	.sidebar-container .el-submenu .el-menu-item {
 	  min-width: 180px !important;
-	  background-color: $subMenuBg !important;
+	  background-color: variables.$subMenuBg !important;
 	  &:hover {
-		background-color: $menuHover !important;
+		background-color: variables.$menuHover !important;
 	  }
 	}
 	.el-menu--collapse .el-menu .el-submenu {

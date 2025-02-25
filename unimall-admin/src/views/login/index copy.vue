@@ -1,61 +1,81 @@
 <template>
-	<div class="login-container">
-		<div style="position: absolute;width: 100%;height: 100vh">
-			<div v-for="item in snow" :key="item.id" class="snow"></div>
-		</div>
-		<el-form ref="loginFromRef" class="login-form" :model="loginForm" :rules="loginRules">
-			<div class="title-container">
-				<h3 class="title">Vue3后台系统</h3>
-			</div>
+  <div class="login-container">
+    <div style="position: absolute; width: 100%; height: 100vh">
+      <div v-for="item in snow" :key="item.id" class="snow"></div>
+    </div>
+    <el-form
+      ref="loginFromRef"
+      class="login-form"
+      :model="loginForm"
+      :rules="loginRules"
+    >
+      <div class="title-container">
+        <h3 class="title">Vue3后台系统</h3>
+      </div>
 
-			<el-form-item prop="username" style="display: flex;flex-direction: row">
-				<span class="icon-container">
-					<UserFilled style="width: 1em;height: 1em" />
-				</span>
-				<el-input
-					v-model="loginForm.username" placeholder="请输入用户名" name="username" type="text"
-					@keyup.enter.native="handleLogin"
-				/>
-			</el-form-item>
+      <el-form-item prop="username" style="display: flex; flex-direction: row">
+        <span class="icon-container">
+          <UserFilled style="width: 1em; height: 1em" />
+        </span>
+        <el-input
+          v-model="loginForm.username"
+          placeholder="请输入用户名"
+          name="username"
+          type="text"
+          @keyup.enter.native="handleLogin"
+        />
+      </el-form-item>
 
-			<el-form-item prop="password">
-				<span class="icon-container">
-					<Lock style="width: 1em;height: 1em" />
-				</span>
-				<el-input
-					v-model="loginForm.password" placeholder="请输入密码" name="password" :type="passwordType"
-					@keyup.enter.native="handleLogin"
-				/>
-				<span class="show-pwd">
-					<svg-icon :icon="passwordType === 'password' ? 'eye' : 'eye-open'" @click="onChangePwdType" />
+      <el-form-item prop="password">
+        <span class="icon-container">
+          <Lock style="width: 1em; height: 1em" />
+        </span>
+        <el-input
+          v-model="loginForm.password"
+          placeholder="请输入密码"
+          name="password"
+          :type="passwordType"
+          @keyup.enter.native="handleLogin"
+        />
+        <span class="show-pwd">
+          <svg-icon
+            :icon="passwordType === 'password' ? 'eye' : 'eye-open'"
+            @click="onChangePwdType"
+          />
+        </span>
+      </el-form-item>
 
-				</span>
-			</el-form-item>
+      <el-form-item class="code-box" prop="captcha_code">
+        <span class="icon-container">
+          <Tickets style="width: 1em; height: 1em" />
+        </span>
+        <el-input
+          v-model="loginForm.captcha_code"
+          placeholder="图形验证码"
+          name="captcha_code"
+          class="code-input"
+          maxlength="4"
+          @keyup.enter.native="handleLogin"
+        >
+        </el-input>
+        <div class="code-img" @click="getCodeImg">{{ codeNet }}</div>
+      </el-form-item>
 
-			<el-form-item class="code-box" prop="captcha_code">
-				<span class="icon-container">
-					<Tickets style="width: 1em;height: 1em" />
-				</span>
-				<el-input
-					v-model="loginForm.captcha_code" placeholder="图形验证码" name="captcha_code" class="code-input"
-					maxlength="4" @keyup.enter.native="handleLogin"
-				>
-				</el-input>
-				<div class="code-img" @click="getCodeImg">{{codeNet}}</div>
-			</el-form-item>
-
-			<el-button
-				type="primary" style=" margin-bottom: 30px;width: 100%;" :loading="loading"
-				size="large" @click.native.prevent="handleLogin"
-			>
-				<span>{{!loading ? '登 录' : '登 录 中...'}}</span>
-			</el-button>
-		</el-form>
-		<!--  底部  -->
-		<div class="el-login-footer">
-			<span>项目搭建博客地址：https://juejin.cn/user/1310273591836957</span>
-		</div>
-	</div>
+      <el-button
+        type="primary"
+        style="margin-bottom: 30px; width: 100%"
+        :loading="loading"
+        size="large"
+        @click.native.prevent="handleLogin"
+      >
+        <span>{{ !loading ? '登 录' : '登 录 中...' }}</span>
+      </el-button>
+    </el-form>
+    <!--  底部  -->
+    <div class="el-login-footer">
+      <span>项目搭建博客地址：https://juejin.cn/user/1310273591836957</span>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -81,13 +101,13 @@ $txt_color: #333;
     width: 420px;
     max-width: 100%;
     background: white;
-    ::v-deep .el-form-item {
+    :deep(.el-form-item) {
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 5px;
       background: rgba(0, 0, 0, 0.1);
       color: #454545;
     }
-    ::v-deep .el-input {
+    :deep(.el-input) {
       display: inline-block;
       width: 85%;
       height: 47px;
@@ -103,7 +123,6 @@ $txt_color: #333;
         background: none;
         box-shadow: none;
       }
-
     }
   }
   .icon-container {
@@ -140,7 +159,6 @@ $txt_color: #333;
       width: 60px;
       background: transparent;
       font-size: 22px;
-
     }
   }
   .el-login-footer {
@@ -197,117 +215,113 @@ $txt_color: #333;
 </style>
 
 <script setup>
-import { UserFilled, Lock, Tickets } from "@element-plus/icons";
+import { UserFilled, Lock, Tickets } from '@element-plus/icons'
 
-import { ref, onMounted } from "vue";
-import { validatePassword, validateCode } from "./rules";
-import { getCode } from "@/api/api";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
+import { ref, onMounted } from 'vue'
+import { validatePassword, validateCode } from './rules'
+import { getCode } from '@/api/api'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 // 雪花效果
-const snow = ref([]);
+const snow = ref([])
 for (let i = 0; i < 1000; i++) {
-	snow.value.push(i);
+  snow.value.push(i)
 }
 
-const codeNet = ref("");
+const codeNet = ref('')
 
 onMounted(() => {
-	getCodeImg();
-});
+  getCodeImg()
+})
 
 // 数据源
 const loginForm = ref({
-	username: "admin",
-	password: "123456",
-	captcha_code: "",
-	code_key: ""
-});
+  username: 'admin',
+  password: '123456',
+  captcha_code: '',
+  code_key: '',
+})
 // 验证规则
 const loginRules = ref({
-	username: [
-		{
-			required: true,
-			trigger: "blur",
-			message: "请输入用户名"
-		}
-
-	],
-	password: [
-		{
-			required: true,
-			trigger: "blur",
-			validator: validatePassword()
-		}
-
-	],
-	captcha_code: [
-		{
-			required: true,
-			trigger: "blur",
-			validator: validateCode()
-		}
-
-	]
-});
+  username: [
+    {
+      required: true,
+      trigger: 'blur',
+      message: '请输入用户名',
+    },
+  ],
+  password: [
+    {
+      required: true,
+      trigger: 'blur',
+      validator: validatePassword(),
+    },
+  ],
+  captcha_code: [
+    {
+      required: true,
+      trigger: 'blur',
+      validator: validateCode(),
+    },
+  ],
+})
 
 // 处理密码框文本显示状态
-const passwordType = ref("password");
+const passwordType = ref('password')
 const onChangePwdType = () => {
-	if (passwordType.value === "password") {
-		passwordType.value = "text";
-	} else {
-		passwordType.value = "password";
-	}
-};
+  if (passwordType.value === 'password') {
+    passwordType.value = 'text'
+  } else {
+    passwordType.value = 'password'
+  }
+}
 
 // 登录动作处理
-const loading = ref(false);
-const loginFromRef = ref(null);
-const store = useStore();
-const router = useRouter();
+const loading = ref(false)
+const loginFromRef = ref(null)
+const store = useStore()
+const router = useRouter()
 
 /**
  * 登录
  */
 const handleLogin = () => {
-	loginFromRef.value.validate(valid => {
-		if (!valid) return;
-		console.log(loginForm.value);
-		if (loginForm.value.captcha_code !== codeNet.value) {
-			ElMessage.error("验证码错误！");
-			return;
-		}
-		loading.value = true;
-		store.dispatch("user/login", loginForm.value)
-			.then(() => {
-				setTimeout(() => {
-					loading.value = false;
-					// TODO: 登录后操作
-					router.push("/");
-				}, 500);
-			})
-			.catch(() => {
-				getCodeImg();
-				loading.value = false;
-			});
-	});
-};
+  loginFromRef.value.validate((valid) => {
+    if (!valid) return
+    console.log(loginForm.value)
+    if (loginForm.value.captcha_code !== codeNet.value) {
+      ElMessage.error('验证码错误！')
+      return
+    }
+    loading.value = true
+    store
+      .dispatch('user/login', loginForm.value)
+      .then(() => {
+        setTimeout(() => {
+          loading.value = false
+          // TODO: 登录后操作
+          router.push('/')
+        }, 500)
+      })
+      .catch(() => {
+        getCodeImg()
+        loading.value = false
+      })
+  })
+}
 /**
  * 获取图形验证码
  */
 const getCodeImg = () => {
-	getCode({})
-		.then(data => {
-			const obj = data.obj;
+  getCode({})
+    .then((data) => {
+      const obj = data.obj
 
-			loginForm.value.code_key = obj.code_key;
-			codeNet.value = obj.code;
-		})
-		.catch(() => {
-		});
-};
-
+      loginForm.value.code_key = obj.code_key
+      codeNet.value = obj.code
+    })
+    .catch(() => {})
+}
 </script>

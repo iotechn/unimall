@@ -52,9 +52,9 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-@import 'src/styles/mixin.scss';
+@use 'src/styles/mixin.scss';
 .app-wrapper {
-  @include clearfix;
+  @include mixin.clearfix;
   position: relative;
   height: 100%;
   width: 100%;

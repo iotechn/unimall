@@ -1,9 +1,9 @@
-@import './variables.scss';
-@import './mixin.scss';
-@import './transition.scss';
-@import './element.scss';
-@import './sidebar.scss';
-@import './btn.scss';
+@use './variables.scss';
+@use './mixin.scss';
+@use './transition.scss';
+@use './element.scss';
+@use './sidebar.scss';
+@use './btn.scss';
 html,
 body {
 	margin: 0;

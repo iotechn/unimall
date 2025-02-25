@@ -6,18 +6,16 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
-
 const props = defineProps({
   icon: {
     type: String,
-    default: "",
+    default: '',
   },
   title: {
     type: String,
-    default: "",
+    default: '',
   },
-});
+})
 
-const { icon, title } = props;
+const { icon, title } = props
 </script>

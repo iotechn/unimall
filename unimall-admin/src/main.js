@@ -12,8 +12,8 @@ import i18n from './lang' // Internationalization
 import ElementPlus from 'element-plus' // 完整引入Element Plus
 // element
 import installElementPlus from "./plugins/element";
-// directives
-import installDirective from "@/directives";
+// directive
+import permission from "@/directive/permission/index.js";
 // filter
 import installFilter from "@/filters";
 
@@ -25,8 +25,9 @@ import Pagination from "@/components/Pagination";
 import svgIcon from "@/components/SvgIcon/index.vue";
 const app = createApp(App);
 installElementPlus(app);
-installDirective(app);
+// installDirective(app);
 installFilter(app);
+app.directive('permission', permission);
 // 全局组件挂载
 app.component("RightToolbar", RightToolbar);
 app.component("Pagination", Pagination);

@@ -56,9 +56,8 @@
 </template>
 
 <script setup>
-
 import path from 'path-browserify'
-import { ref, defineProps } from 'vue'
+import { ref } from 'vue'
 // import path from 'path'
 import { generateTitle } from '@/utils/i18n'
 import { isExternal } from '@/utils'

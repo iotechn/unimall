@@ -6,7 +6,6 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
 import { isExternal } from '@/utils'
 
 // 定义组件接收的 props

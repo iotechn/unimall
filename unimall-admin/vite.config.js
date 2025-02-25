@@ -28,6 +28,13 @@ export default defineConfig({
 		vitePluginGitInfo()
 
 	],
+	css: {
+    preprocessorOptions: {
+      scss: {
+        // additionalData: `@use "@/styles/variables.scss";` // 全局引入变量文件
+      }
+    }
+  },
 	resolve: {
 		alias: {
 			"@": path.resolve("./src")
