@@ -80,7 +80,10 @@ const moveToCurrentTag = () => {
   nextTick(() => {
     for (const tag of tagRefs.value) {
       if (tag.to.path === route.path) {
-        scrollPaneRef.value.moveToTarget(tag)
+        nextTick(() => {
+          scrollPaneRef.value.moveToTarget(tag)
+        })
+
         // when query is different then update
         if (tag.to.fullPath !== route.fullPath) {
           store.dispatch('updateVisitedView', route)

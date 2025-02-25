@@ -7,7 +7,7 @@
         v-model="listQuery.orderNo"
         clearable
         class="filter-item"
-        style="width: 200px;"
+        style="width: 200px"
         placeholder="请输入订单编号"
       />
       <el-select
@@ -17,7 +17,12 @@
         class="filter-item"
         placeholder="请选择订单状态"
       >
-        <el-option v-for="(key, value) in statusMap" :key="key" :label="key" :value="value" />
+        <el-option
+          v-for="(key, value) in statusMap"
+          :key="key"
+          :label="key"
+          :value="value"
+        />
       </el-select>
       <el-button
         v-permission="['operation:order:list']"
@@ -25,9 +30,10 @@
         type="primary"
         icon="el-icon-search"
         @click="handleFilter"
-      >查找</el-button>
+        >查找</el-button
+      >
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <br>
+      <br />
       <el-date-picker
         v-model="downData.gmtStart"
         type="datetime"
@@ -53,10 +59,29 @@
         class="filter-item"
         placeholder="待出库"
       >
-        <el-option v-for="(key, value) in statusMap" :key="key" :label="key" :value="value" />
+        <el-option
+          v-for="(key, value) in statusMap"
+          :key="key"
+          :label="key"
+          :value="value"
+        />
       </el-select>
-      <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="downExcelBtn">导出</el-button>
-      <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="downExcelStatisticsBtn">汇总</el-button>
+      <el-button
+        :loading="downloadLoading"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-download"
+        @click="downExcelBtn"
+        >导出</el-button
+      >
+      <el-button
+        :loading="downloadLoading"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-download"
+        @click="downExcelStatisticsBtn"
+        >汇总</el-button
+      >
     </div>
 
     <!-- 查询结果 -->
@@ -89,89 +114,153 @@
           </el-form>
           <el-form label-position="right" class="table-expand">
             <el-form-item label="客服备注">
-              <span>{{ props.row.adminMono ? props.row.adminMono : '无' }}</span>
+              <span>{{
+                props.row.adminMono ? props.row.adminMono : '无'
+              }}</span>
             </el-form-item>
           </el-form>
-          <el-form v-if="props.row.status === 60 || props.row.refundReason" label-position="right" class="table-expand">
+          <el-form
+            v-if="props.row.status === 60 || props.row.refundReason"
+            label-position="right"
+            class="table-expand"
+          >
             <el-form-item label="退款原因">
-              <span>{{ props.row.refundReason ? props.row.refundReason : '未填写退款原因' }}</span>
+              <span>{{
+                props.row.refundReason
+                  ? props.row.refundReason
+                  : '未填写退款原因'
+              }}</span>
             </el-form-item>
           </el-form>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" width="210" label="订单编号" prop="orderNo" />
+      <el-table-column
+        align="center"
+        width="210"
+        label="订单编号"
+        prop="orderNo"
+      />
 
       <el-table-column align="center" width="80" label="用户ID" prop="userId" />
 
-      <el-table-column align="center" width="120" label="订单状态" prop="status">
+      <el-table-column
+        align="center"
+        width="120"
+        label="订单状态"
+        prop="status"
+      >
         <template slot-scope="scope">
-          <el-tag :type="statusColor(scope.row.status)">{{ scope.row.status | orderStatusFilter }}</el-tag>
+          <el-tag :type="statusColor(scope.row.status)">{{
+            scope.row.status | orderStatusFilter
+          }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" width="110" label="支付渠道" prop="payChannel">
+      <el-table-column
+        align="center"
+        width="110"
+        label="支付渠道"
+        prop="payChannel"
+      >
         <template slot-scope="scope">
-          <el-tag :type="payChannelColor(scope.row.payChannel)">{{ scope.row.payChannel | payChannelFilter }}</el-tag>
+          <el-tag :type="payChannelColor(scope.row.payChannel)">{{
+            scope.row.payChannel | payChannelFilter
+          }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" width="100" label="订单金额" prop="actualPrice">
-        <template slot-scope="scope">¥ {{ scope.row.actualPrice / 100.0 }}</template>
+      <el-table-column
+        align="center"
+        width="100"
+        label="订单金额"
+        prop="actualPrice"
+      >
+        <template slot-scope="scope"
+          >¥ {{ scope.row.actualPrice / 100.0 }}</template
+        >
       </el-table-column>
 
       <!--<el-table-column align="center" label="支付金额" prop="actualPrice"/>-->
 
-      <el-table-column align="center" width="140" label="创建时间" prop="gmtCreate">
+      <el-table-column
+        align="center"
+        width="140"
+        label="创建时间"
+        prop="gmtCreate"
+      >
         <template slot-scope="scope">{{ scope.row.gmtCreate }}</template>
       </el-table-column>
 
-      <el-table-column align="center" width="140" label="物流渠道" prop="shipCode">
+      <el-table-column
+        align="center"
+        width="140"
+        label="物流渠道"
+        prop="shipCode"
+      >
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.status <= 20 || scope.row.status >= 80" type="info">未发货</el-tag>
+          <el-tag
+            v-if="scope.row.status <= 20 || scope.row.status >= 80"
+            type="info"
+            >未发货</el-tag
+          >
           <el-tag v-else>{{ scope.row.shipCode | shipCodeFilter }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" width="200" label="物流单号" prop="shipNo"/>
+      <el-table-column
+        align="center"
+        width="200"
+        label="物流单号"
+        prop="shipNo"
+      />
 
-      <el-table-column align="center" width="200" label="备注" prop="mono"/>
+      <el-table-column align="center" width="200" label="备注" prop="mono" />
 
-      <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
+      <el-table-column
+        align="center"
+        label="操作"
+        width="300"
+        class-name="small-padding fixed-width"
+      >
         <template slot-scope="scope">
           <el-button
             v-permission="['operation:order:detail']"
             type="primary"
             size="mini"
             @click="handleDetail(scope.row)"
-          >详情</el-button>
+            >详情</el-button
+          >
           <el-button
             v-permission="['operation:order:detail']"
-            v-if="scope.row.status===20"
+            v-if="scope.row.status === 20"
             type="primary"
             size="mini"
             @click="downOrderExcelBtn(scope.row)"
-          >配送单</el-button>
+            >配送单</el-button
+          >
           <el-button
             v-permission="['operation:order:ship']"
-            v-if="scope.row.status===20"
+            v-if="scope.row.status === 20"
             type="primary"
             size="mini"
             @click="handleShip(scope.row)"
-          >发货</el-button>
+            >发货</el-button
+          >
           <el-button
             v-permission="['operation:order:refund']"
-            v-if="scope.row.status===60"
+            v-if="scope.row.status === 60"
             type="primary"
             size="mini"
             @click="handleRefund(scope.row)"
-          >退款</el-button>
+            >退款</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
 
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="listQuery.page"
       :limit.sync="listQuery.limit"
@@ -205,27 +294,46 @@
         </el-form-item>
         <el-form-item label="客服备注">
           <span>{{ orderDetail.adminMono }}</span>
-          <el-button type="primary" icon="el-icon-edit" @click="adminMonoDialogVisible = true">编辑</el-button>
+          <el-button
+            type="primary"
+            icon="el-icon-edit"
+            @click="adminMonoDialogVisible = true"
+            >编辑</el-button
+          >
         </el-form-item>
         <el-form-item label="配送费用">
           <template>
-            {{ orderDetail.freightPrice > 0 ? (orderDetail.freightPrice / 100.0) : '免运费' }}
+            {{
+              orderDetail.freightPrice > 0
+                ? orderDetail.freightPrice / 100.0
+                : '免运费'
+            }}
           </template>
         </el-form-item>
         <el-form-item label="收货信息">
           <span>（收货人）{{ orderDetail.consignee }}</span>
           <span>（手机号）{{ orderDetail.phone }}</span>
-          <span>（地址）{{ orderDetail.province }}{{ orderDetail.city }}{{ orderDetail.county }}{{ orderDetail.address }}{{ orderDetail.address }}</span>
+          <span
+            >（地址）{{ orderDetail.province }}{{ orderDetail.city
+            }}{{ orderDetail.county }}{{ orderDetail.address
+            }}{{ orderDetail.address }}</span
+          >
         </el-form-item>
         <el-form-item label="商品信息">
-          <el-table :data="orderDetail.skuList" size="small" border fit highlight-current-row>
+          <el-table
+            :data="orderDetail.skuList"
+            size="small"
+            border
+            fit
+            highlight-current-row
+          >
             <el-table-column align="center" label="名称" prop="spuTitle" />
             <el-table-column align="center" label="规格" prop="title" />
             <el-table-column align="center" label="商品数量" prop="num" />
             <el-table-column align="center" label="单位" prop="unit" />
             <el-table-column align="center" label="总价（单价*数量）">
               <template slot-scope="scope">
-                <span>{{ scope.row.price * scope.row.num / 100 }}</span>
+                <span>{{ (scope.row.price * scope.row.num) / 100 }}</span>
               </template>
             </el-table-column>
           </el-table>
@@ -238,7 +346,7 @@
         status-icon
         label-position="left"
         label-width="100px"
-        style="width: 400px; margin-left:50px;"
+        style="width: 400px; margin-left: 50px"
       >
         <el-form-item label="等级" prop="adminMonoLevel">
           <el-radio-group v-model="orderDetail.adminMonoLevel">
@@ -267,20 +375,30 @@
         status-icon
         label-position="left"
         label-width="100px"
-        style="width: 400px; margin-left:50px;"
+        style="width: 400px; margin-left: 50px"
       >
         <el-form-item label="快递公司" prop="shipCode">
           <el-select v-model="shipForm.shipCode" placeholder="请选择快递公司">
-            <el-option v-for="(key, value) in shipCodeMap" :key="key" :label="key" :value="value"/>
+            <el-option
+              v-for="(key, value) in shipCodeMap"
+              :key="key"
+              :label="key"
+              :value="value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="快递编号" prop="shipNo">
-          <el-input :disabled="shipForm.shipCode === 'NONE'" v-model="shipForm.shipNo" />
+          <el-input
+            :disabled="shipForm.shipCode === 'NONE'"
+            v-model="shipForm.shipNo"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="shipDialogVisible = false">取消</el-button>
-        <el-button :disabled="shipSubmiting" type="primary" @click="confirmShip">确定</el-button>
+        <el-button :disabled="shipSubmiting" type="primary" @click="confirmShip"
+          >确定</el-button
+        >
       </div>
     </el-dialog>
 
@@ -293,7 +411,7 @@
         status-icon
         label-position="left"
         label-width="100px"
-        style="width: 400px; margin-left:50px;"
+        style="width: 400px; margin-left: 50px"
       >
         <el-form-item label="tips">
           <span>允许退款后钱会退回对方账户，请确认您已经收到退货</span>
@@ -303,19 +421,32 @@
           <el-radio v-model="refundForm.type" :label="1">允许退款</el-radio>
         </el-form-item>
         <el-form-item v-if="refundForm.type === 1" label="金额">
-          <el-input v-model="refundForm.sum"/>
+          <el-input v-model="refundForm.sum" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="refundDialogVisible = false">取消</el-button>
-        <el-button :disabled="refundSubmiting" type="primary" @click="confirmRefund">确定</el-button>
+        <el-button
+          :disabled="refundSubmiting"
+          type="primary"
+          @click="confirmRefund"
+          >确定</el-button
+        >
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listOrder, shipOrder, refundOrder, detailOrder, getExcelInfo, editAdminMono, getExcelStatistics } from '@/api/order'
+import {
+  listOrder,
+  shipOrder,
+  refundOrder,
+  detailOrder,
+  getExcelInfo,
+  editAdminMono,
+  getExcelStatistics,
+} from '@/api/order'
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 import checkPermission from '@/utils/permission' // 权限判断函数
 
@@ -329,31 +460,31 @@ const statusMap = {
   60: '退款中',
   70: '已退款',
   80: '已取消',
-  90: '已取消(系统)'
+  90: '已取消(系统)',
 }
 
 const shipCodeMap = {
-  'NONE': '无需物流公司',
-  'SF': '顺丰速运',
-  'HTKY': '百世快递',
-  'ZTO': '中通快递',
-  'STO': '申通快递',
-  'YTO': '圆通速递',
-  'YD': '韵达速递',
-  'YZPY': '邮政快递包裹',
-  'EMS': 'EMS',
-  'HHTT': '天天快递',
-  'JD': '京东快递',
-  'UC': '优速快递',
-  'DBL': '德邦快递',
-  'ZJS': '宅急送',
-  'TNT': 'TNT快递'
+  NONE: '无需物流公司',
+  SF: '顺丰速运',
+  HTKY: '百世快递',
+  ZTO: '中通快递',
+  STO: '申通快递',
+  YTO: '圆通速递',
+  YD: '韵达速递',
+  YZPY: '邮政快递包裹',
+  EMS: 'EMS',
+  HHTT: '天天快递',
+  JD: '京东快递',
+  UC: '优速快递',
+  DBL: '德邦快递',
+  ZJS: '宅急送',
+  TNT: 'TNT快递',
 }
 
 const payChannelMap = {
   WX: '微信支付',
   ALI: '支付宝',
-  OFFLINE: '线下支付'
+  OFFLINE: '线下支付',
 }
 
 export default {
@@ -375,7 +506,7 @@ export default {
         return shipCodeMap[shipCode]
       }
       return '无需物流公司'
-    }
+    },
   },
   data() {
     return {
@@ -387,13 +518,13 @@ export default {
         specifications: undefined,
         unit: undefined,
         num: undefined,
-        address: undefined
+        address: undefined,
       },
       excelDataList: [],
       downData: {
         status: '',
         gmtStart: undefined,
-        gmtEnd: undefined
+        gmtEnd: undefined,
       },
       list: undefined,
       total: 0,
@@ -402,13 +533,13 @@ export default {
         page: 1,
         limit: 20,
         id: undefined,
-        name: undefined
+        name: undefined,
       },
       orderDialogVisible: false,
       orderDetail: {},
       refundForm: {
         orderNo: undefined,
-        type: 0
+        type: 0,
       },
       refundDialogVisible: false,
       refundSubmiting: false,
@@ -417,26 +548,24 @@ export default {
       shipForm: {
         orderNo: undefined,
         shipCode: 'NONE',
-        shipNo: undefined
+        shipNo: undefined,
       },
       shipDialogVisible: false,
       shipSubmiting: false,
       refundRules: {
         orderNo: [
-          { required: true, message: '请使用非IE浏览器重试', trigger: 'blur' }
+          { required: true, message: '请使用非IE浏览器重试', trigger: 'blur' },
         ],
-        type: [
-          { required: true, message: '请选择退货类型', trigger: 'blur' }
-        ]
+        type: [{ required: true, message: '请选择退货类型', trigger: 'blur' }],
       },
       shipRules: {
         shipCode: [
-          { required: true, message: '请选择物流类型', trigger: 'blur' }
+          { required: true, message: '请选择物流类型', trigger: 'blur' },
         ],
         orderNo: [
-          { required: true, message: '请使用非IE浏览器重试', trigger: 'blur' }
-        ]
-      }
+          { required: true, message: '请使用非IE浏览器重试', trigger: 'blur' },
+        ],
+      },
     }
   },
   created() {
@@ -447,7 +576,7 @@ export default {
     getList() {
       this.listLoading = true
       listOrder(this.listQuery)
-        .then(response => {
+        .then((response) => {
           this.list = response.data.data.items
           this.total = response.data.data.total
           this.listLoading = false
@@ -463,7 +592,7 @@ export default {
       this.getList()
     },
     handleDetail(row) {
-      detailOrder(row.id).then(response => {
+      detailOrder(row.id).then((response) => {
         this.orderDetail = response.data.data
       })
       this.orderDialogVisible = true
@@ -475,30 +604,30 @@ export default {
       this.shipForm.shipNo = ''
     },
     confirmShip() {
-      this.$refs['shipForm'].validate(valid => {
+      this.$refs['shipForm'].validate((valid) => {
         if (valid) {
           if (this.shipForm.shipCode !== 'NONE' && !this.shipForm.shipNo) {
             this.$notify.error({
               title: '失败',
-              message: '请填写运单号'
+              message: '请填写运单号',
             })
           } else {
             this.shipSubmiting = true
             shipOrder(this.shipForm)
-              .then(response => {
+              .then((response) => {
                 this.shipSubmiting = false
                 this.shipDialogVisible = false
                 this.$notify.success({
                   title: '成功',
-                  message: '确认发货成功！'
+                  message: '确认发货成功！',
                 })
                 this.getList()
               })
-              .catch(response => {
+              .catch((response) => {
                 this.shipSubmiting = false
                 this.$notify.error({
                   title: '失败',
-                  message: response.data.errmsg
+                  message: response.data.errmsg,
                 })
               })
           }
@@ -509,24 +638,28 @@ export default {
       if (!this.orderDetail) {
         this.$notify.error({
           title: '失败',
-          message: '数据不对，请刷新页面重试'
+          message: '数据不对，请刷新页面重试',
         })
         return
       }
-      editAdminMono(this.orderDetail.id, this.orderDetail.adminMonoLevel, this.orderDetail.adminMono)
-        .then(res => {
+      editAdminMono(
+        this.orderDetail.id,
+        this.orderDetail.adminMonoLevel,
+        this.orderDetail.adminMono
+      )
+        .then((res) => {
           this.$notify.success({
             title: '成功',
-            message: '客服备注成功！'
+            message: '客服备注成功！',
           })
           this.getList()
           this.adminMonoDialogVisible = false
         })
-        .catch(response => {
+        .catch((response) => {
           this.shipSubmiting = false
           this.$notify.error({
             title: '失败',
-            message: response.data.errmsg
+            message: response.data.errmsg,
           })
         })
     },
@@ -534,38 +667,38 @@ export default {
       const obj = {
         orderNo: row.orderNo,
         sum: row.payPrice / 100.0,
-        type: 0
+        type: 0,
       }
       this.refundForm = Object.assign({}, obj)
       this.refundDialogVisible = true
       this.shipForm.shipCode = 'NONE'
     },
     confirmRefund() {
-      this.$refs['refundForm'].validate(valid => {
+      this.$refs['refundForm'].validate((valid) => {
         if (valid) {
           this.refundSubmiting = true
           const obj = {
             type: this.refundForm.type,
-            orderNo: this.refundForm.orderNo
+            orderNo: this.refundForm.orderNo,
           }
           if (this.refundForm.sum) {
             obj['sum'] = parseInt(this.refundForm.sum * 100)
           }
           refundOrder(obj)
-            .then(response => {
+            .then((response) => {
               this.refundSubmiting = false
               this.refundDialogVisible = false
               this.$notify.success({
                 title: '成功',
-                message: '确认退款成功！'
+                message: '确认退款成功！',
               })
               this.getList()
             })
-            .catch(response => {
+            .catch((response) => {
               this.refundSubmiting = false
               this.$notify.error({
                 title: '失败',
-                message: response.data.errmsg
+                message: response.data.errmsg,
               })
             })
         }
@@ -573,7 +706,7 @@ export default {
     },
     // 订单表格中下载
     downOrderExcelBtn(row) {
-      detailOrder(row.id).then(response => {
+      detailOrder(row.id).then((response) => {
         var temp = response.data.data
         const obj = {}
         obj.address = temp.province + temp.city + temp.county + temp.address
@@ -600,9 +733,12 @@ export default {
     // 选择条件下载
     downExcelBtn() {
       this.downloadLoading = true
-      const dataInfo = Object.assign({}, {
-        status: this.downData.status
-      })
+      const dataInfo = Object.assign(
+        {},
+        {
+          status: this.downData.status,
+        }
+      )
 
       if (this.downData.gmtStart) {
         dataInfo['gmtStart'] = this.downData.gmtStart.getTime()
@@ -610,45 +746,46 @@ export default {
       if (this.downData.gmtEnd) {
         dataInfo['gmtEnd'] = this.downData.gmtEnd.getTime()
       }
-      getExcelInfo(dataInfo).then(response => {
-        if (response.data.data == null) {
-          this.$notify.error({
-            title: '失败',
-            message: '没有信息可以打印'
-          })
-        }
-
-        var data = response.data.data
-        for (var i = 0; i < data.length; i++) {
-          var temp = data[i]
-          const obj = {}
-          obj.address = temp.province + temp.city + temp.county + temp.address
-          obj.orderNo = temp.orderNo
-          obj.phone = temp.phone
-          obj.mono = temp.mono
-          obj.adminMono = temp.adminMono
-          obj.area = temp.province + temp.city + temp.county
-          obj.consignee = temp.consignee
-          for (var j = 0; j < temp.skuList.length; j++) {
-            var sku = temp.skuList[j]
-            obj.unit = sku.unit
-            obj.num = sku.num
-            obj.specifications = sku.title
-            obj.barcode = sku.barCode
-            obj.name = sku.spuTitle
-            var copy = Object.assign({}, obj)
-            this.excelDataList.push(copy)
+      getExcelInfo(dataInfo)
+        .then((response) => {
+          if (response.data.data == null) {
+            this.$notify.error({
+              title: '失败',
+              message: '没有信息可以打印',
+            })
           }
-        }
-        this.handleDownload(this.excelDataList)
-        this.excelDataList = []
-        this.downloadLoading = false
-      })
-        .catch(response => {
+
+          var data = response.data.data
+          for (var i = 0; i < data.length; i++) {
+            var temp = data[i]
+            const obj = {}
+            obj.address = temp.province + temp.city + temp.county + temp.address
+            obj.orderNo = temp.orderNo
+            obj.phone = temp.phone
+            obj.mono = temp.mono
+            obj.adminMono = temp.adminMono
+            obj.area = temp.province + temp.city + temp.county
+            obj.consignee = temp.consignee
+            for (var j = 0; j < temp.skuList.length; j++) {
+              var sku = temp.skuList[j]
+              obj.unit = sku.unit
+              obj.num = sku.num
+              obj.specifications = sku.title
+              obj.barcode = sku.barCode
+              obj.name = sku.spuTitle
+              var copy = Object.assign({}, obj)
+              this.excelDataList.push(copy)
+            }
+          }
+          this.handleDownload(this.excelDataList)
+          this.excelDataList = []
+          this.downloadLoading = false
+        })
+        .catch((response) => {
           this.downloadLoading = false
           this.$notify.error({
             title: '失败',
-            message: response.data.errmsg
+            message: response.data.errmsg,
           })
         })
     },
@@ -685,7 +822,7 @@ export default {
       }
     },
     handleDownload(data) {
-      import('@/vendor/Export2Excel').then(excel => {
+      import('@/vendor/Export2Excel').then((excel) => {
         const tHeader = [
           '订单编号',
           '商品名称',
@@ -697,7 +834,7 @@ export default {
           '联系方式',
           '区域划分',
           '客服备注',
-          '用户备注'
+          '用户备注',
         ]
         const filterVal = [
           'orderNo',
@@ -710,7 +847,7 @@ export default {
           'phone',
           'area',
           'mono',
-          'adminMono'
+          'adminMono',
         ]
         excel.export_json_to_excel2(tHeader, data, filterVal, '订单信息')
       })
@@ -718,49 +855,37 @@ export default {
 
     // 订单汇总
     downExcelStatisticsBtn() {
-      const param = {
-      }
+      const param = {}
       if (this.downData.gmtStart) {
         param['gmtStart'] = this.downData.gmtStart.getTime()
       }
       if (this.downData.gmtEnd) {
         param['gmtEnd'] = this.downData.gmtEnd.getTime()
       }
-      getExcelStatistics(param).then(response => {
-        if (response.data.data == null || response.data.data.length === 0) {
-          this.$notify.error({
-            title: '失败',
-            message: '没有信息可以打印'
-          })
-        } else {
-          this.handleStatisticsDownload(response.data.data)
-        }
-      })
-        .catch(response => {
+      getExcelStatistics(param)
+        .then((response) => {
+          if (response.data.data == null || response.data.data.length === 0) {
+            this.$notify.error({
+              title: '失败',
+              message: '没有信息可以打印',
+            })
+          } else {
+            this.handleStatisticsDownload(response.data.data)
+          }
+        })
+        .catch((response) => {
           this.downloadLoading = false
           this.$notify.error({
             title: '失败',
-            message: response.data.errmsg
+            message: response.data.errmsg,
           })
         })
     },
 
     handleStatisticsDownload(data) {
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = [
-          '商品名称',
-          'spuId',
-          '规格',
-          'skuId',
-          '数量'
-        ]
-        const filterVal = [
-          'spuTitle',
-          'spuId',
-          'skuTitle',
-          'skuId',
-          'num'
-        ]
+      import('@/vendor/Export2Excel').then((excel) => {
+        const tHeader = ['商品名称', 'spuId', '规格', 'skuId', '数量']
+        const filterVal = ['spuTitle', 'spuId', 'skuTitle', 'skuId', 'num']
         excel.export_json_to_excel2(tHeader, data, filterVal, '统计信息')
       })
     },
@@ -778,20 +903,20 @@ export default {
         }
         return ''
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style>
-  .el-table .danger-row {
-    background: rgb(201, 143, 143);
-  }
+.el-table .danger-row {
+  background: rgb(201, 143, 143);
+}
 
-  .el-table .warning-row {
-    background: rgb(197, 175, 142);
-  }
+.el-table .warning-row {
+  background: rgb(197, 175, 142);
+}
 
-  .el-table .success-row {
-    background: rgb(166, 202, 149);
-  }
+.el-table .success-row {
+  background: rgb(166, 202, 149);
+}
 </style>

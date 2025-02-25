@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { ref, getCurrentInstance, nextTick } from 'vue'
+import { ref, getCurrentInstance } from 'vue'
 
 const tagAndTagSpacing = 4 // tagAndTagSpacing
 
@@ -32,20 +32,7 @@ const moveToTarget = (currentTag) => {
   const container = scrollContainerRef.value.$el
   const containerWidth = container.offsetWidth
   const scrollWrapper = scrollContainerRef.value.$refs.wrap
-  nextTick(() => {
-    const instance = getCurrentInstance()
-    console.log(instance, '22222')
-
-    if (instance) {
-      const parent = instance.parent
-      // 后续代码
-    }
-  })
-  return
-
   const parent = getCurrentInstance().parent
-  // if (instance && instance.parent) {
-  // }
   const tagList = parent.refs.tag
 
   let firstTag = null
@@ -93,9 +80,6 @@ const moveToTarget = (currentTag) => {
     }
   }
 }
-defineExpose({
-  moveToTarget,
-})
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
