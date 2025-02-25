@@ -16,7 +16,7 @@
 			>
 				{{tag.title}}
 				<template v-if="!isAffiix(tag)">
-					<Close class="el-icon-close" @click.prevent.stop="onCloseClick(index,tag)" />
+					<!-- <Close class="el-icon-close" @click.prevent.stop="onCloseClick(index,tag)" /> -->
 				</template>
 			</router-link>
 		</el-scrollbar>
@@ -94,7 +94,7 @@
 </style>
 
 <script setup>
-import { Close } from "@element-plus/icons";
+// import { Close } from "@element-plus/icons";
 
 import ContextMenu from "./ContextMenu.vue";
 import { ref, reactive, watch, onMounted } from "vue";

@@ -15,6 +15,7 @@
   "homepage": "http://wudengyao.github.io/admin_vue3_vite",
   "dependencies": {
     "@element-plus/icons": "^0.0.11",
+    "@element-plus/icons-vue": "^2.3.1",
     "@toast-ui/editor": "^3.0.2",
     "@vueuse/core": "^10.3.0",
     "@wangeditor/editor": "^5.1.23",

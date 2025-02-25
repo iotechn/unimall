@@ -3,7 +3,7 @@
 import { createI18n } from 'vue-i18n';
 import Cookies from 'js-cookie';
 import en from 'element-plus/dist/locale/en.mjs'; // element-ui lang
-import zhCn from 'element-plus/dist/locale/zh-cn.mjs'; // element-ui lang
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import enLocale from './en';
 import zhLocale from './zh';
 
