@@ -1,5 +1,4 @@
 <template>
-  <!-- 原模板代码保持不变 -->
   <div class="app-container">
     <!-- 查询和其他操作 -->
     <div class="filter-container">
@@ -29,7 +28,7 @@
         v-permission="['operation:order:list']"
         class="filter-item"
         type="primary"
-        icon="el-icon-search"
+        :icon="Search"
         @click="handleFilter"
         >查找</el-button
       >
@@ -38,22 +37,21 @@
       <el-date-picker
         v-model="downData.gmtStart"
         type="datetime"
-        style="width: 200px"
         class="filter-item"
-        default-time="00:00:00"
+        style="width: 200px"
         placeholder="选择开始日期"
-        value-format="yyyy-MM-dd HH:mm:ss"
+        format="YYYY-MM-DD HH:mm:ss"
       />
       至
       <el-date-picker
         v-model="downData.gmtEnd"
         type="datetime"
-        style="width: 200px"
         class="filter-item"
-        default-time="00:00:00"
+        style="width: 200px"
         placeholder="选择结束日期"
-        value-format="yyyy-MM-dd HH:mm:ss"
+        format="YYYY-MM-DD HH:mm:ss"
       />
+
       <el-select
         v-model="downData.status"
         style="width: 200px"
@@ -71,7 +69,7 @@
         :loading="downloadLoading"
         class="filter-item"
         type="primary"
-        icon="el-icon-download"
+        :icon="Download"
         @click="downExcelBtn"
         >导出</el-button
       >
@@ -79,7 +77,7 @@
         :loading="downloadLoading"
         class="filter-item"
         type="primary"
-        icon="el-icon-download"
+        :icon="Download"
         @click="downExcelStatisticsBtn"
         >汇总</el-button
       >
@@ -91,6 +89,7 @@
       :data="list"
       :cell-class-name="tableCellClassName"
       size="small"
+      height="500px"
       element-loading-text="正在查询中。。。"
       border
       fit
@@ -153,7 +152,7 @@
       >
         <template #default="scope">
           <el-tag :type="statusColor(scope.row.status)">{{
-            scope.row.status
+            orderStatusFilter(scope.row.status)
           }}</el-tag>
         </template>
       </el-table-column>
@@ -166,7 +165,7 @@
       >
         <template #default="scope">
           <el-tag :type="payChannelColor(scope.row.payChannel)">{{
-            scope.row.payChannel
+            payChannelFilter(scope.row.payChannel)
           }}</el-tag>
         </template>
       </el-table-column>
@@ -205,7 +204,8 @@
             type="info"
             >未发货</el-tag
           >
-          <el-tag v-else>{{ scope.row.shipCode }}</el-tag>
+
+          <el-tag v-else>{{ shipCodeFilter(scope.row.shipCode) }}</el-tag>
         </template>
       </el-table-column>
 
@@ -263,8 +263,8 @@
     <pagination
       v-show="total > 0"
       :total="total"
-      :page="listQuery.page"
-      :limit="listQuery.limit"
+      v-model:page="listQuery.page"
+      v-model:limit="listQuery.limit"
       @pagination="getList"
     />
 
@@ -281,14 +281,10 @@
           <span>{{ orderDetail.channel }}</span>
         </el-form-item>
         <el-form-item label="订单状态">
-          <template>
-            <el-tag>{{ orderDetail.status }}</el-tag>
-          </template>
+          <el-tag>{{ orderStatusFilter(orderDetail.status) }}</el-tag>
         </el-form-item>
         <el-form-item label="支付渠道">
-          <template>
-            <el-tag>{{ orderDetail.payChannel }}</el-tag>
-          </template>
+          <el-tag>{{ payChannelFilter(orderDetail.payChannel) }}</el-tag>
         </el-form-item>
         <el-form-item label="用户留言">
           <span>{{ orderDetail.mono }}</span>
@@ -297,19 +293,17 @@
           <span>{{ orderDetail.adminMono }}</span>
           <el-button
             type="primary"
-            icon="el-icon-edit"
+            :icon="Edit"
             @click="adminMonoDialogVisible = true"
             >编辑</el-button
           >
         </el-form-item>
         <el-form-item label="配送费用">
-          <template>
-            {{
-              orderDetail.freightPrice > 0
-                ? orderDetail.freightPrice / 100.0
-                : '免运费'
-            }}
-          </template>
+          {{
+            orderDetail.freightPrice > 0
+              ? orderDetail.freightPrice / 100.0
+              : '免运费'
+          }}
         </el-form-item>
         <el-form-item label="收货信息">
           <span>（收货人）{{ orderDetail.consignee }}</span>
@@ -423,6 +417,8 @@
   </div>
 </template>
 <script setup>
+import { Delete, Edit, Search, Download, Upload } from '@element-plus/icons-vue'
+import { ElNotification } from 'element-plus'
 import { ref, onMounted } from 'vue'
 import {
   listOrder,
@@ -511,9 +507,9 @@ const refundSubmiting = ref(false)
 const adminMonoDialogVisible = ref(false)
 const downloadLoading = ref(false)
 const shipForm = ref({
-  orderNo: undefined,
+  orderNo: '',
   shipCode: 'NONE',
-  shipNo: undefined,
+  shipNo: '',
 })
 const shipDialogVisible = ref(false)
 const shipSubmiting = ref(false)
@@ -572,7 +568,7 @@ const handleShip = (row) => {
 const confirmShip = async () => {
   // 这里需要手动实现表单验证逻辑
   if (shipForm.value.shipCode !== 'NONE' && !shipForm.value.shipNo) {
-    $notify.error({
+    ElNotification.error({
       title: '失败',
       message: '请填写运单号',
     })
@@ -582,14 +578,14 @@ const confirmShip = async () => {
       await shipOrder(shipForm.value)
       shipSubmiting.value = false
       shipDialogVisible.value = false
-      $notify.success({
+      ElNotification.success({
         title: '成功',
         message: '确认发货成功！',
       })
       getList()
     } catch (response) {
       shipSubmiting.value = false
-      $notify.error({
+      ElNotification.error({
         title: '失败',
         message: response.data.errmsg,
       })
@@ -600,7 +596,7 @@ const confirmShip = async () => {
 // 处理客服备注
 const handleAdminMono = async () => {
   if (!orderDetail.value) {
-    $notify.error({
+    ElNotification.error({
       title: '失败',
       message: '数据不对，请刷新页面重试',
     })
@@ -612,7 +608,7 @@ const handleAdminMono = async () => {
       orderDetail.value.adminMonoLevel,
       orderDetail.value.adminMono
     )
-    $notify.success({
+    ElNotification.success({
       title: '成功',
       message: '客服备注成功！',
     })
@@ -620,7 +616,7 @@ const handleAdminMono = async () => {
     adminMonoDialogVisible.value = false
   } catch (response) {
     shipSubmiting.value = false
-    $notify.error({
+    ElNotification.error({
       title: '失败',
       message: response.data.errmsg,
     })
@@ -654,14 +650,14 @@ const confirmRefund = async () => {
     await refundOrder(obj)
     refundSubmiting.value = false
     refundDialogVisible.value = false
-    $notify.success({
+    ElNotification.success({
       title: '成功',
       message: '确认退款成功！',
     })
     getList()
   } catch (response) {
     refundSubmiting.value = false
-    $notify.error({
+    ElNotification.error({
       title: '失败',
       message: response.data.errmsg,
     })
@@ -709,7 +705,7 @@ const downExcelBtn = async () => {
   try {
     const response = await getExcelInfo(dataInfo)
     if (response.data.data == null) {
-      $notify.error({
+      ElNotification.error({
         title: '失败',
         message: '没有信息可以打印',
       })
@@ -741,7 +737,7 @@ const downExcelBtn = async () => {
     downloadLoading.value = false
   } catch (response) {
     downloadLoading.value = false
-    $notify.error({
+    ElNotification.error({
       title: '失败',
       message: response.data.errmsg,
     })
@@ -787,7 +783,10 @@ const payChannelColor = (channel) => {
 
 // 处理下载
 const handleDownload = (data) => {
+  console.log(data, '222')
+
   import('@/vendor/Export2Excel').then((excel) => {
+    console.log(excel, '11111111111')
     const tHeader = [
       '订单编号',
       '商品名称',
@@ -830,7 +829,7 @@ const downExcelStatisticsBtn = async () => {
   try {
     const response = await getExcelStatistics(param)
     if (response.data.data == null || response.data.data.length === 0) {
-      $notify.error({
+      ElNotification.error({
         title: '失败',
         message: '没有信息可以打印',
       })
@@ -839,7 +838,7 @@ const downExcelStatisticsBtn = async () => {
     }
   } catch (response) {
     downloadLoading.value = false
-    $notify.error({
+    ElNotification.error({
       title: '失败',
       message: response.data.errmsg,
     })

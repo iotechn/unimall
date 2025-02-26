@@ -52,7 +52,7 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-@use 'src/styles/mixin.scss';
+@use '@/styles/mixin.scss';
 .app-wrapper {
   @include mixin.clearfix;
   position: relative;

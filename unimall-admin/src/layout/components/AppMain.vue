@@ -17,11 +17,12 @@ import { useStore } from 'vuex'
 const store = useStore()
 // 获取当前路由信息
 const route = useRoute()
-
+console.log('22222222222222222')
 // 计算 cachedViews，从 Vuex 中获取状态
 const cachedViews = computed(() => store.state.tagsView.cachedViews)
 // 计算 key，使用当前路由的 fullPath
 const key = computed(() => route.fullPath)
+console.log(cachedViews, key, 'qqqqqqq')
 </script>
 
 <style scoped>

@@ -9,41 +9,58 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-      <template v-if="device!=='mobile'">
-        <el-tooltip :content="$t('navbar.screenfull')" effect="dark" placement="bottom">
+      <template v-if="device !== 'mobile'">
+        <el-tooltip
+          :content="$t('navbar.screenfull')"
+          effect="dark"
+          placement="bottom"
+        >
           <screenfull class="screenfull right-menu-item" />
         </el-tooltip>
 
-        <el-tooltip :content="$t('navbar.size')" effect="dark" placement="bottom">
+        <el-tooltip
+          :content="$t('navbar.size')"
+          effect="dark"
+          placement="bottom"
+        >
           <size-select class="international right-menu-item" />
         </el-tooltip>
 
         <!-- <lang-select class="international right-menu-item" /> -->
 
-        <el-tooltip :content="$t('navbar.theme')" effect="dark" placement="bottom">
+        <el-tooltip
+          :content="$t('navbar.theme')"
+          effect="dark"
+          placement="bottom"
+        >
           <theme-picker class="theme-switch right-menu-item" />
         </el-tooltip>
       </template>
 
       <el-dropdown class="avatar-container right-menu-item" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar" class="user-avatar" > <!--avatar+'?imageView2/1/w/80/h/80'-->
-          <i class="el-icon-caret-bottom" />
+          <img :src="avatar" class="user-avatar" />
+          <!--avatar+'?imageView2/1/w/80/h/80'-->
+          <el-icon class="el-icon-caret-bottom"><CaretBottom /></el-icon>
         </div>
-        <el-dropdown-menu slot="dropdown">
-          <router-link to="/">
-            <el-dropdown-item>{{ $t('navbar.dashboard') }}</el-dropdown-item>
-          </router-link>
-          <el-dropdown-item divided>
-            <router-link to="/profile/password">密码修改</router-link>
-          </el-dropdown-item>
-          <el-dropdown-item divided>
-            <router-link to="/profile/notify">绑定通知中心</router-link>
-          </el-dropdown-item>
-          <el-dropdown-item divided>
-            <span style="display:block;" @click="logout">{{ $t('navbar.logOut') }}</span>
-          </el-dropdown-item>
-        </el-dropdown-menu>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <router-link to="/">
+              <el-dropdown-item>{{ $t('navbar.dashboard') }}</el-dropdown-item>
+            </router-link>
+            <el-dropdown-item divided>
+              <router-link to="/profile/password">密码修改</router-link>
+            </el-dropdown-item>
+            <el-dropdown-item divided>
+              <router-link to="/profile/notify">绑定通知中心</router-link>
+            </el-dropdown-item>
+            <el-dropdown-item divided>
+              <span style="display: block" @click="logout">{{
+                $t('navbar.logOut')
+              }}</span>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
       </el-dropdown>
     </div>
   </div>
@@ -66,15 +83,15 @@ export default {
     Screenfull,
     SizeSelect,
     LangSelect,
-    ThemePicker
+    ThemePicker,
   },
   data() {
     return {
-      avatar: avatar
+      avatar: avatar,
     }
   },
   computed: {
-    ...mapGetters(['sidebar', 'name', 'device']) //, 'avatar'
+    ...mapGetters(['sidebar', 'name', 'device']), //, 'avatar'
   },
   methods: {
     toggleSideBar() {
@@ -84,8 +101,8 @@ export default {
       this.$store.dispatch('LogOut').then(() => {
         location.reload() // In order to re-instantiate the vue-router object to avoid bugs
       })
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -108,6 +125,8 @@ export default {
     vertical-align: top;
   }
   .right-menu {
+    display: flex;
+    align-items: center;
     float: right;
     height: 100%;
     &:focus {

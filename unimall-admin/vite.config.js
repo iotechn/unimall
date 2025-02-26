@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 // import path from 'path-browserify'
 import path from "path";
-console.log(path,"11111111111111111")
 import { viteMockServe } from "vite-plugin-mock";
 import vitePluginGitInfo from "./src/plugins/vite-plugin-git-info.js";
 
