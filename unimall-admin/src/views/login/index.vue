@@ -19,6 +19,7 @@
           >
             <el-form-item prop="username">
               <el-input
+                class="no-border-input"
                 v-model="loginForm.username"
                 placeholder="请输入用户名"
                 size="small"
@@ -33,9 +34,11 @@
             <el-form-item prop="password">
               <el-input
                 :type="passwordType"
+                show-password
                 v-model="loginForm.password"
                 placeholder="请输入密码"
                 size="small"
+                class="no-border-input"
                 auto-complete="off"
                 @keyup.enter.native="handleLogin"
               >
@@ -52,6 +55,7 @@
                 v-model="loginForm.verifyCode"
                 placeholder="输入验证码"
                 size="small"
+                class="no-border-input"
                 auto-complete="off"
                 @keyup.enter.native="handleLogin"
               >
@@ -277,13 +281,16 @@ const handleLogin = () => {
 }
 </script>
 
-<style>
+<style lang="scss">
 .msg-text {
   display: block;
   width: 60px;
   font-size: 12px;
   text-align: center;
   cursor: pointer;
+}
+.el-input-group__append {
+  box-shadow: none !important;
 }
 .msg-text.display {
   color: #ccc;

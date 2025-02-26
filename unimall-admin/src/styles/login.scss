@@ -112,6 +112,13 @@
   font-family: "neo";
   transition: 0.25s;
 }
+.no-border-input .el-input__wrapper {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid rgb(235, 237, 242) !important;
+  background: transparent !important;
+}
 .login-form {
   margin: 10px 0;
   i {
@@ -124,15 +131,6 @@
     margin-bottom: 12px;
   }
   .el-input {
-    input {
-      padding-bottom: 10px;
-      text-indent: 5px;
-      background: transparent;
-      border: none;
-      border-radius: 0;
-      color: #333;
-      border-bottom: 1px solid rgb(235, 237, 242);
-    }
     .el-input__prefix {
       i {
         padding: 0 5px;
