@@ -260,7 +260,6 @@ const handleLogin = () => {
         .dispatch('LoginByUsername', loginForm.value)
         .then(() => {
           loading.value = false
-          console.log(redirect.value, 'qqqqqqqqqqqqqqq')
           router.push({ path: redirect.value || '/' })
         })
         .catch((response) => {

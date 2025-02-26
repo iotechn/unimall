@@ -11,6 +11,7 @@ vue3注意：
 10. 在根template下不能写注释，否则页面加载不出来 可能与vite.config.js配置有关
 11. Export2Excel.js需要引入file-saver插件
 12. 通过<router-link to="/">跳转首页，需要配置路由redirect: '/dashboard'
+13. screenfull全屏插件用法发生变化
 
 
 element plus注意

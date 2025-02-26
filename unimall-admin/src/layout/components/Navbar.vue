@@ -18,13 +18,13 @@
           <screenfull class="screenfull right-menu-item" />
         </el-tooltip>
 
-        <el-tooltip
+        <!-- <el-tooltip
           :content="$t('navbar.size')"
           effect="dark"
           placement="bottom"
         >
           <size-select class="international right-menu-item" />
-        </el-tooltip>
+        </el-tooltip> -->
 
         <!-- <lang-select class="international right-menu-item" /> -->
 

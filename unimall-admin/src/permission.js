@@ -38,11 +38,9 @@ router.beforeEach(async (to, from, next) => {
             router.addRoute(route);
           });
 
-          console.log("ccccccccccc");
 
           next({ ...to, replace: true }); // hack方法 确保addRoutes已完成 ,set the replace: true so the navigation will not leave a history record
         } catch (err) {
-          console.log("bbbbbbbbb");
 
           await store.dispatch('FedLogOut');
           ElMessage.error(err || 'Verification failed, please login again');
@@ -52,10 +50,8 @@ router.beforeEach(async (to, from, next) => {
       } else {
         // 没有动态改变权限的需求可直接next() 删除下方权限判断 ↓
         if (hasPermission(store.getters.perms, to.meta.perms)) {
-          console.log("aaaaaaaaaaa");
           next();
         } else {
-          console.log("dddddddd");
 
           next({ path: '/401', replace: true, query: { noGoBack: true } });
         }
@@ -63,7 +59,6 @@ router.beforeEach(async (to, from, next) => {
       }
     }
   } else {
-    console.log("eeeeeeeee");
 
     /* has no token*/
     if (whiteList.indexOf(to.path) !== -1) {

@@ -783,10 +783,7 @@ const payChannelColor = (channel) => {
 
 // 处理下载
 const handleDownload = (data) => {
-  console.log(data, '222')
-
   import('@/vendor/Export2Excel').then((excel) => {
-    console.log(excel, '11111111111')
     const tHeader = [
       '订单编号',
       '商品名称',
