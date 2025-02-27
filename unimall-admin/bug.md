@@ -12,6 +12,7 @@ vue3注意：
 11. Export2Excel.js需要引入file-saver插件
 12. 通过<router-link to="/">跳转首页，需要配置路由redirect: '/dashboard'
 13. screenfull全屏插件用法发生变化
+14. 在 Vite 里，只有以 VITE_ 开头的环境变量才会被嵌入到客户端代码中，所以自定义的环境变量名必须以 VITE_ 开头。
 
 
 element plus注意

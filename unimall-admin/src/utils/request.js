@@ -5,7 +5,7 @@ import { getToken } from '@/utils/auth'
 
 // create an axios instance
 const service = axios.create({
-  baseURL: 'https://unimallv4.dobbinsoft.com/unimall' + '/m.api', // api 的 base_url
+  baseURL: import.meta.env.VITE_API_BASE_URL + '/m.api', // api 的 base_url
   timeout: 15000 // request timeout
 })
 
