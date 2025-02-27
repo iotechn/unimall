@@ -13,7 +13,7 @@ import ElementPlus from 'element-plus' // 完整引入Element Plus
 // element
 import installElementPlus from "./plugins/element";
 // directive
-import permission from "@/directive/permission/index.js";
+import permission from "@/directive/permission/permission.js";
 // filter
 import installFilter from "@/filters";
 
@@ -23,11 +23,14 @@ import RightToolbar from "@/components/RightToolbar";
 import Pagination from "@/components/Pagination";
 // svg组件
 import svgIcon from "@/components/SvgIcon/index.vue";
+
 const app = createApp(App);
+
 installElementPlus(app);
-// installDirective(app);
 installFilter(app);
-app.directive('permission', permission);
+
+app.directive('permission', permission)
+
 // 全局组件挂载
 app.component("RightToolbar", RightToolbar);
 app.component("Pagination", Pagination);

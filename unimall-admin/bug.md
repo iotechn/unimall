@@ -13,6 +13,7 @@ vue3注意：
 12. 通过<router-link to="/">跳转首页，需要配置路由redirect: '/dashboard'
 13. screenfull全屏插件用法发生变化
 14. 在 Vite 里，只有以 VITE_ 开头的环境变量才会被嵌入到客户端代码中，所以自定义的环境变量名必须以 VITE_ 开头。
+15. 自定义指令中 vue.directive('permission', {inserted(el, binding) {}})  变成 app.directive('permission', {mounted(el, binding) {}})
 
 
 element plus注意
@@ -20,6 +21,7 @@ element plus注意
 2. el-button 使用:icon="Search" Search需要单独引入
 3. $notify替换ElNotification单独引入
 4. el-form-item 下能直接跟template标签，否则渲染不出来
+5. el-submenu换成el-sub-menu 并且对应样式也需要修改
 
 
 

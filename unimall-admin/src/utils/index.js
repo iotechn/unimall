@@ -1,6 +1,16 @@
 /**
  * Created by jiachenpan on 16/11/18.
  */
+// 将字符串的字符全部转换为小写字符
+export function lowerCase(str) {
+	const arr = str.split("");
+	let newStr = "";
+	// 通过for循环遍历数组
+	for (let i = 0; i < arr.length; i++) {
+		if (arr[i] >= "A" && arr[i] <= "Z") { newStr += arr[i].toLowerCase(); } else { newStr += arr[i]; }
+	}
+	return newStr;
+}
 
 export function parseTime(time, cFormat) {
   if (arguments.length === 0) {
