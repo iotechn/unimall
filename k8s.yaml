@@ -67,6 +67,13 @@ spec:
         k8s-app: unimall
         qcloud-app: unimall
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/master
+                    operator: DoesNotExist
       containers:
         - image: ${IMAGE}
           imagePullPolicy: Always
